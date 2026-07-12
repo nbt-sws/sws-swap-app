@@ -9,7 +9,7 @@ const SOCIAL_LINKS = [
 
 export function SocialFooter() {
   return (
-    <footer className="flex h-8 bg-surface/90 backdrop-blur-xl border-t border-border/40 items-center justify-center gap-6">
+    <footer className="fixed bottom-16 md:bottom-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 flex h-8 bg-surface/90 backdrop-blur-xl border-t border-border/40 items-center justify-center gap-6">
       {SOCIAL_LINKS.map((link) => {
         const Icon = link.icon;
         return (

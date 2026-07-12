@@ -17,7 +17,7 @@ const sizeMap = {
 
 export function PageContainer({ children, className, size = 'xl' }: PageContainerProps) {
   return (
-    <div className={cn('mx-auto w-full px-4 sm:px-6 lg:px-8 pb-24 md:pb-8', sizeMap[size], className)}>
+    <div className={cn('mx-auto w-full px-4 sm:px-6 lg:px-8 pb-0 md:pb-0', sizeMap[size], className)}>
       {children}
     </div>
   );

@@ -19,7 +19,7 @@ export function SplashScreen() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-surface relative overflow-hidden">
+    <div className="min-h-full flex flex-col items-center justify-center bg-surface relative overflow-hidden">
       {/* Background gradient orbs */}
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-brand/20 rounded-full blur-[100px]" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-periwinkle/20 rounded-full blur-[100px]" />

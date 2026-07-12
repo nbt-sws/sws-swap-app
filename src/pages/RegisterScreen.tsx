@@ -72,7 +72,7 @@ export function RegisterScreen() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] md:min-h-[calc(100vh-4rem)] flex flex-col bg-surface px-6 py-8">
+    <div className="min-h-full flex flex-col bg-surface px-6 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

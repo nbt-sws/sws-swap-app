@@ -36,7 +36,7 @@ export function ScannerScreen() {
   const langLabel = selectedLanguage;
 
   return (
-    <div className="relative h-[calc(100vh-8.5rem)] bg-black overflow-hidden">
+    <div className="relative h-[calc(100vh-10.5rem)] md:h-[calc(100vh-6rem)] bg-black overflow-hidden">
       {/* Camera view (mock) */}
       <div className="absolute inset-x-0 top-0 bottom-36 bg-black">
         {/* Mock camera feed - dark with subtle noise */}

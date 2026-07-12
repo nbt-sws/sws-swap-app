@@ -65,7 +65,7 @@ export function ScrollableOutlet() {
   return (
     <main
       ref={mainRef}
-      className="flex-1 overflow-y-auto min-h-0 pt-14 lg:pt-16 pb-20 md:pb-10"
+      className="flex-1 overflow-y-auto min-h-0 pt-14 lg:pt-16 pb-24 md:pb-10 pb-[calc(6rem+env(safe-area-inset-bottom))]"
     >
       <div key={pathname} className="page-transition-enter">
         <Suspense fallback={<PageLoader />}>
