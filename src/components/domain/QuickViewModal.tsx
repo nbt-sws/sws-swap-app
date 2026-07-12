@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import {
   useWishlist, useAddToWishlist, useRemoveFromWishlist,
   useMarketStats, useMarketHistory,
@@ -25,6 +26,7 @@ interface QuickViewModalProps {
 }
 
 export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) {
+  const { t } = useTranslation();
   const { data: wishlist } = useWishlist();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
@@ -83,9 +85,9 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
             </div>
 
             <div className="mt-5">
-              <p className="text-xs text-muted-foreground">Price</p>
+              <p className="text-xs text-muted-foreground">{t('common.price')}</p>
               <p className={cn('text-3xl font-extrabold font-mono', listing.listingType === 'TRADE' ? 'text-cyan' : 'text-brand')}>
-                {listing.listingType === 'TRADE' ? 'Trade only' : `฿${listing.price.toLocaleString()}`}
+                {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
               </p>
             </div>
 
@@ -101,7 +103,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">@{listing.seller.name}</p>
-                <p className="text-xs text-muted-foreground">Rating {listing.seller.rating}</p>
+                <p className="text-xs text-muted-foreground">{t('market.sellerRating', { rating: listing.seller.rating })}</p>
               </div>
             </Link>
 
@@ -123,7 +125,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
                 <Button asChild className="flex-1 bg-brand hover:bg-brand-light rounded-full" onClick={onClose}>
                   <Link to="/checkout/$listingId" params={{ listingId: listing.id }}>
                     <ShoppingBag className="w-4 h-4 mr-2" />
-                    Buy Now
+                    {t('common.buyNow')}
                   </Link>
                 </Button>
               )}
@@ -138,7 +140,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
               <Button asChild variant="outline" className="rounded-full border-border" onClick={onClose}>
                 <Link to="/market/$listingId" params={{ listingId: listing.id }}>
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  View detail
+                  {t('common.viewDetail')}
                 </Link>
               </Button>
             </div>

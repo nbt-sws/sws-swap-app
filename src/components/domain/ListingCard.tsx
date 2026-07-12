@@ -67,9 +67,9 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {listing.listingType === 'TRADE' ? (
-              <Badge className="bg-cyan/20 text-cyan border-0">TRADE</Badge>
+              <Badge className="bg-cyan/20 text-cyan border-0">{t('common.tradeOnly').toUpperCase()}</Badge>
             ) : (
-              <Badge className="bg-brand/20 text-brand border-0">SALE</Badge>
+              <Badge className="bg-brand/20 text-brand border-0">{t('market.listingTypes.sale').toUpperCase()}</Badge>
             )}
           </div>
 
@@ -83,7 +83,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
               }}
               className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-center text-xs font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             >
-              Quick view
+              {t('common.quickView')}
             </button>
           )}
         </div>
@@ -137,7 +137,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
               listing.listingType === 'TRADE' ? 'text-cyan' : 'text-brand'
             )}
           >
-            {listing.listingType === 'TRADE' ? 'Trade' : `฿${listing.price.toLocaleString()}`}
+            {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
           </span>
           <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">@{listing.seller.name}</span>
         </div>

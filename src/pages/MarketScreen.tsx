@@ -17,24 +17,36 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/
 import { Button } from '@/components/ui/button';
 import type { MarketListing } from '@/types';
 
-const SHELVES = ['All', 'RAW', 'PRE-GRADED', 'GRADED', 'SEALED-BOX'];
-const GAMES = ['⚓ One Piece', '⚔ Yu-Gi-Oh!'];
-const LISTING_TYPES = ['For sale', 'For trade'];
-
-const SORT_OPTIONS = [
-  { id: 'trending', label: 'Trending' },
-  { id: 'newest', label: 'Newest' },
-  { id: 'price-asc', label: 'Price: Low → High' },
-  { id: 'price-desc', label: 'Price: High → Low' },
+const SHELVES: { id: string; key: string }[] = [
+  { id: 'All', key: 'market.shelves.all' },
+  { id: 'RAW', key: 'market.shelves.raw' },
+  { id: 'PRE-GRADED', key: 'market.shelves.preGraded' },
+  { id: 'GRADED', key: 'market.shelves.graded' },
+  { id: 'SEALED-BOX', key: 'market.shelves.sealedBox' },
+];
+const GAMES: { id: string; key: string }[] = [
+  { id: '⚓ One Piece', key: 'market.games.onePiece' },
+  { id: '⚔ Yu-Gi-Oh!', key: 'market.games.yugioh' },
+];
+const LISTING_TYPES: { id: string; key: string }[] = [
+  { id: 'For sale', key: 'market.listingTypes.sale' },
+  { id: 'For trade', key: 'market.listingTypes.trade' },
 ];
 
-const PRICE_RANGES = [
-  { id: 'all', label: 'All prices', min: 0, max: Infinity },
-  { id: 'under-1k', label: '< ฿1,000', min: 0, max: 1000 },
-  { id: '1k-5k', label: '฿1,000 – 5,000', min: 1000, max: 5000 },
-  { id: '5k-10k', label: '฿5,000 – 10,000', min: 5000, max: 10000 },
-  { id: '10k-50k', label: '฿10,000 – 50,000', min: 10000, max: 50000 },
-  { id: 'over-50k', label: '> ฿50,000', min: 50000, max: Infinity },
+const SORT_OPTIONS: { id: string; key: string }[] = [
+  { id: 'trending', key: 'market.sort.trending' },
+  { id: 'newest', key: 'market.sort.newest' },
+  { id: 'price-asc', key: 'market.sort.priceAsc' },
+  { id: 'price-desc', key: 'market.sort.priceDesc' },
+];
+
+const PRICE_RANGES: { id: string; key: string; min: number; max: number }[] = [
+  { id: 'all', key: 'market.priceRanges.all', min: 0, max: Infinity },
+  { id: 'under-1k', key: 'market.priceRanges.under1k', min: 0, max: 1000 },
+  { id: '1k-5k', key: 'market.priceRanges.1kTo5k', min: 1000, max: 5000 },
+  { id: '5k-10k', key: 'market.priceRanges.5kTo10k', min: 5000, max: 10000 },
+  { id: '10k-50k', key: 'market.priceRanges.10kTo50k', min: 10000, max: 50000 },
+  { id: 'over-50k', key: 'market.priceRanges.over50k', min: 50000, max: Infinity },
 ];
 
 export function MarketScreen() {
@@ -62,12 +74,12 @@ export function MarketScreen() {
     let result = [...(listings || [])];
 
     if (activeGame) {
-      const gameKey = activeGame === '⚓ One Piece' ? 'one-piece' : 'yu-gi-oh';
+      const gameKey = activeGame === t('market.games.onePiece') ? 'one-piece' : 'yu-gi-oh';
       result = result.filter((l) => l.card.game.includes(gameKey));
     }
 
-    if (activeType === 'For sale') result = result.filter((l) => l.listingType === 'SALE');
-    if (activeType === 'For trade') result = result.filter((l) => l.listingType === 'TRADE');
+    if (activeType === t('market.listingTypes.sale')) result = result.filter((l) => l.listingType === 'SALE');
+    if (activeType === t('market.listingTypes.trade')) result = result.filter((l) => l.listingType === 'TRADE');
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -125,8 +137,8 @@ export function MarketScreen() {
   return (
     <PageContainer className="py-6">
       <PageHeader
-        title="SwibSwap Market"
-        description={`${isLoading ? '-' : filteredListings.length} LIVE · raw · pre-graded · graded · sealed — all vault-backed`}
+        title={t('market.title')}
+        description={t('market.description', { count: isLoading ? 0 : filteredListings.length })}
       />
 
       <div className="space-y-6">
@@ -137,7 +149,7 @@ export function MarketScreen() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search cards, codes…"
+            placeholder={t('market.searchPlaceholder')}
             className="w-full bg-surface-light rounded-xl pl-11 pr-4 py-3 text-sm outline-none placeholder:text-muted-foreground/50 border border-transparent focus:border-brand transition-colors"
           />
           {searchQuery && (
@@ -153,9 +165,9 @@ export function MarketScreen() {
         {/* Tabs */}
         <div className="flex gap-4 border-b border-border overflow-x-auto scrollbar-hide">
           {[
-            { label: 'Browse', count: null, to: '/market' },
-            { label: 'My Collection', count: vaultCount, to: '/vault' },
-            { label: 'My Listings', count: myListingsCount, to: '/seller' },
+            { label: t('market.tabs.browse'), count: null, to: '/market' },
+            { label: t('market.tabs.myCollection'), count: vaultCount, to: '/vault' },
+            { label: t('market.tabs.myListings'), count: myListingsCount, to: '/seller' },
           ].map((tab, i) => (
             <Link
               key={tab.label}
@@ -179,15 +191,15 @@ export function MarketScreen() {
           <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1">
             {SHELVES.map((shelf) => (
               <button
-                key={shelf}
-                onClick={() => setActiveShelf(shelf)}
+                key={shelf.id}
+                onClick={() => setActiveShelf(shelf.id)}
                 className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
-                  activeShelf === shelf
+                  activeShelf === shelf.id
                     ? 'bg-brand text-white'
                     : 'bg-surface-light text-muted-foreground hover:text-white'
                 }`}
               >
-                {shelf}
+                {t(shelf.key)}
               </button>
             ))}
           </div>
@@ -197,7 +209,7 @@ export function MarketScreen() {
             className="relative flex shrink-0 items-center gap-2 rounded-lg border border-border bg-surface-light px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-surface-lighter transition-colors"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
-            Filters
+            {t('common.filters')}
             {activeFilterCount > 0 && (
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white">
                 {activeFilterCount}
@@ -212,7 +224,7 @@ export function MarketScreen() {
               className="h-8 appearance-none rounded-lg border border-border bg-surface-light pl-2.5 pr-7 text-xs text-muted-foreground outline-none focus:border-brand"
             >
               {SORT_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>{opt.label}</option>
+                <option key={opt.id} value={opt.id}>{t(opt.key)}</option>
               ))}
             </select>
             <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
@@ -222,14 +234,14 @@ export function MarketScreen() {
             <button
               onClick={() => setViewMode('grid')}
               className={`rounded-md p-1 transition-colors ${viewMode === 'grid' ? 'bg-surface-lighter text-brand' : 'text-muted-foreground hover:text-foreground'}`}
-              aria-label="Grid view"
+              aria-label={t('common.gridView')}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
               className={`rounded-md p-1 transition-colors ${viewMode === 'list' ? 'bg-surface-lighter text-brand' : 'text-muted-foreground hover:text-foreground'}`}
-              aria-label="List view"
+              aria-label={t('common.listView')}
             >
               <ListIcon className="w-3.5 h-3.5" />
             </button>
@@ -237,31 +249,31 @@ export function MarketScreen() {
         </div>
 
         {/* Filters */}
-        <div className="hidden gap-2 flex-wrap items-center">
+        <div className="hidden lg:flex gap-2 flex-wrap items-center">
           {GAMES.map((game) => (
             <button
-              key={game}
-              onClick={() => setActiveGame(activeGame === game ? null : game)}
+              key={game.id}
+              onClick={() => setActiveGame(activeGame === game.id ? null : game.id)}
               className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
-                activeGame === game
+                activeGame === game.id
                   ? 'bg-periwinkle/20 text-periwinkle border border-periwinkle/30'
                   : 'bg-surface-light text-muted-foreground border border-transparent'
               }`}
             >
-              {game}
+              {t(game.key)}
             </button>
           ))}
           {LISTING_TYPES.map((type) => (
             <button
-              key={type}
-              onClick={() => setActiveType(activeType === type ? null : type)}
+              key={type.id}
+              onClick={() => setActiveType(activeType === type.id ? null : type.id)}
               className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
-                activeType === type
+                activeType === type.id
                   ? 'bg-cyan/20 text-cyan border border-cyan/30'
                   : 'bg-surface-light text-muted-foreground border border-transparent'
               }`}
             >
-              {type}
+              {t(type.key)}
             </button>
           ))}
 
@@ -272,7 +284,7 @@ export function MarketScreen() {
               className="h-8 appearance-none rounded-lg border border-border bg-surface-light pl-2.5 pr-7 text-xs text-muted-foreground outline-none focus:border-brand"
             >
               {PRICE_RANGES.map((r) => (
-                <option key={r.id} value={r.id}>{r.label}</option>
+                <option key={r.id} value={r.id}>{t(r.key)}</option>
               ))}
             </select>
             <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
@@ -287,7 +299,7 @@ export function MarketScreen() {
             }`}
           >
             <ShieldCheck className="w-3 h-3" />
-            Verified only
+            {t('common.verifiedOnly')}
           </button>
 
           {activeFilterCount > 0 && (
@@ -295,7 +307,7 @@ export function MarketScreen() {
               onClick={clearAllFilters}
               className="text-xs text-muted-foreground hover:text-brand transition-colors ml-auto"
             >
-              Clear all
+              {t('common.clearAll')}
             </button>
           )}
         </div>
@@ -323,13 +335,13 @@ export function MarketScreen() {
             )}
             {activePriceRange !== 'all' && (
               <Badge variant="secondary" className="gap-1 px-2.5 py-1">
-                {PRICE_RANGES.find((r) => r.id === activePriceRange)?.label}
+                {t(PRICE_RANGES.find((r) => r.id === activePriceRange)?.key ?? 'market.priceRanges.all')}
                 <button onClick={() => setActivePriceRange('all')}><X className="w-3 h-3" /></button>
               </Badge>
             )}
             {showVerifiedOnly && (
               <Badge variant="secondary" className="gap-1 px-2.5 py-1">
-                Verified only
+                {t('common.verifiedOnly')}
                 <button onClick={() => setShowVerifiedOnly(false)}><X className="w-3 h-3" /></button>
               </Badge>
             )}
@@ -377,7 +389,7 @@ export function MarketScreen() {
             </EmptyHeader>
             {activeFilterCount > 0 && (
               <Button variant="outline" size="sm" className="border-border" onClick={clearAllFilters}>
-                Clear all filters
+                {t('market.clearFilters')}
               </Button>
             )}
           </Empty>
@@ -447,6 +459,7 @@ function MarketListRow({
   listing: MarketListing;
   onQuickView?: (l: MarketListing) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-4 bg-surface-light rounded-xl p-3 border border-border hover:border-brand/30 transition cursor-pointer"
       onClick={() => onQuickView?.(listing)}
@@ -458,7 +471,7 @@ function MarketListRow({
         <div className="flex items-center gap-2">
           <p className="text-xs font-mono text-muted-foreground">{listing.card.code}</p>
           {listing.vaultVerified && (
-            <span className="text-[10px] font-mono bg-brand/10 text-brand px-1.5 rounded">VERIFIED</span>
+            <span className="text-[10px] font-mono bg-brand/10 text-brand px-1.5 rounded">{t('market.verified').toUpperCase()}</span>
           )}
         </div>
         <p className="text-sm font-semibold truncate">{listing.card.nameEn}</p>
@@ -468,7 +481,7 @@ function MarketListRow({
         </div>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-sm font-bold font-mono">{listing.listingType === 'TRADE' ? 'Trade' : `฿${listing.price.toLocaleString()}`}</p>
+        <p className="text-sm font-bold font-mono">{listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}</p>
         <p className="text-xs text-muted-foreground">{listing.seller.name}</p>
       </div>
     </div>
@@ -504,13 +517,14 @@ function MobileFilterSheet({
   resultCount: number;
   clearAll: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-surface-light p-6 shadow-xl">
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">Filters</h2>
+          <h2 className="text-lg font-bold">{t('common.filters')}</h2>
           <button onClick={onClose} className="rounded-lg p-2 hover:bg-surface-lighter">
             <X className="w-4 h-4" />
           </button>
@@ -518,47 +532,47 @@ function MobileFilterSheet({
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Game</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.game')}</h3>
             <div className="space-y-1">
               {GAMES.map((game) => (
                 <button
-                  key={game}
-                  onClick={() => setActiveGame(activeGame === game ? null : game)}
+                  key={game.id}
+                  onClick={() => setActiveGame(activeGame === game.id ? null : game.id)}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition-colors ${
-                    activeGame === game
+                    activeGame === game.id
                       ? 'bg-brand/10 font-medium text-brand'
                       : 'text-muted-foreground hover:bg-surface-lighter'
                   }`}
                 >
-                  {game}
-                  {activeGame === game && <div className="h-1.5 w-1.5 rounded-full bg-brand" />}
+                  {t(game.key)}
+                  {activeGame === game.id && <div className="h-1.5 w-1.5 rounded-full bg-brand" />}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Type</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.type')}</h3>
             <div className="space-y-1">
               {LISTING_TYPES.map((type) => (
                 <button
-                  key={type}
-                  onClick={() => setActiveType(activeType === type ? null : type)}
+                  key={type.id}
+                  onClick={() => setActiveType(activeType === type.id ? null : type.id)}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition-colors ${
-                    activeType === type
+                    activeType === type.id
                       ? 'bg-brand/10 font-medium text-brand'
                       : 'text-muted-foreground hover:bg-surface-lighter'
                   }`}
                 >
-                  {type}
-                  {activeType === type && <div className="h-1.5 w-1.5 rounded-full bg-brand" />}
+                  {t(type.key)}
+                  {activeType === type.id && <div className="h-1.5 w-1.5 rounded-full bg-brand" />}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Sort</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.sort')}</h3>
             <div className="space-y-1">
               {SORT_OPTIONS.map((opt) => (
                 <button
@@ -570,7 +584,7 @@ function MobileFilterSheet({
                       : 'text-muted-foreground hover:bg-surface-lighter'
                   }`}
                 >
-                  {opt.label}
+                  {t(opt.key)}
                   {activeSort === opt.id && <div className="h-1.5 w-1.5 rounded-full bg-brand" />}
                 </button>
               ))}
@@ -578,7 +592,7 @@ function MobileFilterSheet({
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Price Range</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.priceRange')}</h3>
             <div className="space-y-1">
               {PRICE_RANGES.map((range) => (
                 <button
@@ -590,7 +604,7 @@ function MobileFilterSheet({
                       : 'text-muted-foreground hover:bg-surface-lighter'
                   }`}
                 >
-                  {range.label}
+                  {t(range.key)}
                   {activePriceRange === range.id && <div className="h-1.5 w-1.5 rounded-full bg-brand" />}
                 </button>
               ))}
@@ -604,7 +618,7 @@ function MobileFilterSheet({
               onChange={(e) => setShowVerifiedOnly(e.target.checked)}
               className="h-4 w-4 rounded border-border"
             />
-            <span className="text-sm text-muted-foreground">Verified sellers only</span>
+            <span className="text-sm text-muted-foreground">{t('common.verifiedSellersOnly')}</span>
             <ShieldCheck className="ml-auto w-4 h-4 text-brand" />
           </label>
         </div>
@@ -614,13 +628,13 @@ function MobileFilterSheet({
             onClick={clearAll}
             className="flex-1 rounded-xl border border-border bg-surface-light py-3 text-sm font-medium text-muted-foreground hover:bg-surface-lighter transition-colors"
           >
-            Clear all
+            {t('common.clearAll')}
           </button>
           <button
             onClick={onClose}
             className="flex-1 rounded-xl bg-brand py-3 text-sm font-medium text-white hover:bg-brand-light transition-colors"
           >
-            Show {resultCount} results
+            {t('common.showResults', { count: resultCount })}
           </button>
         </div>
       </div>

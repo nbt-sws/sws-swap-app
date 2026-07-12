@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,6 +33,7 @@ export function VaultProfileHeader({
   onShare,
   isFollowing,
 }: VaultProfileHeaderProps) {
+  const { t } = useTranslation();
   const displayName = profile.displayName || profile.name;
   const totalItems = (profile.listings ?? 0) + (profile.sales ?? 0);
 
@@ -81,7 +83,7 @@ export function VaultProfileHeader({
               <Button asChild variant="outline" size="sm" className="border-border gap-1.5">
                 <Link to="/settings">
                   <Settings className="w-3.5 h-3.5" />
-                  Customize
+                  {t('common.customize')}
                 </Link>
               </Button>
             ) : (
@@ -93,11 +95,11 @@ export function VaultProfileHeader({
                   onClick={onFollow}
                 >
                   <Heart className={cn('w-3.5 h-3.5', isFollowing && 'fill-current')} />
-                  {isFollowing ? 'Following' : 'Follow'}
+                  {isFollowing ? t('common.following') : t('common.follow')}
                 </Button>
                 <Button variant="outline" size="sm" className="border-border gap-1.5" onClick={onShare}>
                   <Share2 className="w-3.5 h-3.5" />
-                  Share
+                  {t('common.share')}
                 </Button>
               </>
             )}
@@ -106,10 +108,10 @@ export function VaultProfileHeader({
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
-          <Stat value={totalItems} label="Total items" icon={<Package className="w-4 h-4" />} />
-          <Stat value={profile.listings ?? 0} label="Listed" icon={<LinkIcon className="w-4 h-4" />} />
-          <Stat value={profile.sales ?? 0} label="Sold" icon={<Star className="w-4 h-4" />} />
-          <Stat value={profile.followers ?? 0} label="Followers" icon={<Heart className="w-4 h-4" />} />
+          <Stat value={totalItems} label={t('common.totalItems')} icon={<Package className="w-4 h-4" />} />
+          <Stat value={profile.listings ?? 0} label={t('common.listed')} icon={<LinkIcon className="w-4 h-4" />} />
+          <Stat value={profile.sales ?? 0} label={t('common.sold')} icon={<Star className="w-4 h-4" />} />
+          <Stat value={profile.followers ?? 0} label={t('common.followers')} icon={<Heart className="w-4 h-4" />} />
         </div>
 
         {/* Social links */}

@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,12 +17,13 @@ interface VaultCardProps {
 }
 
 export function VaultCard({ item, selected, selecting, onToggleSelect, onList, className }: VaultCardProps) {
+  const { t } = useTranslation();
   const statusLabel =
     item.status === 'held'
-      ? 'In Vault'
+      ? t('common.inVault')
       : item.status === 'sold'
-      ? 'Sold'
-      : 'Graded';
+      ? t('common.sold')
+      : t('common.grade');
 
   const statusColor =
     item.status === 'held'
@@ -80,14 +82,14 @@ export function VaultCard({ item, selected, selecting, onToggleSelect, onList, c
 
         <div className="flex items-center justify-between mt-3">
           <div>
-            <p className="text-[10px] text-muted-foreground">Value</p>
+            <p className="text-[10px] text-muted-foreground">{t('common.value')}</p>
             <p className="text-sm font-bold font-mono">
               {item.status === 'sold' && item.soldFor ? `฿${item.soldFor.toLocaleString()}` : `฿${item.currentPrice.toLocaleString()}`}
             </p>
           </div>
           {item.status !== 'sold' && (
             <div className="text-right">
-              <p className="text-[10px] text-muted-foreground">P/L</p>
+              <p className="text-[10px] text-muted-foreground">{t('common.pl')}</p>
               <div className={cn('flex items-center justify-end text-xs font-bold', item.plPercent >= 0 ? 'text-plup' : 'text-pldown')}>
                 {item.plPercent >= 0 ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
                 {formatPriceChange(item.plPercent)}
@@ -106,7 +108,7 @@ export function VaultCard({ item, selected, selecting, onToggleSelect, onList, c
             className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-brand/10 text-brand text-xs font-medium hover:bg-brand/20 transition"
           >
             <Tag className="w-3 h-3" />
-            List for sale
+            {t('common.listForSale')}
           </button>
         )}
       </div>

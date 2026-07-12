@@ -1,4 +1,5 @@
 import { Link, useParams, useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/auth';
 import { useState, useCallback } from 'react';
 import {
@@ -7,9 +8,10 @@ import {
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { PageLoader } from '@/components/ui/page-loader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import {
   TrendingUp, TrendingDown, Tag, Award,
   Package, Clock, Truck, ListChecks, User, Shield,
@@ -22,16 +24,10 @@ import { toast } from 'sonner';
 import type { AuditRecord } from '@/services/mockApi';
 import type { ShippingAddress } from '@/types';
 
-const EVENT_LABELS: Record<string, string> = {
-  ITEM_REGISTERED: 'Item registered',
-  PRICE_UPDATED: 'Price updated',
-  ITEM_LISTED: 'Listed for sale',
-  ITEM_DELISTED: 'Delisted',
-  ITEM_SOLD: 'Sold',
-  STATUS_CHANGED: 'Status changed',
-};
+
 
 export function VaultItemDetailScreen() {
+  const { t } = useTranslation();
   const { itemId } = useParams({ from: '/vault/items/$itemId' });
   const navigate = useNavigate();
   const { data: vault, isLoading } = useVault();
@@ -61,10 +57,10 @@ export function VaultItemDetailScreen() {
         { itemId: item?.id ?? '', shippingAddress: address },
         {
           onSuccess: () => {
-            toast.success('Vault delivery requested');
+            toast.success(t('vault.item.requestDelivery'));
             setAddressModalMode(null);
           },
-          onError: () => toast.error('Failed to request delivery'),
+          onError: () => toast.error(t('common.error')),
         }
       );
     },
@@ -77,10 +73,10 @@ export function VaultItemDetailScreen() {
         { itemId: item?.id ?? '', shippingAddress: address },
         {
           onSuccess: () => {
-            toast.success('Redemption requested');
+            toast.success(t('vault.item.redeemCard'));
             setAddressModalMode(null);
           },
-          onError: () => toast.error('Failed to request redemption'),
+          onError: () => toast.error(t('common.error')),
         }
       );
     },
@@ -90,7 +86,7 @@ export function VaultItemDetailScreen() {
   if (isLoading) {
     return (
       <PageContainer className="py-6">
-        <Skeleton className="h-64 w-full" />
+        <PageLoader />
       </PageContainer>
     );
   }
@@ -98,10 +94,18 @@ export function VaultItemDetailScreen() {
   if (!item) {
     return (
       <PageContainer className="py-6">
-        <p className="text-muted-foreground">Vault item not found.</p>
-        <Button asChild className="mt-4 bg-brand hover:bg-brand-light">
-          <Link to="/vault">Back to vault</Link>
-        </Button>
+        <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-20">
+          <EmptyMedia variant="icon">
+            <Package className="w-8 h-8 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>{t('vault.item.notFound')}</EmptyTitle>
+            <EmptyDescription>{t('vault.item.backToVault')}</EmptyDescription>
+          </EmptyHeader>
+          <Button asChild className="bg-brand hover:bg-brand-light">
+            <Link to="/vault">{t('vault.item.backToVault')}</Link>
+          </Button>
+        </Empty>
       </PageContainer>
     );
   }
@@ -111,7 +115,7 @@ export function VaultItemDetailScreen() {
   return (
     <PageContainer className="py-6">
       <PageHeader
-        title="Vault item"
+        title={t('vault.item.title')}
         description={item.card.code}
         back={{ to: '/vault' }}
       />
@@ -174,13 +178,13 @@ export function VaultItemDetailScreen() {
             <div className="grid grid-cols-2 gap-3">
               <Card className="bg-surface-light border-border">
                 <CardContent className="p-3">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Paid</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('vault.item.paid')}</p>
                   <p className="font-mono font-bold">฿{item.paidPrice.toLocaleString()}</p>
                 </CardContent>
               </Card>
               <Card className="bg-surface-light border-border">
                 <CardContent className="p-3">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Current</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('vault.item.current')}</p>
                   <p className="font-mono font-bold">฿{item.currentPrice.toLocaleString()}</p>
                 </CardContent>
               </Card>
@@ -198,7 +202,7 @@ export function VaultItemDetailScreen() {
                   <TrendingDown className="w-6 h-6 text-pldown" />
                 )}
                 <div>
-                  <p className="text-sm text-muted-foreground">All-time P/L</p>
+                  <p className="text-sm text-muted-foreground">{t('vault.item.allTimePL')}</p>
                   <p className={cn(
                     'text-xl font-bold font-mono',
                     isPositive ? 'text-plup' : 'text-pldown'
@@ -213,11 +217,11 @@ export function VaultItemDetailScreen() {
             <Card className="bg-surface-light border-border">
               <CardContent className="p-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                  Ownership
+                  {t('vault.item.ownership')}
                 </h3>
                 <div className="space-y-3 text-sm">
                   <OwnershipRow
-                    label="Owner"
+                    label={t('vault.item.owner')}
                     id={item.ownerId}
                     currentUserId={user?.id}
                     icon={<User className="w-4 h-4" />}
@@ -225,7 +229,7 @@ export function VaultItemDetailScreen() {
                   />
                   <div className="h-px bg-border" />
                   <OwnershipRow
-                    label="Holder"
+                    label={t('vault.item.holder')}
                     id={item.holderId}
                     currentUserId={user?.id}
                     icon={<Shield className="w-4 h-4" />}
@@ -237,33 +241,33 @@ export function VaultItemDetailScreen() {
 
             {/* Details */}
             <div>
-              <h3 className="text-sm font-semibold mb-3">Details</h3>
+              <h3 className="text-sm font-semibold mb-3">{t('vault.item.details')}</h3>
               <dl className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm">
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div>
-                    <dt className="text-muted-foreground text-xs">Item ID</dt>
+                    <dt className="text-muted-foreground text-xs">{t('common.itemId')}</dt>
                     <dd className="font-medium">{item.id.slice(0, 8)}…</dd>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div>
-                    <dt className="text-muted-foreground text-xs">Status</dt>
+                    <dt className="text-muted-foreground text-xs">{t('common.status')}</dt>
                     <dd className="font-medium">{item.status}</dd>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div>
-                    <dt className="text-muted-foreground text-xs">Acquired</dt>
+                    <dt className="text-muted-foreground text-xs">{t('common.acquired')}</dt>
                     <dd className="font-medium">{item.dateAcquired}</dd>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div>
-                    <dt className="text-muted-foreground text-xs">Source</dt>
+                    <dt className="text-muted-foreground text-xs">{t('common.source')}</dt>
                     <dd className="font-medium truncate">{item.source}</dd>
                   </div>
                 </div>
@@ -279,7 +283,7 @@ export function VaultItemDetailScreen() {
                   disabled={delistListing.isPending}
                 >
                   <ListChecks className="w-4 h-4 mr-2" />
-                  {delistListing.isPending ? 'Delisting...' : 'Delist'}
+                  {delistListing.isPending ? t('common.delisting') : t('common.delist')}
                 </Button>
               ) : (
                 <Button
@@ -287,7 +291,7 @@ export function VaultItemDetailScreen() {
                   onClick={() => setListModalOpen(true)}
                 >
                   <ShoppingBag className="w-4 h-4 mr-2" />
-                  List for sale
+                  {t('common.listForSale')}
                 </Button>
               )}
               <Button
@@ -296,7 +300,7 @@ export function VaultItemDetailScreen() {
                 onClick={() => navigate({ to: '/pregrade', search: { category: 'PREGRADE', cardId: item.id, cardCode: item.card.code, cardName: item.card.nameEn } })}
               >
                 <Award className="w-4 h-4 mr-2" />
-                Grade
+                {t('common.grade')}
               </Button>
             </div>
 
@@ -309,7 +313,7 @@ export function VaultItemDetailScreen() {
                   disabled={vaultDelivery.isPending}
                 >
                   <Truck className="w-4 h-4 mr-2" />
-                  Request delivery
+                  {t('common.requestDelivery')}
                 </Button>
                 <Button
                   variant="outline"
@@ -318,7 +322,7 @@ export function VaultItemDetailScreen() {
                   disabled={createRedemption.isPending}
                 >
                   <Tag className="w-4 h-4 mr-2" />
-                  Redeem
+                  {t('common.redeem')}
                 </Button>
               </div>
             )}
@@ -328,16 +332,16 @@ export function VaultItemDetailScreen() {
             open={addressModalMode === 'delivery'}
             onClose={() => setAddressModalMode(null)}
             onSubmit={handleDeliverySubmit}
-            title="Request vault delivery"
-            description="We'll ship this card to your address."
+            title={t('vault.item.requestDelivery')}
+            description={t('vault.item.deliveryDescription')}
             isPending={vaultDelivery.isPending}
           />
           <ShippingAddressModal
             open={addressModalMode === 'redemption'}
             onClose={() => setAddressModalMode(null)}
             onSubmit={handleRedemptionSubmit}
-            title="Redeem card"
-            description="We'll process this card and send cash equivalent to your address."
+            title={t('vault.item.redeemCard')}
+            description={t('vault.item.redeemDescription')}
             isPending={createRedemption.isPending}
           />
         </div>
@@ -349,13 +353,13 @@ export function VaultItemDetailScreen() {
               active={activeTab === 'details'}
               onClick={() => setActiveTab('details')}
               icon={<Package className="w-4 h-4 inline mr-1" />}
-              label="Details"
+              label={t('vault.item.details')}
             />
             <TabButton
               active={activeTab === 'history'}
               onClick={() => setActiveTab('history')}
               icon={<Clock className="w-4 h-4 inline mr-1" />}
-              label="Audit History"
+              label={t('vault.item.auditHistory')}
             />
           </div>
         </div>
@@ -366,7 +370,7 @@ export function VaultItemDetailScreen() {
             {itemAudit.isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-                <span className="ml-2 text-sm text-muted-foreground">Loading history...</span>
+                <span className="ml-2 text-sm text-muted-foreground">{t('common.loadingHistory')}</span>
               </div>
             ) : itemAudit.data && itemAudit.data.length > 0 ? (
               itemAudit.data.map((record: AuditRecord) => (
@@ -375,7 +379,7 @@ export function VaultItemDetailScreen() {
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <Clock className="w-8 h-8 mb-2 opacity-40" />
-                <p className="text-sm">No audit history yet.</p>
+                <p className="text-sm">{t('common.noHistory')}</p>
               </div>
             )}
           </div>
@@ -430,8 +434,9 @@ function OwnershipRow({
   icon: React.ReactNode;
   color: 'plup' | 'periwinkle';
 }) {
+  const { t } = useTranslation();
   const isCurrentUser = !!id && id === currentUserId;
-  const displayId = id ? `${id.slice(0, 8)}…` : 'Unknown';
+  const displayId = id ? `${id.slice(0, 8)}…` : t('common.unknown');
   const colorClasses = {
     plup: 'bg-plup/10 text-plup',
     periwinkle: 'bg-periwinkle/10 text-periwinkle',
@@ -444,11 +449,11 @@ function OwnershipRow({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="font-medium truncate">{isCurrentUser ? 'You' : displayId}</p>
+        <p className="font-medium truncate">{isCurrentUser ? t('common.you') : displayId}</p>
       </div>
       {isCurrentUser && (
         <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', colorClasses[color])}>
-          You
+          {t('common.you')}
         </span>
       )}
     </div>
@@ -456,12 +461,14 @@ function OwnershipRow({
 }
 
 function AuditRecordCard({ record }: { record: AuditRecord }) {
+  const { t } = useTranslation();
+  const eventLabel = t(`vault.eventLabels.${record.eventType}` as const, { defaultValue: record.eventType });
   return (
     <div className="flex items-start gap-4 rounded-xl border border-border bg-surface-light p-4">
       <div className="mt-0.5 h-2 w-2 rounded-full bg-brand" />
       <div className="flex-1">
         <div className="flex items-center justify-between">
-          <span className="font-medium">{EVENT_LABELS[record.eventType] || record.eventType}</span>
+          <span className="font-medium">{eventLabel}</span>
           <span className="text-xs text-muted-foreground">
             {record.occurredAt ? new Date(record.occurredAt).toLocaleString() : '-'}
           </span>

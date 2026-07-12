@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import {
   Layers, CheckCircle, Package, Tag, Truck, Gift, CheckSquare, Lock,
@@ -20,18 +21,19 @@ interface VaultFilterTabsProps {
   isOwner?: boolean;
 }
 
-const FILTER_CONFIG: { id: VaultFilter; label: string; icon: React.ElementType; ownerOnly?: boolean }[] = [
-  { id: 'ALL', label: 'All', icon: Layers },
-  { id: 'AVAILABLE', label: 'Available', icon: CheckCircle },
-  { id: 'VAULT_HELD', label: 'Vault held', icon: Package },
-  { id: 'LISTED', label: 'Listed', icon: Tag },
-  { id: 'IN_TRANSIT', label: 'In transit', icon: Truck },
-  { id: 'REDEEMING', label: 'Redeeming', icon: Gift },
-  { id: 'COMPLETED', label: 'Completed', icon: CheckSquare },
-  { id: 'LOCKED', label: 'Locked', icon: Lock },
+const FILTER_CONFIG: { id: VaultFilter; labelKey: string; icon: React.ElementType; ownerOnly?: boolean }[] = [
+  { id: 'ALL', labelKey: 'filters.all', icon: Layers },
+  { id: 'AVAILABLE', labelKey: 'filters.available', icon: CheckCircle },
+  { id: 'VAULT_HELD', labelKey: 'filters.vaultHeld', icon: Package },
+  { id: 'LISTED', labelKey: 'filters.listed', icon: Tag },
+  { id: 'IN_TRANSIT', labelKey: 'filters.inTransit', icon: Truck },
+  { id: 'REDEEMING', labelKey: 'filters.redeeming', icon: Gift },
+  { id: 'COMPLETED', labelKey: 'filters.completed', icon: CheckSquare },
+  { id: 'LOCKED', labelKey: 'filters.locked', icon: Lock },
 ];
 
 export function VaultFilterTabs({ activeFilter, onFilterChange, counts, isOwner }: VaultFilterTabsProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap gap-2">
       {FILTER_CONFIG.map((f) => {
@@ -52,7 +54,7 @@ export function VaultFilterTabs({ activeFilter, onFilterChange, counts, isOwner 
             aria-pressed={active}
           >
             <Icon className="w-3.5 h-3.5" />
-            <span>{f.label}</span>
+            <span>{t(f.labelKey)}</span>
             <span
               className={cn(
                 'ml-0.5 min-w-[1.25rem] rounded-full px-1 py-0 text-[10px] text-center',

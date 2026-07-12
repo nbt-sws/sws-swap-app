@@ -37,7 +37,90 @@
     "switchLanguage": "เปลี่ยนภาษา",
     "viewAll": "ดูทั้งหมด",
     "seeAll": "ดูทั้งหมด",
-    "browseAll": "เรียกดูทั้งหมด"
+    "browseAll": "เรียกดูทั้งหมด",
+    "add": "เพิ่ม",
+    "history": "ประวัติ",
+    "filters": "ตัวกรอง",
+    "clearAll": "ล้างทั้งหมด",
+    "showResults": "แสดง {{count}} รายการ",
+    "game": "เกม",
+    "type": "ประเภท",
+    "sort": "จัดเรียง",
+    "priceRange": "ช่วงราคา",
+    "verifiedOnly": "เฉพาะที่ยืนยันแล้ว",
+    "verifiedSellersOnly": "เฉพาะผู้ขายที่ยืนยันแล้ว",
+    "buyNow": "ซื้อเลย",
+    "viewDetail": "ดูรายละเอียด",
+    "quickView": "ดูอย่างเร็ว",
+    "makeOffer": "เสนอราคา",
+    "sendOffer": "ส่งข้อเสนอ",
+    "sending": "กำลังส่ง...",
+    "yourOffer": "ราคาที่เสนอ (฿)",
+    "enterAmount": "ระบุจำนวน",
+    "wishlist": "สิ่งที่อยากได้",
+    "wishlisted": "บันทึกแล้ว",
+    "share": "แชร์",
+    "rating": "คะแนน",
+    "verifiedSeller": "ผู้ขายที่ยืนยันแล้ว",
+    "price": "ราคา",
+    "deliveryOptions": "ตัวเลือกการจัดส่ง",
+    "listForSale": "ลงขาย",
+    "delisting": "กำลังปิดการขาย...",
+    "grade": "ตรวจสอบ",
+    "requestDelivery": "ขอจัดส่ง",
+    "redeem": "แลกคืน",
+    "itemId": "รหัสสินค้า",
+    "status": "สถานะ",
+    "acquired": "ได้รับเมื่อ",
+    "source": "แหล่งที่มา",
+    "owner": "เจ้าของ",
+    "holder": "ผู้ถือ",
+    "you": "คุณ",
+    "value": "มูลค่า",
+    "pl": "กำไร/ขาดทุน",
+    "all": "ทั้งหมด",
+    "tradeOnly": "แลกเปลี่ยนเท่านั้น",
+    "loadingHistory": "กำลังโหลดประวัติ...",
+    "noHistory": "ยังไม่มีประวัติการตรวจสอบ",
+    "inVault": "ในตู้เซฟ",
+    "paid": "ราคาซื้อ",
+    "current": "ราคาปัจจุบัน",
+    "allTimePL": "กำไร/ขาดทุนรวม",
+    "ownership": "ความเป็นเจ้าของ",
+    "details": "รายละเอียด",
+    "auditHistory": "ประวัติการตรวจสอบ",
+    "goToVault": "ไปที่ตู้เซฟ",
+    "customize": "ปรับแต่ง",
+    "follow": "ติดตาม",
+    "following": "กำลังติดตาม",
+    "totalItems": "จำนวนรายการทั้งหมด",
+    "listed": "ลงขาย",
+    "sold": "ขายแล้ว",
+    "followers": "ผู้ติดตาม",
+    "selected": "เลือก {{count}} รายการ",
+    "selectAll": "เลือกทั้งหมดที่แสดง",
+    "list": "ลงขาย",
+    "delist": "ปิดการขาย",
+    "gridView": "มุมมองตาราง",
+    "listView": "มุมมองรายการ",
+    "compactView": "มุมมองกระชับ",
+    "recentSales": "การขายล่าสุด",
+    "priceHistory": "ประวัติราคา",
+    "lastSold": "ขายล่าสุด",
+    "average": "เฉลี่ย",
+    "lowest": "ต่ำสุด",
+    "highest": "สูงสุด",
+    "sampleSize": "ขนาดตัวอย่าง"
+  },
+  "filters": {
+    "all": "ทั้งหมด",
+    "available": "พร้อมขาย",
+    "vaultHeld": "อยู่ในตู้เซฟ",
+    "listed": "ลงขายแล้ว",
+    "inTransit": "กำลังจัดส่ง",
+    "redeeming": "กำลังแลกคืน",
+    "completed": "เสร็จสิ้น",
+    "locked": "ล็อก"
   },
   "auth": {
     "signIn": "เข้าสู่ระบบ",
@@ -151,10 +234,53 @@
     "emptyDesc": "เราจะแจ้งให้ทราบเมื่อมีข้อเสนอ คำสั่งซื้อ หรืออัปเดต"
   },
   "market": {
+    "title": "ตลาด SwibSwap",
+    "description": "{{count}} รายการสด · raw · pre-graded · graded · sealed — ทั้งหมดมีตู้เซฟรับรอง",
     "empty": "ไม่พบรายการ",
-    "emptyDesc": "ลองปรับตัวกรองหรือค้นหาการ์ดอื่น"
+    "emptyDesc": "ลองปรับตัวกรองหรือค้นหาการ์ดอื่น",
+    "clearFilters": "ล้างตัวกรองทั้งหมด",
+    "tabs": {
+      "browse": "เรียกดู",
+      "myCollection": "คอลเลกชันของฉัน",
+      "myListings": "รายการขายของฉัน"
+    },
+    "searchPlaceholder": "ค้นหาการ์ด รหัส...",
+    "shelves": {
+      "all": "ทั้งหมด",
+      "raw": "RAW",
+      "preGraded": "Pre-graded",
+      "graded": "Graded",
+      "sealedBox": "Sealed box"
+    },
+    "games": {
+      "onePiece": "⚓ One Piece",
+      "yugioh": "⚔ Yu-Gi-Oh!"
+    },
+    "listingTypes": {
+      "sale": "ขาย",
+      "trade": "แลกเปลี่ยน"
+    },
+    "sort": {
+      "trending": "มาแรง",
+      "newest": "ใหม่ล่าสุด",
+      "priceAsc": "ราคา: ต่ำ → สูง",
+      "priceDesc": "ราคา: สูง → ต่ำ"
+    },
+    "priceRanges": {
+      "all": "ทุกช่วงราคา",
+      "under1k": "< ฿1,000",
+      "1kTo5k": "฿1,000 – 5,000",
+      "5kTo10k": "฿5,000 – 10,000",
+      "10kTo50k": "฿10,000 – 50,000",
+      "over50k": "> ฿50,000"
+    },
+    "verified": "ยืนยันแล้ว",
+    "sellerRating": "คะแนน {{rating}}"
   },
   "listing": {
+    "title": "รายละเอียดรายการ",
+    "notFound": "ไม่พบรายการ",
+    "backToMarket": "กลับไปที่ตลาด",
     "status": {
       "active": "กำลังขาย",
       "draft": "ร่าง",
@@ -165,6 +291,13 @@
     "wishlist": {
       "add": "เพิ่มในรายการโปรด",
       "remove": "นำออกจากรายการโปรด"
+    },
+    "dialog": {
+      "makeOffer": "เสนอราคา",
+      "proposeTrade": "เสนอแลกเปลี่ยน",
+      "selectCards": "เลือกการ์ดจากตู้เซฟของคุณเพื่อเสนอแลกกับ {{cardName}}",
+      "vaultEmptyForTrade": "ตู้เซฟของคุณว่างเปล่า เพิ่มการ์ดก่อน",
+      "sendTradeOffer": "ส่งข้อเสนอแลกเปลี่ยน ({{count}})"
     }
   },
   "orders": {
@@ -185,6 +318,67 @@
       "DELIVERED": "ส่งถึงแล้ว",
       "COMPLETED": "เสร็จสิ้น",
       "CANCELLED": "ยกเลิก"
+    }
+  },
+  "vault": {
+    "title": "SwibsVault",
+    "collectionDescription": "คอลเลกชันของฉัน · {{count}} ใบ",
+    "vault": "ตู้เซฟ",
+    "store": "ร้านค้า",
+    "stats": {
+      "value": "มูลค่า",
+      "cards": "การ์ด",
+      "held": "ถืออยู่",
+      "pl": "กำไร/ขาดทุน"
+    },
+    "empty": {
+      "vaultTitle": "ไม่พบรายการ",
+      "vaultDesc": "เพิ่มการ์ดเข้าตู้เซฟเพื่อเริ่มติดตาม",
+      "storeTitle": "ร้านค้าของคุณว่างเปล่า",
+      "storeDesc": "ลงขายรายการจากตู้เซฟเพื่อเริ่มขาย"
+    },
+    "confirmUnlist": {
+      "title": "ยืนยันการปิดการขาย",
+      "description": "คุณแน่ใจหรือไม่ว่าต้องการปิดการขาย {{count}} รายการ?"
+    },
+    "item": {
+      "title": "รายการในตู้เซฟ",
+      "notFound": "ไม่พบรายการในตู้เซฟ",
+      "backToVault": "กลับไปที่ตู้เซฟ",
+      "paid": "ราคาซื้อ",
+      "current": "ราคาปัจจุบัน",
+      "allTimePL": "กำไร/ขาดทุนรวม",
+      "ownership": "ความเป็นเจ้าของ",
+      "owner": "เจ้าของ",
+      "holder": "ผู้ถือ",
+      "details": "รายละเอียด",
+      "auditHistory": "ประวัติการตรวจสอบ",
+      "requestDelivery": "ขอจัดส่งจากตู้เซฟ",
+      "deliveryDescription": "เราจะจัดส่งการ์ดใบนี้ไปยังที่อยู่ของคุณ",
+      "redeemCard": "แลกคืนการ์ด",
+      "redeemDescription": "เราจะดำเนินการแลกคืนการ์ดและส่งเงินสดเทียบเท่าไปยังที่อยู่ของคุณ"
+    },
+    "history": {
+      "title": "ประวัติตู้เซฟ",
+      "empty": "ยังไม่มีประวัติการตรวจสอบ"
+    },
+    "eventLabels": {
+      "ITEM_REGISTERED": "ลงทะเบียนรายการ",
+      "PRICE_UPDATED": "อัปเดตราคา",
+      "ITEM_LISTED": "ลงขาย",
+      "ITEM_DELISTED": "ปิดการขาย",
+      "ITEM_SOLD": "ขายแล้ว",
+      "STATUS_CHANGED": "สถานะเปลี่ยนแปลง"
+    },
+    "profile": {
+      "totalItems": "จำนวนรายการทั้งหมด",
+      "listed": "ลงขาย",
+      "sold": "ขายแล้ว",
+      "followers": "ผู้ติดตาม",
+      "customize": "ปรับแต่ง",
+      "follow": "ติดตาม",
+      "following": "กำลังติดตาม",
+      "share": "แชร์"
     }
   }
 }

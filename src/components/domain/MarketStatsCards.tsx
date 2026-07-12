@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface MarketStatsCardsProps {
@@ -14,11 +15,12 @@ interface MarketStatsCardsProps {
 }
 
 export function MarketStatsCards({ stats, className, compact, showCount }: MarketStatsCardsProps) {
+  const { t } = useTranslation();
   const cards = [
-    { label: 'Last sold', value: stats.lastSold },
-    { label: 'Average', value: stats.average },
-    { label: 'Lowest', value: stats.min },
-    { label: 'Highest', value: stats.max },
+    { label: t('common.lastSold'), value: stats.lastSold },
+    { label: t('common.average'), value: stats.average },
+    { label: t('common.lowest'), value: stats.min },
+    { label: t('common.highest'), value: stats.max },
   ];
 
   return (
@@ -52,7 +54,7 @@ export function MarketStatsCards({ stats, className, compact, showCount }: Marke
           )}
         >
           <p className={cn('text-muted-foreground', compact ? 'text-[10px]' : 'text-xs')}>
-            Sample size
+            {t('common.sampleSize')}
           </p>
           <p className={cn('font-bold text-foreground font-mono', compact ? 'text-sm mt-0.5' : 'text-base mt-1')}>
             {stats.count ?? 0} sales

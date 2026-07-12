@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import {
   useVault, useListingsBySeller, useDelistListing, useStoreProfile,
@@ -27,12 +28,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { VaultItem } from '@/types';
 
 const VIEWS = [
-  { id: 'grid', icon: LayoutGrid, label: 'Grid' },
-  { id: 'list', icon: ListIcon, label: 'List' },
-  { id: 'compact', icon: LayoutTemplate, label: 'Compact' },
+  { id: 'grid', icon: LayoutGrid, labelKey: 'common.gridView' },
+  { id: 'list', icon: ListIcon, labelKey: 'common.listView' },
+  { id: 'compact', icon: LayoutTemplate, labelKey: 'common.compactView' },
 ] as const;
 
 export function VaultScreen() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const userId = user?.id ?? 'u1';
   const { data: vault, isLoading } = useVault();
@@ -167,8 +169,8 @@ export function VaultScreen() {
   return (
     <PageContainer className="py-6">
       <PageHeader
-        title="SwibsVault"
-        description={`my collection · ${cardCount} cards`}
+        title={t('vault.title')}
+        description={t('vault.collectionDescription', { count: cardCount })}
       />
 
       <div className="space-y-6">
@@ -213,18 +215,18 @@ export function VaultScreen() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="glass-card rounded-xl p-3">
-          <p className="text-[9px] font-mono text-muted-foreground mb-1">VALUE</p>
+          <p className="text-[9px] font-mono text-muted-foreground mb-1">{t('vault.stats.value')}</p>
           <p className="text-sm font-bold font-mono text-foreground">฿{totalValue.toLocaleString()}</p>
         </div>
         <div className="glass-card rounded-xl p-3">
-          <p className="text-[9px] font-mono text-muted-foreground mb-1">CARDS</p>
+          <p className="text-[9px] font-mono text-muted-foreground mb-1">{t('vault.stats.cards')}</p>
           <p className="text-sm font-bold font-mono">{cardCount}</p>
-          <p className="text-[9px] text-muted-foreground">{heldCards.length} held</p>
+          <p className="text-[9px] text-muted-foreground">{heldCards.length} {t('vault.stats.held')}</p>
         </div>
         <div className="glass-card rounded-xl p-3">
-          <p className="text-[9px] font-mono text-muted-foreground mb-1">P/L</p>
+          <p className="text-[9px] font-mono text-muted-foreground mb-1">{t('vault.stats.pl')}</p>
           <p className={cn(
             'text-sm font-bold font-mono flex items-center gap-1',
             totalPL >= 0 ? 'text-plup' : 'text-pldown'
@@ -252,7 +254,7 @@ export function VaultScreen() {
             )}
           >
             <Package className="w-4 h-4" />
-            Vault
+            {t('vault.vault')}
           </button>
           <button
             onClick={() => { setVaultViewMode('store'); clearSelection(); }}
@@ -264,13 +266,13 @@ export function VaultScreen() {
             )}
           >
             <Store className="w-4 h-4" />
-            Store
+            {t('vault.store')}
           </button>
         </div>
       </div>
 
       {/* Toolbar: Filters + Views + Select + Register */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
         {/* Filter Pills */}
         <VaultFilterTabs
           activeFilter={activeFilter}
@@ -283,7 +285,7 @@ export function VaultScreen() {
         <div className="flex items-center gap-1 shrink-0">
           {selecting ? (
             <>
-              <span className="text-xs text-muted-foreground mr-2">{selectedIds.size} selected</span>
+              <span className="text-xs text-muted-foreground mr-2">{t('common.selected', { count: selectedIds.size })}</span>
               <button
                 onClick={clearSelection}
                 className="w-8 h-8 rounded-lg bg-surface-light flex items-center justify-center text-muted-foreground hover:text-white"
@@ -295,7 +297,7 @@ export function VaultScreen() {
             <button
               onClick={() => setSelecting(true)}
               className="w-8 h-8 rounded-lg bg-surface-light flex items-center justify-center text-muted-foreground hover:text-white"
-              aria-label="Select items"
+              aria-label={t('common.selectAll')}
             >
               <CheckSquare className="w-4 h-4" />
             </button>
@@ -308,7 +310,7 @@ export function VaultScreen() {
                 'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
                 activeView === v.id ? 'bg-surface-lighter text-white' : 'text-muted-foreground'
               )}
-              title={v.label}
+              title={t(v.labelKey)}
             >
               <v.icon className="w-4 h-4" />
             </button>
@@ -316,7 +318,7 @@ export function VaultScreen() {
           {vaultViewMode === 'vault' && (
             <Button size="sm" className="bg-brand hover:bg-brand-light gap-1.5 ml-1 h-8 px-2.5" onClick={() => setRegisterModalOpen(true)}>
               <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline text-xs">Add</span>
+              <span className="hidden sm:inline text-xs">{t('common.add')}</span>
             </Button>
           )}
           <Button
@@ -326,16 +328,7 @@ export function VaultScreen() {
             onClick={() => setHistoryOpen(true)}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline text-xs">History</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-border gap-1.5 h-8 px-2.5"
-            onClick={() => setHistoryOpen(true)}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline text-xs">History</span>
+            <span className="hidden sm:inline text-xs">{t('common.history')}</span>
           </Button>
         </div>
       </div>
@@ -344,7 +337,7 @@ export function VaultScreen() {
       {selecting && selectedIds.size > 0 && (
         <div className="flex items-center justify-between rounded-2xl border border-border bg-surface-light p-4">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium">{selectedIds.size} selected</span>
+            <span className="text-sm font-medium">{t('common.selected', { count: selectedIds.size })}</span>
             <button onClick={() => {
               const visibleIds = filteredCards.map((i) => i.id);
               const allSelected = visibleIds.every((id) => selectedIds.has(id));
@@ -358,20 +351,20 @@ export function VaultScreen() {
                 return next;
               });
             }} className="text-sm text-brand hover:underline">
-              Select all visible
+              {t('common.selectAll')}
             </button>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="secondary" className="gap-2" onClick={handleBulkList}>
               <Tag className="w-3.5 h-3.5" />
-              List
+              {t('common.list')}
             </Button>
             <Button size="sm" variant="secondary" className="gap-2" onClick={handleBulkDelist}>
               <EyeOff className="w-3.5 h-3.5" />
-              Delist
+              {t('common.delist')}
             </Button>
             <Button size="sm" variant="ghost" onClick={clearSelection}>
-              Cancel
+              {t('common.cancel')}
             </Button>
           </div>
         </div>
@@ -418,17 +411,17 @@ export function VaultScreen() {
             <Package className="w-8 h-8 text-brand" />
           </EmptyMedia>
           <EmptyHeader>
-            <EmptyTitle>{vaultViewMode === 'store' ? 'Your store is empty' : 'No items found'}</EmptyTitle>
+            <EmptyTitle>{vaultViewMode === 'store' ? t('vault.empty.storeTitle') : t('vault.empty.vaultTitle')}</EmptyTitle>
             <EmptyDescription>
               {vaultViewMode === 'store'
-                ? 'List items from your vault to start selling.'
-                : 'Add cards to your vault to start tracking.'}
+                ? t('vault.empty.storeDesc')
+                : t('vault.empty.vaultDesc')}
             </EmptyDescription>
           </EmptyHeader>
           {vaultViewMode === 'store' && (
             <Button className="bg-brand hover:bg-brand-light gap-2" onClick={() => { setVaultViewMode('vault'); }}>
               <Package className="w-4 h-4" />
-              Go to vault
+              {t('common.goToVault')}
             </Button>
           )}
         </Empty>
@@ -496,13 +489,13 @@ export function VaultScreen() {
       {confirmUnlistOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-2xl border border-border bg-surface-light p-6 space-y-4">
-            <h3 className="text-lg font-semibold">Confirm unlist</h3>
+            <h3 className="text-lg font-semibold">{t('vault.confirmUnlist.title')}</h3>
             <p className="text-sm text-muted-foreground">
-              Are you sure you want to delist {selectedIds.size} item(s)?
+              {t('vault.confirmUnlist.description', { count: selectedIds.size })}
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="ghost" size="sm" onClick={() => setConfirmUnlistOpen(false)}>Cancel</Button>
-              <Button variant="destructive" size="sm" onClick={confirmBulkDelist}>Delist</Button>
+              <Button variant="ghost" size="sm" onClick={() => setConfirmUnlistOpen(false)}>{t('common.cancel')}</Button>
+              <Button variant="destructive" size="sm" onClick={confirmBulkDelist}>{t('common.delist')}</Button>
             </div>
           </div>
         </div>
@@ -523,6 +516,7 @@ function VaultListRow({
   onList?: (item: VaultItem) => void;
   isListed?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <Link
       to="/vault/items/$itemId"
@@ -541,7 +535,7 @@ function VaultListRow({
         <div className="flex items-center gap-2">
           <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>
           {isListed && (
-            <span className="text-[10px] font-mono bg-brand/10 text-brand px-1.5 rounded">LISTED</span>
+            <span className="text-[10px] font-mono bg-brand/10 text-brand px-1.5 rounded">{t('filters.listed').toUpperCase()}</span>
           )}
         </div>
         <p className="text-sm font-semibold truncate">{item.card.nameEn}</p>
@@ -565,7 +559,7 @@ function VaultListRow({
             className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-brand hover:underline"
           >
             <Tag className="w-3 h-3" />
-            List
+            {t('common.list')}
           </button>
         )}
       </div>

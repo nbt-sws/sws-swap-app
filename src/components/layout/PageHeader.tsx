@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { ChevronLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -19,6 +20,7 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, icon, description, action, className, back }: PageHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div className={cn('mb-6', className)}>
       {back && (
@@ -29,7 +31,7 @@ export function PageHeader({ title, icon, description, action, className, back }
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
-              Back
+              {t('common.back')}
             </button>
           ) : (
             <Link
@@ -39,7 +41,7 @@ export function PageHeader({ title, icon, description, action, className, back }
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
-              Back
+              {t('common.back')}
             </Link>
           )}
           {action && <div className="shrink-0">{action}</div>}

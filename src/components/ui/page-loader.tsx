@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 
 export function PageLoader() {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center">
       <div className="relative">
@@ -10,7 +12,7 @@ export function PageLoader() {
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin text-brand"
         />
       </div>
-      <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
+      <p className="mt-4 text-sm text-muted-foreground">{t('common.loading')}...</p>
     </div>
   );
 }

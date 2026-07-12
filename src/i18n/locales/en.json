@@ -37,7 +37,90 @@
     "switchLanguage": "Switch language",
     "viewAll": "View all",
     "seeAll": "See all",
-    "browseAll": "Browse all"
+    "browseAll": "Browse all",
+    "add": "Add",
+    "history": "History",
+    "filters": "Filters",
+    "clearAll": "Clear all",
+    "showResults": "Show {{count}} results",
+    "game": "Game",
+    "type": "Type",
+    "sort": "Sort",
+    "priceRange": "Price range",
+    "verifiedOnly": "Verified only",
+    "verifiedSellersOnly": "Verified sellers only",
+    "buyNow": "Buy now",
+    "viewDetail": "View detail",
+    "quickView": "Quick view",
+    "makeOffer": "Make offer",
+    "sendOffer": "Send offer",
+    "sending": "Sending...",
+    "yourOffer": "Your offer price (฿)",
+    "enterAmount": "Enter amount",
+    "wishlist": "Wishlist",
+    "wishlisted": "Wishlisted",
+    "share": "Share",
+    "rating": "Rating",
+    "verifiedSeller": "Verified seller",
+    "price": "Price",
+    "deliveryOptions": "Delivery options",
+    "listForSale": "List for sale",
+    "delisting": "Delisting...",
+    "grade": "Grade",
+    "requestDelivery": "Request delivery",
+    "redeem": "Redeem",
+    "itemId": "Item ID",
+    "status": "Status",
+    "acquired": "Acquired",
+    "source": "Source",
+    "owner": "Owner",
+    "holder": "Holder",
+    "you": "You",
+    "value": "Value",
+    "pl": "P/L",
+    "all": "All",
+    "tradeOnly": "Trade only",
+    "loadingHistory": "Loading history...",
+    "noHistory": "No audit history yet.",
+    "inVault": "In Vault",
+    "paid": "Paid",
+    "current": "Current",
+    "allTimePL": "All-time P/L",
+    "ownership": "Ownership",
+    "details": "Details",
+    "auditHistory": "Audit History",
+    "goToVault": "Go to vault",
+    "customize": "Customize",
+    "follow": "Follow",
+    "following": "Following",
+    "totalItems": "Total items",
+    "listed": "Listed",
+    "sold": "Sold",
+    "followers": "Followers",
+    "selected": "{{count}} selected",
+    "selectAll": "Select all visible",
+    "list": "List",
+    "delist": "Delist",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "compactView": "Compact view",
+    "recentSales": "Recent Sales",
+    "priceHistory": "Price History",
+    "lastSold": "Last sold",
+    "average": "Average",
+    "lowest": "Lowest",
+    "highest": "Highest",
+    "sampleSize": "Sample size"
+  },
+  "filters": {
+    "all": "All",
+    "available": "Available",
+    "vaultHeld": "Vault held",
+    "listed": "Listed",
+    "inTransit": "In transit",
+    "redeeming": "Redeeming",
+    "completed": "Completed",
+    "locked": "Locked"
   },
   "auth": {
     "signIn": "Sign in",
@@ -151,10 +234,53 @@
     "emptyDesc": "We’ll let you know when there are offers, orders, or updates."
   },
   "market": {
+    "title": "SwibSwap Market",
+    "description": "{{count}} LIVE · raw · pre-graded · graded · sealed — all vault-backed",
     "empty": "No listings found",
-    "emptyDesc": "Try adjusting your filters or search for a different card."
+    "emptyDesc": "Try adjusting your filters or search for a different card.",
+    "clearFilters": "Clear all filters",
+    "tabs": {
+      "browse": "Browse",
+      "myCollection": "My Collection",
+      "myListings": "My Listings"
+    },
+    "searchPlaceholder": "Search cards, codes…",
+    "shelves": {
+      "all": "All",
+      "raw": "RAW",
+      "preGraded": "Pre-graded",
+      "graded": "Graded",
+      "sealedBox": "Sealed box"
+    },
+    "games": {
+      "onePiece": "⚓ One Piece",
+      "yugioh": "⚔ Yu-Gi-Oh!"
+    },
+    "listingTypes": {
+      "sale": "For sale",
+      "trade": "For trade"
+    },
+    "sort": {
+      "trending": "Trending",
+      "newest": "Newest",
+      "priceAsc": "Price: Low → High",
+      "priceDesc": "Price: High → Low"
+    },
+    "priceRanges": {
+      "all": "All prices",
+      "under1k": "< ฿1,000",
+      "1kTo5k": "฿1,000 – 5,000",
+      "5kTo10k": "฿5,000 – 10,000",
+      "10kTo50k": "฿10,000 – 50,000",
+      "over50k": "> ฿50,000"
+    },
+    "verified": "VERIFIED",
+    "sellerRating": "Rating {{rating}}"
   },
   "listing": {
+    "title": "Listing details",
+    "notFound": "Listing not found.",
+    "backToMarket": "Back to market",
     "status": {
       "active": "Active",
       "draft": "Draft",
@@ -165,6 +291,13 @@
     "wishlist": {
       "add": "Add to wishlist",
       "remove": "Remove from wishlist"
+    },
+    "dialog": {
+      "makeOffer": "Make an offer",
+      "proposeTrade": "Propose a trade",
+      "selectCards": "Select cards from your vault to offer for {{cardName}}.",
+      "vaultEmptyForTrade": "Your vault is empty. Add cards to your vault first.",
+      "sendTradeOffer": "Send trade offer ({{count}})"
     }
   },
   "orders": {
@@ -185,6 +318,67 @@
       "DELIVERED": "Delivered",
       "COMPLETED": "Completed",
       "CANCELLED": "Cancelled"
+    }
+  },
+  "vault": {
+    "title": "SwibsVault",
+    "collectionDescription": "my collection · {{count}} cards",
+    "vault": "Vault",
+    "store": "Store",
+    "stats": {
+      "value": "VALUE",
+      "cards": "CARDS",
+      "held": "held",
+      "pl": "P/L"
+    },
+    "empty": {
+      "vaultTitle": "No items found",
+      "vaultDesc": "Add cards to your vault to start tracking.",
+      "storeTitle": "Your store is empty",
+      "storeDesc": "List items from your vault to start selling."
+    },
+    "confirmUnlist": {
+      "title": "Confirm unlist",
+      "description": "Are you sure you want to delist {{count}} item(s)?"
+    },
+    "item": {
+      "title": "Vault item",
+      "notFound": "Vault item not found.",
+      "backToVault": "Back to vault",
+      "paid": "Paid",
+      "current": "Current",
+      "allTimePL": "All-time P/L",
+      "ownership": "Ownership",
+      "owner": "Owner",
+      "holder": "Holder",
+      "details": "Details",
+      "auditHistory": "Audit History",
+      "requestDelivery": "Request vault delivery",
+      "deliveryDescription": "We'll ship this card to your address.",
+      "redeemCard": "Redeem card",
+      "redeemDescription": "We'll process this card and send cash equivalent to your address."
+    },
+    "history": {
+      "title": "Vault history",
+      "empty": "No audit history yet."
+    },
+    "eventLabels": {
+      "ITEM_REGISTERED": "Item registered",
+      "PRICE_UPDATED": "Price updated",
+      "ITEM_LISTED": "Listed for sale",
+      "ITEM_DELISTED": "Delisted",
+      "ITEM_SOLD": "Sold",
+      "STATUS_CHANGED": "Status changed"
+    },
+    "profile": {
+      "totalItems": "Total items",
+      "listed": "Listed",
+      "sold": "Sold",
+      "followers": "Followers",
+      "customize": "Customize",
+      "follow": "Follow",
+      "following": "Following",
+      "share": "Share"
     }
   }
 }

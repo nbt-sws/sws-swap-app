@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import {
   useListing, useCardPrice, useAddToWishlist, useRemoveFromWishlist, useWishlist,
@@ -6,6 +7,8 @@ import {
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { PageLoader } from '@/components/ui/page-loader';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { DeliveryPreferenceSelector } from '@/components/domain/DeliveryPreferenceSelector';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,10 +22,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import {
-  Heart, Share2, Star, ArrowRightLeft, Clock,
+  Heart, Share2, Star, ArrowRightLeft, Clock, Package,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { PriceChart } from '@/components/domain/PriceChart';
@@ -30,16 +32,17 @@ import { MarketStatsCards } from '@/components/domain/MarketStatsCards';
 import { useAuthStore, isMember } from '@/stores/auth';
 
 const statusConfig = {
-  active: { label: 'Active', className: 'bg-success/10 text-success border-0' },
-  sold: { label: 'Sold', className: 'bg-muted/30 text-muted-foreground border-0' },
-  paused: { label: 'Paused', className: 'bg-warning/10 text-warning border-0' },
-  draft: { label: 'Draft', className: 'bg-surface-lighter text-muted-foreground border-0' },
-  delisted: { label: 'Delisted', className: 'bg-pldown/10 text-pldown border-0' },
+  active: { labelKey: 'listing.status.active', className: 'bg-success/10 text-success border-0' },
+  sold: { labelKey: 'listing.status.sold', className: 'bg-muted/30 text-muted-foreground border-0' },
+  paused: { labelKey: 'listing.status.inactive', className: 'bg-warning/10 text-warning border-0' },
+  draft: { labelKey: 'listing.status.draft', className: 'bg-surface-lighter text-muted-foreground border-0' },
+  delisted: { labelKey: 'listing.status.delisted', className: 'bg-pldown/10 text-pldown border-0' },
 };
 
 const PERIODS = ['7d', '30d', '90d', '1y'] as const;
 
 export function ListingDetailScreen() {
+  const { t } = useTranslation();
   const { listingId } = useParams({ from: '/market/$listingId' });
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
@@ -68,10 +71,7 @@ export function ListingDetailScreen() {
   if (isLoading) {
     return (
       <PageContainer className="py-6">
-        <Skeleton className="h-8 w-32 mb-4" />
-        <Skeleton className="h-64 w-full mb-4" />
-        <Skeleton className="h-8 w-3/4 mb-2" />
-        <Skeleton className="h-6 w-1/2" />
+        <PageLoader />
       </PageContainer>
     );
   }
@@ -79,10 +79,18 @@ export function ListingDetailScreen() {
   if (!listing) {
     return (
       <PageContainer className="py-6">
-        <p className="text-muted-foreground">Listing not found.</p>
-        <Button asChild className="mt-4">
-          <Link to="/market">Back to market</Link>
-        </Button>
+        <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-20">
+          <EmptyMedia variant="icon">
+            <Package className="w-8 h-8 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>{t('listing.notFound')}</EmptyTitle>
+            <EmptyDescription>{t('listing.backToMarket')}</EmptyDescription>
+          </EmptyHeader>
+          <Button asChild className="bg-brand hover:bg-brand-light">
+            <Link to="/market">{t('listing.backToMarket')}</Link>
+          </Button>
+        </Empty>
       </PageContainer>
     );
   }
@@ -143,7 +151,7 @@ export function ListingDetailScreen() {
   return (
     <PageContainer className="py-6">
       <PageHeader
-        title="Listing details"
+        title={t('listing.title')}
         back={{ to: '/market' }}
       />
 
@@ -163,7 +171,7 @@ export function ListingDetailScreen() {
               <span className="text-6xl">{listing.card.game === 'one-piece' ? '⚓' : '⚔'}</span>
             </div>
             <div className="absolute top-4 left-4 flex gap-2">
-              <Badge className={status.className}>{status.label}</Badge>
+              <Badge className={status.className}>{t(status.labelKey)}</Badge>
               <Badge className="bg-surface-lighter text-foreground">{listing.shelf}</Badge>
             </div>
 
@@ -198,7 +206,7 @@ export function ListingDetailScreen() {
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Star className="w-3 h-3 text-pregrade fill-pregrade" />
                 <span>{listing.seller.rating}</span>
-                <span>· Verified seller</span>
+                <span>· {t('common.verifiedSeller')}</span>
               </div>
             </div>
 
@@ -206,9 +214,9 @@ export function ListingDetailScreen() {
 
           {/* Price */}
           <div>
-            <p className="text-xs font-mono text-muted-foreground mb-1">PRICE</p>
+            <p className="text-xs font-mono text-muted-foreground mb-1">{t('common.price').toUpperCase()}</p>
             {isTrade ? (
-              <p className="text-3xl font-bold font-mono text-cyan">Trade only</p>
+              <p className="text-3xl font-bold font-mono text-cyan">{t('common.tradeOnly')}</p>
             ) : (
               <p className="text-3xl font-bold font-mono">฿{listing.price.toLocaleString()}</p>
             )}
@@ -216,7 +224,7 @@ export function ListingDetailScreen() {
 
           {/* Delivery options */}
           <div className="space-y-2">
-            <p className="text-xs font-mono text-muted-foreground">DELIVERY OPTIONS</p>
+            <p className="text-xs font-mono text-muted-foreground">{t('common.deliveryOptions').toUpperCase()}</p>
             <DeliveryPreferenceSelector
               value={delivery}
               onChange={setDelivery}
@@ -232,31 +240,31 @@ export function ListingDetailScreen() {
                   className="flex-1 bg-brand hover:bg-brand-light h-12"
                   onClick={() => navigate({ to: '/checkout/$listingId', params: { listingId: listing.id }, search: { delivery } })}
                 >
-                  Buy Now
+                  {t('common.buyNow')}
                 </Button>
                 <Dialog open={offerOpen} onOpenChange={setOfferOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="flex-1 border-border h-12">
-                      Make Offer
+                      {t('common.makeOffer')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="bg-surface-light border-border">
                     <DialogHeader>
-                      <DialogTitle>Make an offer</DialogTitle>
+                      <DialogTitle>{t('listing.dialog.makeOffer')}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 pt-2">
                       <div>
-                        <p className="text-sm text-muted-foreground mb-2">Your offer price (฿)</p>
+                        <p className="text-sm text-muted-foreground mb-2">{t('common.yourOffer')}</p>
                         <Input
                           type="number"
                           value={offerAmount}
                           onChange={(e) => setOfferAmount(e.target.value)}
-                          placeholder="Enter amount"
+                          placeholder={t('common.enterAmount')}
                           className="bg-surface border-border"
                         />
                       </div>
                       <Button className="w-full bg-brand hover:bg-brand-light" onClick={handleOffer} disabled={createOffer.isPending}>
-                        {createOffer.isPending ? 'Sending...' : 'Send Offer'}
+                        {createOffer.isPending ? t('common.sending') : t('common.sendOffer')}
                       </Button>
                     </div>
                   </DialogContent>
@@ -267,20 +275,20 @@ export function ListingDetailScreen() {
                 <DialogTrigger asChild>
                   <Button className="flex-1 bg-cyan hover:bg-cyan/90 text-surface-dark h-12">
                     <ArrowRightLeft className="w-4 h-4 mr-2" />
-                    Propose Trade
+                    {t('listing.dialog.proposeTrade')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="bg-surface-light border-border max-w-lg max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Propose a trade</DialogTitle>
+                    <DialogTitle>{t('listing.dialog.proposeTrade')}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-2">
                     <p className="text-sm text-muted-foreground">
-                      Select cards from your vault to offer for <span className="text-foreground font-medium">{listing.card.nameEn}</span>.
+                      {t('listing.dialog.selectCards', { cardName: listing.card.nameEn })}
                     </p>
 
                     {!vault || vault.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Your vault is empty. Add cards to your vault first.</p>
+                      <p className="text-sm text-muted-foreground">{t('listing.dialog.vaultEmptyForTrade')}</p>
                     ) : (
                       <div className="space-y-2">
                         {vault.map((item) => {
@@ -317,7 +325,7 @@ export function ListingDetailScreen() {
                       onClick={handleTradeOffer}
                       disabled={createTradeOffer.isPending || selectedTradeCards.length === 0}
                     >
-                      {createTradeOffer.isPending ? 'Sending...' : `Send trade offer (${selectedTradeCards.length})`}
+                      {createTradeOffer.isPending ? t('common.sending') : t('listing.dialog.sendTradeOffer', { count: selectedTradeCards.length })}
                     </Button>
                   </div>
                 </DialogContent>
@@ -328,7 +336,7 @@ export function ListingDetailScreen() {
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={handleWishlist} disabled={addToWishlist.isPending || removeFromWishlist.isPending}>
               <Heart className={cn('w-4 h-4 mr-2', isWishlisted && 'fill-current text-brand')} />
-              {isWishlisted ? 'Wishlisted' : 'Wishlist'}
+              {isWishlisted ? t('common.wishlisted') : t('common.wishlist')}
             </Button>
             <Button
               variant="ghost"
@@ -343,7 +351,7 @@ export function ListingDetailScreen() {
               }}
             >
               <Share2 className="w-4 h-4 mr-2" />
-              Share
+              {t('common.share')}
             </Button>
           </div>
         </div>
@@ -366,7 +374,7 @@ export function ListingDetailScreen() {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-4">
                   <Clock className="w-4 h-4 text-brand" />
-                  <h3 className="font-semibold">Recent Sales</h3>
+                  <h3 className="font-semibold">{t('common.recentSales')}</h3>
                 </div>
                 <div className="space-y-0.5">
                   {marketHistory.slice(-8).reverse().map((sale, i) => (

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
@@ -29,6 +30,7 @@ export function PriceChart({
   className,
   compact,
 }: PriceChartProps) {
+  const { t } = useTranslation();
   const trendValue = trend ?? 0;
   const isPositive = trendValue >= 0;
 
@@ -44,7 +46,7 @@ export function PriceChart({
     <Card className={cn('bg-surface-light border-border', className)}>
       <CardContent className={compact ? 'p-3' : 'p-4'}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className={cn('font-semibold', compact && 'text-sm')}>Price History</h3>
+          <h3 className={cn('font-semibold', compact && 'text-sm')}>{t('common.priceHistory')}</h3>
           <div className="flex items-center gap-2">
             {onPeriodChange && (
               <div className="flex items-center gap-1">

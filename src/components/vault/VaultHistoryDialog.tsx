@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -10,15 +11,6 @@ import { useUserAuditHistory } from '@/hooks/useApi';
 import { Clock, Package } from 'lucide-react';
 import type { AuditRecord } from '@/services/mockApi';
 
-const EVENT_LABELS: Record<string, string> = {
-  ITEM_REGISTERED: 'Item registered',
-  PRICE_UPDATED: 'Price updated',
-  ITEM_LISTED: 'Listed for sale',
-  ITEM_DELISTED: 'Delisted',
-  ITEM_SOLD: 'Sold',
-  STATUS_CHANGED: 'Status changed',
-};
-
 interface VaultHistoryDialogProps {
   open: boolean;
   onClose: () => void;
@@ -26,7 +18,11 @@ interface VaultHistoryDialogProps {
 }
 
 export function VaultHistoryDialog({ open, onClose, userId }: VaultHistoryDialogProps) {
+  const { t } = useTranslation();
   const { data: history, isLoading } = useUserAuditHistory(userId);
+
+  const getEventLabel = (eventType: string) =>
+    t(`vault.eventLabels.${eventType}` as const, { defaultValue: eventType });
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -34,7 +30,7 @@ export function VaultHistoryDialog({ open, onClose, userId }: VaultHistoryDialog
         <DialogHeader className="p-5 pb-0">
           <DialogTitle className="text-lg flex items-center gap-2">
             <Clock className="w-5 h-5 text-brand" />
-            Vault history
+            {t('vault.history.title')}
           </DialogTitle>
         </DialogHeader>
 
@@ -54,13 +50,13 @@ export function VaultHistoryDialog({ open, onClose, userId }: VaultHistoryDialog
           ) : history && history.length > 0 ? (
             <div className="space-y-3">
               {history.map((record) => (
-                <AuditRecordCard key={record.id} record={record} />
+                <AuditRecordCard key={record.id} record={record} getEventLabel={getEventLabel} />
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
               <Package className="w-8 h-8 mb-2 opacity-40" />
-              <p className="text-sm">No vault history yet.</p>
+              <p className="text-sm">{t('vault.history.empty')}</p>
             </div>
           )}
         </ScrollArea>
@@ -69,13 +65,13 @@ export function VaultHistoryDialog({ open, onClose, userId }: VaultHistoryDialog
   );
 }
 
-function AuditRecordCard({ record }: { record: AuditRecord }) {
+function AuditRecordCard({ record, getEventLabel }: { record: AuditRecord; getEventLabel: (type: string) => string }) {
   return (
     <div className="flex items-start gap-4 rounded-xl border border-border bg-surface p-4">
       <div className="mt-1.5 h-2 w-2 rounded-full bg-brand shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-medium text-sm">{EVENT_LABELS[record.eventType] || record.eventType}</span>
+          <span className="font-medium text-sm">{getEventLabel(record.eventType)}</span>
           <span className="text-xs text-muted-foreground whitespace-nowrap">
             {record.occurredAt ? new Date(record.occurredAt).toLocaleString() : '-'}
           </span>
