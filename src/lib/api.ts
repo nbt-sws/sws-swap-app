@@ -246,6 +246,7 @@ export const vaultApi = {
     itemFormat?: string;
     condition?: string;
     description?: string;
+    metadata?: Record<string, unknown>;
   }) => apiPost<ApiItem>('items', { json: data }),
 
   deleteItem: (id: string) => apiDelete<void>(`items/${id}`),

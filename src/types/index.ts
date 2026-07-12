@@ -14,6 +14,8 @@ export interface Card {
 export interface VaultItem {
   id: string;
   card: Card;
+  ownerId?: string;
+  holderId?: string;
   paidPrice: number;
   currentPrice: number;
   currency: string;

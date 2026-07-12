@@ -1,5 +1,8 @@
 import { Link } from '@tanstack/react-router';
-import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useApi';
+import {
+  useWishlist, useAddToWishlist, useRemoveFromWishlist,
+  useMarketStats, useMarketHistory,
+} from '@/hooks/useApi';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { Heart, ShoppingBag, ExternalLink, X } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
+import { PriceChart } from './PriceChart';
+import { MarketStatsCards } from './MarketStatsCards';
 import type { MarketListing } from '@/types';
 
 interface QuickViewModalProps {
@@ -24,6 +29,10 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
   const isWishlisted = listing ? wishlist?.some((w) => w.cardCode === listing.card.code) : false;
+
+  const cardCode = listing?.card.code ?? '';
+  const { data: marketStats } = useMarketStats(cardCode, { enabled: open && !!cardCode });
+  const { data: marketHistory } = useMarketHistory(cardCode, '30d', { enabled: open && !!cardCode });
 
   if (!listing) return null;
 
@@ -95,6 +104,18 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
                 <p className="text-xs text-muted-foreground">Rating {listing.seller.rating}</p>
               </div>
             </Link>
+
+            {/* Market data */}
+            {marketStats && (
+              <div className="mt-5">
+                <MarketStatsCards stats={marketStats} compact />
+              </div>
+            )}
+            {marketHistory && marketHistory.length > 0 && (
+              <div className="mt-4">
+                <PriceChart data={marketHistory} period="30d" compact />
+              </div>
+            )}
 
             {/* Actions */}
             <div className="mt-auto pt-6 flex items-center gap-3">

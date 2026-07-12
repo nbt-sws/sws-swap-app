@@ -52,6 +52,8 @@ export function RegisterItemModal({ isOpen, onClose }: RegisterItemModalProps) {
   const handleSubmit = () => {
     if (!form.code || !form.nameEn) return;
 
+    const paidPriceNum = form.paidPrice ? Number(form.paidPrice) : 0;
+
     addToVault.mutate(
       {
         name: form.nameEn,
@@ -61,6 +63,11 @@ export function RegisterItemModal({ isOpen, onClose }: RegisterItemModalProps) {
         itemFormat: form.language,
         condition: form.condition,
         description: `Type: ${form.type}, NameJP: ${form.nameJp}, Source: ${form.source || 'Manual entry'}, Paid: ${form.paidPrice} THB`,
+        metadata: {
+          paidPrice: paidPriceNum,
+          dateAcquired: form.dateAcquired,
+          source: form.source || 'Manual entry',
+        },
       },
       {
         onSuccess: () => {

@@ -542,7 +542,11 @@ export function useCreateTradeOffer() {
 
 // ─── Market data hooks ──────────────────────────────────────────────
 
-export function useMarketHistory(cardCode: string, range: string = '30d') {
+export function useMarketHistory(
+  cardCode: string,
+  range: string = '30d',
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ['marketHistory', cardCode, range],
     queryFn: () => withFallback(
@@ -550,11 +554,14 @@ export function useMarketHistory(cardCode: string, range: string = '30d') {
       () => mockApi.fetchMarketHistory(cardCode, range).then((r) => r.data)
     ),
     staleTime: 1000 * 60 * 5,
-    enabled: !!cardCode,
+    enabled: !!cardCode && (options?.enabled ?? true),
   });
 }
 
-export function useMarketStats(cardCode: string) {
+export function useMarketStats(
+  cardCode: string,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ['marketStats', cardCode],
     queryFn: () => withFallback(
@@ -568,7 +575,7 @@ export function useMarketStats(cardCode: string) {
       () => mockApi.fetchMarketStats(cardCode)
     ),
     staleTime: 1000 * 60 * 5,
-    enabled: !!cardCode,
+    enabled: !!cardCode && (options?.enabled ?? true),
   });
 }
 

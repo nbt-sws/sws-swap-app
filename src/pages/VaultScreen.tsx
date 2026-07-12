@@ -1,11 +1,14 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Link } from '@tanstack/react-router';
-import { useVault, useListingsBySeller, useDelistListing } from '@/hooks/useApi';
+import {
+  useVault, useListingsBySeller, useDelistListing, useStoreProfile,
+  useFollowedSellers, useFollowSeller, useUnfollowSeller,
+} from '@/hooks/useApi';
 import { useAuthStore } from '@/stores/auth';
 import { StorefrontManager } from '@/components/vault/StorefrontManager';
 import {
   LayoutGrid, List as ListIcon, LayoutTemplate, TrendingUp, TrendingDown,
-  CheckSquare, Tag, Plus, Package, Store, EyeOff, Gift, Truck,
+  CheckSquare, Tag, Plus, Package, Store, EyeOff, Gift, Truck, Clock,
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -17,11 +20,11 @@ import { cn, formatPriceChange } from '@/lib/utils';
 import { ListItemModal } from '@/components/vault/ListItemModal';
 import { BulkListModal } from '@/components/vault/BulkListModal';
 import { RegisterItemModal } from '@/components/vault/RegisterItemModal';
+import { VaultFilterTabs, type VaultFilter } from '@/components/vault/VaultFilterTabs';
+import { VaultProfileHeader, VaultProfileHeaderSkeleton } from '@/components/vault/VaultProfileHeader';
+import { VaultHistoryDialog } from '@/components/vault/VaultHistoryDialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { VaultItem } from '@/types';
-
-const FILTERS = ['All', 'Held', 'Sold', 'Listed', 'Graded'] as const;
-type Filter = typeof FILTERS[number];
 
 const VIEWS = [
   { id: 'grid', icon: LayoutGrid, label: 'Grid' },
@@ -36,7 +39,8 @@ export function VaultScreen() {
   const { data: listings } = useListingsBySeller(userId);
   const delistListing = useDelistListing();
 
-  const [activeFilter, setActiveFilter] = useState<Filter>('All');
+  const [activeFilter, setActiveFilter] = useState<VaultFilter>('ALL');
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [activeView, setActiveView] = useState<string>('grid');
   const [selecting, setSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -62,14 +66,33 @@ export function VaultScreen() {
   const totalPL = useMemo(() => heldCards.reduce((sum, v) => sum + v.plAmount, 0), [heldCards]);
   const cardCount = vault?.length ?? 0;
 
+  const { data: profile, isLoading: profileLoading } = useStoreProfile(userId);
+  const { data: followedIds } = useFollowedSellers();
+  const followSeller = useFollowSeller();
+  const unfollowSeller = useUnfollowSeller();
+  const isOwner = user?.id === userId;
+  const isFollowing = followedIds?.includes(userId) ?? false;
+
   const counts = useMemo(() => {
-    const c = { All: 0, Held: 0, Sold: 0, Listed: 0, Graded: 0 };
+    const c: Record<VaultFilter, number> = {
+      ALL: 0,
+      AVAILABLE: 0,
+      VAULT_HELD: 0,
+      LISTED: 0,
+      IN_TRANSIT: 0,
+      REDEEMING: 0,
+      COMPLETED: 0,
+      LOCKED: 0,
+    };
     vault?.forEach((v) => {
-      c.All++;
-      if (v.status === 'held') c.Held++;
-      if (v.status === 'sold') c.Sold++;
-      if (listingsMap.has(v.card.code)) c.Listed++;
-      if (/PSA|BGS|RAWLITY/.test(v.condition)) c.Graded++;
+      c.ALL++;
+      if (v.status === 'held') {
+        c.VAULT_HELD++;
+        if (!listingsMap.has(v.card.code)) c.AVAILABLE++;
+      }
+      if (listingsMap.has(v.card.code)) c.LISTED++;
+      if (v.status === 'sold') c.COMPLETED++;
+      if (v.status === 'grading') c.LOCKED++;
     });
     return c;
   }, [vault, listingsMap]);
@@ -78,12 +101,13 @@ export function VaultScreen() {
     if (!vault) return [];
     return vault.filter((v) => {
       if (vaultViewMode === 'store') return listingsMap.has(v.card.code);
-      if (activeFilter === 'All') return true;
-      if (activeFilter === 'Held') return v.status === 'held';
-      if (activeFilter === 'Sold') return v.status === 'sold';
-      if (activeFilter === 'Listed') return listingsMap.has(v.card.code);
-      if (activeFilter === 'Graded') return /PSA|BGS|RAWLITY/.test(v.condition);
-      return true;
+      if (activeFilter === 'ALL') return true;
+      if (activeFilter === 'AVAILABLE') return v.status === 'held' && !listingsMap.has(v.card.code);
+      if (activeFilter === 'VAULT_HELD') return v.status === 'held';
+      if (activeFilter === 'LISTED') return listingsMap.has(v.card.code);
+      if (activeFilter === 'COMPLETED') return v.status === 'sold';
+      if (activeFilter === 'LOCKED') return v.status === 'grading';
+      return false;
     });
   }, [vault, vaultViewMode, activeFilter, listingsMap]);
 
@@ -148,6 +172,28 @@ export function VaultScreen() {
       />
 
       <div className="space-y-6">
+        {/* Profile header */}
+        {profileLoading || !profile ? (
+          <VaultProfileHeaderSkeleton />
+        ) : (
+          <VaultProfileHeader
+            profile={profile}
+            isOwner={isOwner}
+            isFollowing={isFollowing}
+            onFollow={() => {
+              if (isFollowing) unfollowSeller.mutate(userId);
+              else followSeller.mutate(userId);
+            }}
+            onShare={() => {
+              const url = typeof window !== 'undefined' ? window.location.href : '';
+              if (navigator.share) {
+                navigator.share({ title: profile.displayName || profile.name, url }).catch(() => {});
+              } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).catch(() => {});
+              }
+            }}
+          />
+        )}
         {/* Fulfillment links */}
         <div className="grid grid-cols-2 gap-3">
           <Link
@@ -226,22 +272,12 @@ export function VaultScreen() {
       {/* Toolbar: Filters + Views + Select + Register */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Filter Pills */}
-        <div className="flex flex-1 min-w-0 gap-2 overflow-x-auto scrollbar-hide">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={cn(
-                'px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all',
-                activeFilter === f
-                  ? 'bg-brand text-white'
-                  : 'bg-surface-light text-muted-foreground hover:text-white'
-              )}
-            >
-              {f}<span className="hidden sm:inline"> · {counts[f]}</span>
-            </button>
-          ))}
-        </div>
+        <VaultFilterTabs
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+          counts={counts}
+          isOwner={isOwner}
+        />
 
         {/* Right side: View toggles + Select + Register */}
         <div className="flex items-center gap-1 shrink-0">
@@ -283,6 +319,24 @@ export function VaultScreen() {
               <span className="hidden sm:inline text-xs">Add</span>
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-border gap-1.5 h-8 px-2.5"
+            onClick={() => setHistoryOpen(true)}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline text-xs">History</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-border gap-1.5 h-8 px-2.5"
+            onClick={() => setHistoryOpen(true)}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline text-xs">History</span>
+          </Button>
         </div>
       </div>
 
@@ -436,6 +490,7 @@ export function VaultScreen() {
       <ListItemModal open={listModalOpen} onClose={closeListModal} item={selectedItem} />
       <BulkListModal open={bulkListModalOpen} onClose={() => setBulkListModalOpen(false)} items={selectedItems} />
       <RegisterItemModal isOpen={registerModalOpen} onClose={() => setRegisterModalOpen(false)} />
+      <VaultHistoryDialog open={historyOpen} onClose={() => setHistoryOpen(false)} userId={userId} />
 
       {/* Confirm Unlist Dialog */}
       {confirmUnlistOpen && (

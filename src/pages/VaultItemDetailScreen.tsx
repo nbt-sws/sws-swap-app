@@ -216,31 +216,21 @@ export function VaultItemDetailScreen() {
                   Ownership
                 </h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-plup/10 text-plup">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground">Owner</p>
-                      <p className="font-medium truncate">You</p>
-                    </div>
-                    <span className="rounded-full bg-plup/10 px-2 py-0.5 text-xs font-semibold text-plup">
-                      You
-                    </span>
-                  </div>
+                  <OwnershipRow
+                    label="Owner"
+                    id={item.ownerId}
+                    currentUserId={user?.id}
+                    icon={<User className="w-4 h-4" />}
+                    color="plup"
+                  />
                   <div className="h-px bg-border" />
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-periwinkle/10 text-periwinkle">
-                      <Shield className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground">Holder</p>
-                      <p className="font-medium truncate">You</p>
-                    </div>
-                    <span className="rounded-full bg-periwinkle/10 px-2 py-0.5 text-xs font-semibold text-periwinkle">
-                      You
-                    </span>
-                  </div>
+                  <OwnershipRow
+                    label="Holder"
+                    id={item.holderId}
+                    currentUserId={user?.id}
+                    icon={<Shield className="w-4 h-4" />}
+                    color="periwinkle"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -424,6 +414,44 @@ function TabButton({
       {icon}
       {label}
     </button>
+  );
+}
+
+function OwnershipRow({
+  label,
+  id,
+  currentUserId,
+  icon,
+  color,
+}: {
+  label: string;
+  id?: string;
+  currentUserId?: string;
+  icon: React.ReactNode;
+  color: 'plup' | 'periwinkle';
+}) {
+  const isCurrentUser = !!id && id === currentUserId;
+  const displayId = id ? `${id.slice(0, 8)}…` : 'Unknown';
+  const colorClasses = {
+    plup: 'bg-plup/10 text-plup',
+    periwinkle: 'bg-periwinkle/10 text-periwinkle',
+  };
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className={cn('flex h-9 w-9 items-center justify-center rounded-full', colorClasses[color])}>
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="font-medium truncate">{isCurrentUser ? 'You' : displayId}</p>
+      </div>
+      {isCurrentUser && (
+        <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', colorClasses[color])}>
+          You
+        </span>
+      )}
+    </div>
   );
 }
 

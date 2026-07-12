@@ -22,11 +22,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import {
-  Heart, Share2, Star, TrendingUp, TrendingDown,
-  ArrowRightLeft, Clock,
+  Heart, Share2, Star, ArrowRightLeft, Clock,
 } from 'lucide-react';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { cn, getCardImageUrl } from '@/lib/utils';
+import { PriceChart } from '@/components/domain/PriceChart';
+import { MarketStatsCards } from '@/components/domain/MarketStatsCards';
 import { useAuthStore, isMember } from '@/stores/auth';
 
 const statusConfig = {
@@ -36,6 +36,8 @@ const statusConfig = {
   draft: { label: 'Draft', className: 'bg-surface-lighter text-muted-foreground border-0' },
   delisted: { label: 'Delisted', className: 'bg-pldown/10 text-pldown border-0' },
 };
+
+const PERIODS = ['7d', '30d', '90d', '1y'] as const;
 
 export function ListingDetailScreen() {
   const { listingId } = useParams({ from: '/market/$listingId' });
@@ -59,6 +61,7 @@ export function ListingDetailScreen() {
   const [tradeOpen, setTradeOpen] = useState(false);
   const [selectedTradeCards, setSelectedTradeCards] = useState<string[]>([]);
   const [delivery, setDelivery] = useState<'SHIP' | 'VAULT_STORE'>('SHIP');
+  const [period, setPeriod] = useState<string>('30d');
 
   const isWishlisted = listing ? wishlist?.some((w: { listingId: string }) => w.listingId === listing.id) : false;
 
@@ -349,49 +352,14 @@ export function ListingDetailScreen() {
       {/* Price chart + market stats */}
       {!!priceData && priceData.history.length > 0 && (
         <div className="mt-6 space-y-6">
-          {marketStats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <StatCard label="Last Sold" value={`฿${marketStats.lastSold?.toLocaleString() || '0'}`} />
-              <StatCard label="Average" value={`฿${marketStats.average?.toLocaleString() || '0'}`} />
-              <StatCard label="Lowest" value={`฿${marketStats.min?.toLocaleString() || '0'}`} />
-              <StatCard label="Highest" value={`฿${marketStats.max?.toLocaleString() || '0'}`} />
-            </div>
-          )}
+          {marketStats && <MarketStatsCards stats={marketStats} />}
 
-          <Card className="bg-surface-light border-border">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Price History</h3>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-muted-foreground">30d trend</span>
-                  <span className={priceData.trend30d >= 0 ? 'text-plup' : 'text-pldown'}>
-                    {priceData.trend30d >= 0 ? <TrendingUp className="w-3 h-3 inline" /> : <TrendingDown className="w-3 h-3 inline" />}
-                    {Math.abs(priceData.trend30d).toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={priceData.history}>
-                    <defs>
-                      <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#F06AA8" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#F06AA8" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" hide />
-                    <YAxis hide domain={['dataMin', 'dataMax']} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1E2248', border: '1px solid #282D5A', borderRadius: '12px' }}
-                      itemStyle={{ color: '#fff' }}
-                      formatter={(value: number) => [`฿${value.toLocaleString()}`, 'Price']}
-                    />
-                    <Area type="monotone" dataKey="price" stroke="#F06AA8" strokeWidth={2} fill="url(#priceGradient)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <PriceChart
+            data={priceData.history}
+            period={period}
+            onPeriodChange={PERIODS.includes(period as typeof PERIODS[number]) ? setPeriod : undefined}
+            trend={priceData.trend30d}
+          />
 
           {marketHistory && marketHistory.length > 0 && (
             <Card className="bg-surface-light border-border">
@@ -431,11 +399,4 @@ export function ListingDetailScreen() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-surface-light p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-bold text-foreground">{value}</p>
-    </div>
-  );
-}
+

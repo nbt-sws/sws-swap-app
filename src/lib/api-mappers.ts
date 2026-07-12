@@ -64,6 +64,10 @@ function placeholderCard(overrides: Partial<Card> = {}): Card {
 
 export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
   const inVault = ['VAULT_HELD', 'AVAILABLE', 'LOCKED'].includes(apiItem.status);
+  const metadata = apiItem.metadata ?? {};
+  const paidPrice = typeof metadata.paidPrice === 'number' ? metadata.paidPrice : 0;
+  const dateAcquired = typeof metadata.dateAcquired === 'string' ? metadata.dateAcquired : apiItem.createdAt;
+  const source = typeof metadata.source === 'string' ? metadata.source : (apiItem.category ?? '');
   return {
     id: apiItem.id,
     card: placeholderCard({
@@ -73,11 +77,13 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
       imageUrl: apiItem.imageUrl,
       condition: (apiItem.condition ?? 'Raw') as Card['condition'],
     }),
-    paidPrice: 0,
+    ownerId: apiItem.ownerId,
+    holderId: apiItem.holderId,
+    paidPrice,
     currentPrice: 0,
     currency: 'THB',
-    dateAcquired: apiItem.createdAt,
-    source: apiItem.category ?? '',
+    dateAcquired,
+    source,
     condition: apiItem.condition ?? 'Raw',
     status: apiItem.status === 'DELIVERED' || apiItem.status === 'REDEEMED' ? 'sold' : inVault ? 'held' : 'held',
     plAmount: 0,
