@@ -1,0 +1,745 @@
+{
+  "name": "market",
+  "route": "/market/",
+  "count": 25,
+  "findings": [
+    {
+      "selector": "div.w-6.h-6",
+      "tagName": "div",
+      "rect": {
+        "x": 1140.46875,
+        "y": 19.5,
+        "width": 24,
+        "height": 24,
+        "top": 19.5,
+        "right": 1164.46875,
+        "bottom": 43.5,
+        "left": 1140.46875
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "p.text-sm.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 288,
+        "y": 124,
+        "width": 374.4375,
+        "height": 20,
+        "top": 124,
+        "right": 662.4375,
+        "bottom": 144,
+        "left": 288
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(1)",
+      "tagName": "button",
+      "rect": {
+        "x": 288,
+        "y": 295,
+        "width": 37.734375,
+        "height": 28,
+        "top": 295,
+        "right": 325.734375,
+        "bottom": 323,
+        "left": 288
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "2.9:1 (need 4.5:1) — text #ffffff on #f06aa8",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(2)",
+      "tagName": "button",
+      "rect": {
+        "x": 333.734375,
+        "y": 295,
+        "width": 50,
+        "height": 28,
+        "top": 295,
+        "right": 383.734375,
+        "bottom": 323,
+        "left": 333.734375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(3)",
+      "tagName": "button",
+      "rect": {
+        "x": 391.734375,
+        "y": 295,
+        "width": 98.265625,
+        "height": 28,
+        "top": 295,
+        "right": 490,
+        "bottom": 323,
+        "left": 391.734375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(4)",
+      "tagName": "button",
+      "rect": {
+        "x": 498,
+        "y": 295,
+        "width": 71.25,
+        "height": 28,
+        "top": 295,
+        "right": 569.25,
+        "bottom": 323,
+        "left": 498
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(5)",
+      "tagName": "button",
+      "rect": {
+        "x": 577.25,
+        "y": 295,
+        "width": 95.625,
+        "height": 28,
+        "top": 295,
+        "right": 672.875,
+        "bottom": 323,
+        "left": 577.25
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(1)",
+      "tagName": "button",
+      "rect": {
+        "x": 288,
+        "y": 350,
+        "width": 100.609375,
+        "height": 30,
+        "top": 350,
+        "right": 388.609375,
+        "bottom": 380,
+        "left": 288
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(2)",
+      "tagName": "button",
+      "rect": {
+        "x": 396.609375,
+        "y": 350,
+        "width": 91.78125,
+        "height": 30,
+        "top": 350,
+        "right": 488.390625,
+        "bottom": 380,
+        "left": 396.609375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(3)",
+      "tagName": "button",
+      "rect": {
+        "x": 496.390625,
+        "y": 350,
+        "width": 68.46875,
+        "height": 30,
+        "top": 350,
+        "right": 564.859375,
+        "bottom": 380,
+        "left": 496.390625
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(4)",
+      "tagName": "button",
+      "rect": {
+        "x": 572.859375,
+        "y": 350,
+        "width": 75.375,
+        "height": 30,
+        "top": 350,
+        "right": 648.234375,
+        "bottom": 380,
+        "left": 572.859375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.inline-flex.items-center",
+      "tagName": "button",
+      "rect": {
+        "x": 799.234375,
+        "y": 350,
+        "width": 111.796875,
+        "height": 30,
+        "top": 350,
+        "right": 911.03125,
+        "bottom": 380,
+        "left": 799.234375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(1) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 305,
+        "y": 681.421875,
+        "width": 85.96875,
+        "height": 15,
+        "top": 681.421875,
+        "right": 390.96875,
+        "bottom": 696.421875,
+        "left": 305
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(2) > div.group.relative > a > div.relative.aspect-\\[5\\/7\\] > div.absolute.top-3 > span.inline-flex.items-center",
+      "tagName": "span",
+      "rect": {
+        "x": 496.59375,
+        "y": 418,
+        "width": 53.71875,
+        "height": 20,
+        "top": 418,
+        "right": 550.3125,
+        "bottom": 438,
+        "left": 496.59375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(2) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 500.59375,
+        "y": 681.421875,
+        "width": 85.96875,
+        "height": 15,
+        "top": 681.421875,
+        "right": 586.5625,
+        "bottom": 696.421875,
+        "left": 500.59375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(2) > div.group.relative > div.p-4 > div.mt-3.flex > span.text-base.font-bold",
+      "tagName": "span",
+      "rect": {
+        "x": 500.59375,
+        "y": 735.421875,
+        "width": 48,
+        "height": 24,
+        "top": 735.421875,
+        "right": 548.59375,
+        "bottom": 759.421875,
+        "left": 500.59375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(3) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 696.1875,
+        "y": 681.453125,
+        "width": 85.984375,
+        "height": 15,
+        "top": 681.453125,
+        "right": 782.171875,
+        "bottom": 696.453125,
+        "left": 696.1875
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(4) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 891.796875,
+        "y": 681.421875,
+        "width": 94.78125,
+        "height": 15,
+        "top": 681.421875,
+        "right": 986.578125,
+        "bottom": 696.421875,
+        "left": 891.796875
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(5) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 1087.390625,
+        "y": 681.453125,
+        "width": 85.984375,
+        "height": 15,
+        "top": 681.453125,
+        "right": 1173.375,
+        "bottom": 696.453125,
+        "left": 1087.390625
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(6) > div.group.relative > a > div.relative.aspect-\\[5\\/7\\] > div.absolute.top-3 > span.inline-flex.items-center",
+      "tagName": "span",
+      "rect": {
+        "x": 301,
+        "y": 836.421875,
+        "width": 53.71875,
+        "height": 20,
+        "top": 836.421875,
+        "right": 354.71875,
+        "bottom": 856.421875,
+        "left": 301
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(6) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 305,
+        "y": 1099.84375,
+        "width": 85.96875,
+        "height": 15,
+        "top": 1099.84375,
+        "right": 390.96875,
+        "bottom": 1114.84375,
+        "left": 305
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(6) > div.group.relative > div.p-4 > div.mt-3.flex > span.text-base.font-bold",
+      "tagName": "span",
+      "rect": {
+        "x": 305,
+        "y": 1153.84375,
+        "width": 48,
+        "height": 24,
+        "top": 1153.84375,
+        "right": 353,
+        "bottom": 1177.84375,
+        "left": 305
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "div:nth-of-type(7) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 500.59375,
+        "y": 1099.84375,
+        "width": 78.28125,
+        "height": 15,
+        "top": 1099.84375,
+        "right": 578.875,
+        "bottom": 1114.84375,
+        "left": 500.59375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.w-12.h-12",
+      "tagName": "div",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "isPageLevel": false,
+      "isHidden": true,
+      "findings": [
+        {
+          "type": "dark-glow",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Colored glow (#f06aa8) on dark background",
+          "ignoreValue": "",
+          "name": "Dark mode with glowing accents",
+          "description": "Dark backgrounds with colored box-shadow glows are the default \"cool\" look of AI-generated UIs. Use subtle, purposeful lighting instead — or skip the dark theme entirely."
+        }
+      ]
+    },
+    {
+      "selector": "body",
+      "tagName": "body",
+      "rect": null,
+      "isPageLevel": true,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "skipped-heading",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "<h1> \"SwibSwap Market\" followed by <h3> \"Monkey D. Luffy G5\" (missing h2)",
+          "ignoreValue": "",
+          "name": "Skipped heading level",
+          "description": "Heading levels should not skip (e.g. h1 then h3 with no h2). Screen readers use heading hierarchy for navigation. Skipping levels breaks the document outline."
+        },
+        {
+          "type": "layout-transition",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "transition: width",
+          "ignoreValue": "",
+          "name": "Layout property animation",
+          "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations."
+        },
+        {
+          "type": "image-hover-transform",
+          "category": "slop",
+          "severity": "advisory",
+          "detail": "Tailwind hover transform on <img>",
+          "ignoreValue": "",
+          "name": "Image hover transform",
+          "description": "Scaling or rotating an image on hover is a recurring generated-UI signature. Let imagery sit still, or use a subtler, purposeful interaction."
+        },
+        {
+          "type": "image-hover-transform",
+          "category": "slop",
+          "severity": "advisory",
+          "detail": "Tailwind hover transform on <img>",
+          "ignoreValue": "",
+          "name": "Image hover transform",
+          "description": "Scaling or rotating an image on hover is a recurring generated-UI signature. Let imagery sit still, or use a subtler, purposeful interaction."
+        },
+        {
+          "type": "image-hover-transform",
+          "category": "slop",
+          "severity": "advisory",
+          "detail": "Tailwind hover transform on <img>",
+          "ignoreValue": "",
+          "name": "Image hover transform",
+          "description": "Scaling or rotating an image on hover is a recurring generated-UI signature. Let imagery sit still, or use a subtler, purposeful interaction."
+        },
+        {
+          "type": "image-hover-transform",
+          "category": "slop",
+          "severity": "advisory",
+          "detail": "Tailwind hover transform on <img>",
+          "ignoreValue": "",
+          "name": "Image hover transform",
+          "description": "Scaling or rotating an image on hover is a recurring generated-UI signature. Let imagery sit still, or use a subtler, purposeful interaction."
+        },
+        {
+          "type": "image-hover-transform",
+          "category": "slop",
+          "severity": "advisory",
+          "detail": "Tailwind hover transform on <img>",
+          "ignoreValue": "",
+          "name": "Image hover transform",
+          "description": "Scaling or rotating an image on hover is a recurring generated-UI signature. Let imagery sit still, or use a subtler, purposeful interaction."
+        },
+        {
+          "type": "image-hover-transform",
+          "category": "slop",
+          "severity": "advisory",
+          "detail": "Tailwind hover transform on <img>",
+          "ignoreValue": "",
+          "name": "Image hover transform",
+          "description": "Scaling or rotating an image on hover is a recurring generated-UI signature. Let imagery sit still, or use a subtler, purposeful interaction."
+        },
+        {
+          "type": "image-hover-transform",
+          "category": "slop",
+          "severity": "advisory",
+          "detail": "Tailwind hover transform on <img>",
+          "ignoreValue": "",
+          "name": "Image hover transform",
+          "description": "Scaling or rotating an image on hover is a recurring generated-UI signature. Let imagery sit still, or use a subtler, purposeful interaction."
+        }
+      ]
+    }
+  ]
+}

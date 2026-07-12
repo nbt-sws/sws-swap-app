@@ -1,0 +1,466 @@
+{
+  "name": "profile",
+  "route": "/profile/",
+  "count": 17,
+  "findings": [
+    {
+      "selector": "div.w-6.h-6",
+      "tagName": "div",
+      "rect": {
+        "x": 1140.46875,
+        "y": 19.5,
+        "width": 24,
+        "height": 24,
+        "top": 19.5,
+        "right": 1164.46875,
+        "bottom": 43.5,
+        "left": 1140.46875
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.w-20.h-20",
+      "tagName": "div",
+      "rect": {
+        "x": 725,
+        "y": 193,
+        "width": 80,
+        "height": 80,
+        "top": 193,
+        "right": 805,
+        "bottom": 273,
+        "left": 725
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "2.9:1 (need 3:1) — text #ffffff on #f06aa8",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "p.text-sm.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 313,
+        "y": 317,
+        "width": 904,
+        "height": 20,
+        "top": 317,
+        "right": 1217,
+        "bottom": 337,
+        "left": 313
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(1) > div.text-card-foreground.flex > div.p-3.text-center > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 301,
+        "y": 509,
+        "width": 281.328125,
+        "height": 15,
+        "top": 509,
+        "right": 582.328125,
+        "bottom": 524,
+        "left": 301
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(2) > div.text-card-foreground.flex > div.p-3.text-center > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 624.328125,
+        "y": 509,
+        "width": 281.328125,
+        "height": 15,
+        "top": 509,
+        "right": 905.65625,
+        "bottom": 524,
+        "left": 624.328125
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.grid.grid-cols-3 > div.text-card-foreground.flex > div.p-3.text-center > p.text-\\[10px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 947.65625,
+        "y": 509,
+        "width": 281.34375,
+        "height": 15,
+        "top": 509,
+        "right": 1229,
+        "bottom": 524,
+        "left": 947.65625
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(1) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 618,
+        "width": 852,
+        "height": 16,
+        "top": 618,
+        "right": 1201,
+        "bottom": 634,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(2) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 680,
+        "width": 852,
+        "height": 16,
+        "top": 680,
+        "right": 1201,
+        "bottom": 696,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(3) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 742,
+        "width": 771.125,
+        "height": 16,
+        "top": 742,
+        "right": 1120.125,
+        "bottom": 758,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(4) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 804,
+        "width": 815.046875,
+        "height": 16,
+        "top": 804,
+        "right": 1164.046875,
+        "bottom": 820,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(5) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 866,
+        "width": 852,
+        "height": 16,
+        "top": 866,
+        "right": 1201,
+        "bottom": 882,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(6) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 928,
+        "width": 852,
+        "height": 16,
+        "top": 928,
+        "right": 1201,
+        "bottom": 944,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(7) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 990,
+        "width": 852,
+        "height": 16,
+        "top": 990,
+        "right": 1201,
+        "bottom": 1006,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "a:nth-of-type(8) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 1052,
+        "width": 852,
+        "height": 16,
+        "top": 1052,
+        "right": 1201,
+        "bottom": 1068,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.space-y-2 > div > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 349,
+        "y": 1122,
+        "width": 852,
+        "height": 16,
+        "top": 1122,
+        "right": 1201,
+        "bottom": 1138,
+        "left": 349
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.w-12.h-12",
+      "tagName": "div",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "isPageLevel": false,
+      "isHidden": true,
+      "findings": [
+        {
+          "type": "dark-glow",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Colored glow (#f06aa8) on dark background",
+          "ignoreValue": "",
+          "name": "Dark mode with glowing accents",
+          "description": "Dark backgrounds with colored box-shadow glows are the default \"cool\" look of AI-generated UIs. Use subtle, purposeful lighting instead — or skip the dark theme entirely."
+        }
+      ]
+    },
+    {
+      "selector": "body",
+      "tagName": "body",
+      "rect": null,
+      "isPageLevel": true,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "single-font",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "only font used is manrope",
+          "ignoreValue": "",
+          "name": "Single font for everything",
+          "description": "Only one font family is used for the entire page. Pair a distinctive display font with a refined body font to create typographic hierarchy."
+        },
+        {
+          "type": "layout-transition",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "transition: width",
+          "ignoreValue": "",
+          "name": "Layout property animation",
+          "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations."
+        }
+      ]
+    }
+  ]
+}

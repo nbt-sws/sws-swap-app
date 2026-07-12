@@ -1,0 +1,441 @@
+import { useState } from 'react';
+import { Link, useParams, useNavigate } from '@tanstack/react-router';
+import {
+  useListing, useCardPrice, useAddToWishlist, useRemoveFromWishlist, useWishlist,
+  useCreateOffer, useVault, useCreateTradeOffer, useMarketStats, useMarketHistory,
+} from '@/hooks/useApi';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { DeliveryPreferenceSelector } from '@/components/domain/DeliveryPreferenceSelector';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import {
+  Heart, Share2, Star, TrendingUp, TrendingDown,
+  ArrowRightLeft, Clock,
+} from 'lucide-react';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { cn, getCardImageUrl } from '@/lib/utils';
+import { useAuthStore, isMember } from '@/stores/auth';
+
+const statusConfig = {
+  active: { label: 'Active', className: 'bg-success/10 text-success border-0' },
+  sold: { label: 'Sold', className: 'bg-muted/30 text-muted-foreground border-0' },
+  paused: { label: 'Paused', className: 'bg-warning/10 text-warning border-0' },
+  draft: { label: 'Draft', className: 'bg-surface-lighter text-muted-foreground border-0' },
+  delisted: { label: 'Delisted', className: 'bg-pldown/10 text-pldown border-0' },
+};
+
+export function ListingDetailScreen() {
+  const { listingId } = useParams({ from: '/market/$listingId' });
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuthStore();
+  const isListingMember = isMember(user);
+
+  const { data: listing, isLoading } = useListing(listingId);
+  const { data: priceData } = useCardPrice(listing?.card.code ?? '');
+  const { data: marketStats } = useMarketStats(listing?.card.code ?? '');
+  const { data: marketHistory } = useMarketHistory(listing?.card.code ?? '', '30d');
+  const { data: wishlist } = useWishlist();
+  const addToWishlist = useAddToWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
+  const createOffer = useCreateOffer();
+  const createTradeOffer = useCreateTradeOffer();
+  const { data: vault } = useVault();
+
+  const [offerAmount, setOfferAmount] = useState('');
+  const [offerOpen, setOfferOpen] = useState(false);
+  const [tradeOpen, setTradeOpen] = useState(false);
+  const [selectedTradeCards, setSelectedTradeCards] = useState<string[]>([]);
+  const [delivery, setDelivery] = useState<'SHIP' | 'VAULT_STORE'>('SHIP');
+
+  const isWishlisted = listing ? wishlist?.some((w: { listingId: string }) => w.listingId === listing.id) : false;
+
+  if (isLoading) {
+    return (
+      <PageContainer className="py-6">
+        <Skeleton className="h-8 w-32 mb-4" />
+        <Skeleton className="h-64 w-full mb-4" />
+        <Skeleton className="h-8 w-3/4 mb-2" />
+        <Skeleton className="h-6 w-1/2" />
+      </PageContainer>
+    );
+  }
+
+  if (!listing) {
+    return (
+      <PageContainer className="py-6">
+        <p className="text-muted-foreground">Listing not found.</p>
+        <Button asChild className="mt-4">
+          <Link to="/market">Back to market</Link>
+        </Button>
+      </PageContainer>
+    );
+  }
+
+  const status = statusConfig[listing.status as keyof typeof statusConfig] ?? statusConfig.active;
+
+  const handleWishlist = () => {
+    if (!isAuthenticated) {
+      navigate({ to: '/login' });
+      return;
+    }
+    if (isWishlisted) removeFromWishlist.mutate(listing.id);
+    else addToWishlist.mutate(listing.id);
+  };
+
+  const handleOffer = () => {
+    if (!isAuthenticated) {
+      navigate({ to: '/login' });
+      return;
+    }
+    const price = Number(offerAmount);
+    if (!price || price <= 0) return;
+    createOffer.mutate({ listingId: listing.id, offerPrice: price }, {
+      onSuccess: () => setOfferOpen(false),
+    });
+  };
+
+  const toggleTradeCard = (code: string) => {
+    setSelectedTradeCards((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
+    );
+  };
+
+  const handleTradeOffer = () => {
+    if (!isAuthenticated) {
+      navigate({ to: '/login' });
+      return;
+    }
+    if (selectedTradeCards.length === 0 || !vault) return;
+    const tradeCards = vault
+      .filter((item) => selectedTradeCards.includes(item.card.code))
+      .map((item) => ({
+        code: item.card.code,
+        nameEn: item.card.nameEn,
+        condition: item.card.condition,
+        game: item.card.game,
+      }));
+    createTradeOffer.mutate({ listingId: listing.id, tradeCards }, {
+      onSuccess: () => {
+        setTradeOpen(false);
+        setSelectedTradeCards([]);
+      },
+    });
+  };
+
+  const isTrade = listing.listingType === 'TRADE';
+
+  return (
+    <PageContainer className="py-6">
+      <PageHeader
+        title="Listing details"
+        back={{ to: '/market' }}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Image */}
+        <Card className="bg-surface-light border-border overflow-hidden">
+          <CardContent className="p-0 aspect-[4/5] flex items-center justify-center relative">
+            <ImageWithFallback
+              src={getCardImageUrl(listing.card)}
+              alt={listing.card.nameEn}
+              className="absolute inset-0"
+            />
+            <div className={cn(
+              'absolute inset-0 flex items-center justify-center -z-10',
+              listing.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
+            )}>
+              <span className="text-6xl">{listing.card.game === 'one-piece' ? '⚓' : '⚔'}</span>
+            </div>
+            <div className="absolute top-4 left-4 flex gap-2">
+              <Badge className={status.className}>{status.label}</Badge>
+              <Badge className="bg-surface-lighter text-foreground">{listing.shelf}</Badge>
+            </div>
+
+          </CardContent>
+        </Card>
+
+        {/* Info */}
+        <div className="space-y-5">
+          <div>
+            <p className="text-xs font-mono text-muted-foreground mb-1">{listing.card.code}</p>
+            <h1 className="text-2xl font-bold mb-2">{listing.card.nameEn}</h1>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+              <span>{listing.card.rarity}</span>
+              <span>·</span>
+              <span>{listing.card.condition}</span>
+              <span>·</span>
+              <span>{listing.card.language}</span>
+            </div>
+          </div>
+
+          {/* Seller */}
+          <Link
+            to="/seller/$sellerId"
+            params={{ sellerId: listing.seller.id }}
+            className="flex items-center gap-3 bg-surface-light rounded-xl p-3 border border-border hover:border-brand/30 transition"
+          >
+            <div className="w-10 h-10 rounded-full bg-surface-lighter flex items-center justify-center font-bold">
+              {listing.seller.name.charAt(0)}
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-sm">@{listing.seller.name}</p>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Star className="w-3 h-3 text-pregrade fill-pregrade" />
+                <span>{listing.seller.rating}</span>
+                <span>· Verified seller</span>
+              </div>
+            </div>
+
+          </Link>
+
+          {/* Price */}
+          <div>
+            <p className="text-xs font-mono text-muted-foreground mb-1">PRICE</p>
+            {isTrade ? (
+              <p className="text-3xl font-bold font-mono text-cyan">Trade only</p>
+            ) : (
+              <p className="text-3xl font-bold font-mono">฿{listing.price.toLocaleString()}</p>
+            )}
+          </div>
+
+          {/* Delivery options */}
+          <div className="space-y-2">
+            <p className="text-xs font-mono text-muted-foreground">DELIVERY OPTIONS</p>
+            <DeliveryPreferenceSelector
+              value={delivery}
+              onChange={setDelivery}
+              isMember={isListingMember}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            {!isTrade ? (
+              <>
+                <Button
+                  className="flex-1 bg-brand hover:bg-brand-light h-12"
+                  onClick={() => navigate({ to: '/checkout/$listingId', params: { listingId: listing.id }, search: { delivery } })}
+                >
+                  Buy Now
+                </Button>
+                <Dialog open={offerOpen} onOpenChange={setOfferOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex-1 border-border h-12">
+                      Make Offer
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-surface-light border-border">
+                    <DialogHeader>
+                      <DialogTitle>Make an offer</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-2">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Your offer price (฿)</p>
+                        <Input
+                          type="number"
+                          value={offerAmount}
+                          onChange={(e) => setOfferAmount(e.target.value)}
+                          placeholder="Enter amount"
+                          className="bg-surface border-border"
+                        />
+                      </div>
+                      <Button className="w-full bg-brand hover:bg-brand-light" onClick={handleOffer} disabled={createOffer.isPending}>
+                        {createOffer.isPending ? 'Sending...' : 'Send Offer'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            ) : (
+              <Dialog open={tradeOpen} onOpenChange={setTradeOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex-1 bg-cyan hover:bg-cyan/90 text-surface-dark h-12">
+                    <ArrowRightLeft className="w-4 h-4 mr-2" />
+                    Propose Trade
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-surface-light border-border max-w-lg max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Propose a trade</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-2">
+                    <p className="text-sm text-muted-foreground">
+                      Select cards from your vault to offer for <span className="text-foreground font-medium">{listing.card.nameEn}</span>.
+                    </p>
+
+                    {!vault || vault.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Your vault is empty. Add cards to your vault first.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {vault.map((item) => {
+                          const selected = selectedTradeCards.includes(item.card.code);
+                          return (
+                            <div
+                              key={item.card.code}
+                              onClick={() => toggleTradeCard(item.card.code)}
+                              className={cn(
+                                'flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition',
+                                selected ? 'border-cyan bg-cyan/10' : 'border-border bg-surface hover:border-border/80'
+                              )}
+                            >
+                              <Checkbox checked={selected} onCheckedChange={() => toggleTradeCard(item.card.code)} />
+                              <div className={cn(
+                                'w-10 h-12 rounded-md flex items-center justify-center text-sm shrink-0',
+                                item.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
+                              )}>
+                                {item.card.game === 'one-piece' ? '⚓' : '⚔'}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>
+                                <p className="font-medium text-sm truncate">{item.card.nameEn}</p>
+                                <p className="text-xs text-muted-foreground">{item.card.condition}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <Button
+                      className="w-full bg-cyan hover:bg-cyan/90 text-surface-dark"
+                      onClick={handleTradeOffer}
+                      disabled={createTradeOffer.isPending || selectedTradeCards.length === 0}
+                    >
+                      {createTradeOffer.isPending ? 'Sending...' : `Send trade offer (${selectedTradeCards.length})`}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={handleWishlist} disabled={addToWishlist.isPending || removeFromWishlist.isPending}>
+              <Heart className={cn('w-4 h-4 mr-2', isWishlisted && 'fill-current text-brand')} />
+              {isWishlisted ? 'Wishlisted' : 'Wishlist'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const url = typeof window !== 'undefined' ? window.location.href : '';
+                if (navigator.share) {
+                  navigator.share({ title: listing.card.nameEn, url }).catch(() => {});
+                } else if (navigator.clipboard) {
+                  navigator.clipboard.writeText(url).catch(() => {});
+                }
+              }}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Price chart + market stats */}
+      {!!priceData && priceData.history.length > 0 && (
+        <div className="mt-6 space-y-6">
+          {marketStats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <StatCard label="Last Sold" value={`฿${marketStats.lastSold?.toLocaleString() || '0'}`} />
+              <StatCard label="Average" value={`฿${marketStats.average?.toLocaleString() || '0'}`} />
+              <StatCard label="Lowest" value={`฿${marketStats.min?.toLocaleString() || '0'}`} />
+              <StatCard label="Highest" value={`฿${marketStats.max?.toLocaleString() || '0'}`} />
+            </div>
+          )}
+
+          <Card className="bg-surface-light border-border">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Price History</h3>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-muted-foreground">30d trend</span>
+                  <span className={priceData.trend30d >= 0 ? 'text-plup' : 'text-pldown'}>
+                    {priceData.trend30d >= 0 ? <TrendingUp className="w-3 h-3 inline" /> : <TrendingDown className="w-3 h-3 inline" />}
+                    {Math.abs(priceData.trend30d).toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={priceData.history}>
+                    <defs>
+                      <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#F06AA8" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="#F06AA8" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="date" hide />
+                    <YAxis hide domain={['dataMin', 'dataMax']} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#1E2248', border: '1px solid #282D5A', borderRadius: '12px' }}
+                      itemStyle={{ color: '#fff' }}
+                      formatter={(value: number) => [`฿${value.toLocaleString()}`, 'Price']}
+                    />
+                    <Area type="monotone" dataKey="price" stroke="#F06AA8" strokeWidth={2} fill="url(#priceGradient)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {marketHistory && marketHistory.length > 0 && (
+            <Card className="bg-surface-light border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="w-4 h-4 text-brand" />
+                  <h3 className="font-semibold">Recent Sales</h3>
+                </div>
+                <div className="space-y-0.5">
+                  {marketHistory.slice(-8).reverse().map((sale, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between rounded-lg p-2.5 transition-colors hover:bg-surface"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10">
+                          <Clock className="w-4 h-4 text-brand" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            ฿{sale.price?.toLocaleString() ?? '0'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {sale.date}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+    </PageContainer>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface-light p-4">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-xl font-bold text-foreground">{value}</p>
+    </div>
+  );
+}

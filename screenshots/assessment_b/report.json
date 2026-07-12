@@ -1,0 +1,186 @@
+{
+  "app": "http://localhost:3002",
+  "liveServer": "http://localhost:8400/detect.js",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "screenshots": [
+    "screenshots/assessment_b/home.png",
+    "screenshots/assessment_b/market.png",
+    "screenshots/assessment_b/vault.png",
+    "screenshots/assessment_b/seller-store.png",
+    "screenshots/assessment_b/services.png",
+    "screenshots/assessment_b/profile.png"
+  ],
+  "pageFindings": [
+    {
+      "name": "home",
+      "route": "/",
+      "messages": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 33 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        },
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 33 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        }
+      ]
+    },
+    {
+      "name": "market",
+      "route": "/market/",
+      "messages": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 25 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        },
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 25 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        }
+      ]
+    },
+    {
+      "name": "vault",
+      "route": "/vault/",
+      "messages": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 38 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        },
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 38 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        }
+      ]
+    },
+    {
+      "name": "seller-store",
+      "route": "/seller/",
+      "messages": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 18 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        },
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 18 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        }
+      ]
+    },
+    {
+      "name": "services",
+      "route": "/services",
+      "messages": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 13 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        },
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 13 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "route": "/profile/",
+      "messages": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 17 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        },
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 17 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold",
+          "location": {
+            "url": "http://localhost:8400/detect.js",
+            "line": 4510,
+            "column": 12,
+            "lineNumber": 4510,
+            "columnNumber": 12
+          }
+        }
+      ]
+    }
+  ]
+}

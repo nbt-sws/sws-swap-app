@@ -1,0 +1,1342 @@
+{
+  "byPage": [
+    {
+      "name": "home",
+      "total": 33,
+      "rules": {
+        "low-contrast": 20,
+        "ai-color-palette": 10,
+        "dark-glow": 2,
+        "layout-transition": 1,
+        "image-hover-transform": 13
+      }
+    },
+    {
+      "name": "market",
+      "total": 25,
+      "rules": {
+        "low-contrast": 19,
+        "ai-color-palette": 4,
+        "dark-glow": 1,
+        "skipped-heading": 1,
+        "layout-transition": 1,
+        "image-hover-transform": 7
+      }
+    },
+    {
+      "name": "vault",
+      "total": 38,
+      "rules": {
+        "low-contrast": 31,
+        "ai-color-palette": 5,
+        "dark-glow": 1,
+        "layout-transition": 1,
+        "image-hover-transform": 6
+      }
+    },
+    {
+      "name": "seller-store",
+      "total": 18,
+      "rules": {
+        "low-contrast": 9,
+        "ai-color-palette": 7,
+        "dark-glow": 1,
+        "layout-transition": 1
+      }
+    },
+    {
+      "name": "services",
+      "total": 13,
+      "rules": {
+        "low-contrast": 8,
+        "line-length": 2,
+        "tiny-text": 4,
+        "ai-color-palette": 3,
+        "dark-glow": 1,
+        "skipped-heading": 1,
+        "layout-transition": 1
+      }
+    },
+    {
+      "name": "profile",
+      "total": 17,
+      "rules": {
+        "low-contrast": 15,
+        "dark-glow": 1,
+        "single-font": 1,
+        "layout-transition": 1
+      }
+    }
+  ],
+  "ruleCounts": {
+    "low-contrast": 102,
+    "ai-color-palette": 29,
+    "dark-glow": 7,
+    "layout-transition": 6,
+    "image-hover-transform": 26,
+    "skipped-heading": 2,
+    "line-length": 2,
+    "tiny-text": 4,
+    "single-font": 1
+  },
+  "severityCounts": {
+    "warning": 153,
+    "advisory": 26
+  },
+  "totalFindings": 179,
+  "fileLocations": [
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "div.w-6.h-6",
+      "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "p.text-sm.text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "div.relative.p-5 > p.text-xs.font-medium",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "div.mt-2.inline-flex",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-trending-up",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-trending-up > path:nth-of-type(1)",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-trending-up > path:nth-of-type(2)",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "div.mt-5.flex > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "h2.text-sm.font-semibold",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "dark-glow",
+      "selector": "a.group.flex:nth-of-type(1) > div.flex.h-12",
+      "detail": "Colored glow (#f06aa8) on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "a.group.w-28:nth-of-type(1) > p.text-\\[10px\\].font-medium",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "a.group.w-28:nth-of-type(2) > p.text-\\[10px\\].font-medium",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "a.group.w-28:nth-of-type(3) > p.text-\\[10px\\].font-medium",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "a.group.w-28:nth-of-type(4) > p.text-\\[10px\\].font-medium",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "a.group.w-28:nth-of-type(6) > p.text-\\[10px\\].font-medium",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group.w-32:nth-of-type(1) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group.w-32:nth-of-type(2) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group.w-32:nth-of-type(3) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group.w-32:nth-of-type(4) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group.w-32:nth-of-type(5) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group.w-32:nth-of-type(6) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group.w-32:nth-of-type(7) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group:nth-of-type(1) > div.text-card-foreground.flex > div.p-4 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.group:nth-of-type(2) > div.text-card-foreground.flex > div.p-4 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.flex.items-center:nth-of-type(1) > div.min-w-0 > p.text-\\[10px\\].font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.flex.items-center:nth-of-type(1) > div.text-right.shrink-0 > p.text-\\[10px\\].font-medium",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.flex.items-center:nth-of-type(2) > div.min-w-0 > p.text-\\[10px\\].font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "ai-color-palette",
+      "selector": "a.flex.items-center:nth-of-type(2) > div.text-right.shrink-0 > p.text-\\[10px\\].font-medium",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.flex.items-center:nth-of-type(3) > div.min-w-0 > p.text-\\[10px\\].font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "a.flex.items-center:nth-of-type(3) > div.text-right.shrink-0 > p.text-\\[10px\\].font-medium",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "low-contrast",
+      "selector": "div.p-5 > div.flex.items-center > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "dark-glow",
+      "selector": "a.relative.-mt-5 > div.w-12.h-12",
+      "detail": "Colored glow (#f06aa8) on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "layout-transition",
+      "selector": "body",
+      "detail": "transition: width",
+      "severity": "warning"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "home",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.w-6.h-6",
+      "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "p.text-sm.text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(1)",
+      "detail": "2.9:1 (need 4.5:1) — text #ffffff on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(2)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(3)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(4)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.items-center:nth-of-type(3) > div.flex.gap-2 > button.px-3.py-1\\.5:nth-of-type(5)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(1)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(2)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(3)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.px-3.py-1\\.5:nth-of-type(4)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div.flex.gap-2:nth-of-type(4) > button.inline-flex.items-center",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div:nth-of-type(1) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "ai-color-palette",
+      "selector": "div:nth-of-type(2) > div.group.relative > a > div.relative.aspect-\\[5\\/7\\] > div.absolute.top-3 > span.inline-flex.items-center",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div:nth-of-type(2) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "ai-color-palette",
+      "selector": "div:nth-of-type(2) > div.group.relative > div.p-4 > div.mt-3.flex > span.text-base.font-bold",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div:nth-of-type(3) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div:nth-of-type(4) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div:nth-of-type(5) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "ai-color-palette",
+      "selector": "div:nth-of-type(6) > div.group.relative > a > div.relative.aspect-\\[5\\/7\\] > div.absolute.top-3 > span.inline-flex.items-center",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div:nth-of-type(6) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "ai-color-palette",
+      "selector": "div:nth-of-type(6) > div.group.relative > div.p-4 > div.mt-3.flex > span.text-base.font-bold",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "low-contrast",
+      "selector": "div:nth-of-type(7) > div.group.relative > div.p-4 > div.flex.items-start > div.flex-1.min-w-0 > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "dark-glow",
+      "selector": "div.w-12.h-12",
+      "detail": "Colored glow (#f06aa8) on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "skipped-heading",
+      "selector": "body",
+      "detail": "<h1> \"SwibSwap Market\" followed by <h3> \"Monkey D. Luffy G5\" (missing h2)",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "layout-transition",
+      "selector": "body",
+      "detail": "transition: width",
+      "severity": "warning"
+    },
+    {
+      "page": "market",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "market",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "market",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "market",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "market",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "market",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "market",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.w-6.h-6",
+      "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "p.text-sm.text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.bg-brand-gradient.rounded-xl > p.text-\\[9px\\].font-mono",
+      "detail": "2.9:1 (need 4.5:1) — text #ffffff on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.bg-brand-gradient.rounded-xl > p.text-sm.font-bold",
+      "detail": "2.9:1 (need 4.5:1) — text #ffffff on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(2) > p.text-\\[9px\\].font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(2) > p.text-\\[9px\\].text-muted-foreground:nth-of-type(3)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(3) > p.text-\\[9px\\].font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(3) > p.text-\\[9px\\].text-muted-foreground:nth-of-type(3)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "button.px-3.py-1\\.5:nth-of-type(1)",
+      "detail": "2.9:1 (need 4.5:1) — text #ffffff on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "button.px-3.py-1\\.5:nth-of-type(2)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "button.px-3.py-1\\.5:nth-of-type(3)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "button.px-3.py-1\\.5:nth-of-type(4)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "button.px-3.py-1\\.5:nth-of-type(5)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "ai-color-palette",
+      "selector": "div.group.relative:nth-of-type(1) > a.block.relative > div.absolute.top-3 > span.inline-flex.items-center",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(1) > div.p-3 > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(1) > div.p-3 > div.flex.items-center > div:nth-of-type(1) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(1) > div.p-3 > div.flex.items-center > div.text-right > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "ai-color-palette",
+      "selector": "div.group.relative:nth-of-type(2) > a.block.relative > div.absolute.top-3 > span.inline-flex.items-center",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(2) > div.p-3 > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(2) > div.p-3 > div.flex.items-center > div:nth-of-type(1) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(2) > div.p-3 > div.flex.items-center > div.text-right > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "ai-color-palette",
+      "selector": "div.group.relative:nth-of-type(3) > a.block.relative > div.absolute.top-3 > span.inline-flex.items-center",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(3) > div.p-3 > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(3) > div.p-3 > div.flex.items-center > div:nth-of-type(1) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(3) > div.p-3 > div.flex.items-center > div.text-right > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(3) > div.p-3 > div.flex.items-center > div.text-right > div.flex.items-center",
+      "detail": "4.1:1 (need 4.5:1) — text #ef4444 on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "ai-color-palette",
+      "selector": "div.group.relative:nth-of-type(4) > a.block.relative > div.absolute.top-3 > span.inline-flex.items-center",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(4) > div.p-3 > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(4) > div.p-3 > div.flex.items-center > div:nth-of-type(1) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(4) > div.p-3 > div.flex.items-center > div.text-right > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "ai-color-palette",
+      "selector": "div.group.relative:nth-of-type(5) > a.block.relative > div.absolute.top-3 > span.inline-flex.items-center",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(5) > div.p-3 > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(5) > div.p-3 > div.flex.items-center > div:nth-of-type(1) > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(5) > div.p-3 > div.flex.items-center > div.text-right > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(6) > div.p-3 > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "low-contrast",
+      "selector": "div.group.relative:nth-of-type(6) > div.p-3 > div.flex.items-center > div > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "dark-glow",
+      "selector": "div.w-12.h-12",
+      "detail": "Colored glow (#f06aa8) on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "layout-transition",
+      "selector": "body",
+      "detail": "transition: width",
+      "severity": "warning"
+    },
+    {
+      "page": "vault",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "vault",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "vault",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "vault",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "vault",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "vault",
+      "rule": "image-hover-transform",
+      "selector": "body",
+      "detail": "Tailwind hover transform on <img>",
+      "severity": "advisory"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.w-6.h-6",
+      "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "p.text-sm.text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.shrink-0 > a.inline-flex.items-center",
+      "detail": "2.9:1 (need 4.5:1) — text #ffffff on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.text-card-foreground.flex:nth-of-type(1) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.text-card-foreground.flex:nth-of-type(2) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.text-card-foreground.flex:nth-of-type(3) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "ai-color-palette",
+      "selector": "div.text-card-foreground.flex:nth-of-type(4) > div.p-4.flex > div.p-2.rounded-lg",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-arrow-right-left",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(1)",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(2)",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(3)",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "ai-color-palette",
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(4)",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.text-card-foreground.flex:nth-of-type(4) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.text-card-foreground.flex:nth-of-type(1) > div.p-4 > div.flex.flex-col > div.flex-1.min-w-0 > div.flex.flex-wrap:nth-of-type(1) > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "low-contrast",
+      "selector": "div.text-card-foreground.flex:nth-of-type(2) > div.p-4 > div.flex.flex-col > div.flex-1.min-w-0 > div.flex.flex-wrap:nth-of-type(1) > p.text-xs.font-mono",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "ai-color-palette",
+      "selector": "span.text-cyan",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "dark-glow",
+      "selector": "div.w-12.h-12",
+      "detail": "Colored glow (#f06aa8) on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "seller-store",
+      "rule": "layout-transition",
+      "selector": "body",
+      "detail": "transition: width",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "div.w-6.h-6",
+      "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "p.text-sm.text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(1) > div.flex.items-start > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground:nth-of-type(1)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "line-length",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(1) > div.flex.items-start > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground:nth-of-type(1)",
+      "detail": "~144 chars/line (aim for <80)",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(2) > div.flex.items-start > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground:nth-of-type(1)",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "line-length",
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(2) > div.flex.items-start > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground:nth-of-type(1)",
+      "detail": "~144 chars/line (aim for <80)",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "div.text-center:nth-of-type(1) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "tiny-text",
+      "selector": "div.text-center:nth-of-type(1) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "9px body text",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "div.text-center:nth-of-type(2) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "tiny-text",
+      "selector": "div.text-center:nth-of-type(2) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "9px body text",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "div.text-center:nth-of-type(3) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "tiny-text",
+      "selector": "div.text-center:nth-of-type(3) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "9px body text",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "low-contrast",
+      "selector": "div.text-center:nth-of-type(4) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "tiny-text",
+      "selector": "div.text-center:nth-of-type(4) > p.text-\\[9px\\].text-muted-foreground",
+      "detail": "9px body text",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "ai-color-palette",
+      "selector": "span.text-cyan.text-lg",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "ai-color-palette",
+      "selector": "div.bg-cyan\\/5.border > div > p.text-sm.font-medium",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "ai-color-palette",
+      "selector": "p.text-xs.text-cyan\\/70",
+      "detail": "Cyan neon text on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "dark-glow",
+      "selector": "a.relative.-mt-5 > div.w-12.h-12",
+      "detail": "Colored glow (#f06aa8) on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "skipped-heading",
+      "selector": "body",
+      "detail": "<h1> \"Services\" followed by <h3> \"kaido99\" (missing h2)",
+      "severity": "warning"
+    },
+    {
+      "page": "services",
+      "rule": "layout-transition",
+      "selector": "body",
+      "detail": "transition: width",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "div.w-6.h-6",
+      "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "div.w-20.h-20",
+      "detail": "2.9:1 (need 3:1) — text #ffffff on #f06aa8",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "p.text-sm.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(1) > div.text-card-foreground.flex > div.p-3.text-center > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(2) > div.text-card-foreground.flex > div.p-3.text-center > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "div.grid.grid-cols-3 > div.text-card-foreground.flex > div.p-3.text-center > p.text-\\[10px\\].text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(1) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(2) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(3) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(4) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(5) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(6) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(7) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "a:nth-of-type(8) > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "low-contrast",
+      "selector": "div.space-y-2 > div > div.flex.items-center > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground",
+      "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "dark-glow",
+      "selector": "div.w-12.h-12",
+      "detail": "Colored glow (#f06aa8) on dark background",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "single-font",
+      "selector": "body",
+      "detail": "only font used is manrope",
+      "severity": "warning"
+    },
+    {
+      "page": "profile",
+      "rule": "layout-transition",
+      "selector": "body",
+      "detail": "transition: width",
+      "severity": "warning"
+    }
+  ]
+}

@@ -1,0 +1,330 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 230 38% 15%;
+    --foreground: 0 0% 98%;
+    --card: 230 35% 18%;
+    --card-foreground: 0 0% 98%;
+    --popover: 230 35% 18%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 330 83% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 75% 72%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 230 25% 25%;
+    --muted-foreground: 230 20% 68%;
+    --accent: 170 70% 59%;
+    --accent-foreground: 230 38% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 230 25% 25%;
+    --input: 230 25% 25%;
+    --ring: 330 83% 62%;
+    --radius: 0.75rem;
+    --sidebar-background: 230 38% 12%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 330 83% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 25% 25%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 230 25% 25%;
+    --sidebar-ring: 330 83% 62%;
+
+    /* Buyer-compatible semantic token bridge (dark host) */
+    --color-brand-primary: #F06AA8;
+    --color-brand-primary-light: rgba(240, 106, 168, 0.15);
+    --color-brand-primary-dark: #D44E8E;
+    --color-brand-secondary: #7B8AF5;
+    --color-brand-secondary-light: rgba(123, 138, 245, 0.15);
+    --color-brand-secondary-dark: #3C3489;
+
+    --color-success: #4FE0D0;
+    --color-success-light: rgba(79, 224, 208, 0.15);
+    --color-success-dark: #085041;
+    --color-warning: #FFD84D;
+    --color-warning-light: rgba(255, 216, 77, 0.15);
+    --color-warning-dark: #5C4A00;
+    --color-danger: #EF4444;
+    --color-danger-light: rgba(239, 68, 68, 0.15);
+    --color-danger-dark: #5C1A1A;
+
+    --color-bg-default: #0D0F26;
+    --color-bg-surface: #151936;
+    --color-bg-elevated: #1E2248;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: rgba(255, 255, 255, 0.7);
+    --color-text-tertiary: rgba(255, 255, 255, 0.45);
+    --color-border-default: #282D5A;
+    --color-border-strong: #3D4280;
+    --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+    /* Z-index scale from buyer */
+    --z-bg: 0;
+    --z-content: 10;
+    --z-sticky: 30;
+    --z-overlay: 40;
+    --z-drawer: 50;
+    --z-modal: 60;
+    --z-toast: 70;
+    --z-tooltip: 80;
+    --z-spinner: 90;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-surface text-foreground font-sans;
+    overflow-x: hidden;
+  }
+
+  /* Ambient vault glow: fixed behind all content */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--color-bg-default);
+    background-image:
+      radial-gradient(ellipse at 0% 0%, rgba(240, 106, 168, 0.10) 0%, transparent 45%),
+      radial-gradient(ellipse at 100% 0%, rgba(123, 138, 245, 0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 100%, rgba(123, 138, 245, 0.10) 0%, transparent 45%),
+      radial-gradient(ellipse at 0% 100%, rgba(79, 224, 208, 0.07) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 35%, rgba(240, 106, 168, 0.05) 0%, transparent 50%);
+    animation: ambient-drift 30s ease-in-out infinite alternate;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body::before {
+      animation: none;
+    }
+  }
+}
+
+@layer utilities {
+  .tap-highlight-transparent {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .mono-num {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+
+  .glass-card {
+    @apply bg-surface-light/70 backdrop-blur-xl border border-border/50 shadow-sm;
+  }
+
+  .glass-card-hover {
+    @apply transition-all duration-300 hover:bg-surface-light/90 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5;
+  }
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0D0F26;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #282D5A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3D4280;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(240, 106, 168, 0.3);
+  color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Buyer-web compatible motion + surface utilities
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Global focus ring */
+*:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Scrollbar gutter to prevent layout shift */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Tight editorial headings */
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* ─── Shimmer ──────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-elevated) 25%,
+    var(--color-bg-surface) 50%,
+    var(--color-bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ─── Hover glow / lift ────────────────────────────────────────── */
+.hover-glow {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 0 1px rgba(240, 106, 168, 0.2), 0 8px 32px rgba(240, 106, 168, 0.15);
+}
+
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(15, 18, 40, 0.18);
+}
+
+/* ─── 3D tilt card ─────────────────────────────────────────────── */
+.tilt-card {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.tilt-card:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) scale(1.02);
+}
+.tilt-card:active {
+  transform: perspective(1000px) rotateX(1deg) rotateY(-1deg) scale(0.99);
+}
+
+/* ─── Ambient background drift ─────────────────────────────────── */
+@keyframes ambient-drift {
+  0% {
+    background-position:
+      0% 0%,
+      100% 0%,
+      100% 100%,
+      0% 100%,
+      50% 35%;
+  }
+  100% {
+    background-position:
+      5% 8%,
+      95% 5%,
+      95% 95%,
+      5% 95%,
+      52% 38%;
+  }
+}
+
+/* ─── Page transitions ─────────────────────────────────────────── */
+@keyframes page-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.page-transition-enter {
+  animation: page-enter 250ms ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ─── Stagger fade-in ──────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger-fade-in > * {
+  animation: fade-in-up 0.5s ease backwards;
+}
+.stagger-fade-in > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-fade-in > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-fade-in > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-fade-in > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-fade-in > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-fade-in > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-fade-in > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-fade-in > *:nth-child(8) { animation-delay: 420ms; }
+
+/* ─── Heart burst ──────────────────────────────────────────────── */
+@keyframes heart-burst {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.35); }
+  60% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.heart-burst {
+  animation: heart-burst 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Reduced motion overrides ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  .tilt-card:hover, .tilt-card:active {
+    transform: none !important;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .group:hover .group-hover\:scale-105,
+  .group-hover\:scale-105 {
+    transform: none !important;
+  }
+}

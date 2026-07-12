@@ -1,0 +1,1 @@
+{"action":"evaluate","args":{"code":"Array.from(document.querySelectorAll('script')).map(s => s.src).filter(s => s.includes('market')).join(', ')"},"session":"swap-ui-check"}

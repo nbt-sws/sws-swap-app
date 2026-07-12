@@ -1,0 +1,484 @@
+{
+  "name": "seller-store",
+  "route": "/seller/",
+  "count": 18,
+  "findings": [
+    {
+      "selector": "div.w-6.h-6",
+      "tagName": "div",
+      "rect": {
+        "x": 1140.46875,
+        "y": 19.5,
+        "width": 24,
+        "height": 24,
+        "top": 19.5,
+        "right": 1164.46875,
+        "bottom": 43.5,
+        "left": 1140.46875
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "p.text-sm.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 288,
+        "y": 124,
+        "width": 281.9375,
+        "height": 20,
+        "top": 124,
+        "right": 569.9375,
+        "bottom": 144,
+        "left": 288
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.shrink-0 > a.inline-flex.items-center",
+      "tagName": "a",
+      "rect": {
+        "x": 1114.046875,
+        "y": 88,
+        "width": 127.953125,
+        "height": 36,
+        "top": 88,
+        "right": 1242,
+        "bottom": 124,
+        "left": 1114.046875
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "2.9:1 (need 4.5:1) — text #ffffff on #f06aa8",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-card-foreground.flex:nth-of-type(1) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 353,
+        "y": 241,
+        "width": 77.171875,
+        "height": 16,
+        "top": 241,
+        "right": 430.171875,
+        "bottom": 257,
+        "left": 353
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-card-foreground.flex:nth-of-type(2) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 595.5,
+        "y": 241,
+        "width": 60.921875,
+        "height": 16,
+        "top": 241,
+        "right": 656.421875,
+        "bottom": 257,
+        "left": 595.5
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-card-foreground.flex:nth-of-type(3) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 838,
+        "y": 241,
+        "width": 53.09375,
+        "height": 16,
+        "top": 241,
+        "right": 891.09375,
+        "bottom": 257,
+        "left": 838
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-card-foreground.flex:nth-of-type(4) > div.p-4.flex > div.p-2.rounded-lg",
+      "tagName": "div",
+      "rect": {
+        "x": 1032.5,
+        "y": 215,
+        "width": 36,
+        "height": 36,
+        "top": 215,
+        "right": 1068.5,
+        "bottom": 251,
+        "left": 1032.5
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "svg.lucide.lucide-arrow-right-left",
+      "tagName": "svg",
+      "rect": {
+        "x": 1040.5,
+        "y": 223,
+        "width": 20,
+        "height": 20,
+        "top": 223,
+        "right": 1060.5,
+        "bottom": 243,
+        "left": 1040.5
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(1)",
+      "tagName": "path",
+      "rect": {
+        "x": 1053.8333740234375,
+        "y": 225.5,
+        "width": 3.333251953125,
+        "height": 6.6666717529296875,
+        "top": 225.5,
+        "right": 1057.1666259765625,
+        "bottom": 232.1666717529297,
+        "left": 1053.8333740234375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(2)",
+      "tagName": "path",
+      "rect": {
+        "x": 1043.8333740234375,
+        "y": 228.8333282470703,
+        "width": 13.333251953125,
+        "height": 0,
+        "top": 228.8333282470703,
+        "right": 1057.1666259765625,
+        "bottom": 228.8333282470703,
+        "left": 1043.8333740234375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(3)",
+      "tagName": "path",
+      "rect": {
+        "x": 1043.8333740234375,
+        "y": 233.8333282470703,
+        "width": 3.333251953125,
+        "height": 6.6666717529296875,
+        "top": 233.8333282470703,
+        "right": 1047.1666259765625,
+        "bottom": 240.5,
+        "left": 1043.8333740234375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "svg.lucide.lucide-arrow-right-left > path:nth-of-type(4)",
+      "tagName": "path",
+      "rect": {
+        "x": 1043.8333740234375,
+        "y": 237.1666717529297,
+        "width": 13.333251953125,
+        "height": 0,
+        "top": 237.1666717529297,
+        "right": 1057.1666259765625,
+        "bottom": 237.1666717529297,
+        "left": 1043.8333740234375
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-card-foreground.flex:nth-of-type(4) > div.p-4.flex > div:nth-of-type(2) > p.text-xs.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 1080.5,
+        "y": 241,
+        "width": 73.890625,
+        "height": 16,
+        "top": 241,
+        "right": 1154.390625,
+        "bottom": 257,
+        "left": 1080.5
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-card-foreground.flex:nth-of-type(1) > div.p-4 > div.flex.flex-col > div.flex-1.min-w-0 > div.flex.flex-wrap:nth-of-type(1) > p.text-xs.font-mono",
+      "tagName": "p",
+      "rect": {
+        "x": 417,
+        "y": 426,
+        "width": 57.609375,
+        "height": 16,
+        "top": 426,
+        "right": 474.609375,
+        "bottom": 442,
+        "left": 417
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-card-foreground.flex:nth-of-type(2) > div.p-4 > div.flex.flex-col > div.flex-1.min-w-0 > div.flex.flex-wrap:nth-of-type(1) > p.text-xs.font-mono",
+      "tagName": "p",
+      "rect": {
+        "x": 417,
+        "y": 676,
+        "width": 72,
+        "height": 16,
+        "top": 676,
+        "right": 489,
+        "bottom": 692,
+        "left": 417
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "span.text-cyan",
+      "tagName": "span",
+      "rect": {
+        "x": 1165,
+        "y": 674,
+        "width": 60,
+        "height": 26,
+        "top": 674,
+        "right": 1225,
+        "bottom": 700,
+        "left": 1165
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "div.w-12.h-12",
+      "tagName": "div",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "isPageLevel": false,
+      "isHidden": true,
+      "findings": [
+        {
+          "type": "dark-glow",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Colored glow (#f06aa8) on dark background",
+          "ignoreValue": "",
+          "name": "Dark mode with glowing accents",
+          "description": "Dark backgrounds with colored box-shadow glows are the default \"cool\" look of AI-generated UIs. Use subtle, purposeful lighting instead — or skip the dark theme entirely."
+        }
+      ]
+    },
+    {
+      "selector": "body",
+      "tagName": "body",
+      "rect": null,
+      "isPageLevel": true,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "layout-transition",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "transition: width",
+          "ignoreValue": "",
+          "name": "Layout property animation",
+          "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations."
+        }
+      ]
+    }
+  ]
+}

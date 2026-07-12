@@ -1,0 +1,412 @@
+{
+  "name": "services",
+  "route": "/services",
+  "count": 13,
+  "findings": [
+    {
+      "selector": "div.w-6.h-6",
+      "tagName": "div",
+      "rect": {
+        "x": 1140.46875,
+        "y": 19.5,
+        "width": 24,
+        "height": 24,
+        "top": 19.5,
+        "right": 1164.46875,
+        "bottom": 43.5,
+        "left": 1140.46875
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "1.0:1 (need 4.5:1) — text #f06aa8 on #f06aa8",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "p.text-sm.text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 288,
+        "y": 124,
+        "width": 428.859375,
+        "height": 20,
+        "top": 124,
+        "right": 716.859375,
+        "bottom": 144,
+        "left": 288
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        }
+      ]
+    },
+    {
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(1) > div.flex.items-start > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground:nth-of-type(1)",
+      "tagName": "p",
+      "rect": {
+        "x": 364,
+        "y": 278,
+        "width": 862,
+        "height": 32,
+        "top": 278,
+        "right": 1226,
+        "bottom": 310,
+        "left": 364
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        },
+        {
+          "type": "line-length",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "~144 chars/line (aim for <80)",
+          "ignoreValue": "",
+          "name": "Line length too long",
+          "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line. Add a max-width (65ch to 75ch) to text containers."
+        }
+      ]
+    },
+    {
+      "selector": "div.bg-surface-light.rounded-xl:nth-of-type(2) > div.flex.items-start > div.flex-1.min-w-0 > p.text-xs.text-muted-foreground:nth-of-type(1)",
+      "tagName": "p",
+      "rect": {
+        "x": 364,
+        "y": 503,
+        "width": 862,
+        "height": 32,
+        "top": 503,
+        "right": 1226,
+        "bottom": 535,
+        "left": 364
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.0:1 (need 4.5:1) — text #7b819d on #1e2248",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        },
+        {
+          "type": "line-length",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "~144 chars/line (aim for <80)",
+          "ignoreValue": "",
+          "name": "Line length too long",
+          "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line. Add a max-width (65ch to 75ch) to text containers."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-center:nth-of-type(1) > p.text-\\[9px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 288,
+        "y": 795,
+        "width": 229.5,
+        "height": 13.5,
+        "top": 795,
+        "right": 517.5,
+        "bottom": 808.5,
+        "left": 288
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        },
+        {
+          "type": "tiny-text",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "9px body text",
+          "ignoreValue": "",
+          "name": "Tiny body text",
+          "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-center:nth-of-type(2) > p.text-\\[9px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 529.5,
+        "y": 795,
+        "width": 229.5,
+        "height": 13.5,
+        "top": 795,
+        "right": 759,
+        "bottom": 808.5,
+        "left": 529.5
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        },
+        {
+          "type": "tiny-text",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "9px body text",
+          "ignoreValue": "",
+          "name": "Tiny body text",
+          "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-center:nth-of-type(3) > p.text-\\[9px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 771,
+        "y": 795,
+        "width": 229.5,
+        "height": 13.5,
+        "top": 795,
+        "right": 1000.5,
+        "bottom": 808.5,
+        "left": 771
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        },
+        {
+          "type": "tiny-text",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "9px body text",
+          "ignoreValue": "",
+          "name": "Tiny body text",
+          "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+        }
+      ]
+    },
+    {
+      "selector": "div.text-center:nth-of-type(4) > p.text-\\[9px\\].text-muted-foreground",
+      "tagName": "p",
+      "rect": {
+        "x": 1012.5,
+        "y": 795,
+        "width": 229.5,
+        "height": 13.5,
+        "top": 795,
+        "right": 1242,
+        "bottom": 808.5,
+        "left": 1012.5
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "low-contrast",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "4.5:1 (need 4.5:1) — text #7b819d on #151936",
+          "ignoreValue": "",
+          "name": "Low contrast text",
+          "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background."
+        },
+        {
+          "type": "tiny-text",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "9px body text",
+          "ignoreValue": "",
+          "name": "Tiny body text",
+          "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+        }
+      ]
+    },
+    {
+      "selector": "span.text-cyan.text-lg",
+      "tagName": "span",
+      "rect": {
+        "x": 305,
+        "y": 853.5,
+        "width": 15.53125,
+        "height": 28,
+        "top": 853.5,
+        "right": 320.53125,
+        "bottom": 881.5,
+        "left": 305
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "div.bg-cyan\\/5.border > div > p.text-sm.font-medium",
+      "tagName": "p",
+      "rect": {
+        "x": 332.53125,
+        "y": 849.5,
+        "width": 319.125,
+        "height": 20,
+        "top": 849.5,
+        "right": 651.65625,
+        "bottom": 869.5,
+        "left": 332.53125
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "p.text-xs.text-cyan\\/70",
+      "tagName": "p",
+      "rect": {
+        "x": 332.53125,
+        "y": 869.5,
+        "width": 319.125,
+        "height": 16,
+        "top": 869.5,
+        "right": 651.65625,
+        "bottom": 885.5,
+        "left": 332.53125
+      },
+      "isPageLevel": false,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "ai-color-palette",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Cyan neon text on dark background",
+          "ignoreValue": "",
+          "name": "AI color palette",
+          "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette."
+        }
+      ]
+    },
+    {
+      "selector": "a.relative.-mt-5 > div.w-12.h-12",
+      "tagName": "div",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "isPageLevel": false,
+      "isHidden": true,
+      "findings": [
+        {
+          "type": "dark-glow",
+          "category": "slop",
+          "severity": "warning",
+          "detail": "Colored glow (#f06aa8) on dark background",
+          "ignoreValue": "",
+          "name": "Dark mode with glowing accents",
+          "description": "Dark backgrounds with colored box-shadow glows are the default \"cool\" look of AI-generated UIs. Use subtle, purposeful lighting instead — or skip the dark theme entirely."
+        }
+      ]
+    },
+    {
+      "selector": "body",
+      "tagName": "body",
+      "rect": null,
+      "isPageLevel": true,
+      "isHidden": false,
+      "findings": [
+        {
+          "type": "skipped-heading",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "<h1> \"Services\" followed by <h3> \"kaido99\" (missing h2)",
+          "ignoreValue": "",
+          "name": "Skipped heading level",
+          "description": "Heading levels should not skip (e.g. h1 then h3 with no h2). Screen readers use heading hierarchy for navigation. Skipping levels breaks the document outline."
+        },
+        {
+          "type": "layout-transition",
+          "category": "quality",
+          "severity": "warning",
+          "detail": "transition: width",
+          "ignoreValue": "",
+          "name": "Layout property animation",
+          "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations."
+        }
+      ]
+    }
+  ]
+}

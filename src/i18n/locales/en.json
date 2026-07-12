@@ -1,0 +1,190 @@
+{
+  "nav": {
+    "home": "Home",
+    "market": "Market",
+    "sell": "Sell",
+    "vault": "Vault",
+    "services": "Services",
+    "orders": "Orders",
+    "offers": "Offers",
+    "wishlist": "Wishlist",
+    "settings": "Settings",
+    "scan": "Scan",
+    "login": "Log in",
+    "logout": "Log out",
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "browse": "Browse",
+    "stores": "Stores",
+    "following": "Following",
+    "campaigns": "Campaigns",
+    "achievements": "Achievements"
+  },
+  "common": {
+    "search": "Search",
+    "cancel": "Cancel",
+    "save": "Save",
+    "submit": "Submit",
+    "loading": "Loading",
+    "error": "Error",
+    "retry": "Retry",
+    "close": "Close",
+    "open": "Open",
+    "back": "Back",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "unknown": "Unknown",
+    "switchLanguage": "Switch language",
+    "viewAll": "View all",
+    "seeAll": "See all",
+    "browseAll": "Browse all"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "continue": "Continue"
+  },
+  "home": {
+    "greeting": {
+      "morning": "Good morning, {{name}}",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}}",
+      "collector": "Collector"
+    },
+    "memberBadge": "Member",
+    "freePlan": "Free",
+    "portfolio": {
+      "title": "Portfolio Value",
+      "change": "{{value}} ({{percent}}%)",
+      "topCards": "Top {{count}} cards"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "scan": "Scan",
+      "addVault": "Add to Vault",
+      "sell": "Sell",
+      "market": "Market",
+      "orders": "Orders",
+      "offers": "Offers"
+    },
+    "vaultSnapshot": {
+      "title": "Vault",
+      "viewAll": "View all",
+      "empty": "Your vault is empty"
+    },
+    "marketPulse": {
+      "title": "Market Pulse",
+      "viewAll": "Browse market",
+      "empty": "No trending listings",
+      "trade": "Trade"
+    },
+    "activity": {
+      "title": "Active",
+      "pendingOrders": "{{count}} pending order",
+      "pendingOrders_plural": "{{count}} pending orders",
+      "pendingOffers": "{{count}} pending offer",
+      "pendingOffers_plural": "{{count}} pending offers"
+    },
+    "wishlist": {
+      "title": "Wishlist",
+      "empty": "No wishlist items",
+      "target": "Target"
+    },
+    "guestWelcome": {
+      "title": "Unlock your collector vault",
+      "desc": "Sign in to track your portfolio, manage cards, and see personalized offers.",
+      "signIn": "Sign In",
+      "register": "Create account"
+    },
+    "kycBanner": {
+      "title": "Complete KYC",
+      "desc": "Unlock vault storage and higher limits",
+      "cta": "Start KYC"
+    },
+    "discovery": {
+      "title": "Discover cards",
+      "desc": "Browse vault-backed listings and trending cards",
+      "cta": "Explore market"
+    }
+  },
+  "delivery": {
+    "option": {
+      "ship": "Ship to me",
+      "shipDesc": "Delivered to your address with tracking",
+      "vaultStore": "Store in Vault",
+      "vaultStoreDescMember": "Secure storage + instant vault authentication",
+      "vaultStoreDescNonMember": "Members-only secure storage"
+    },
+    "memberOnlyBadge": "Member only",
+    "dialog": {
+      "title": "Membership required",
+      "description": "Vault storage is available for verified members. Complete KYC to unlock it.",
+      "goToKyc": "Go to KYC",
+      "chooseShipping": "Choose shipping instead"
+    }
+  },
+  "timeAgo": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  },
+  "offers": {
+    "title": "Offers",
+    "description": "Manage your incoming and outgoing offers",
+    "empty": "No offers yet",
+    "emptyDesc": "Make an offer on a listing or wait for buyers to reach out."
+  },
+  "wishlist": {
+    "title": "Wishlist",
+    "description": "Cards you're watching",
+    "empty": "Your wishlist is empty",
+    "emptyDesc": "Save cards you’re watching and we’ll alert you when prices move."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Stay on top of offers, orders, and updates",
+    "unread": "{{count}} unread",
+    "empty": "No notifications yet",
+    "emptyDesc": "We’ll let you know when there are offers, orders, or updates."
+  },
+  "market": {
+    "empty": "No listings found",
+    "emptyDesc": "Try adjusting your filters or search for a different card."
+  },
+  "listing": {
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "inactive": "Inactive",
+      "sold": "Sold",
+      "delisted": "Delisted"
+    },
+    "wishlist": {
+      "add": "Add to wishlist",
+      "remove": "Remove from wishlist"
+    }
+  },
+  "orders": {
+    "title": "My Orders",
+    "description": "Track your purchases and trades",
+    "empty": "No orders yet",
+    "emptyDesc": "Browse the market to find your next card.",
+    "tabs": {
+      "all": "All",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "status": {
+      "PENDING_PAYMENT": "Pending payment",
+      "PAID": "Paid",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    }
+  }
+}

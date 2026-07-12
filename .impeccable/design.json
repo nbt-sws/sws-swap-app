@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-08T04:39:00.000Z",
+  "title": "Design System: SwibSwap App",
+  "extensions": {
+    "colorMeta": {
+      "brand": {
+        "role": "primary",
+        "displayName": "Magenta Glow",
+        "canonical": "#F06AA8",
+        "tonalRamp": [
+          "#2D0A17",
+          "#5A132F",
+          "#872548",
+          "#B43762",
+          "#F06AA8",
+          "#F78BB8",
+          "#F9AEC8",
+          "#FCD1E3"
+        ]
+      },
+      "brand-light": {
+        "role": "primary",
+        "displayName": "Magenta Tint",
+        "canonical": "#F78BB8",
+        "tonalRamp": [
+          "#2D161C",
+          "#5A3038",
+          "#874A56",
+          "#B46474",
+          "#F78BB8",
+          "#F9A8C4",
+          "#FBC5D8",
+          "#FDE2EC"
+        ]
+      },
+      "brand-dark": {
+        "role": "primary",
+        "displayName": "Magenta Deep",
+        "canonical": "#D44E8E",
+        "tonalRamp": [
+          "#1F0813",
+          "#3D1026",
+          "#5C183A",
+          "#7A204E",
+          "#D44E8E",
+          "#E072A4",
+          "#EC9ABD",
+          "#F8C3D6"
+        ]
+      },
+      "periwinkle": {
+        "role": "secondary",
+        "displayName": "Periwinkle",
+        "canonical": "#7B8AF5",
+        "tonalRamp": [
+          "#0F1233",
+          "#1F255E",
+          "#2F3989",
+          "#4F5DB4",
+          "#7B8AF5",
+          "#9BAAF8",
+          "#BCC8FB",
+          "#DDE6FD"
+        ]
+      },
+      "surface": {
+        "role": "background",
+        "displayName": "Vault Surface",
+        "canonical": "#151936",
+        "tonalRamp": [
+          "#080914",
+          "#0D0F26",
+          "#151936",
+          "#1E2248",
+          "#282D5A",
+          "#313866",
+          "#3D4280",
+          "#4A4F8A"
+        ]
+      },
+      "surface-light": {
+        "role": "surface",
+        "displayName": "Elevated Surface",
+        "canonical": "#1E2248",
+        "tonalRamp": [
+          "#0A0C1C",
+          "#15183A",
+          "#1E2248",
+          "#282D5A",
+          "#313866",
+          "#3D4280",
+          "#4A4F8A",
+          "#575CA0"
+        ]
+      },
+      "foreground": {
+        "role": "text",
+        "displayName": "White Ink",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#1F1F1F",
+          "#3D3D3D",
+          "#5C5C5C",
+          "#7A7A7A",
+          "#999999",
+          "#B8B8B8",
+          "#D6D6D6",
+          "#FFFFFF"
+        ]
+      },
+      "cyan": {
+        "role": "success",
+        "displayName": "Cyan",
+        "canonical": "#4FE0D0",
+        "tonalRamp": [
+          "#001F1A",
+          "#003E33",
+          "#005D4D",
+          "#0A7C68",
+          "#4FE0D0",
+          "#7BE9DC",
+          "#A7F2E8",
+          "#D3FBF4"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page-level headings and portfolio value."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles inside a page."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles, dialog headings, list headers."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Descriptions, form labels, body copy. Max line length 65–75ch for long prose."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Badges, captions, timestamps, small metadata, bottom-nav labels."
+      },
+      "mono": {
+        "displayName": "Mono Data",
+        "purpose": "Prices, card codes, P/L, order numbers."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glow",
+        "value": "0 0 20px rgba(240, 106, 168, 0.3)",
+        "purpose": "Primary button and scan FAB ambient glow."
+      },
+      {
+        "name": "glow-cyan",
+        "value": "0 0 20px rgba(79, 224, 208, 0.3)",
+        "purpose": "Verification and success glow accents."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 4px 12px rgba(0, 0, 0, 0.08)",
+        "purpose": "Gentle lift on desktop card hover."
+      },
+      {
+        "name": "modal",
+        "value": "0 12px 36px rgba(15, 18, 40, 0.18)",
+        "purpose": "Dialogs and bottom sheets."
+      }
+    ],
+    "motion": [
+      {
+        "name": "page-transition-enter",
+        "value": "animation: page-enter 250ms ease forwards",
+        "purpose": "Page enter transition."
+      },
+      {
+        "name": "page-transition-exit",
+        "value": "animation: page-exit 150ms ease forwards",
+        "purpose": "Page exit transition."
+      },
+      {
+        "name": "fade-in",
+        "value": "animation: fade-in 200ms ease forwards",
+        "purpose": "Soft content fade-in."
+      },
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default easing for state transitions."
+      },
+      {
+        "name": "duration-hover",
+        "value": "250ms",
+        "purpose": "Hover and glow transitions."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "@media (prefers-reduced-motion: reduce) { transition: none !important; animation: none !important; }",
+        "purpose": "Disable continuous animations and transforms for users who prefer reduced motion."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The highest-value action CTA. Magenta fill with white text and a soft glow on hover.",
+      "html": "<button class=\"ds-btn-primary\">Get started</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 24px; border: none; border-radius: 16px; background-color: #F06AA8; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; line-height: 1.55; cursor: pointer; transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background-color: #F78BB8; transform: translateY(-1px); box-shadow: 0 0 20px rgba(240, 106, 168, 0.3); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #151936, 0 0 0 4px #F06AA8; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary CTAs and information actions. Periwinkle fill with white text.",
+      "html": "<button class=\"ds-btn-secondary\">Learn more</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 24px; border: none; border-radius: 16px; background-color: #7B8AF5; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; line-height: 1.55; cursor: pointer; transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-secondary:hover { background-color: #9BAAF8; transform: translateY(-1px); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px #151936, 0 0 0 4px #7B8AF5; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-emphasis actions on dark surfaces. Transparent background with a tinted surface on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Cancel</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 24px; border: none; border-radius: 16px; background-color: transparent; color: rgba(255, 255, 255, 0.8); font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; line-height: 1.55; cursor: pointer; transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-ghost:hover { background-color: #282D5A; color: #FFFFFF; } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 2px #F06AA8; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Single-line text field with surface-light background, rounded corners, and brand focus ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search cards…\" />",
+      "css": ".ds-input { width: 100%; height: 48px; padding: 0 16px; border: 1px solid #282D5A; border-radius: 16px; background-color: #1E2248; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 400; line-height: 1.55; outline: none; transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-input::placeholder { color: rgba(255, 255, 255, 0.45); } .ds-input:hover { border-color: #3D4280; } .ds-input:focus-visible { border-color: #F06AA8; box-shadow: 0 0 0 2px rgba(240, 106, 168, 0.15); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Default dark surface container with subtle border and a gentle lift on hover.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\">Card title</h3><p class=\"ds-card-body\">Card description text goes here.</p></article>",
+      "css": ".ds-card { padding: 16px; border: 1px solid #282D5A; border-radius: 16px; background-color: #1E2248; transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); } .ds-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); transform: translateY(-2px); } .ds-card-title { margin: 0 0 8px; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; font-size: 1.125rem; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; } .ds-card-body { margin: 0; color: rgba(255, 255, 255, 0.7); font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 400; line-height: 1.55; }"
+    },
+    {
+      "name": "Badge Primary",
+      "kind": "chip",
+      "refersTo": "badge-primary",
+      "description": "Status badge using the primary magenta tint for emphasis on dark surfaces.",
+      "html": "<span class=\"ds-badge-primary\">Live</span>",
+      "css": ".ds-badge-primary { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; background-color: rgba(240, 106, 168, 0.15); color: #F06AA8; font-family: 'Inter', system-ui, sans-serif; font-size: 0.625rem; font-weight: 500; line-height: 1.4; letter-spacing: 0.01em; }"
+    },
+    {
+      "name": "Badge Neutral",
+      "kind": "chip",
+      "refersTo": "badge-neutral",
+      "description": "Default status badge on a dark elevated surface.",
+      "html": "<span class=\"ds-badge-neutral\">Draft</span>",
+      "css": ".ds-badge-neutral { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; background-color: #282D5A; color: rgba(255, 255, 255, 0.7); font-family: 'Inter', system-ui, sans-serif; font-size: 0.625rem; font-weight: 500; line-height: 1.4; letter-spacing: 0.01em; }"
+    },
+    {
+      "name": "Dialog",
+      "kind": "custom",
+      "refersTo": "dialog",
+      "description": "Centered modal panel on a dark surface with header, close affordance, and large ambient shadow.",
+      "html": "<div class=\"ds-dialog\"><header class=\"ds-dialog-header\"><h2 class=\"ds-dialog-title\">Confirm action</h2><button class=\"ds-dialog-close\" aria-label=\"Close\">×</button></header><p class=\"ds-dialog-body\">Are you sure you want to continue?</p></div>",
+      "css": ".ds-dialog { width: 100%; max-width: 560px; padding: 24px; border-radius: 16px; background-color: #1E2248; box-shadow: 0 12px 36px rgba(15, 18, 40, 0.18); } .ds-dialog-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; } .ds-dialog-title { margin: 0; color: #FFFFFF; font-family: 'Inter', system-ui, sans-serif; font-size: 1.125rem; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; } .ds-dialog-close { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: none; border-radius: 9999px; background-color: transparent; color: rgba(255, 255, 255, 0.7); font-size: 1.25rem; line-height: 1; cursor: pointer; transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-dialog-close:hover { background-color: #282D5A; } .ds-dialog-close:focus-visible { outline: none; box-shadow: 0 0 0 2px #F06AA8; } .ds-dialog-body { margin: 0; color: rgba(255, 255, 255, 0.7); font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 400; line-height: 1.55; }"
+    },
+    {
+      "name": "Floating Dock Item",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Mobile floating dock item with icon and label. Active state uses magenta tint on dark glass.",
+      "html": "<button class=\"ds-dock-item active\"><svg class=\"ds-dock-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><polyline points=\"9 22 9 12 15 12 15 22\"/></svg><span class=\"ds-dock-label\">Home</span></button>",
+      "css": ".ds-dock-item { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 64px; padding: 8px 12px; border: none; border-radius: 16px; background-color: transparent; color: rgba(255, 255, 255, 0.7); font-family: 'Inter', system-ui, sans-serif; cursor: pointer; transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1); } .ds-dock-item:hover { background-color: #282D5A; color: #FFFFFF; } .ds-dock-item.active { background-color: rgba(240, 106, 168, 0.15); color: #F06AA8; } .ds-dock-item:focus-visible { outline: none; box-shadow: 0 0 0 2px #F06AA8; } .ds-dock-icon { width: 20px; height: 20px; } .ds-dock-label { font-size: 0.625rem; font-weight: 500; line-height: 1.4; letter-spacing: 0.01em; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Vault at Night",
+    "overview": "SwibSwap App is designed to feel like a private, high-end collector's vault viewed after dark: deep surfaces, soft ambient glow, and precise magenta/periwinkle accents that highlight the cards without shouting. The interface is calm, confident, and card-first. Every screen treats the collectible as the hero and the UI as the quiet frame around it.\n\nThis system rejects generic SaaS dashboards and cartoonish gamification. It also rejects the bright, airy marketplace default — the dark surface is intentional, chosen because collectors often browse prices and portfolios in low-light environments and because the magenta glow reads as premium, not playful.",
+    "keyCharacteristics": [
+      "Dark, tinted-neutral surfaces with two disciplined accents.",
+      "Card-first layouts with rounded corners, subtle borders, and ambient glow on hover.",
+      "Fixed rem type scale and a single sans family across the product UI.",
+      "Motion that conveys state, never decorative celebration.",
+      "Responsive shell that shifts from bottom navigation on mobile to a sidebar + top bar on desktop."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Magenta should occupy no more than 10% of any given screen. It is reserved for the highest-value action or the most important status.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dark Surface Rule",
+        "body": "Surfaces stay dark and cool-neutral. Components that need elevation use surface-light or surface-lighter.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Product UI uses one sans family across headings, body, labels, and buttons.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces start flat. Shadows and glow appear as a response to state (hover, focus, elevation, open), never as permanent decoration.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No Ghost Card Rule",
+        "body": "Do not pair a 1px border with a wide soft shadow on the same element for decoration.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the magenta accent to ≤10% of any given screen.",
+      "Do use surface-light for cards and surface-lighter for hover/selected states.",
+      "Do provide visible focus rings on every interactive element.",
+      "Do use JetBrains Mono for prices, card codes, P/L, and percentages.",
+      "Do respect prefers-reduced-motion.",
+      "Do use skeleton screens and empty states instead of blank space.",
+      "Do design every screen to work at 320px mobile width and expand gracefully to 1280px+ desktop."
+    ],
+    "donts": [
+      "Don't use gradient text as a primary heading treatment.",
+      "Don't use glassmorphism as a default card style.",
+      "Don't use side-stripe borders as card accents.",
+      "Don't ship placeholder copy.",
+      "Don't rely on color alone for status.",
+      "Don't use rounded corners larger than 16px on cards, sections, or inputs.",
+      "Don't introduce a light-mode body background."
+    ]
+  }
+}

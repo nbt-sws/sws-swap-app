@@ -1,0 +1,1 @@
+{"action":"evaluate","args":{"code":"(() => { return JSON.stringify({ url: window.location.href, pathname: window.location.pathname, route: document.querySelector(\"h1\")?.textContent?.trim(), rootHtml: document.getElementById(\"root\")?.innerHTML?.substring(0,500) }); })()"},"session":"swap-ui-check"}

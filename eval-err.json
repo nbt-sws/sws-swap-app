@@ -1,0 +1,1 @@
+{"action":"evaluate","args":{"code":"(() => { let logs = []; const orig = console.error; console.error = (...args) => { logs.push(args.map(a => String(a)).join(\" \")); orig.apply(console, args); }; setTimeout(() => { window.__lastErrors = logs; }, 100); return \"ok\"; })()"},"session":"swap-ui-check"}

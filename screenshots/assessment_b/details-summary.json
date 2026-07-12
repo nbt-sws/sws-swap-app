@@ -1,0 +1,32 @@
+[
+  {
+    "name": "home",
+    "route": "/",
+    "count": 33
+  },
+  {
+    "name": "market",
+    "route": "/market/",
+    "count": 25
+  },
+  {
+    "name": "vault",
+    "route": "/vault/",
+    "count": 38
+  },
+  {
+    "name": "seller-store",
+    "route": "/seller/",
+    "count": 18
+  },
+  {
+    "name": "services",
+    "route": "/services",
+    "count": 13
+  },
+  {
+    "name": "profile",
+    "route": "/profile/",
+    "count": 17
+  }
+]

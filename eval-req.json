@@ -1,0 +1,1 @@
+{"action":"evaluate","args":{"code":"localStorage.setItem('sws_access_token', 'mock-dev-token'); 'token set'"},"session":"swap-ui-check"}
