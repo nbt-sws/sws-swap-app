@@ -45,6 +45,7 @@ export function VaultScreen() {
   const [listModalOpen, setListModalOpen] = useState(false);
   const [bulkListModalOpen, setBulkListModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [listTargetItem, setListTargetItem] = useState<VaultItem | null>(null);
 
   const listingsMap = useMemo(() => {
     const map = new Map<string, { listingId: string; price: number }>();
@@ -107,11 +108,22 @@ export function VaultScreen() {
 
   const handleBulkList = useCallback(() => {
     if (selectedItems.length === 1) {
+      setListTargetItem(selectedItems[0]);
       setListModalOpen(true);
     } else if (selectedItems.length > 1) {
       setBulkListModalOpen(true);
     }
-  }, [selectedItems.length]);
+  }, [selectedItems]);
+
+  const handleListItem = useCallback((item: VaultItem) => {
+    setListTargetItem(item);
+    setListModalOpen(true);
+  }, []);
+
+  const closeListModal = useCallback(() => {
+    setListModalOpen(false);
+    setListTargetItem(null);
+  }, []);
 
   const handleBulkDelist = useCallback(() => {
     setConfirmUnlistOpen(true);
@@ -126,7 +138,7 @@ export function VaultScreen() {
     clearSelection();
   }, [selectedItems, listingsMap, delistListing, clearSelection]);
 
-  const selectedItem = selectedItems.length === 1 ? selectedItems[0] : null;
+  const selectedItem = listTargetItem ?? (selectedItems.length === 1 ? selectedItems[0] : null);
 
   return (
     <PageContainer className="py-6">
@@ -282,9 +294,14 @@ export function VaultScreen() {
             <button onClick={() => {
               const visibleIds = filteredCards.map((i) => i.id);
               const allSelected = visibleIds.every((id) => selectedIds.has(id));
-              visibleIds.forEach((id) => toggleSelect(id));
-              if (allSelected) visibleIds.forEach((id) => {
-                if (selectedIds.has(id)) toggleSelect(id);
+              setSelectedIds((prev) => {
+                const next = new Set(prev);
+                if (allSelected) {
+                  visibleIds.forEach((id) => next.delete(id));
+                } else {
+                  visibleIds.forEach((id) => next.add(id));
+                }
+                return next;
               });
             }} className="text-sm text-brand hover:underline">
               Select all visible
@@ -374,6 +391,7 @@ export function VaultScreen() {
                   selected={selectedIds.has(item.id)}
                   selecting={selecting}
                   onToggleSelect={toggleSelect}
+                  onList={handleListItem}
                 />
               ))}
             </div>
@@ -388,6 +406,7 @@ export function VaultScreen() {
                   selected={selectedIds.has(item.id)}
                   selecting={selecting}
                   onToggleSelect={toggleSelect}
+                  onList={handleListItem}
                   isListed={listingsMap.has(item.card.code)}
                 />
               ))}
@@ -403,6 +422,7 @@ export function VaultScreen() {
                   selected={selectedIds.has(item.id)}
                   selecting={selecting}
                   onToggleSelect={toggleSelect}
+                  onList={handleListItem}
                   className="rounded-xl"
                 />
               ))}
@@ -413,7 +433,7 @@ export function VaultScreen() {
       </div>
 
       {/* Modals */}
-      <ListItemModal open={listModalOpen} onClose={() => setListModalOpen(false)} item={selectedItem} />
+      <ListItemModal open={listModalOpen} onClose={closeListModal} item={selectedItem} />
       <BulkListModal open={bulkListModalOpen} onClose={() => setBulkListModalOpen(false)} items={selectedItems} />
       <RegisterItemModal isOpen={registerModalOpen} onClose={() => setRegisterModalOpen(false)} />
 
@@ -439,12 +459,13 @@ export function VaultScreen() {
 /* ─── Vault List Row ─── */
 
 function VaultListRow({
-  item, selected, selecting, onToggleSelect, isListed,
+  item, selected, selecting, onToggleSelect, onList, isListed,
 }: {
   item: VaultItem;
   selected?: boolean;
   selecting?: boolean;
   onToggleSelect?: (id: string) => void;
+  onList?: (item: VaultItem) => void;
   isListed?: boolean;
 }) {
   return (
@@ -479,6 +500,19 @@ function VaultListRow({
         <p className={cn('text-xs font-bold', item.plPercent >= 0 ? 'text-plup' : 'text-pldown')}>
           {formatPriceChange(item.plPercent)}
         </p>
+        {onList && item.status === 'held' && !selecting && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onList(item);
+            }}
+            className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-brand hover:underline"
+          >
+            <Tag className="w-3 h-3" />
+            List
+          </button>
+        )}
       </div>
     </Link>
   );

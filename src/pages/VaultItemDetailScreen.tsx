@@ -1,4 +1,5 @@
 import { Link, useParams, useNavigate } from '@tanstack/react-router';
+import { useAuthStore } from '@/stores/auth';
 import { useState, useCallback } from 'react';
 import {
   useVault, useListingsBySeller, useDelistListing,
@@ -34,7 +35,8 @@ export function VaultItemDetailScreen() {
   const { itemId } = useParams({ from: '/vault/items/$itemId' });
   const navigate = useNavigate();
   const { data: vault, isLoading } = useVault();
-  const { data: listings } = useListingsBySeller('u1');
+  const { user } = useAuthStore();
+  const { data: listings } = useListingsBySeller(user?.id);
   const delistListing = useDelistListing();
   const vaultDelivery = useVaultDelivery();
   const createRedemption = useCreateRedemption();
@@ -301,7 +303,7 @@ export function VaultItemDetailScreen() {
               <Button
                 variant="outline"
                 className="flex-1 border-border h-12"
-                onClick={() => navigate({ to: '/pregrade', search: { category: 'PREGRADE' } })}
+                onClick={() => navigate({ to: '/pregrade', search: { category: 'PREGRADE', cardId: item.id, cardCode: item.card.code, cardName: item.card.nameEn } })}
               >
                 <Award className="w-4 h-4 mr-2" />
                 Grade

@@ -48,6 +48,7 @@ export interface MarketListing {
 
 export interface CreateListingInput {
   card: Card;
+  itemId?: string;
   price: number;
   listingType: 'SALE' | 'TRADE';
   shelf: MarketListing['shelf'];

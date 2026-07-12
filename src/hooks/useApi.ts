@@ -295,10 +295,11 @@ export function useMyListings() {
 
 export function useCreateListing() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   return useMutation({
     mutationFn: (input: CreateListingInput) =>
       listingsApi.create({
-        itemId: input.card.id,
+        itemId: input.itemId ?? input.card.id,
         title: input.card.nameEn,
         description: input.description,
         price: input.price,
@@ -309,6 +310,8 @@ export function useCreateListing() {
       queryClient.invalidateQueries({ queryKey: ['myListings'] });
       queryClient.invalidateQueries({ queryKey: ['market'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listingsBySeller', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['vault'] });
     },
   });
 }

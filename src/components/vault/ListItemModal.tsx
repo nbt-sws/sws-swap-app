@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCreateListing } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,7 +34,7 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
   const createListing = useCreateListing();
   const [price, setPrice] = useState('');
   const [listingType, setListingType] = useState<'SALE' | 'TRADE'>('SALE');
-  const [shelf] = useState(() => (item ? getShelf(item.condition) : 'RAW'));
+  const shelf = useMemo(() => (item ? getShelf(item.condition) : 'RAW'), [item]);
 
   const handleSubmit = () => {
     if (!item) return;
@@ -42,6 +42,7 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
     createListing.mutate(
       {
         card: item.card,
+        itemId: item.id,
         price: priceNum,
         listingType,
         shelf,

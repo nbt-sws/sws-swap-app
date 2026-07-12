@@ -77,12 +77,22 @@ export function KycScreen() {
     }
     try {
       const imageBase64 = await readFileAsBase64(idImage);
+      // Backend expects s3Key references, but no upload/presigned-URL endpoint
+      // is exposed in the gateway yet. In real mode this will fail until the
+      // backend can accept or generate S3 keys.
       await submitKyc.mutateAsync({
         documents: [{ type: 'ID_CARD', s3Key: imageBase64 }],
       });
       toast.success('KYC verification submitted');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to submit KYC');
+      const isRealMode = import.meta.env.VITE_USE_MOCK_API !== 'true';
+      const message =
+        isRealMode && !(err instanceof Error && err.message.toLowerCase().includes('mock'))
+          ? 'KYC document upload is not fully wired yet: the backend expects an S3 key but no upload endpoint is exposed.'
+          : err instanceof Error
+          ? err.message
+          : 'Failed to submit KYC';
+      toast.error(message);
     }
   };
 

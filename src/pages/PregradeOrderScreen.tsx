@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useVault } from '@/hooks/useApi';
 import { useServiceProviders, useCreateServiceOrder } from '@/hooks/useServices';
@@ -27,7 +27,7 @@ const COLOR_RING: Record<ServiceProvider['color'], string> = {
 
 export function PregradeOrderScreen() {
   const navigate = useNavigate();
-  const search = useSearch({ from: '/pregrade' }) as { category?: ServiceCategory; provider?: string; package?: string };
+  const search = useSearch({ from: '/pregrade' }) as { category?: ServiceCategory; provider?: string; package?: string; cardId?: string; cardCode?: string; cardName?: string };
   const category: ServiceCategory = search.category ?? 'PREGRADE';
   const preferredProviderId = search.provider;
   const preferredPackageId = search.package;
@@ -67,6 +67,12 @@ export function PregradeOrderScreen() {
   const [selectedCourier, setSelectedCourier] = useState('Kerry');
 
   const heldCards = vault?.filter((v) => v.status === 'held' && v.condition === 'Raw') || [];
+
+  useEffect(() => {
+    if (search.cardId && heldCards.some((c) => c.id === search.cardId)) {
+      setSelectedCards(new Set([search.cardId]));
+    }
+  }, [search.cardId, heldCards]);
   const cardCount = selectedCards.size;
   const pricePerCard = selectedPackage?.pricePerCard ?? provider?.pricePerCard ?? 0;
   const currency = selectedPackage?.currency ?? provider?.currency ?? 'THB';

@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Tag } from 'lucide-react';
 import { cn, getCardImageUrl, formatPriceChange } from '@/lib/utils';
 import type { VaultItem } from '@/types';
 
@@ -11,10 +11,11 @@ interface VaultCardProps {
   selected?: boolean;
   selecting?: boolean;
   onToggleSelect?: (itemId: string) => void;
+  onList?: (item: VaultItem) => void;
   className?: string;
 }
 
-export function VaultCard({ item, selected, selecting, onToggleSelect, className }: VaultCardProps) {
+export function VaultCard({ item, selected, selecting, onToggleSelect, onList, className }: VaultCardProps) {
   const statusLabel =
     item.status === 'held'
       ? 'In Vault'
@@ -94,6 +95,20 @@ export function VaultCard({ item, selected, selecting, onToggleSelect, className
             </div>
           )}
         </div>
+
+        {onList && item.status === 'held' && !selecting && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onList(item);
+            }}
+            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-brand/10 text-brand text-xs font-medium hover:bg-brand/20 transition"
+          >
+            <Tag className="w-3 h-3" />
+            List for sale
+          </button>
+        )}
       </div>
     </div>
   );

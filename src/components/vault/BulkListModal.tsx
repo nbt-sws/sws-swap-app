@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useCreateListing } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,31 +29,36 @@ export function BulkListModal({ open, onClose, items }: BulkListModalProps) {
   const [price, setPrice] = useState('');
   const [listingType, setListingType] = useState<'SALE' | 'TRADE'>('SALE');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const priceNum = listingType === 'SALE' ? Number(price) || 0 : 0;
-    let completed = 0;
-    const total = items.length;
-
-    items.forEach((item) => {
-      createListing.mutate(
-        {
+    const results = await Promise.allSettled(
+      items.map((item) =>
+        createListing.mutateAsync({
           card: item.card,
+          itemId: item.id,
           price: priceNum,
           listingType,
           shelf: getShelf(item.condition),
-        },
-        {
-          onSuccess: () => {
-            completed++;
-            if (completed === total) {
-              setPrice('');
-              setListingType('SALE');
-              onClose();
-            }
-          },
-        }
-      );
-    });
+        })
+      )
+    );
+
+    const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+
+    if (failed === 0) {
+      toast.success(`Listed ${succeeded} item(s)`);
+      setPrice('');
+      setListingType('SALE');
+      onClose();
+    } else if (succeeded === 0) {
+      toast.error('Failed to list items. Please try again.');
+    } else {
+      toast.warning(`Listed ${succeeded} item(s), ${failed} failed`);
+      setPrice('');
+      setListingType('SALE');
+      onClose();
+    }
   };
 
   if (items.length === 0) return null;

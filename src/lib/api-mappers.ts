@@ -210,7 +210,13 @@ export function mapApiCollectorProfileToStore(apiProfile: ApiCollectorProfile): 
     avatarUrl: apiProfile.avatarUrl,
     bannerUrl: apiProfile.bannerUrl,
     location: apiProfile.address
-      ? [apiProfile.address.city, apiProfile.address.country].filter(Boolean).join(', ')
+      ? [
+          apiProfile.address.street,
+          [apiProfile.address.city, apiProfile.address.state].filter(Boolean).join(', '),
+          [apiProfile.address.country, apiProfile.address.postalCode].filter(Boolean).join(' '),
+        ]
+          .filter(Boolean)
+          .join(', ')
       : undefined,
     rating: 0,
     listings: apiProfile.stats?.listedItems ?? 0,
