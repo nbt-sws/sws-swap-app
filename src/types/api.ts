@@ -1,7 +1,7 @@
 /**
- * API-aligned types from SWS Architecture API_SPEC.md.
- * These mirror the backend contract. UI/presentation types live in
- * src/types/index.ts and are mapped from these at the hook layer.
+ * API-aligned types from SWS real backend contract.
+ * These mirror the backend contract exposed through the API gateway at /api/v1.
+ * UI/presentation types live in src/types/index.ts and are mapped from these at the hook layer.
  */
 
 export type ApiUserTier = 'REGULAR' | 'MEMBER' | 'ADMIN';
@@ -10,7 +10,7 @@ export type ApiKycStatus = 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
 export interface ApiUser {
   id: string;
   email: string;
-  fullName: string;
+  name: string;
   tier: ApiUserTier;
   kycStatus: ApiKycStatus;
   avatarUrl?: string;
@@ -23,8 +23,8 @@ export interface ApiUser {
     line: boolean;
     sms: boolean;
   };
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type ApiItemStatus =
@@ -35,43 +35,70 @@ export type ApiItemStatus =
   | 'VAULT_HELD'
   | 'REDEEMING'
   | 'REDEEMED'
-  | 'SUSPENDED'
-  | 'LISTED'
-  | 'SOLD';
+  | 'SUSPENDED';
 
 export interface ApiItem {
   id: string;
   name: string;
   sku: string;
-  category: string;
-  subCategory?: string;
-  itemFormat?: string;
-  condition?: string;
-  description?: string;
-  imageUrl?: string;
   ownerId: string;
   holderId: string;
   status: ApiItemStatus;
+  description?: string;
+  category?: string;
+  subCategory?: string;
+  itemFormat?: string;
+  condition?: string;
+  imageUrl?: string;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
 
-export type ApiListingStatus = 'ACTIVE' | 'SOLD' | 'CANCELLED';
+export type ApiListingStatus = 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'SOLD' | 'DELISTED';
 
 export interface ApiListing {
-  id: string;
+  listingId: string;
   itemId: string;
   sellerId: string;
+  title: string;
+  description?: string;
   price: number;
   currency: string;
-  condition: string;
-  images: string[];
   status: ApiListingStatus;
+  category?: string;
+  subCategory?: string;
+  itemFormat?: string;
+  condition?: string;
+  imageUrl?: string;
+  sellerDisplayName?: string;
+  sellerAvatarUrl?: string;
+  sellerBio?: string;
+  sellerTier?: string;
+  ownerId?: string;
+  holderId?: string;
   createdAt: string;
 }
 
-export type ApiOrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-export type ApiDeliveryType = 'SHIP' | 'VAULT_STORE';
+export type ApiOrderStatus =
+  | 'CREATED'
+  | 'ITEM_LOCKED'
+  | 'PAYMENT_PENDING'
+  | 'PAYMENT_CONFIRMED'
+  | 'SHIPPING_ARRANGED'
+  | 'COMPLETED'
+  | 'CANCELLED';
+
+export type ApiDeliveryPreference = 'SHIP' | 'VAULT_STORE';
+
+export interface ApiShippingAddress {
+  name: string;
+  address: string;
+  province: string;
+  postalCode: string;
+  phone: string;
+  district?: string;
+}
 
 export interface ApiOrder {
   id: string;
@@ -80,36 +107,41 @@ export interface ApiOrder {
   listingId: string;
   itemId: string;
   price: number;
-  deliveryType: ApiDeliveryType;
   status: ApiOrderStatus;
+  deliveryPreference: ApiDeliveryPreference;
   shippingAddress?: ApiShippingAddress;
+  lockedAt?: string;
+  paidAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  cancelReason?: string;
   createdAt: string;
+  updatedAt: string;
 }
+
+export type ApiOfferStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED' | 'CANCELLED';
 
 export interface ApiOffer {
   id: string;
   listingId: string;
+  buyerId: string;
+  sellerId: string;
   offerPrice: number;
-  fromUserId: string;
-  toUserId: string;
-  status: 'PENDING' | 'ACCEPTED' | 'DECLINED';
+  status: ApiOfferStatus;
+  expiresAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface ApiWishlistItem {
   id: string;
-  userId: string;
   listingId: string;
+  buyerId: string;
+  sellerId: string;
+  offerPrice?: number;
+  status?: string;
   createdAt: string;
-}
-
-export interface ApiShippingAddress {
-  name: string;
-  phone: string;
-  address: string;
-  district?: string;
-  province: string;
-  postalCode: string;
+  updatedAt: string;
 }
 
 export interface ApiRedemption {
@@ -136,24 +168,33 @@ export interface ApiVaultDelivery {
 export interface ApiNotification {
   id: string;
   userId: string;
-  type: string;
   title: string;
   body: string;
-  read: boolean;
+  channel: string;
+  eventType: string;
+  readAt?: string;
   createdAt: string;
 }
 
 export interface ApiMarketStats {
+  sku: string;
   lastSold?: number;
-  average?: number;
-  min?: number;
-  max?: number;
+  avgPrice?: number;
+  minPrice?: number;
+  maxPrice?: number;
   count?: number;
+  updatedAt?: string;
 }
 
 export interface ApiMarketHistoryPoint {
-  date: string;
+  time: string;
   price: number;
+}
+
+export interface ApiMarketHistoryResponse {
+  sku: string;
+  period?: string;
+  trades: ApiMarketHistoryPoint[];
 }
 
 export interface ApiAuthResponse {
@@ -163,16 +204,34 @@ export interface ApiAuthResponse {
 
 export interface ApiCollectorProfile {
   userId: string;
-  displayName?: string;
+  displayName: string;
   bio?: string;
-  avatarUrl?: string;
   bannerUrl?: string;
-  location?: string;
-  rating?: number;
-  totalSales?: number;
-  totalListings?: number;
-  followerCount?: number;
-  socialLinks?: { platform: string; url: string }[];
+  avatarUrl?: string;
+  accentColor?: string;
+  isPublic: boolean;
+  socialLinks?: {
+    instagram?: string;
+    twitter?: string;
+    website?: string;
+  };
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+  };
+  memberSince: string;
+  tier: ApiUserTier;
+  kycStatus: string;
+  stats: {
+    totalItems: number;
+    listedItems: number;
+    soldItems: number;
+    followers: number;
+    following: number;
+  };
 }
 
 export type ApiServiceCategory = 'PREGRADE' | 'GRADE';

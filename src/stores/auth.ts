@@ -44,6 +44,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem('sws_refresh_token');
         localStorage.removeItem(DEV_USER_KEY);
+        window.location.href = '/login';
       }
       set({ user: null, accessToken: null, isAuthenticated: false });
     },
@@ -55,12 +56,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
         return;
       }
       try {
-        const res = await userApi.me();
-        const apiUser = res.user;
+        const apiUser = await userApi.me();
         const user: AuthUser = {
           id: apiUser.id,
           email: apiUser.email,
-          fullName: apiUser.fullName || apiUser.email,
+          fullName: apiUser.name || apiUser.email,
           avatarUrl: apiUser.avatarUrl,
           tier: apiUser.tier,
           kycStatus: apiUser.kycStatus,

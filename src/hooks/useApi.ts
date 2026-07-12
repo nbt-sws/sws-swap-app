@@ -10,6 +10,7 @@ import * as mockApi from '@/services/mockApi';
 import type {
   CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview,
 } from '@/types';
+import type { ApiCollectorProfile } from '@/types/api';
 import {
   mapApiUserToAuthUser,
   mapApiItemToVaultItem,
@@ -29,26 +30,20 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 
 export async function withFallback<T>(apiCall: () => Promise<T>, fallback: () => Promise<T>): Promise<T> {
   if (USE_MOCK) return fallback();
-  try {
-    return await apiCall();
-  } catch {
-    // In dev/demo mode, silently fall back to mock data so the UI stays usable
-    // when the backend is not running.
-    return fallback();
-  }
+  return apiCall();
 }
 
 // ─── Vault hooks ────────────────────────────────────────────────────
 
 export function useVault() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   return useQuery({
     queryKey: ['vault'],
     queryFn: async () => {
       const items = await withFallback(
         async () => {
-          const userRes = await userApi.me();
-          const res = await vaultApi.getItems({ ownerId: userRes.user.id });
+          if (!user?.id) return [];
+          const res = await vaultApi.getItems({ holderId: user.id });
           return res.items.map(mapApiItemToVaultItem);
         },
         () => mockApi.fetchVault()
@@ -68,7 +63,7 @@ export function useVaultItem(itemId: string) {
       const item = await withFallback(
         async () => {
           const res = await vaultApi.getItemById(itemId);
-          return mapApiItemToVaultItem(res.item);
+          return mapApiItemToVaultItem(res);
         },
         async () => {
           const items = await mockApi.fetchVault();
@@ -99,7 +94,7 @@ export function useMarketListings(shelf?: string) {
       const listings = await withFallback(
         async () => {
           const res = await listingsApi.getAll(shelf ? { q: shelf } : undefined);
-          return res.listings.map(mapApiListingToMarketListing);
+          return res.results.map(mapApiListingToMarketListing);
         },
         () => mockApi.fetchMarketListings(shelf)
       );
@@ -116,7 +111,7 @@ export function useListings(params?: { q?: string; page?: number; limit?: number
       const listings = await withFallback(
         async () => {
           const res = await listingsApi.getAll(params);
-          return res.listings.map(mapApiListingToMarketListing);
+          return res.results.map(mapApiListingToMarketListing);
         },
         () => mockApi.fetchMarketListings(params?.q)
       );
@@ -133,7 +128,7 @@ export function useListing(listingId: string) {
       const listing = await withFallback(
         async () => {
           const res = await listingsApi.getById(listingId);
-          return mapApiListingToMarketListing(res.listing);
+          return mapApiListingToMarketListing(res);
         },
         () => mockApi.fetchListingById(listingId)
       );
@@ -198,7 +193,7 @@ export function useUser() {
       const user = await withFallback(
         async () => {
           const res = await userApi.me();
-          return mapApiUserToAuthUser(res.user);
+          return mapApiUserToAuthUser(res);
         },
         () => mockApi.fetchUser()
       );
@@ -210,14 +205,26 @@ export function useUser() {
 }
 
 export function useAuthLogin() {
+  const setTokens = useAuthStore((s) => s.setTokens);
+  const setUser = useAuthStore((s) => s.setUser);
   return useMutation({
     mutationFn: authApi.login,
+    onSuccess: (res) => {
+      setTokens(res.token);
+      setUser(mapApiUserToAuthUser(res.user));
+    },
   });
 }
 
 export function useAuthRegister() {
+  const setTokens = useAuthStore((s) => s.setTokens);
+  const setUser = useAuthStore((s) => s.setUser);
   return useMutation({
     mutationFn: authApi.register,
+    onSuccess: (res) => {
+      setTokens(res.token);
+      setUser(mapApiUserToAuthUser(res.user));
+    },
   });
 }
 
@@ -234,9 +241,9 @@ export function useWishlist() {
             wishlistApi.getAll(),
             listingsApi.getAll({ limit: 1000 }),
           ]);
-          const listings = listingsRes.listings;
-          return wishlistRes.wishlist.map((i) =>
-            mapApiWishlistItemToWishlistItem(i, listings.find((l) => l.id === i.listingId))
+          const listings = listingsRes.results;
+          return wishlistRes.items.map((i) =>
+            mapApiWishlistItemToWishlistItem(i, listings.find((l) => l.listingId === i.listingId))
           );
         },
         () => mockApi.fetchWishlist()
@@ -267,15 +274,15 @@ export function useRemoveFromWishlist() {
 // ─── Seller / Listing hooks ─────────────────────────────────────────
 
 export function useMyListings() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   return useQuery({
     queryKey: ['myListings'],
     queryFn: async () => {
       const listings = await withFallback(
         async () => {
-          const userRes = await userApi.me();
-          const res = await listingsApi.getBySeller(userRes.user.id);
-          return res.listings.map(mapApiListingToMarketListing);
+          if (!user?.id) return [];
+          const res = await listingsApi.getBySeller(user.id);
+          return res.results.map(mapApiListingToMarketListing);
         },
         () => mockApi.fetchMyListings()
       );
@@ -292,12 +299,11 @@ export function useCreateListing() {
     mutationFn: (input: CreateListingInput) =>
       listingsApi.create({
         itemId: input.card.id,
-        price: input.price,
+        title: input.card.nameEn,
         description: input.description,
-        condition: input.card.condition,
-        images: input.card.imageUrl ? [input.card.imageUrl] : undefined,
-        listingType: input.listingType,
-        shelf: input.shelf,
+        price: input.price,
+        category: input.shelf,
+        itemFormat: input.listingType,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myListings'] });
@@ -323,13 +329,16 @@ export function useUpdateListingStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ listingId, status }: { listingId: string; status: 'active' | 'paused' | 'sold' }) => {
-      const apiStatus: import('@/types/api').ApiListingStatus =
-        status === 'sold' ? 'SOLD' : 'ACTIVE';
       if (USE_MOCK) {
         await mockApi.updateListingStatus(listingId, status);
         return;
       }
-      await listingsApi.updateStatus(listingId, { status: apiStatus });
+      if (status === 'active') {
+        await listingsApi.activate(listingId);
+      } else {
+        // paused / sold maps to delist on the real backend
+        await listingsApi.delist(listingId);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myListings'] });
@@ -368,7 +377,7 @@ export function useOrder(orderId: string) {
       const order = await withFallback(
         async () => {
           const res = await ordersApi.getById(orderId);
-          return mapApiOrderToOrder(res.order);
+          return mapApiOrderToOrder(res);
         },
         async () => mockApi.fetchOrderById(orderId)
       );
@@ -382,16 +391,25 @@ export function useOrder(orderId: string) {
 export function useCreateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { listingId: string; deliveryType: 'SHIP' | 'VAULT_STORE'; shippingAddress?: ShippingAddress }) => {
+    mutationFn: async (data: { listingId: string; deliveryType: 'SHIP' | 'VAULT_STORE'; shippingAddress?: ShippingAddress; itemId?: string; sellerId?: string; price?: number }) => {
       if (USE_MOCK) {
         const order = await mockApi.createOrder({
           listingId: data.listingId,
           deliveryPreference: data.deliveryType,
           shippingAddress: data.shippingAddress,
         });
-        return { order };
+        return order;
       }
-      return ordersApi.create(data);
+      const created = await ordersApi.create({
+        listingId: data.listingId,
+        itemId: data.itemId,
+        sellerId: data.sellerId,
+        price: data.price,
+        deliveryPreference: data.deliveryType,
+        shippingAddress: data.shippingAddress,
+      });
+      const full = await ordersApi.getById(created.orderId);
+      return mapApiOrderToOrder(full);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),
   });
@@ -412,13 +430,14 @@ export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: import('@/types').Order['status'] }) => {
-      const apiStatus: import('@/types/api').ApiOrder['status'] =
-        status === 'PENDING_PAYMENT' ? 'PENDING' : status === 'COMPLETED' ? 'DELIVERED' : status;
       if (USE_MOCK) {
         await mockApi.updateOrderStatus(orderId, status);
         return;
       }
-      await ordersApi.updateStatus(orderId, { status: apiStatus });
+      // Real backend only exposes cancel for buyer-facing status transitions.
+      if (status === 'CANCELLED') {
+        await ordersApi.cancel(orderId);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -478,7 +497,18 @@ export function useOffers() {
 export function useCreateOffer() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: offersApi.create,
+    mutationFn: async (data: { listingId: string; sellerId?: string; offerPrice: number }) => {
+      let sellerId = data.sellerId;
+      if (!sellerId && !USE_MOCK) {
+        const listing = await listingsApi.getById(data.listingId);
+        sellerId = listing.sellerId;
+      }
+      return offersApi.create({
+        listingId: data.listingId,
+        sellerId: sellerId ?? '',
+        offerPrice: data.offerPrice,
+      });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offers'] }),
   });
 }
@@ -495,8 +525,14 @@ export function useRespondOffer() {
 export function useCreateTradeOffer() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { listingId: string; tradeCards: TradeCard[] }) =>
-      offersApi.create({ listingId: payload.listingId, offerPrice: 0 }),
+    mutationFn: async (payload: { listingId: string; sellerId?: string; tradeCards: TradeCard[] }) => {
+      let sellerId = payload.sellerId;
+      if (!sellerId && !USE_MOCK) {
+        const listing = await listingsApi.getById(payload.listingId);
+        sellerId = listing.sellerId;
+      }
+      return offersApi.create({ listingId: payload.listingId, sellerId: sellerId ?? '', offerPrice: 0 });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offers'] }),
   });
 }
@@ -507,7 +543,7 @@ export function useMarketHistory(cardCode: string, range: string = '30d') {
   return useQuery({
     queryKey: ['marketHistory', cardCode, range],
     queryFn: () => withFallback(
-      () => marketApi.getHistory(cardCode, range).then((r) => r.data),
+      () => marketApi.getHistory(cardCode, range).then((r) => r.trades.map((t) => ({ date: t.time, price: t.price }))),
       () => mockApi.fetchMarketHistory(cardCode, range).then((r) => r.data)
     ),
     staleTime: 1000 * 60 * 5,
@@ -519,7 +555,13 @@ export function useMarketStats(cardCode: string) {
   return useQuery({
     queryKey: ['marketStats', cardCode],
     queryFn: () => withFallback(
-      () => marketApi.getStats(cardCode),
+      () => marketApi.getStats(cardCode).then((r) => ({
+        lastSold: r.lastSold,
+        average: r.avgPrice,
+        min: r.minPrice,
+        max: r.maxPrice,
+        count: r.count,
+      })),
       () => mockApi.fetchMarketStats(cardCode)
     ),
     staleTime: 1000 * 60 * 5,
@@ -563,7 +605,7 @@ export function useVaultDelivery() {
         return mockApi.createVaultDelivery(itemId, shippingAddress ?? { name: '', address: '', province: '', postalCode: '', phone: '' });
       }
       const res = await vaultApi.createVaultDelivery(itemId, { shippingAddress: shippingAddress ?? { name: '', address: '', province: '', postalCode: '', phone: '' } });
-      return res.delivery;
+      return res;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vault'] });
@@ -580,7 +622,7 @@ export function useCreateRedemption() {
         return mockApi.createRedemption(itemId, shippingAddress);
       }
       const res = await vaultApi.createRedemption(itemId, { shippingAddress });
-      return res.redemption;
+      return res;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vault'] });
@@ -663,7 +705,7 @@ export function useStoreProfile(userId: string) {
       const profile = await withFallback(
         async () => {
           const res = await collectorApi.getProfile(userId);
-          return mapApiCollectorProfileToStore(res.profile);
+          return mapApiCollectorProfileToStore(res);
         },
         async () => mockApi.fetchStoreProfile(userId)
       );
@@ -679,8 +721,17 @@ export function useUpdateStoreProfile() {
   return useMutation<StoreProfile, Error, { userId: string; data: Partial<StoreProfile> }>({
     mutationFn: ({ userId, data }) => withFallback(
       async () => {
-        const res = await collectorApi.updateProfile(data);
-        return mapApiCollectorProfileToStore(res.profile);
+        const profileUpdate: Partial<ApiCollectorProfile> = {
+          displayName: data.displayName,
+          bio: data.bio,
+          avatarUrl: data.avatarUrl,
+          bannerUrl: data.bannerUrl,
+          socialLinks: data.socialLinks
+            ? Object.fromEntries(data.socialLinks.map((l) => [l.platform, l.url]))
+            : undefined,
+        };
+        const res = await collectorApi.updateProfile(profileUpdate);
+        return mapApiCollectorProfileToStore(res);
       },
       async () => mockApi.updateStoreProfile(userId, data)
     ),
@@ -860,7 +911,7 @@ export function useListingsBySeller(sellerId?: string) {
       const listings = await withFallback(
         async () => {
           const res = await listingsApi.getBySeller(sellerId);
-          return res.listings.map(mapApiListingToMarketListing);
+          return res.results.map(mapApiListingToMarketListing);
         },
         () => mockApi.fetchListingsBySeller(sellerId)
       );
@@ -924,7 +975,7 @@ export function useTrendingListings() {
       const listings = await withFallback(
         async () => {
           const res = await listingsApi.getAll({ sort: 'price_desc', limit: 8 });
-          return res.listings.map(mapApiListingToMarketListing);
+          return res.results.map(mapApiListingToMarketListing);
         },
         () => mockApi.fetchMarketListings()
       );

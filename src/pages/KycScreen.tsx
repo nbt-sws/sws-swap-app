@@ -78,9 +78,7 @@ export function KycScreen() {
     try {
       const imageBase64 = await readFileAsBase64(idImage);
       await submitKyc.mutateAsync({
-        fullName: fullName.trim(),
-        idNumber: idNumber.trim(),
-        idImage: imageBase64,
+        documents: [{ type: 'ID_CARD', s3Key: imageBase64 }],
       });
       toast.success('KYC verification submitted');
     } catch (err) {

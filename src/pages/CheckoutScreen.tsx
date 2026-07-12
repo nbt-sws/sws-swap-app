@@ -115,7 +115,7 @@ export function CheckoutScreen() {
       },
       {
         onSuccess: (data) => {
-          navigate({ to: '/orders/$orderId', params: { orderId: data.order.id } });
+          navigate({ to: '/orders/$orderId', params: { orderId: data.id } });
         },
       }
     );

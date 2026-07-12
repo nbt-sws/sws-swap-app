@@ -16,9 +16,7 @@ import type {
   ApiRedemption,
   ApiVaultDelivery,
 } from '@/types/api';
-import type {
-  AuthUser,
-} from '@/types/auth';
+import type { AuthUser } from '@/types/auth';
 import type {
   Notification,
   Redemption,
@@ -36,11 +34,14 @@ export function mapApiUserToAuthUser(apiUser: ApiUser): AuthUser {
   return {
     id: apiUser.id,
     email: apiUser.email,
-    fullName: apiUser.fullName,
+    fullName: apiUser.name,
     avatarUrl: apiUser.avatarUrl,
     tier: apiUser.tier,
     kycStatus: apiUser.kycStatus,
-    currency: 'THB',
+    currency: apiUser.currency || 'THB',
+    preferredGrader: apiUser.preferredGrader,
+    preferredPreGrader: apiUser.preferredPreGrader,
+    notifications: apiUser.notifications,
     createdAt: apiUser.createdAt,
     updatedAt: apiUser.updatedAt,
   };
@@ -62,7 +63,7 @@ function placeholderCard(overrides: Partial<Card> = {}): Card {
 }
 
 export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
-  const inVault = ['VAULT_HELD', 'LISTED', 'AVAILABLE', 'LOCKED'].includes(apiItem.status);
+  const inVault = ['VAULT_HELD', 'AVAILABLE', 'LOCKED'].includes(apiItem.status);
   return {
     id: apiItem.id,
     card: placeholderCard({
@@ -76,9 +77,9 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
     currentPrice: 0,
     currency: 'THB',
     dateAcquired: apiItem.createdAt,
-    source: apiItem.category,
+    source: apiItem.category ?? '',
     condition: apiItem.condition ?? 'Raw',
-    status: apiItem.status === 'SOLD' ? 'sold' : inVault ? 'held' : 'held',
+    status: apiItem.status === 'DELIVERED' || apiItem.status === 'REDEEMED' ? 'sold' : inVault ? 'held' : 'held',
     plAmount: 0,
     plPercent: 0,
   };
@@ -86,12 +87,13 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
 
 export function mapApiListingToMarketListing(apiListing: ApiListing): MarketListing {
   return {
-    id: apiListing.id,
+    id: apiListing.listingId,
     card: placeholderCard({
       id: apiListing.itemId,
-      nameEn: `Item ${apiListing.itemId.slice(0, 6)}`,
-      imageUrl: apiListing.images[0],
-      condition: apiListing.condition as Card['condition'],
+      code: apiListing.itemId,
+      nameEn: apiListing.title,
+      imageUrl: apiListing.imageUrl,
+      condition: (apiListing.condition ?? 'Raw') as Card['condition'],
     }),
     price: apiListing.price,
     currency: apiListing.currency,
@@ -99,7 +101,7 @@ export function mapApiListingToMarketListing(apiListing: ApiListing): MarketList
     shelf: 'RAW',
     seller: {
       id: apiListing.sellerId,
-      name: `Seller ${apiListing.sellerId.slice(0, 6)}`,
+      name: apiListing.sellerDisplayName || `Seller ${apiListing.sellerId.slice(0, 6)}`,
       rating: 0,
     },
     vaultVerified: false,
@@ -112,14 +114,16 @@ export function mapApiListingToMarketListing(apiListing: ApiListing): MarketList
 
 export function mapApiOrderToOrder(apiOrder: ApiOrder): Order {
   const statusMap: Record<ApiOrder['status'], Order['status']> = {
-    PENDING: 'PENDING_PAYMENT',
-    PAID: 'PAID',
-    SHIPPED: 'SHIPPED',
-    DELIVERED: 'COMPLETED',
+    CREATED: 'PENDING_PAYMENT',
+    ITEM_LOCKED: 'PENDING_PAYMENT',
+    PAYMENT_PENDING: 'PENDING_PAYMENT',
+    PAYMENT_CONFIRMED: 'PAID',
+    SHIPPING_ARRANGED: 'SHIPPED',
+    COMPLETED: 'COMPLETED',
     CANCELLED: 'CANCELLED',
   };
 
-  const shipping = apiOrder.deliveryType === 'SHIP' ? 120 : 0;
+  const shipping = apiOrder.deliveryPreference === 'SHIP' ? 120 : 0;
   const fee = Math.round(apiOrder.price * 0.05);
 
   return {
@@ -127,13 +131,12 @@ export function mapApiOrderToOrder(apiOrder: ApiOrder): Order {
     buyerId: apiOrder.buyerId,
     sellerId: apiOrder.sellerId,
     listing: mapApiListingToMarketListing({
-      id: apiOrder.listingId,
+      listingId: apiOrder.listingId,
       itemId: apiOrder.itemId,
       sellerId: apiOrder.sellerId,
+      title: 'Unknown item',
       price: apiOrder.price,
       currency: 'THB',
-      condition: '',
-      images: [],
       status: 'ACTIVE',
       createdAt: apiOrder.createdAt,
     }),
@@ -142,25 +145,24 @@ export function mapApiOrderToOrder(apiOrder: ApiOrder): Order {
     shipping,
     total: apiOrder.price + fee + shipping,
     status: statusMap[apiOrder.status],
-    deliveryPreference: apiOrder.deliveryType,
+    deliveryPreference: apiOrder.deliveryPreference,
     shippingAddress: apiOrder.shippingAddress
       ? `${apiOrder.shippingAddress.name}, ${apiOrder.shippingAddress.address}${apiOrder.shippingAddress.district ? `, ${apiOrder.shippingAddress.district}` : ''}, ${apiOrder.shippingAddress.province} ${apiOrder.shippingAddress.postalCode} — ${apiOrder.shippingAddress.phone}`
       : undefined,
     createdAt: apiOrder.createdAt,
-    updatedAt: apiOrder.createdAt,
+    updatedAt: apiOrder.updatedAt,
   };
 }
 
 export function mapApiOfferToOffer(apiOffer: ApiOffer, currentUserId?: string): Offer {
-  const isIncoming = currentUserId ? apiOffer.toUserId === currentUserId : true;
+  const isIncoming = currentUserId ? apiOffer.sellerId === currentUserId : true;
   const listing: MarketListing = mapApiListingToMarketListing({
-    id: apiOffer.listingId,
+    listingId: apiOffer.listingId,
     itemId: '',
-    sellerId: isIncoming ? apiOffer.fromUserId : apiOffer.toUserId,
+    sellerId: apiOffer.sellerId,
+    title: 'Unknown item',
     price: apiOffer.offerPrice,
     currency: 'THB',
-    condition: '',
-    images: [],
     status: 'ACTIVE',
     createdAt: apiOffer.createdAt,
   });
@@ -169,12 +171,14 @@ export function mapApiOfferToOffer(apiOffer: ApiOffer, currentUserId?: string): 
     id: apiOffer.id,
     listing,
     offerPrice: apiOffer.offerPrice,
-    status: apiOffer.status,
+    status: apiOffer.status === 'CANCELLED' || apiOffer.status === 'EXPIRED'
+      ? 'DECLINED'
+      : (apiOffer.status as Offer['status']),
     direction: isIncoming ? 'INCOMING' : 'OUTGOING',
-    fromUser: { id: apiOffer.fromUserId, name: `User ${apiOffer.fromUserId.slice(0, 6)}` },
-    toUser: { id: apiOffer.toUserId, name: `User ${apiOffer.toUserId.slice(0, 6)}` },
+    fromUser: { id: apiOffer.buyerId, name: `User ${apiOffer.buyerId.slice(0, 6)}` },
+    toUser: { id: apiOffer.sellerId, name: `User ${apiOffer.sellerId.slice(0, 6)}` },
     createdAt: apiOffer.createdAt,
-    expiresAt: apiOffer.createdAt,
+    expiresAt: apiOffer.expiresAt,
   };
 }
 
@@ -185,9 +189,10 @@ export function mapApiWishlistItemToWishlistItem(
   return {
     id: apiItem.id,
     listingId: apiItem.listingId,
-    cardName: listing ? `Item ${listing.itemId.slice(0, 6)}` : `Listing ${apiItem.listingId.slice(0, 6)}`,
+    cardName: listing ? listing.title : `Listing ${apiItem.listingId.slice(0, 6)}`,
     cardCode: listing?.itemId ?? apiItem.listingId,
-    targetPrice: 0,
+    game: 'one-piece',
+    targetPrice: apiItem.offerPrice ?? 0,
     currentPrice: listing?.price ?? 0,
     currency: listing?.currency ?? 'THB',
     alertEnabled: false,
@@ -204,23 +209,30 @@ export function mapApiCollectorProfileToStore(apiProfile: ApiCollectorProfile): 
     bio: apiProfile.bio,
     avatarUrl: apiProfile.avatarUrl,
     bannerUrl: apiProfile.bannerUrl,
-    location: apiProfile.location,
-    rating: apiProfile.rating ?? 0,
-    listings: apiProfile.totalListings ?? 0,
-    sales: apiProfile.totalSales ?? 0,
-    followers: apiProfile.followerCount ?? 0,
-    activeListings: apiProfile.totalListings ?? 0,
-    socialLinks: apiProfile.socialLinks,
+    location: apiProfile.address
+      ? [apiProfile.address.city, apiProfile.address.country].filter(Boolean).join(', ')
+      : undefined,
+    rating: 0,
+    listings: apiProfile.stats?.listedItems ?? 0,
+    sales: apiProfile.stats?.soldItems ?? 0,
+    followers: apiProfile.stats?.followers ?? 0,
+    activeListings: apiProfile.stats?.listedItems ?? 0,
+    socialLinks: apiProfile.socialLinks
+      ? Object.entries(apiProfile.socialLinks)
+          .filter(([, url]) => url)
+          .map(([platform, url]) => ({ platform, url: url as string }))
+      : undefined,
+    createdAt: apiProfile.memberSince,
   };
 }
 
 export function mapApiNotification(apiNotification: ApiNotification): Notification {
   return {
     id: apiNotification.id,
-    type: apiNotification.type,
+    type: apiNotification.eventType,
     title: apiNotification.title,
     body: apiNotification.body,
-    read: apiNotification.read,
+    read: !!apiNotification.readAt,
     createdAt: apiNotification.createdAt,
   };
 }

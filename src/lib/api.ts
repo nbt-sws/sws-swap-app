@@ -16,7 +16,7 @@ import type {
   ApiPartnerApplication,
   ApiRedemption,
   ApiVaultDelivery,
-  ApiMarketHistoryPoint,
+  ApiMarketHistoryResponse,
   ApiMarketStats,
   ApiAuditEntry,
   ApiPlatformStats,
@@ -36,7 +36,6 @@ function getAuthHeaders(): Record<string, string> {
 
 export const api = ky.create({
   prefix: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
   hooks: {
     beforeRequest: [
       ({ request }) => {
@@ -65,7 +64,15 @@ export async function apiGet<T>(path: string, options?: { searchParams?: Record<
 
 export async function apiPost<T>(path: string, options?: { json?: unknown; body?: FormData }): Promise<T> {
   try {
-    const res = await api.post(path, { ...options, headers: getAuthHeaders() });
+    const headers = getAuthHeaders();
+    const opts: { headers: Record<string, string>; json?: unknown; body?: FormData } = { headers };
+    if (options?.body) {
+      opts.body = options.body;
+    } else if (options?.json !== undefined) {
+      opts.json = options.json;
+      opts.headers['Content-Type'] = 'application/json';
+    }
+    const res = await api.post(path, opts);
     return res.json();
   } catch (err) {
     const error = err as { response?: { status: number } };
@@ -79,7 +86,7 @@ export async function apiPost<T>(path: string, options?: { json?: unknown; body?
 
 export async function apiPut<T>(path: string, options?: { json?: unknown }): Promise<T> {
   try {
-    const res = await api.put(path, { ...options, headers: getAuthHeaders() });
+    const res = await api.put(path, { json: options?.json, headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
     return res.json();
   } catch (err) {
     const error = err as { response?: { status: number } };
@@ -107,7 +114,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
 
 export async function apiPatch<T>(path: string, options?: { json?: unknown }): Promise<T> {
   try {
-    const res = await api.patch(path, { ...options, headers: getAuthHeaders() });
+    const res = await api.patch(path, { json: options?.json, headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
     return res.json();
   } catch (err) {
     const error = err as { response?: { status: number } };
@@ -119,18 +126,18 @@ export async function apiPatch<T>(path: string, options?: { json?: unknown }): P
   }
 }
 
-// ─── Domain APIs (aligned with API_SPEC.md) ─────────────────────────
+// ─── Domain APIs (aligned with real backend contract) ─────────────────
 
 export const authApi = {
   login: (data: { email: string; password: string }) =>
     api.post('auth/login', { json: data }).json<ApiAuthResponse>(),
-  register: (data: { fullName: string; email: string; password: string }) =>
-    api.post('auth/register', { json: data }).json<ApiAuthResponse>(),
-  me: () => apiGet<{ user: ApiUser }>('auth/me'),
+  register: (data: { fullName?: string; email: string; password: string }) =>
+    api.post('auth/register', { json: { email: data.email, password: data.password, name: data.fullName } }).json<ApiAuthResponse>(),
+  me: () => apiGet<ApiUser>('auth/me'),
 };
 
 export const userApi = {
-  me: () => apiGet<{ user: ApiUser }>('auth/me'),
+  me: () => apiGet<ApiUser>('auth/me'),
 };
 
 export const listingsApi = {
@@ -142,67 +149,70 @@ export const listingsApi = {
     min_price?: number;
     max_price?: number;
     sellerId?: string;
-  }) => apiGet<{ listings: ApiListing[] }>('listings', { searchParams: params }),
+    status?: string;
+  }) => apiGet<{ results: ApiListing[] }>('listings', { searchParams: params }),
 
-  getById: (id: string) => apiGet<{ listing: ApiListing }>(`listings/${id}`),
+  getById: (id: string) => apiGet<ApiListing>(`listings/${id}`),
 
   getBySeller: (sellerId: string) =>
-    apiGet<{ listings: ApiListing[] }>('listings', { searchParams: { sellerId } }),
+    apiGet<{ results: ApiListing[] }>('listings', { searchParams: { sellerId } }),
 
   create: (data: {
     itemId: string;
-    price: number;
-    currency?: string;
-    condition?: string;
-    images?: string[];
+    title?: string;
     description?: string;
-    listingType?: 'SALE' | 'TRADE';
-    shelf?: string;
-  }) => apiPost<{ listing: ApiListing }>('listings', { json: data }),
+    price: number;
+    category?: string;
+    subCategory?: string;
+    itemFormat?: string;
+  }) => apiPost<{ listingId: string; status: string }>('listings', { json: data }),
 
-  updateStatus: (id: string, data: { status: ApiListingStatus }) =>
-    apiPut<void>(`listings/${id}/status`, { json: data }),
+  activate: (id: string) => apiPost<{ listingId: string; status: string }>(`listings/${id}/activate`),
 
-  delist: (id: string) => apiDelete<void>(`listings/${id}`),
+  delist: (id: string) => apiDelete<{ listingId: string; status: string }>(`listings/${id}`),
 };
 
 export const ordersApi = {
-  getRecent: () => apiGet<{ orders: ApiOrder[] }>('orders/recent'),
-  getAll: () => apiGet<{ orders: ApiOrder[] }>('orders'),
-  getById: (id: string) => apiGet<{ order: ApiOrder }>(`orders/${id}`),
+  getAll: async () => {
+    const res = await apiGet<{ orders: ApiOrder[] } | ApiOrder[]>('orders');
+    return Array.isArray(res) ? { orders: res } : res;
+  },
+  getById: (id: string) => apiGet<ApiOrder>(`orders/${id}`),
   create: (data: {
     listingId: string;
-    deliveryType: ApiOrder['deliveryType'];
+    itemId?: string;
+    sellerId?: string;
+    price?: number;
+    deliveryPreference: ApiOrder['deliveryPreference'];
     shippingAddress?: ApiShippingAddress;
-  }) => apiPost<{ order: ApiOrder }>('orders', { json: data }),
-  updateStatus: (id: string, data: { status: ApiOrder['status'] }) =>
-    apiPut<void>(`orders/${id}/status`, { json: data }),
-  cancel: (id: string) => apiPost<void>(`orders/${id}/cancel`),
+  }) => apiPost<{ orderId: string; status: string }>('orders', { json: data }),
+  cancel: (id: string, data?: { reason?: string }) =>
+    apiPost<{ orderId: string; status: string }>(`orders/${id}/cancel`, { json: data }),
 };
 
 export type ApiListingStatus = ApiListing['status'];
 export type ApiOrderStatus = ApiOrder['status'];
 
 export const wishlistApi = {
-  getAll: () => apiGet<{ wishlist: ApiWishlistItem[] }>('wishlist'),
-  add: (listingId: string) => apiPost<void>(`wishlist/${listingId}`),
-  remove: (listingId: string) => apiDelete<void>(`wishlist/${listingId}`),
+  getAll: () => apiGet<{ items: ApiWishlistItem[] }>('wishlist'),
+  add: (listingId: string) => apiPost<ApiWishlistItem>(`wishlist/${listingId}`),
+  remove: (listingId: string) => apiDelete<{ status: string }>(`wishlist/${listingId}`),
 };
 
 export const notificationsApi = {
   getAll: () => apiGet<{ notifications: ApiNotification[] }>('notifications'),
-  markRead: (id: string) => apiPatch<void>(`notifications/${id}/read`),
+  markRead: (id: string) => apiPatch<{ status: string }>(`notifications/${id}/read`),
 };
 
 export const storesApi = {
-  getAll: (params?: { tier?: string; search?: string; minListings?: string; hasSales?: string }) =>
+  getAll: (params?: { tier?: string; search?: string; page?: number; limit?: number }) =>
     apiGet<{ sellers: ApiCollectorProfile[] }>('collectors', { searchParams: params }),
 };
 
 export const collectorApi = {
-  getProfile: (userId: string) => apiGet<{ profile: ApiCollectorProfile }>(`collectors/${userId}`),
+  getProfile: (userId: string) => apiGet<ApiCollectorProfile>(`collectors/${userId}`),
   updateProfile: (data: Partial<ApiCollectorProfile>) =>
-    apiPut<{ profile: ApiCollectorProfile }>('collectors/me', { json: data }),
+    apiPut<ApiCollectorProfile>('collectors/me', { json: data }),
   uploadAvatar: (formData: FormData) =>
     api.post('collector-profiles/avatar', { body: formData, headers: getAuthHeaders() }).json<{ avatarUrl: string }>(),
   uploadBanner: (formData: FormData) =>
@@ -216,10 +226,8 @@ export const followsApi = {
 };
 
 export const vaultApi = {
-  getItems: (params?: {
-    ownerId?: string;
-    holderId?: string;
-    userId?: string;
+  getItems: (params: {
+    holderId: string;
     status?: string;
     category?: string;
     subCategory?: string;
@@ -228,7 +236,7 @@ export const vaultApi = {
     limit?: number;
   }) => apiGet<{ items: ApiItem[] }>('items', { searchParams: params }),
 
-  getItemById: (id: string) => apiGet<{ item: ApiItem }>(`items/${id}`),
+  getItemById: (id: string) => apiGet<ApiItem>(`items/${id}`),
 
   registerItem: (data: {
     name: string;
@@ -238,18 +246,17 @@ export const vaultApi = {
     itemFormat?: string;
     condition?: string;
     description?: string;
-    imageUrl?: string;
-  }) => apiPost<{ item: ApiItem }>('items', { json: data }),
+  }) => apiPost<ApiItem>('items', { json: data }),
 
   deleteItem: (id: string) => apiDelete<void>(`items/${id}`),
 
   createRedemption: (id: string, data: { shippingAddress: ApiShippingAddress }) =>
-    apiPost<{ redemption: ApiRedemption }>(`items/${id}/redemptions`, { json: data }),
+    apiPost<{ status: string }>(`items/${id}/redemptions`, { json: data }),
 
   getRedemptions: () => apiGet<{ redemptions: ApiRedemption[] }>('redemptions'),
 
   createVaultDelivery: (id: string, data: { shippingAddress: ApiShippingAddress }) =>
-    apiPost<{ delivery: ApiVaultDelivery }>(`items/${id}/vault-deliveries`, { json: data }),
+    apiPost<{ status: string }>(`items/${id}/vault-deliveries`, { json: data }),
 
   getVaultDeliveries: () => apiGet<{ deliveries: ApiVaultDelivery[] }>('vault-deliveries'),
 };
@@ -263,22 +270,24 @@ export const auditApi = {
 
 export const marketApi = {
   getHistory: (sku: string, period?: string) =>
-    apiGet<{ data: ApiMarketHistoryPoint[] }>(`market/${sku}/history`, { searchParams: period ? { period } : undefined }),
+    apiGet<ApiMarketHistoryResponse>(`market/${sku}/history`, { searchParams: period ? { period } : undefined }),
   getStats: (sku: string) => apiGet<ApiMarketStats>(`market/${sku}/stats`),
 };
 
 export const offersApi = {
   getReceived: () => apiGet<{ offers: ApiOffer[] }>('offers/received'),
   getSent: () => apiGet<{ offers: ApiOffer[] }>('offers/sent'),
-  create: (data: { listingId: string; offerPrice: number }) =>
-    apiPost<{ offer: ApiOffer }>('offers', { json: data }),
-  accept: (offerId: string) => apiPost<void>(`offers/${offerId}/accept`),
-  decline: (offerId: string) => apiPost<void>(`offers/${offerId}/decline`),
+  create: (data: { listingId: string; sellerId: string; offerPrice: number }) =>
+    apiPost<ApiOffer>('offers', { json: data }),
+  accept: (offerId: string) => apiPost<ApiOffer>(`offers/${offerId}/accept`),
+  decline: (offerId: string) => apiPost<ApiOffer>(`offers/${offerId}/decline`),
 };
 
 export const kycApi = {
-  getStatus: (userId: string) => apiGet<{ status: ApiUser['kycStatus']; submittedAt?: string }>(`kyc/status/${userId}`),
-  submit: (data: unknown) => apiPost<{ status: ApiUser['kycStatus'] }>('kyc/submit', { json: data }),
+  getStatus: (userId: string) =>
+    apiGet<{ userId: string; status: ApiUser['kycStatus']; submittedAt?: string; reviewedAt?: string }>(`kyc/status/${userId}`),
+  submit: (data: { documents: { type: string; s3Key: string }[] }) =>
+    apiPost<{ kycId: string; status: ApiUser['kycStatus']; message: string }>('kyc/submit', { json: data }),
 };
 
 export const campaignsApi = {
@@ -308,11 +317,11 @@ export const platformApi = {
 };
 
 export const shipmentsApi = {
-  getByOrder: (orderId: string) => apiGet<{ shipment: unknown }>(`shipments/${orderId}`),
-  track: (id: string) => apiGet<{ tracking: unknown }>(`shipments/${id}/track`),
+  getByOrder: (orderId: string) => apiGet<unknown>(`shipments/${orderId}`),
+  track: (id: string) => apiGet<{ timeline: unknown[] }>(`shipments/${id}/track`),
 };
 
-// ─── Legacy wrappers for swap-app compatibility (not in API_SPEC.md) ─
+// ─── Legacy wrappers for swap-app compatibility (mock-only endpoints) ─
 
 export const pricesApi = {
   getByCode: (cardCode: string) => apiGet<unknown>(`prices/${cardCode}`),
