@@ -203,7 +203,7 @@ export function PregradeOrderScreen() {
                                 GRADER_STYLES[grader]
                               )}
                             >
-                              {grader}
+                              {grader === 'OTHER' ? 'Other' : grader}
                             </span>
                           ))}
                         </p>
@@ -238,7 +238,7 @@ export function PregradeOrderScreen() {
                         <span className="text-sm font-bold truncate">{pkg.name}</span>
                         {pkg.grader && (
                           <span className={cn('text-[8px] px-1 py-0.5 rounded border font-medium', GRADER_STYLES[pkg.grader])}>
-                            {pkg.grader}
+                            {pkg.grader === 'OTHER' ? 'Other' : pkg.grader}
                           </span>
                         )}
                       </div>

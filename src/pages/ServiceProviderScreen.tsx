@@ -59,7 +59,7 @@ export function ServiceProviderScreen() {
   const groupedPackages = useMemo(() => {
     const groups = new Map<GradingService | 'other', ServicePackage[]>();
     packages.forEach((pkg) => {
-      const key = pkg.grader ?? 'other';
+      const key = pkg.grader && pkg.grader !== 'OTHER' ? pkg.grader : 'other';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(pkg);
     });
@@ -189,7 +189,7 @@ export function ServiceProviderScreen() {
                     GRADER_STYLES[grader]
                   )}
                 >
-                  {grader}
+                  {grader === 'OTHER' ? 'Other' : grader}
                 </span>
               ))}
             </div>
@@ -270,7 +270,7 @@ export function ServiceProviderScreen() {
             <div className="space-y-6">
               {groupedPackages.map(([grader, pkgs]) => (
                 <div key={grader} className="space-y-3">
-                  {grader !== 'other' && (
+                  {grader !== 'other' ? (
                     <div className="flex items-center gap-3">
                       <img
                         src={GRADER_IMAGE_URLS[grader]}
@@ -282,7 +282,14 @@ export function ServiceProviderScreen() {
                         {grader}
                       </h3>
                     </div>
-                  )}
+                  ) : provider.category === 'GRADE' ? (
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 px-3 rounded bg-surface-light flex items-center justify-center text-xs text-muted-foreground">
+                        Other
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-400">Other / Custom grader</h3>
+                    </div>
+                  ) : null}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr">
                     {pkgs.map((pkg) => (
                       <PackageCard

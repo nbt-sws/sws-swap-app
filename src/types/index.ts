@@ -83,7 +83,7 @@ export interface CardPriceData {
   }[];
 }
 
-export type GradingService = 'RAWLITY' | 'BLACKLENS' | 'PSA' | 'BGS' | 'CGC' | 'TAG';
+export type GradingService = 'RAWLITY' | 'BLACKLENS' | 'PSA' | 'BGS' | 'CGC' | 'TAG' | 'OTHER';
 
 export interface GradingSubmission {
   id: string;
@@ -179,6 +179,16 @@ export interface ServiceOrderInput {
   shippingAddress?: ShippingAddress;
 }
 
+export interface ProposedPackage {
+  name: string;
+  description: string;
+  pricePerCard: number;
+  currency: string;
+  turnaround: string;
+  includes: string[];
+  grader?: GradingService;
+}
+
 export interface PartnerApplication {
   id: string;
   companyName: string;
@@ -189,6 +199,8 @@ export interface PartnerApplication {
   serviceCategories: ServiceCategory[];
   serviceTypes: string[];
   acceptedGraders?: GradingService[];
+  customGraderNote?: string;
+  proposedPackages?: ProposedPackage[];
   message?: string;
   status: 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
   storeId?: string;
@@ -206,6 +218,8 @@ export interface PartnerApplicationInput {
   serviceCategories: ServiceCategory[];
   serviceTypes: string[];
   acceptedGraders?: GradingService[];
+  customGraderNote?: string;
+  proposedPackages?: ProposedPackage[];
   message?: string;
 }
 

@@ -236,7 +236,7 @@ export interface ApiCollectorProfile {
 
 export type ApiServiceCategory = 'PREGRADE' | 'GRADE';
 export type ApiServiceDeliveryMode = 'PHOTO_UPLOAD' | 'PHYSICAL_DROP_OFF' | 'PHYSICAL_SHIP';
-export type ApiGradingService = 'RAWLITY' | 'BLACKLENS' | 'PSA' | 'BGS' | 'CGC' | 'TAG';
+export type ApiGradingService = 'RAWLITY' | 'BLACKLENS' | 'PSA' | 'BGS' | 'CGC' | 'TAG' | 'OTHER';
 
 export interface ApiServicePackage {
   id: string;
@@ -301,6 +301,16 @@ export interface ApiServiceOrder {
   updatedAt: string;
 }
 
+export interface ApiProposedPackage {
+  name: string;
+  description: string;
+  pricePerCard: number;
+  currency: string;
+  turnaround: string;
+  includes: string[];
+  grader?: ApiGradingService;
+}
+
 export interface ApiPartnerApplication {
   id: string;
   companyName: string;
@@ -311,6 +321,8 @@ export interface ApiPartnerApplication {
   serviceCategories: ApiServiceCategory[];
   serviceTypes: string[];
   acceptedGraders?: ApiGradingService[];
+  customGraderNote?: string;
+  proposedPackages?: ApiProposedPackage[];
   message?: string;
   status: 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
   storeId?: string;

@@ -103,6 +103,7 @@ export function StatusHubScreen() {
                         sub.service === 'PSA' ? 'bg-cyan/10 text-cyan' :
                         sub.service === 'BGS' ? 'bg-amber-500/10 text-amber-400' :
                         sub.service === 'TAG' ? 'bg-emerald-500/10 text-emerald-400' :
+                        sub.service === 'OTHER' ? 'bg-slate-500/10 text-slate-400' :
                         'bg-pregrade/10 text-pregrade'
                       }`}>
                         {sub.service}

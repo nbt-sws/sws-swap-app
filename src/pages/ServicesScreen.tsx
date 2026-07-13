@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useServiceProviders, useSubmitPartnerApplication, usePartnerApplications } from '@/hooks/useServices';
-import type { ServiceCategory, ServiceProvider, PartnerApplicationInput, GradingService } from '@/types';
+import type { ServiceCategory, ServiceProvider, PartnerApplicationInput, GradingService, ProposedPackage } from '@/types';
 import { GRADER_STYLES } from '@/lib/graderAssets';
 
 type TabValue = 'pregrade' | 'grade' | 'partner';
@@ -231,7 +231,7 @@ function ProviderCard({
                 GRADER_STYLES[grader]
               )}
             >
-              {grader}
+              {grader === 'OTHER' ? 'Other' : grader}
             </span>
           ))}
         </div>
@@ -287,6 +287,8 @@ function PartnerTab() {
     serviceCategories: [],
     serviceTypes: [],
     acceptedGraders: [],
+    customGraderNote: '',
+    proposedPackages: [],
     message: '',
   });
 
@@ -317,6 +319,39 @@ function PartnerTab() {
     });
   };
 
+  const addPackage = () => {
+    setForm((prev) => ({
+      ...prev,
+      proposedPackages: [
+        ...(prev.proposedPackages ?? []),
+        { name: '', description: '', pricePerCard: 0, currency: 'THB', turnaround: '', includes: [] },
+      ],
+    }));
+  };
+
+  const removePackage = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      proposedPackages: prev.proposedPackages?.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updatePackage = <K extends keyof ProposedPackage>(index: number, field: K, value: ProposedPackage[K]) => {
+    setForm((prev) => ({
+      ...prev,
+      proposedPackages: prev.proposedPackages?.map((pkg, i) => (i === index ? { ...pkg, [field]: value } : pkg)),
+    }));
+  };
+
+  const togglePackageGrader = (index: number, grader: GradingService) => {
+    setForm((prev) => ({
+      ...prev,
+      proposedPackages: prev.proposedPackages?.map((pkg, i) =>
+        i === index ? { ...pkg, grader: pkg.grader === grader ? undefined : grader } : pkg
+      ),
+    }));
+  };
+
   const canSubmit =
     form.companyName.trim() &&
     form.contactName.trim() &&
@@ -338,6 +373,8 @@ function PartnerTab() {
           serviceCategories: [],
           serviceTypes: [],
           acceptedGraders: [],
+          customGraderNote: '',
+          proposedPackages: [],
           message: '',
         });
       },
@@ -462,7 +499,7 @@ function PartnerTab() {
         <div className="space-y-2">
           <Label>Accepted graders</Label>
           <div className="flex gap-2 flex-wrap">
-            {(['PSA', 'BGS', 'CGC', 'TAG', 'RAWLITY', 'BLACKLENS'] as GradingService[]).map((grader) => (
+            {(['PSA', 'BGS', 'CGC', 'TAG', 'RAWLITY', 'BLACKLENS', 'OTHER'] as GradingService[]).map((grader) => (
               <button
                 key={grader}
                 type="button"
@@ -475,10 +512,116 @@ function PartnerTab() {
                 )}
               >
                 {form.acceptedGraders?.includes(grader) && <Check className="w-3 h-3" />}
-                {grader}
+                {grader === 'OTHER' ? 'Other grader' : grader}
               </button>
             ))}
           </div>
+          {form.acceptedGraders?.includes('OTHER') && (
+            <Input
+              value={form.customGraderNote ?? ''}
+              onChange={(e) => setForm((p) => ({ ...p, customGraderNote: e.target.value }))}
+              placeholder="e.g. SGC, HGA, local Thai grader..."
+              className="bg-surface-light border-border text-xs mt-2"
+            />
+          )}
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label>Proposed packages</Label>
+            <span className="text-[10px] text-muted-foreground">{form.proposedPackages?.length ?? 0} package(s)</span>
+          </div>
+          <p className="text-xs text-muted-foreground">Add the packages you plan to offer. You can edit these later after approval.</p>
+          <div className="space-y-3">
+            {form.proposedPackages?.map((pkg, index) => (
+              <div key={index} className="bg-surface-light rounded-xl p-3 space-y-3 border border-border">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Package {index + 1}</Label>
+                  <button
+                    type="button"
+                    onClick={() => removePackage(index)}
+                    className="text-[10px] text-red-400 hover:text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    value={pkg.name}
+                    onChange={(e) => updatePackage(index, 'name', e.target.value)}
+                    placeholder="Package name"
+                    className="bg-surface border-border text-xs"
+                  />
+                  <Input
+                    value={pkg.turnaround}
+                    onChange={(e) => updatePackage(index, 'turnaround', e.target.value)}
+                    placeholder="Turnaround e.g. 2-3 weeks"
+                    className="bg-surface border-border text-xs"
+                  />
+                </div>
+                <Input
+                  value={pkg.description}
+                  onChange={(e) => updatePackage(index, 'description', e.target.value)}
+                  placeholder="Short description"
+                  className="bg-surface border-border text-xs"
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    type="number"
+                    value={pkg.pricePerCard || ''}
+                    onChange={(e) => updatePackage(index, 'pricePerCard', parseFloat(e.target.value) || 0)}
+                    placeholder="Price per card"
+                    className="bg-surface border-border text-xs"
+                  />
+                  <Input
+                    value={pkg.currency}
+                    onChange={(e) => updatePackage(index, 'currency', e.target.value.toUpperCase())}
+                    placeholder="THB"
+                    className="bg-surface border-border text-xs"
+                  />
+                </div>
+                <Textarea
+                  value={pkg.includes.join('\n')}
+                  onChange={(e) =>
+                    updatePackage(
+                      index,
+                      'includes',
+                      e.target.value.split('\n').map((s) => s.trim()).filter(Boolean)
+                    )
+                  }
+                  placeholder="Includes (one per line)"
+                  className="bg-surface border-border text-xs min-h-[60px]"
+                />
+                <div className="flex gap-2 flex-wrap">
+                  {(['PSA', 'BGS', 'CGC', 'TAG', 'RAWLITY', 'BLACKLENS', 'OTHER'] as GradingService[]).map((grader) => (
+                    <button
+                      key={grader}
+                      type="button"
+                      onClick={() => togglePackageGrader(index, grader)}
+                      className={cn(
+                        'text-[10px] px-2 py-1 rounded border transition-all',
+                        pkg.grader === grader
+                          ? GRADER_STYLES[grader]
+                          : 'bg-surface border-border text-muted-foreground'
+                      )}
+                    >
+                      {pkg.grader === grader && <Check className="w-2.5 h-2.5 inline mr-1" />}
+                      {grader === 'OTHER' ? 'Other' : grader}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addPackage}
+            className="w-full border-border text-xs"
+          >
+            + Add package
+          </Button>
         </div>
 
         <div className="space-y-1.5">
@@ -530,7 +673,9 @@ function PartnerTab() {
                   <p className="text-xs text-muted-foreground">
                     {app.serviceCategories.map((c) => (c === 'PREGRADE' ? 'Pre-grade' : 'Grade')).join(', ')}
                     {app.serviceTypes.length > 0 && ` · ${app.serviceTypes.join(', ')}`}
-                    {app.acceptedGraders && app.acceptedGraders.length > 0 && ` · ${app.acceptedGraders.join(', ')}`}
+                    {app.acceptedGraders && app.acceptedGraders.length > 0 && ` · ${app.acceptedGraders.map((g) => (g === 'OTHER' ? 'Other' : g)).join(', ')}`}
+                    {app.customGraderNote && ` (${app.customGraderNote})`}
+                    {app.proposedPackages && app.proposedPackages.length > 0 && ` · ${app.proposedPackages.length} proposed package(s)`}
                   </p>
                 </div>
                 <span

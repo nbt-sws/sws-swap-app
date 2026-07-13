@@ -15,6 +15,7 @@ import type {
   ApiServiceOrder,
   ApiPartnerApplication,
   ApiGradingService,
+  ApiProposedPackage,
   ApiRedemption,
   ApiVaultDelivery,
   ApiMarketHistoryResponse,
@@ -376,6 +377,8 @@ export const partnersApi = {
     serviceCategories: ApiServiceCategory[];
     serviceTypes: string[];
     acceptedGraders?: ApiGradingService[];
+    customGraderNote?: string;
+    proposedPackages?: ApiProposedPackage[];
     message?: string;
   }) => apiPost<{ application: ApiPartnerApplication }>('partners/applications', { json: data }),
   getApplications: () => apiGet<{ applications: ApiPartnerApplication[] }>('partners/applications'),

@@ -116,6 +116,8 @@ export function useSubmitPartnerApplication() {
             serviceCategories: input.serviceCategories,
             serviceTypes: input.serviceTypes,
             acceptedGraders: input.acceptedGraders,
+            customGraderNote: input.customGraderNote,
+            proposedPackages: input.proposedPackages,
             message: input.message,
           });
           return res.application as PartnerApplication;

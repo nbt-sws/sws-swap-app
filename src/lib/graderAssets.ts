@@ -7,6 +7,7 @@ export const GRADER_IMAGE_URLS: Record<GradingService, string> = {
   RAWLITY: 'https://picsum.photos/seed/rawlity/400/300',
   BLACKLENS: 'https://picsum.photos/seed/blacklens/400/300',
   CGC: 'https://picsum.photos/seed/cgc/400/300',
+  OTHER: 'https://picsum.photos/seed/other-grader/400/300',
 };
 
 export const GRADER_STYLES: Record<GradingService, string> = {
@@ -16,4 +17,5 @@ export const GRADER_STYLES: Record<GradingService, string> = {
   TAG: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   RAWLITY: 'bg-brand/10 text-brand border-brand/20',
   BLACKLENS: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
+  OTHER: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
 };
