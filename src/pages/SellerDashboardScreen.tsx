@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import {
   Plus,
   Eye,
@@ -20,6 +21,7 @@ import {
   ArrowRightLeft,
   TrendingUp,
   Package,
+  Award,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import type { MarketListing } from '@/types';
@@ -114,6 +116,16 @@ export function SellerDashboardScreen() {
           </Card>
         </div>
 
+        {/* Quick links */}
+        <div className="flex flex-wrap gap-3">
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/seller/orders">
+              <Award className="w-4 h-4" />
+              Service orders
+            </Link>
+          </Button>
+        </div>
+
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <TabsList className="bg-surface-light border border-border">
@@ -143,15 +155,18 @@ export function SellerDashboardScreen() {
         )}
 
         {!isLoading && filtered.length === 0 && (
-          <Card className="bg-surface-light border-border">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <Package className="w-10 h-10 mx-auto mb-3 opacity-50" />
-              <p>No listings here yet.</p>
-              <Button asChild className="mt-4 bg-brand hover:bg-brand-light">
-                <Link to="/seller/new">Create your first listing</Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-12">
+            <EmptyMedia variant="icon">
+              <Package className="w-8 h-8 text-brand" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No listings here yet</EmptyTitle>
+              <EmptyDescription>Create your first listing to start selling.</EmptyDescription>
+            </EmptyHeader>
+            <Button asChild className="bg-brand hover:bg-brand-light">
+              <Link to="/seller/new">Create your first listing</Link>
+            </Button>
+          </Empty>
         )}
 
         <div className="space-y-4">
@@ -159,7 +174,7 @@ export function SellerDashboardScreen() {
             const status = listing.status ?? 'active';
             const config = statusConfig[status];
             return (
-              <Card key={listing.id} className="bg-surface-light border-border">
+              <Card key={listing.id} className="bg-surface-light border-border hover:border-brand/30 hover:bg-surface-lighter transition">
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Link

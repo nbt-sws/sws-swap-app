@@ -5,6 +5,7 @@ import { useState, useCallback } from 'react';
 import {
   useVault, useListingsBySeller, useDelistListing,
   useItemAuditHistory, useVaultDelivery, useCreateRedemption,
+  useConsignToPlatform,
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -15,7 +16,7 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/
 import {
   TrendingUp, TrendingDown, Tag, Award,
   Package, Clock, Truck, ListChecks, User, Shield,
-  Calendar, ShoppingBag,
+  Calendar, ShoppingBag, ClipboardList,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { ListItemModal } from '@/components/vault/ListItemModal';
@@ -36,6 +37,7 @@ export function VaultItemDetailScreen() {
   const delistListing = useDelistListing();
   const vaultDelivery = useVaultDelivery();
   const createRedemption = useCreateRedemption();
+  const consign = useConsignToPlatform();
   const itemAudit = useItemAuditHistory(itemId);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [addressModalMode, setAddressModalMode] = useState<'delivery' | 'redemption' | null>(null);
@@ -44,6 +46,11 @@ export function VaultItemDetailScreen() {
   const item = vault?.find((v) => v.id === itemId);
   const listing = listings?.find((l) => l.card.code === item?.card.code);
   const isListed = !!listing;
+  const isOwner = !!item && item.ownerId === user?.id;
+  const canList = isOwner && item?.itemStatus !== 'REDEEMING' && item?.itemStatus !== 'REDEEMED' && item?.itemStatus !== 'LOCKED';
+  const canConsign = isOwner && item?.holderId === user?.id;
+  const canRequestDelivery = isOwner && item?.itemStatus === 'VAULT_HELD';
+  const canRedeem = isOwner && item?.holderId === user?.id && item?.itemStatus === 'AVAILABLE';
 
   const handleDelist = useCallback(() => {
     if (listing) {
@@ -94,7 +101,7 @@ export function VaultItemDetailScreen() {
   if (!item) {
     return (
       <PageContainer className="py-6">
-        <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-20">
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
           <EmptyMedia variant="icon">
             <Package className="w-8 h-8 text-brand" />
           </EmptyMedia>
@@ -239,6 +246,35 @@ export function VaultItemDetailScreen() {
               </CardContent>
             </Card>
 
+            {/* Service order */}
+            {item.serviceOrderId && (
+              <Card className="bg-brand/5 border-brand/20">
+                <CardContent className="p-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-brand mb-3 flex items-center gap-1.5">
+                    <ClipboardList className="w-3.5 h-3.5" /> Service order
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Order</span>
+                      <Link
+                        to="/service-orders/$orderId"
+                        params={{ orderId: item.serviceOrderId }}
+                        className="font-mono text-brand hover:underline"
+                      >
+                        {item.serviceOrderId}
+                      </Link>
+                    </div>
+                    {item.serviceOrderStatus && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Status</span>
+                        <span className="font-medium">{item.serviceOrderStatus}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Details */}
             <div>
               <h3 className="text-sm font-semibold mb-3">{t('vault.item.details')}</h3>
@@ -285,13 +321,21 @@ export function VaultItemDetailScreen() {
                   <ListChecks className="w-4 h-4 mr-2" />
                   {delistListing.isPending ? t('common.delisting') : t('common.delist')}
                 </Button>
-              ) : (
+              ) : canList ? (
                 <Button
                   className="flex-1 bg-brand hover:bg-brand-light h-12"
                   onClick={() => setListModalOpen(true)}
                 >
                   <ShoppingBag className="w-4 h-4 mr-2" />
                   {t('common.listForSale')}
+                </Button>
+              ) : (
+                <Button
+                  className="flex-1 bg-surface-lighter text-muted-foreground h-12 cursor-not-allowed"
+                  disabled
+                >
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Not available to list
                 </Button>
               )}
               <Button
@@ -304,26 +348,42 @@ export function VaultItemDetailScreen() {
               </Button>
             </div>
 
-            {item.status === 'held' && (
+            {canConsign && (
+              <Button
+                variant="outline"
+                className="w-full border-brand text-brand hover:bg-brand/10 h-12"
+                onClick={() => consign.mutate(item.id)}
+                disabled={consign.isPending}
+              >
+                <Package className="w-4 h-4 mr-2" />
+                {consign.isPending ? 'Depositing...' : 'Deposit to SWS Vault'}
+              </Button>
+            )}
+
+            {(canRequestDelivery || canRedeem) && (
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1 border-border h-12"
-                  onClick={() => setAddressModalMode('delivery')}
-                  disabled={vaultDelivery.isPending}
-                >
-                  <Truck className="w-4 h-4 mr-2" />
-                  {t('common.requestDelivery')}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 border-border h-12"
-                  onClick={() => setAddressModalMode('redemption')}
-                  disabled={createRedemption.isPending}
-                >
-                  <Tag className="w-4 h-4 mr-2" />
-                  {t('common.redeem')}
-                </Button>
+                {canRequestDelivery && (
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-border h-12"
+                    onClick={() => setAddressModalMode('delivery')}
+                    disabled={vaultDelivery.isPending}
+                  >
+                    <Truck className="w-4 h-4 mr-2" />
+                    {t('common.requestDelivery')}
+                  </Button>
+                )}
+                {canRedeem && (
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-border h-12"
+                    onClick={() => setAddressModalMode('redemption')}
+                    disabled={createRedemption.isPending}
+                  >
+                    <Tag className="w-4 h-4 mr-2" />
+                    {t('common.redeem')}
+                  </Button>
+                )}
               </div>
             )}
           </div>

@@ -88,7 +88,7 @@ export function ScannerScreen() {
           {/* Gallery upload */}
           <button
             onClick={handleCapture}
-            className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center active:scale-95 transition-transform"
+            className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center active:scale-95 transition-transform"
           >
             <Image className="w-6 h-6 text-white" />
           </button>

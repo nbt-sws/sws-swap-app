@@ -1,4 +1,4 @@
-import type { VaultItem, MarketListing, CardPriceData, GradingSubmission, WishlistItem, Order, Offer, OfferUser, ShippingAddress, CreateListingInput, TradeCard, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, ServiceProvider, ServicePackage, ServiceOrder, PartnerApplication, PartnerApplicationInput, ServiceOrderInput, GradingService } from '@/types';
+import type { VaultItem, MarketListing, CardPriceData, GradingSubmission, WishlistItem, Order, Offer, OfferUser, ShippingAddress, CreateListingInput, TradeCard, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, ServiceProvider, ServicePackage, ServiceOrder, ServiceOrderStage, PartnerApplication, PartnerApplicationInput, ServiceOrderInput, ServiceOrderUpdate, GradingService } from '@/types';
 import type { AuthUser } from '@/types/auth';
 import { getPackagePlaceholderUrl } from '@/lib/utils';
 import { GRADER_IMAGE_URLS } from '@/lib/graderAssets';
@@ -8,45 +8,102 @@ const API_BASE = 'https://api.swibswap.app/v1';
 // Simulate network delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+function addDaysISO(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function loadVault(): VaultItem[] {
+  if (typeof window === 'undefined') return FALLBACK_VAULT;
+  try {
+    const raw = localStorage.getItem('sws_vault');
+    if (raw) return JSON.parse(raw) as VaultItem[];
+  } catch {}
+  return FALLBACK_VAULT;
+}
+
+function saveVault(items: VaultItem[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('sws_vault', JSON.stringify(items));
+}
+
+function syncVaultWithOrder(order: ServiceOrder) {
+  const vault = loadVault();
+  const currentStage = [...order.stages].reverse().find((s) => s.completed);
+  let changed = false;
+  order.cardIds.forEach((cardId) => {
+    const item = vault.find((v) => v.id === cardId);
+    if (item) {
+      item.serviceOrderId = order.id;
+      item.serviceOrderStatus = currentStage?.label ?? 'Ordered';
+      if (order.status === 'COMPLETED') item.status = 'held';
+      else if (order.status === 'CANCELLED') {
+        item.status = 'held';
+        item.serviceOrderStatus = 'Cancelled';
+      } else {
+        item.status = 'grading';
+      }
+      changed = true;
+    }
+  });
+  if (changed) saveVault(vault);
+}
+
 // Fallback data
 const FALLBACK_VAULT: VaultItem[] = [
   {
     id: 'v1',
     card: { id: 'c1', code: 'OP02-013', nameEn: 'Portgas D. Ace', nameJp: 'ポートガス・D・エース', rarity: 'SR', type: 'Character', language: 'JP', game: 'one-piece', condition: 'Raw' },
+    ownerId: 'u1', holderId: 'u1',
     paidPrice: 12500, currentPrice: 18440, currency: 'THB', dateAcquired: '2026-03-12', source: 'Yahoo! JP auction · via proxy',
-    condition: 'Raw', status: 'held', plAmount: 5940, plPercent: 47.5,
+    condition: 'Raw', status: 'held', itemStatus: 'AVAILABLE', plAmount: 5940, plPercent: 47.5,
   },
   {
     id: 'v2',
     card: { id: 'c2', code: 'QCAC-JP001', nameEn: 'Blue-Eyes White Dragon', nameJp: '青眼の白龍', rarity: 'QCSR', type: 'Monster', language: 'JP', game: 'yu-gi-oh', condition: 'Raw' },
+    ownerId: 'u1', holderId: 'sws-platform',
     paidPrice: 8800, currentPrice: 9850, currency: 'THB', dateAcquired: '2026-01-20', source: 'Local shop · Bangkok',
-    condition: 'Raw', status: 'held', plAmount: 1050, plPercent: 11.9,
+    condition: 'Raw', status: 'held', itemStatus: 'VAULT_HELD', plAmount: 1050, plPercent: 11.9,
   },
   {
     id: 'v3',
     card: { id: 'c3', code: 'OP01-025', nameEn: 'Nami (Alt Art)', nameJp: 'ナミ（パラレル）', rarity: 'SR', type: 'Character', language: 'EN', game: 'one-piece', condition: 'Raw' },
+    ownerId: 'u1', holderId: 'u1',
     paidPrice: 5200, currentPrice: 4120, currency: 'THB', dateAcquired: '2025-11-05', source: 'Trade · @kaido99',
-    condition: 'Raw', status: 'held', plAmount: -1080, plPercent: -20.8,
+    condition: 'Raw', status: 'held', itemStatus: 'AVAILABLE', plAmount: -1080, plPercent: -20.8,
   },
   {
     id: 'v4',
     card: { id: 'c4', code: 'OP01-001', nameEn: 'Roronoa Zoro', nameJp: 'ロロノア・ゾロ', rarity: 'L', type: 'Leader', language: 'JP', game: 'one-piece', condition: 'PSA 10' },
+    ownerId: 'u1', holderId: 'u1',
     paidPrice: 4500, currentPrice: 6900, currency: 'THB', dateAcquired: '2026-02-14', source: 'eBay · JP seller',
-    condition: 'PSA 10', status: 'held', plAmount: 2400, plPercent: 53.3,
+    condition: 'PSA 10', status: 'held', itemStatus: 'AVAILABLE', plAmount: 2400, plPercent: 53.3,
   },
   {
     id: 'v5',
     card: { id: 'c5', code: 'OP05-060', nameEn: 'Monkey D. Luffy G5', nameJp: 'モンキー・D・ルフィ ギア5', rarity: 'SEC', type: 'Character', language: 'JP', game: 'one-piece', condition: 'RAWLITY 9' },
+    ownerId: 'u1', holderId: 'u1',
     paidPrice: 28000, currentPrice: 32000, currency: 'THB', dateAcquired: '2026-04-01', source: 'SwibSwap Market · @shanks_rt',
-    condition: 'RAWLITY 9', status: 'held', plAmount: 4000, plPercent: 14.3,
+    condition: 'RAWLITY 9', status: 'held', itemStatus: 'AVAILABLE', plAmount: 4000, plPercent: 14.3,
   },
   {
     id: 'v6',
     card: { id: 'c6', code: 'OP01-120', nameEn: 'Shanks (Alt)', nameJp: 'シャンクス（パラレル）', rarity: 'SR', type: 'Character', language: 'JP', game: 'one-piece', condition: 'Raw' },
+    ownerId: 'u1', holderId: 'u1',
     paidPrice: 15000, currentPrice: 0, currency: 'THB', dateAcquired: '2025-08-20', source: 'Yahoo! JP auction',
     condition: 'Raw', status: 'sold', soldFor: 16900, plAmount: 1900, plPercent: 12.7,
   },
 ];
+
+// Initialize vault from localStorage if available
+(() => {
+  const loaded = loadVault();
+  if (loaded !== FALLBACK_VAULT) {
+    FALLBACK_VAULT.length = 0;
+    FALLBACK_VAULT.push(...loaded);
+  }
+})();
 
 const FALLBACK_MARKET: MarketListing[] = [
   {
@@ -674,14 +731,24 @@ const FALLBACK_SERVICE_PROVIDERS: ServiceProvider[] = [
   }),
 ];
 
-const GRADER_KEYS: GradingService[] = ['PSA', 'BGS', 'CGC', 'TAG', 'RAWLITY', 'BLACKLENS'];
+const GRADER_KEYS: GradingService[] = ['PSA', 'BGS', 'CGC', 'TAG', 'RAWLITY', 'BLACKLENS', 'OTHER'];
+
+const GRADER_CUTOFF_DAYS: Record<GradingService, number> = {
+  PSA: 5, BGS: 7, CGC: 6, TAG: 3, RAWLITY: 2, BLACKLENS: 2, OTHER: 4,
+};
+const GRADER_SHIP_DAYS: Record<GradingService, number> = {
+  PSA: 8, BGS: 12, CGC: 10, TAG: 5, RAWLITY: 3, BLACKLENS: 3, OTHER: 6,
+};
 
 FALLBACK_SERVICE_PROVIDERS.forEach((provider) => {
   provider.packages = provider.packages.map((pkg) => {
+    const updates: Partial<ServicePackage> = {};
     if (pkg.grader && GRADER_KEYS.includes(pkg.grader)) {
-      return { ...pkg, imageUrl: GRADER_IMAGE_URLS[pkg.grader] };
+      updates.imageUrl = GRADER_IMAGE_URLS[pkg.grader];
+      updates.cutoffDate = addDaysISO(GRADER_CUTOFF_DAYS[pkg.grader]);
+      updates.shippingDate = addDaysISO(GRADER_SHIP_DAYS[pkg.grader]);
     }
-    return pkg;
+    return Object.keys(updates).length > 0 ? { ...pkg, ...updates } : pkg;
   });
 });
 
@@ -802,11 +869,29 @@ export async function addToVault(item: Omit<VaultItem, 'id' | 'currentPrice' | '
   const newItem: VaultItem = {
     ...item,
     id: `v${Date.now()}`,
+    ownerId: item.ownerId ?? 'u1',
+    holderId: item.holderId ?? 'u1',
+    itemStatus: item.itemStatus ?? 'AVAILABLE',
     currentPrice: item.paidPrice * 1.1,
     plAmount: item.paidPrice * 0.1,
     plPercent: 10,
   };
+  const vault = loadVault();
+  vault.unshift(newItem);
+  saveVault(vault);
   return newItem;
+}
+
+export async function consignItemToPlatform(itemId: string, userId = 'u1'): Promise<VaultItem> {
+  await delay(500);
+  const vault = loadVault();
+  const item = vault.find((v) => v.id === itemId);
+  if (!item) throw new Error('Item not found');
+  if (item.ownerId !== userId) throw new Error('Only the owner can consign this item');
+  item.holderId = 'sws-platform';
+  item.itemStatus = 'VAULT_HELD';
+  saveVault(vault);
+  return item;
 }
 
 export async function submitRating(submissionId: string, rating: { score: number; tags: string[]; comment: string }): Promise<void> {
@@ -842,11 +927,36 @@ export async function fetchServicePackages(providerId: string): Promise<ServiceP
   return provider?.packages.filter((pkg) => pkg.enabled) ?? [];
 }
 
+function buildInitialStages(category: ServiceOrder['category']): ServiceOrderStage[] {
+  const now = new Date().toISOString();
+  if (category === 'GRADE') {
+    return [
+      { key: 'ordered', label: 'Ordered', completed: true, timestamp: now },
+      { key: 'shipped-to-store', label: 'Shipped to store', completed: false },
+      { key: 'received-by-store', label: 'Received by store', completed: false },
+      { key: 'sent-to-grader', label: 'Sent to grader', completed: false },
+      { key: 'at-grader', label: 'At grader / grading', completed: false },
+      { key: 'qa', label: 'QA / grading complete', completed: false },
+      { key: 'returned-to-store', label: 'Returned to store', completed: false },
+      { key: 'shipped-to-customer', label: 'Shipped to customer', completed: false },
+      { key: 'delivered', label: 'Delivered', completed: false },
+    ];
+  }
+  return [
+    { key: 'ordered', label: 'Ordered', completed: true, timestamp: now },
+    { key: 'received', label: 'Materials received', completed: false },
+    { key: 'in-progress', label: 'In progress', completed: false },
+    { key: 'completed', label: 'Completed', completed: false },
+  ];
+}
+
 export async function createServiceOrder(input: ServiceOrderInput, userId = 'u1'): Promise<ServiceOrder> {
   await delay(700);
   const provider = FALLBACK_SERVICE_PROVIDERS.find((p) => p.id === input.providerId);
   const pkg = input.packageId ? provider?.packages.find((p) => p.id === input.packageId) : undefined;
   const pricePerCard = pkg?.pricePerCard ?? provider?.pricePerCard ?? 0;
+  const now = new Date().toISOString();
+  const stages = buildInitialStages(input.category);
   const order: ServiceOrder = {
     id: `SWS-SO-${Math.floor(100000 + Math.random() * 900000)}`,
     userId,
@@ -855,17 +965,47 @@ export async function createServiceOrder(input: ServiceOrderInput, userId = 'u1'
     providerName: provider?.storeName ?? input.providerId,
     storeId: provider?.storeId ?? '',
     packageId: input.packageId,
+    packageName: pkg?.name,
+    grader: pkg?.grader,
     cardIds: input.cardIds,
     status: 'PENDING',
+    stages,
     totalAmount: pricePerCard * input.cardIds.length,
     currency: pkg?.currency ?? provider?.currency ?? 'THB',
     shippingAddress: input.shippingAddress,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
   };
   const orders = loadServiceOrders();
   orders.unshift(order);
   saveServiceOrders(orders);
+  syncVaultWithOrder(order);
+  return order;
+}
+
+export async function updateServiceOrder(orderId: string, update: ServiceOrderUpdate): Promise<ServiceOrder> {
+  await delay(500);
+  const orders = loadServiceOrders();
+  const index = orders.findIndex((o) => o.id === orderId);
+  if (index === -1) throw new Error('Order not found');
+  const order = { ...orders[index] };
+  if (update.status !== undefined) order.status = update.status;
+  if (update.lotNumber !== undefined) order.lotNumber = update.lotNumber;
+  if (update.labOrderNumber !== undefined) order.labOrderNumber = update.labOrderNumber;
+  if (update.trackingNumber !== undefined) order.trackingNumber = update.trackingNumber;
+  if (update.stages) {
+    order.stages = update.stages;
+    const lastCompleted = [...order.stages].reverse().find((s) => s.completed);
+    if (lastCompleted) {
+      if (lastCompleted.key === 'delivered' || lastCompleted.key === 'completed') order.status = 'COMPLETED';
+      else if (lastCompleted.key === 'cancelled') order.status = 'CANCELLED';
+      else order.status = 'IN_PROGRESS';
+    }
+  }
+  order.updatedAt = new Date().toISOString();
+  orders[index] = order;
+  saveServiceOrders(orders);
+  syncVaultWithOrder(order);
   return order;
 }
 
@@ -1190,15 +1330,25 @@ export async function createOrder(payload: {
   const fee = Math.round(price * 0.05);
   const shipping = payload.deliveryPreference === 'SHIP' ? 120 : 0;
   const now = new Date().toISOString();
+
+  const vault = loadVault();
+  const item = listing.itemId
+    ? vault.find((v) => v.id === listing.itemId)
+    : vault.find((v) => v.card.code === listing.card.code && v.status !== 'sold');
+  const platformFee = item && item.holderId === 'sws-platform' ? Math.round(price * 0.025) : 0;
+
   const order: Order = {
     id: `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
     buyerId: 'current-user',
     sellerId: listing.seller.id,
     listing,
+    itemId: item?.id,
     subtotal: price,
     fee,
     shipping,
-    total: price + fee + shipping,
+    platformFee,
+    sellerPayout: price - fee - platformFee,
+    total: price + fee + shipping + platformFee,
     status: 'PENDING_PAYMENT',
     deliveryPreference: payload.deliveryPreference,
     shippingAddress: payload.shippingAddress
@@ -1207,6 +1357,10 @@ export async function createOrder(payload: {
     createdAt: now,
     updatedAt: now,
   };
+  if (item) {
+    item.itemStatus = 'LOCKED';
+    saveVault(vault);
+  }
   FALLBACK_ORDERS.unshift(order);
   return order;
 }
@@ -1215,6 +1369,12 @@ export async function cancelOrder(orderId: string): Promise<Order> {
   await delay(400);
   const order = await fetchOrderById(orderId);
   if (!order) throw new Error('Order not found');
+  const vault = loadVault();
+  const item = order.itemId ? vault.find((v) => v.id === order.itemId) : undefined;
+  if (item && item.itemStatus === 'LOCKED') {
+    item.itemStatus = 'AVAILABLE';
+    saveVault(vault);
+  }
   return { ...order, status: 'CANCELLED', updatedAt: new Date().toISOString() };
 }
 
@@ -1222,6 +1382,36 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
   await delay(400);
   const order = await fetchOrderById(orderId);
   if (!order) throw new Error('Order not found');
+  const vault = loadVault();
+  const item = order.itemId ? vault.find((v) => v.id === order.itemId) : undefined;
+  const buyerId = order.buyerId;
+
+  if (item) {
+    if (status === 'PAID') {
+      item.ownerId = buyerId;
+      if (order.deliveryPreference === 'VAULT_STORE') {
+        item.itemStatus = 'VAULT_HELD';
+      } else {
+        item.itemStatus = 'IN_TRANSIT';
+      }
+    } else if (status === 'SHIPPED') {
+      if (order.deliveryPreference === 'SHIP') {
+        item.itemStatus = 'IN_TRANSIT';
+      }
+    } else if (status === 'DELIVERED') {
+      item.holderId = buyerId;
+      item.itemStatus = 'DELIVERED';
+    } else if (status === 'COMPLETED') {
+      item.holderId = buyerId;
+      item.itemStatus = order.deliveryPreference === 'VAULT_STORE' ? 'VAULT_HELD' : 'DELIVERED';
+    } else if (status === 'CANCELLED') {
+      item.ownerId = order.sellerId;
+      item.holderId = order.listing.holderId ?? order.sellerId;
+      item.itemStatus = 'AVAILABLE';
+    }
+    saveVault(vault);
+  }
+
   return { ...order, status, updatedAt: new Date().toISOString() };
 }
 
@@ -1326,8 +1516,13 @@ export async function fetchMyListings(): Promise<MarketListing[]> {
   }
 }
 
-export async function createListing(input: CreateListingInput): Promise<MarketListing> {
+export async function createListing(input: CreateListingInput, sellerId = 'u1', sellerName = 'BoBoBoA'): Promise<MarketListing> {
   await delay(700);
+  const vault = loadVault();
+  const item = input.itemId ? vault.find((v) => v.id === input.itemId) : undefined;
+  if (input.itemId && item && item.ownerId !== sellerId) {
+    throw new Error('Only the item owner can create a listing');
+  }
   const newListing: MarketListing = {
     id: `my${Date.now()}`,
     card: { ...input.card, id: input.card.id || `c${Date.now()}` },
@@ -1335,13 +1530,21 @@ export async function createListing(input: CreateListingInput): Promise<MarketLi
     currency: 'THB',
     listingType: input.listingType,
     shelf: input.shelf,
-    seller: { id: 'u1', name: 'BoBoBoA', rating: 4.9 },
-    vaultVerified: false,
+    seller: { id: sellerId, name: sellerName, rating: 4.9 },
+    vaultVerified: !!item && item.holderId !== sellerId,
+    itemId: input.itemId,
+    ownerId: item?.ownerId,
+    holderId: item?.holderId,
     timestamp: new Date().toISOString(),
     status: 'active',
     views: 0,
     watchers: 0,
   };
+  if (item) {
+    item.listingId = newListing.id;
+    item.itemStatus = 'LOCKED';
+    saveVault(vault);
+  }
   MY_LISTINGS.unshift(newListing);
   return newListing;
 }
@@ -1502,41 +1705,56 @@ export async function fetchVaultDeliveries(): Promise<VaultDelivery[]> {
 
 export async function createRedemption(
   itemId: string,
-  shippingAddress: ShippingAddress
+  shippingAddress: ShippingAddress,
+  userId = 'u1'
 ): Promise<Redemption> {
   await delay(700);
-  const item = FALLBACK_VAULT.find((v) => v.id === itemId);
+  const vault = loadVault();
+  const item = vault.find((v) => v.id === itemId);
+  if (!item) throw new Error('Item not found');
+  if (item.ownerId !== userId || item.holderId !== userId) {
+    throw new Error('Redemption requires owner and holder to be the same user');
+  }
+  item.itemStatus = 'REDEEMING';
+  saveVault(vault);
   const redemption: Redemption = {
     id: `RDM-${Math.floor(100000 + Math.random() * 900000)}`,
     itemId,
-    userId: 'current-user',
+    userId,
     status: 'PENDING',
     shippingAddress,
     createdAt: new Date().toISOString(),
   };
-  if (item) {
-    FALLBACK_REDEMPTIONS = [redemption, ...FALLBACK_REDEMPTIONS];
-  }
+  FALLBACK_REDEMPTIONS = [redemption, ...FALLBACK_REDEMPTIONS];
   return redemption;
 }
 
 export async function createVaultDelivery(
   itemId: string,
-  shippingAddress: ShippingAddress
+  shippingAddress: ShippingAddress,
+  userId = 'u1'
 ): Promise<VaultDelivery> {
   await delay(700);
-  const item = FALLBACK_VAULT.find((v) => v.id === itemId);
+  const vault = loadVault();
+  const item = vault.find((v) => v.id === itemId);
+  if (!item) throw new Error('Item not found');
+  if (item.ownerId !== userId) {
+    throw new Error('Only the owner can request delivery');
+  }
+  if (item.itemStatus !== 'VAULT_HELD') {
+    throw new Error('Item is not in vault-held status');
+  }
+  item.itemStatus = 'IN_TRANSIT';
+  saveVault(vault);
   const delivery: VaultDelivery = {
     id: `DVD-${Math.floor(100000 + Math.random() * 900000)}`,
     itemId,
-    userId: 'current-user',
+    userId,
     status: 'PENDING',
     shippingAddress,
     createdAt: new Date().toISOString(),
   };
-  if (item) {
-    FALLBACK_VAULT_DELIVERIES = [delivery, ...FALLBACK_VAULT_DELIVERIES];
-  }
+  FALLBACK_VAULT_DELIVERIES = [delivery, ...FALLBACK_VAULT_DELIVERIES];
   return delivery;
 }
 

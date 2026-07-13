@@ -1,6 +1,7 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
+import { Route } from '@/routes/vault.index';
 import {
   useVault, useListingsBySeller, useDelistListing, useStoreProfile,
   useFollowedSellers, useFollowSeller, useUnfollowSeller,
@@ -9,7 +10,7 @@ import { useAuthStore } from '@/stores/auth';
 import { StorefrontManager } from '@/components/vault/StorefrontManager';
 import {
   LayoutGrid, List as ListIcon, LayoutTemplate, TrendingUp, TrendingDown,
-  CheckSquare, Tag, Plus, Package, Store, EyeOff, Gift, Truck, Clock,
+  CheckSquare, Tag, Plus, Package, Store, EyeOff, Gift, Truck, Clock, Wallet,
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -25,7 +26,7 @@ import { VaultFilterTabs, type VaultFilter } from '@/components/vault/VaultFilte
 import { VaultProfileHeader, VaultProfileHeaderSkeleton } from '@/components/vault/VaultProfileHeader';
 import { VaultHistoryDialog } from '@/components/vault/VaultHistoryDialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { VaultItem } from '@/types';
+import type { VaultItem, StoreProfile } from '@/types';
 
 const VIEWS = [
   { id: 'grid', icon: LayoutGrid, labelKey: 'common.gridView' },
@@ -36,7 +37,7 @@ const VIEWS = [
 export function VaultScreen() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const userId = user?.id ?? 'u1';
+  const userId = user?.id ?? '';
   const { data: vault, isLoading } = useVault();
   const { data: listings } = useListingsBySeller(userId);
   const delistListing = useDelistListing();
@@ -52,6 +53,13 @@ export function VaultScreen() {
   const [bulkListModalOpen, setBulkListModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [listTargetItem, setListTargetItem] = useState<VaultItem | null>(null);
+
+  const { action } = Route.useSearch();
+  useEffect(() => {
+    if (action === 'register') {
+      setRegisterModalOpen(true);
+    }
+  }, [action]);
 
   const listingsMap = useMemo(() => {
     const map = new Map<string, { listingId: string; price: number }>();
@@ -75,6 +83,19 @@ export function VaultScreen() {
   const isOwner = user?.id === userId;
   const isFollowing = followedIds?.includes(userId) ?? false;
 
+  const fallbackProfile = useMemo<StoreProfile>(() => ({
+    id: userId,
+    userId,
+    name: user?.fullName || user?.email || userId,
+    displayName: user?.fullName,
+    avatarUrl: user?.avatarUrl,
+    rating: 0,
+    listings: 0,
+    sales: 0,
+    followers: 0,
+  }), [userId, user]);
+  const effectiveProfile = profile ?? fallbackProfile;
+
   const counts = useMemo(() => {
     const c: Record<VaultFilter, number> = {
       ALL: 0,
@@ -88,13 +109,14 @@ export function VaultScreen() {
     };
     vault?.forEach((v) => {
       c.ALL++;
-      if (v.status === 'held') {
-        c.VAULT_HELD++;
-        if (!listingsMap.has(v.card.code)) c.AVAILABLE++;
-      }
+      const itemStatus = v.itemStatus;
+      if (itemStatus === 'AVAILABLE') c.AVAILABLE++;
+      if (itemStatus === 'VAULT_HELD') c.VAULT_HELD++;
+      if (itemStatus === 'LOCKED') c.LOCKED++;
+      if (itemStatus === 'IN_TRANSIT') c.IN_TRANSIT++;
+      if (itemStatus === 'REDEEMING') c.REDEEMING++;
+      if (itemStatus === 'DELIVERED' || v.status === 'sold') c.COMPLETED++;
       if (listingsMap.has(v.card.code)) c.LISTED++;
-      if (v.status === 'sold') c.COMPLETED++;
-      if (v.status === 'grading') c.LOCKED++;
     });
     return c;
   }, [vault, listingsMap]);
@@ -104,11 +126,13 @@ export function VaultScreen() {
     return vault.filter((v) => {
       if (vaultViewMode === 'store') return listingsMap.has(v.card.code);
       if (activeFilter === 'ALL') return true;
-      if (activeFilter === 'AVAILABLE') return v.status === 'held' && !listingsMap.has(v.card.code);
-      if (activeFilter === 'VAULT_HELD') return v.status === 'held';
+      if (activeFilter === 'AVAILABLE') return v.itemStatus === 'AVAILABLE' && !listingsMap.has(v.card.code);
+      if (activeFilter === 'VAULT_HELD') return v.itemStatus === 'VAULT_HELD';
       if (activeFilter === 'LISTED') return listingsMap.has(v.card.code);
-      if (activeFilter === 'COMPLETED') return v.status === 'sold';
-      if (activeFilter === 'LOCKED') return v.status === 'grading';
+      if (activeFilter === 'IN_TRANSIT') return v.itemStatus === 'IN_TRANSIT';
+      if (activeFilter === 'REDEEMING') return v.itemStatus === 'REDEEMING';
+      if (activeFilter === 'COMPLETED') return v.itemStatus === 'DELIVERED' || v.status === 'sold';
+      if (activeFilter === 'LOCKED') return v.itemStatus === 'LOCKED';
       return false;
     });
   }, [vault, vaultViewMode, activeFilter, listingsMap]);
@@ -175,11 +199,11 @@ export function VaultScreen() {
 
       <div className="space-y-6">
         {/* Profile header */}
-        {profileLoading || !profile ? (
+        {profileLoading && !profile ? (
           <VaultProfileHeaderSkeleton />
         ) : (
           <VaultProfileHeader
-            profile={profile}
+            profile={effectiveProfile}
             isOwner={isOwner}
             isFollowing={isFollowing}
             onFollow={() => {
@@ -189,7 +213,7 @@ export function VaultScreen() {
             onShare={() => {
               const url = typeof window !== 'undefined' ? window.location.href : '';
               if (navigator.share) {
-                navigator.share({ title: profile.displayName || profile.name, url }).catch(() => {});
+                navigator.share({ title: effectiveProfile.displayName || effectiveProfile.name, url }).catch(() => {});
               } else if (navigator.clipboard) {
                 navigator.clipboard.writeText(url).catch(() => {});
               }
@@ -216,30 +240,44 @@ export function VaultScreen() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="glass-card rounded-xl p-3">
-          <p className="text-[9px] font-mono text-muted-foreground mb-1">{t('vault.stats.value')}</p>
-          <p className="text-sm font-bold font-mono text-foreground">฿{totalValue.toLocaleString()}</p>
+          <div className="glass-card rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-md bg-brand/10 flex items-center justify-center">
+                <Wallet className="w-3.5 h-3.5 text-brand" />
+              </div>
+              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.value')}</p>
+            </div>
+            <p className="text-sm font-bold font-mono text-foreground">฿{totalValue.toLocaleString()}</p>
+          </div>
+          <div className="glass-card rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-md bg-periwinkle/10 flex items-center justify-center">
+                <Package className="w-3.5 h-3.5 text-periwinkle" />
+              </div>
+              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.cards')}</p>
+            </div>
+            <p className="text-sm font-bold font-mono">{cardCount}</p>
+            <p className="text-[9px] text-muted-foreground">{heldCards.length} {t('vault.stats.held')}</p>
+          </div>
+          <div className="glass-card rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <div className={cn('w-6 h-6 rounded-md flex items-center justify-center', totalPL >= 0 ? 'bg-cyan/10' : 'bg-pldown/10')}>
+                {totalPL >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-cyan" /> : <TrendingDown className="w-3.5 h-3.5 text-pldown" />}
+              </div>
+              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.pl')}</p>
+            </div>
+            <p className={cn(
+              'text-sm font-bold font-mono flex items-center gap-1',
+              totalPL >= 0 ? 'text-plup' : 'text-pldown'
+            )}>
+              ฿{Math.abs(totalPL).toLocaleString()}
+            </p>
+            <p className="text-[9px] text-muted-foreground">
+              {totalPL >= 0 ? '+' : '-'}
+              {totalValue > totalPL ? ((totalPL / (totalValue - totalPL)) * 100).toFixed(1) : '0.0'}%
+            </p>
+          </div>
         </div>
-        <div className="glass-card rounded-xl p-3">
-          <p className="text-[9px] font-mono text-muted-foreground mb-1">{t('vault.stats.cards')}</p>
-          <p className="text-sm font-bold font-mono">{cardCount}</p>
-          <p className="text-[9px] text-muted-foreground">{heldCards.length} {t('vault.stats.held')}</p>
-        </div>
-        <div className="glass-card rounded-xl p-3">
-          <p className="text-[9px] font-mono text-muted-foreground mb-1">{t('vault.stats.pl')}</p>
-          <p className={cn(
-            'text-sm font-bold font-mono flex items-center gap-1',
-            totalPL >= 0 ? 'text-plup' : 'text-pldown'
-          )}>
-            {totalPL >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-            ฿{Math.abs(totalPL).toLocaleString()}
-          </p>
-          <p className="text-[9px] text-muted-foreground">
-            {totalPL >= 0 ? '+' : '-'}
-            {totalValue > totalPL ? ((totalPL / (totalValue - totalPL)) * 100).toFixed(1) : '0.0'}%
-          </p>
-        </div>
-      </div>
 
       {/* Vault / Store Toggle */}
       <div className="flex items-center justify-center">
@@ -335,7 +373,7 @@ export function VaultScreen() {
 
       {/* Bulk action bar */}
       {selecting && selectedIds.size > 0 && (
-        <div className="flex items-center justify-between rounded-2xl border border-border bg-surface-light p-4">
+        <div className="flex items-center justify-between rounded-xl border border-border bg-surface-light p-4">
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium">{t('common.selected', { count: selectedIds.size })}</span>
             <button onClick={() => {
@@ -398,7 +436,7 @@ export function VaultScreen() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="space-y-2">
-                <Skeleton className="aspect-[5/7] rounded-2xl" />
+                <Skeleton className="aspect-[5/7] rounded-xl" />
                 <Skeleton className="h-3 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
               </div>
@@ -406,7 +444,7 @@ export function VaultScreen() {
           </div>
         )
       ) : filteredCards.length === 0 ? (
-        <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-20">
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
           <EmptyMedia variant="icon">
             <Package className="w-8 h-8 text-brand" />
           </EmptyMedia>
@@ -488,7 +526,7 @@ export function VaultScreen() {
       {/* Confirm Unlist Dialog */}
       {confirmUnlistOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-border bg-surface-light p-6 space-y-4">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-surface-light p-6 space-y-4">
             <h3 className="text-lg font-semibold">{t('vault.confirmUnlist.title')}</h3>
             <p className="text-sm text-muted-foreground">
               {t('vault.confirmUnlist.description', { count: selectedIds.size })}

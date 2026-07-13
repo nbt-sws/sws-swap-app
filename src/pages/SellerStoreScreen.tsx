@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Star, Package, Heart, MapPin, Store, FolderOpen, Search, ShieldCheck, SlidersHorizontal,
@@ -116,9 +117,9 @@ export function SellerStoreScreen() {
   if (listingsLoading || profileLoading) {
     return (
       <PageContainer className="py-6">
-        <Skeleton className="h-64 w-full rounded-2xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
         <div className="flex justify-center -mt-12 mb-6">
-          <Skeleton className="w-24 h-24 rounded-2xl border-4 border-surface-light" />
+          <Skeleton className="w-24 h-24 rounded-xl border-4 border-surface-light" />
         </div>
         <Skeleton className="h-8 w-1/2 mx-auto mb-2" />
         <Skeleton className="h-4 w-1/3 mx-auto mb-6" />
@@ -128,13 +129,19 @@ export function SellerStoreScreen() {
 
   if (!storeSeller) {
     return (
-      <PageContainer className="py-6 text-center">
-        <Store className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-        <h1 className="text-xl font-bold">Store not found</h1>
-        <p className="text-muted-foreground mb-4">This seller does not exist or has no active listings.</p>
-        <Button asChild className="bg-brand hover:bg-brand-light">
-          <Link to="/stores">Browse stores</Link>
-        </Button>
+      <PageContainer className="py-6">
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
+          <EmptyMedia variant="icon">
+            <Store className="w-8 h-8 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Store not found</EmptyTitle>
+            <EmptyDescription>This seller does not exist or has no active listings.</EmptyDescription>
+          </EmptyHeader>
+          <Button asChild className="bg-brand hover:bg-brand-light">
+            <Link to="/stores">Browse stores</Link>
+          </Button>
+        </Empty>
       </PageContainer>
     );
   }
@@ -166,7 +173,7 @@ export function SellerStoreScreen() {
       <div className="relative mb-8">
         <div
           className={cn(
-            'h-48 sm:h-64 rounded-2xl bg-cover bg-center relative overflow-hidden',
+            'h-48 sm:h-64 rounded-xl bg-cover bg-center relative overflow-hidden',
             !profile?.bannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-surface-dark'
           )}
           style={profile?.bannerUrl ? { backgroundImage: `url(${profile.bannerUrl})` } : undefined}
@@ -178,9 +185,9 @@ export function SellerStoreScreen() {
         </div>
 
         <div className="flex flex-col items-center -mt-16 px-4 text-center">
-          <Avatar className="w-32 h-32 rounded-2xl border-4 border-surface-light shadow-xl bg-surface-lighter">
+          <Avatar className="w-32 h-32 rounded-xl border-4 border-surface-light shadow-xl bg-surface-lighter">
             <AvatarImage src={profile?.avatarUrl} alt={displayName} className="object-cover" />
-            <AvatarFallback className="rounded-2xl text-3xl font-bold bg-surface-lighter text-foreground">
+            <AvatarFallback className="rounded-xl text-3xl font-bold bg-surface-lighter text-foreground">
               {displayName.charAt(0)}
             </AvatarFallback>
           </Avatar>

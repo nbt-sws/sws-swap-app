@@ -8,7 +8,7 @@ import {
 } from '@/lib/api';
 import * as mockApi from '@/services/mockApi';
 import type {
-  CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview,
+  CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, Card,
 } from '@/types';
 import type { ApiCollectorProfile } from '@/types/api';
 import {
@@ -22,6 +22,7 @@ import {
   mapApiNotification,
   mapApiRedemption,
   mapApiVaultDelivery,
+  placeholderCard,
 } from '@/lib/api-mappers';
 
 import { useAuthStore } from '@/stores/auth';
@@ -38,12 +39,12 @@ export async function withFallback<T>(apiCall: () => Promise<T>, fallback: () =>
 export function useVault() {
   const { isAuthenticated, user } = useAuthStore();
   return useQuery({
-    queryKey: ['vault'],
+    queryKey: ['vault', user?.id],
     queryFn: async () => {
       const items = await withFallback(
         async () => {
           if (!user?.id) return [];
-          const res = await vaultApi.getItems({ holderId: user.id });
+          const res = await vaultApi.getItems({ ownerId: user.id });
           return res.items.map(mapApiItemToVaultItem);
         },
         () => mockApi.fetchVault()
@@ -51,7 +52,7 @@ export function useVault() {
       return items;
     },
     staleTime: 1000 * 60 * 2,
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !!user?.id,
   });
 }
 
@@ -79,8 +80,44 @@ export function useVaultItem(itemId: string) {
 
 export function useAddToVault() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   return useMutation({
-    mutationFn: (item: Parameters<typeof vaultApi.registerItem>[0]) => vaultApi.registerItem(item),
+    mutationFn: async (item: Parameters<typeof vaultApi.registerItem>[0]) => {
+      if (USE_MOCK) {
+        return mockApi.addToVault({
+          card: placeholderCard({
+            id: item.sku,
+            code: item.sku,
+            nameEn: item.name,
+            condition: (item.condition ?? 'Raw') as Card['condition'],
+          }),
+          ownerId: user?.id,
+          holderId: user?.id,
+          paidPrice: typeof item.metadata?.paidPrice === 'number' ? item.metadata.paidPrice : 0,
+          currency: 'THB',
+          dateAcquired: typeof item.metadata?.dateAcquired === 'string' ? item.metadata.dateAcquired : new Date().toISOString().split('T')[0],
+          source: typeof item.metadata?.source === 'string' ? item.metadata.source : (item.category ?? 'Manual entry'),
+          condition: item.condition ?? 'Raw',
+          status: 'held',
+          itemStatus: 'AVAILABLE',
+          plAmount: 0,
+          plPercent: 0,
+        } as Omit<import('@/types').VaultItem, 'id' | 'currentPrice' | 'plAmount' | 'plPercent'>);
+      }
+      return vaultApi.registerItem(item);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vault'] }),
+  });
+}
+
+export function useConsignToPlatform() {
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  return useMutation({
+    mutationFn: (itemId: string) =>
+      USE_MOCK
+        ? mockApi.consignItemToPlatform(itemId, user?.id)
+        : vaultApi.consignToPlatform(itemId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vault'] }),
   });
 }
@@ -297,15 +334,29 @@ export function useCreateListing() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   return useMutation({
-    mutationFn: (input: CreateListingInput) =>
-      listingsApi.create({
+    mutationFn: async (input: CreateListingInput) => {
+      if (USE_MOCK) {
+        return mockApi.createListing(input, user?.id, user?.fullName ?? 'Me');
+      }
+      const res = await listingsApi.create({
         itemId: input.itemId ?? input.card.id,
         title: input.card.nameEn,
         description: input.description,
         price: input.price,
         category: input.shelf,
         itemFormat: input.listingType,
-      }),
+      });
+      return mapApiListingToMarketListing({
+        listingId: res.listingId,
+        itemId: input.itemId ?? input.card.id,
+        sellerId: user?.id ?? '',
+        title: input.card.nameEn,
+        price: input.price,
+        currency: 'THB',
+        status: 'ACTIVE',
+        createdAt: new Date().toISOString(),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myListings'] });
       queryClient.invalidateQueries({ queryKey: ['market'] });
@@ -445,6 +496,7 @@ export function useUpdateOrderStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['vault'] });
     },
   });
 }
@@ -609,10 +661,11 @@ export function useUserAuditHistory(userId: string) {
 
 export function useVaultDelivery() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   return useMutation({
     mutationFn: async ({ itemId, shippingAddress }: { itemId: string; shippingAddress?: ShippingAddress }) => {
       if (USE_MOCK) {
-        return mockApi.createVaultDelivery(itemId, shippingAddress ?? { name: '', address: '', province: '', postalCode: '', phone: '' });
+        return mockApi.createVaultDelivery(itemId, shippingAddress ?? { name: '', address: '', province: '', postalCode: '', phone: '' }, user?.id);
       }
       const res = await vaultApi.createVaultDelivery(itemId, { shippingAddress: shippingAddress ?? { name: '', address: '', province: '', postalCode: '', phone: '' } });
       return res;
@@ -626,10 +679,11 @@ export function useVaultDelivery() {
 
 export function useCreateRedemption() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   return useMutation({
     mutationFn: async ({ itemId, shippingAddress }: { itemId: string; shippingAddress: ShippingAddress }) => {
       if (USE_MOCK) {
-        return mockApi.createRedemption(itemId, shippingAddress);
+        return mockApi.createRedemption(itemId, shippingAddress, user?.id);
       }
       const res = await vaultApi.createRedemption(itemId, { shippingAddress });
       return res;

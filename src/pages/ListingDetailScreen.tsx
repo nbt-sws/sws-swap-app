@@ -79,7 +79,7 @@ export function ListingDetailScreen() {
   if (!listing) {
     return (
       <PageContainer className="py-6">
-        <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-20">
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
           <EmptyMedia variant="icon">
             <Package className="w-8 h-8 text-brand" />
           </EmptyMedia>

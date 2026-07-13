@@ -63,6 +63,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           fullName: apiUser.name || apiUser.email,
           avatarUrl: apiUser.avatarUrl,
           tier: apiUser.tier,
+          role: apiUser.tier,
           kycStatus: apiUser.kycStatus,
           currency: apiUser.currency || 'THB',
           preferredGrader: apiUser.preferredGrader,
@@ -106,15 +107,19 @@ export const useAuthStore = create<AuthState>((set, get) => {
 });
 
 export function getUserRole(user: AuthUser | null): UserRole {
-  return user?.tier ?? 'GUEST';
+  return user?.role ?? user?.tier ?? 'GUEST';
 }
 
 export function isAdmin(user: AuthUser | null): boolean {
   return user?.tier === 'ADMIN';
 }
 
+export function isSubscriber(user: AuthUser | null): boolean {
+  return user?.tier === 'SUBSCRIBER';
+}
+
 export function isMember(user: AuthUser | null): boolean {
-  return user?.tier === 'MEMBER' || user?.tier === 'ADMIN';
+  return user?.tier === 'MEMBER' || user?.tier === 'SUBSCRIBER' || user?.tier === 'ADMIN';
 }
 
 export function isRegularUser(user: AuthUser | null): boolean {

@@ -354,7 +354,7 @@ export function MarketScreen() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
               {Array.from({ length: 10 }).map((_, i) => (
                 <div key={i} className="space-y-2 h-full">
-                  <Skeleton className="aspect-[5/7] rounded-2xl" />
+                  <Skeleton className="aspect-[5/7] rounded-xl" />
                   <Skeleton className="h-3 w-3/4" />
                   <Skeleton className="h-3 w-1/2" />
                 </div>
@@ -379,7 +379,7 @@ export function MarketScreen() {
             </div>
           )
         ) : filteredListings.length === 0 ? (
-          <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-20">
+          <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
             <EmptyMedia variant="icon">
               <Package className="w-8 h-8 text-brand" />
             </EmptyMedia>

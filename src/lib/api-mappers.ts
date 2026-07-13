@@ -16,6 +16,7 @@ import type {
   ApiRedemption,
   ApiVaultDelivery,
 } from '@/types/api';
+import { SWS_PLATFORM_USER_UUID } from '@/lib/utils';
 import type { AuthUser } from '@/types/auth';
 import type {
   Notification,
@@ -37,6 +38,7 @@ export function mapApiUserToAuthUser(apiUser: ApiUser): AuthUser {
     fullName: apiUser.name,
     avatarUrl: apiUser.avatarUrl,
     tier: apiUser.tier,
+    role: apiUser.tier,
     kycStatus: apiUser.kycStatus,
     currency: apiUser.currency || 'THB',
     preferredGrader: apiUser.preferredGrader,
@@ -47,7 +49,7 @@ export function mapApiUserToAuthUser(apiUser: ApiUser): AuthUser {
   };
 }
 
-function placeholderCard(overrides: Partial<Card> = {}): Card {
+export function placeholderCard(overrides: Partial<Card> = {}): Card {
   return {
     id: overrides.id ?? '',
     code: overrides.code ?? '',
@@ -62,8 +64,18 @@ function placeholderCard(overrides: Partial<Card> = {}): Card {
   };
 }
 
+function mapApiHolderId(holderId?: string): string | undefined {
+  if (!holderId) return holderId;
+  return holderId === SWS_PLATFORM_USER_UUID ? 'sws-platform' : holderId;
+}
+
+function mapApiOwnerId(ownerId?: string): string | undefined {
+  if (!ownerId) return ownerId;
+  return ownerId === SWS_PLATFORM_USER_UUID ? 'sws-platform' : ownerId;
+}
+
 export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
-  const inVault = ['VAULT_HELD', 'AVAILABLE', 'LOCKED'].includes(apiItem.status);
+  const inVault = ['VAULT_HELD', 'AVAILABLE', 'LOCKED', 'IN_TRANSIT', 'REDEEMING', 'SUSPENDED'].includes(apiItem.status);
   const metadata = apiItem.metadata ?? {};
   const paidPrice = typeof metadata.paidPrice === 'number' ? metadata.paidPrice : 0;
   const dateAcquired = typeof metadata.dateAcquired === 'string' ? metadata.dateAcquired : apiItem.createdAt;
@@ -77,8 +89,8 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
       imageUrl: apiItem.imageUrl,
       condition: (apiItem.condition ?? 'Raw') as Card['condition'],
     }),
-    ownerId: apiItem.ownerId,
-    holderId: apiItem.holderId,
+    ownerId: mapApiOwnerId(apiItem.ownerId),
+    holderId: mapApiHolderId(apiItem.holderId),
     paidPrice,
     currentPrice: 0,
     currency: 'THB',
@@ -86,6 +98,7 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
     source,
     condition: apiItem.condition ?? 'Raw',
     status: apiItem.status === 'DELIVERED' || apiItem.status === 'REDEEMED' ? 'sold' : inVault ? 'held' : 'held',
+    itemStatus: apiItem.status,
     plAmount: 0,
     plPercent: 0,
   };
@@ -103,14 +116,17 @@ export function mapApiListingToMarketListing(apiListing: ApiListing): MarketList
     }),
     price: apiListing.price,
     currency: apiListing.currency,
-    listingType: 'SALE',
-    shelf: 'RAW',
+    listingType: (apiListing.itemFormat === 'TRADE' ? 'TRADE' : 'SALE') as MarketListing['listingType'],
+    shelf: (apiListing.category ?? 'RAW') as MarketListing['shelf'],
     seller: {
       id: apiListing.sellerId,
       name: apiListing.sellerDisplayName || `Seller ${apiListing.sellerId.slice(0, 6)}`,
       rating: 0,
     },
-    vaultVerified: false,
+    vaultVerified: !!apiListing.holderId && apiListing.holderId !== apiListing.ownerId,
+    itemId: apiListing.itemId,
+    ownerId: apiListing.ownerId,
+    holderId: mapApiHolderId(apiListing.holderId),
     timestamp: apiListing.createdAt,
     status: apiListing.status.toLowerCase() as MarketListing['status'],
     views: 0,

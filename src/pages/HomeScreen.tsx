@@ -129,7 +129,7 @@ function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
 function QuickActions({ t }: { t: (k: string, o?: Record<string, unknown>) => string }) {
   const actions = [
     { key: 'scan', icon: Scan, to: '/scan', className: 'bg-brand-gradient text-white shadow-glow hover:opacity-90' },
-    { key: 'addVault', icon: Plus, to: '/add-to-vault' },
+    { key: 'addVault', icon: Plus, to: '/vault', search: { action: 'register' as const } },
     { key: 'sell', icon: Store, to: '/seller' },
     { key: 'market', icon: ShoppingBag, to: '/market' },
     { key: 'orders', icon: ClipboardList, to: '/orders' },
@@ -146,6 +146,7 @@ function QuickActions({ t }: { t: (k: string, o?: Record<string, unknown>) => st
             <Link
               key={a.key}
               to={a.to}
+              search={a.search as { action: 'register' } | undefined}
               className="group flex flex-col items-center gap-2"
             >
               <div
@@ -192,7 +193,8 @@ function VaultSnapshot({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
             <Package className="h-10 w-10 text-muted-foreground/60" />
             <p className="mt-2 text-sm text-muted-foreground">{t('home.vaultSnapshot.empty')}</p>
             <Link
-              to="/add-to-vault"
+              to="/vault"
+              search={{ action: 'register' as const }}
               className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-light"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -249,7 +251,7 @@ function MarketPulse({ listings, loading, t }: { listings?: MarketListing[]; loa
           ))}
         </div>
       ) : !listings || listings.length === 0 ? (
-        <Empty className="mt-3 rounded-2xl border-dashed border-border bg-surface-light/50 py-10">
+        <Empty className="mt-3 rounded-xl border-dashed border-border bg-surface-light/50 py-10">
           <EmptyMedia variant="icon">
             <ShoppingBag className="w-8 h-8 text-brand" />
           </EmptyMedia>

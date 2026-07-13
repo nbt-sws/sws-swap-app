@@ -380,5 +380,57 @@
       "following": "Following",
       "share": "Share"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "account": "Account",
+      "preferences": "Preferences",
+      "support": "Support",
+      "danger": "Danger Zone"
+    },
+    "items": {
+      "profile": "Profile",
+      "subscription": "Subscription",
+      "role": "Role",
+      "kyc": "KYC",
+      "currency": "Currency",
+      "notifications": "Notifications",
+      "appearance": "Appearance",
+      "language": "Language",
+      "terms": "Terms of service",
+      "privacy": "Privacy policy",
+      "dataSources": "Data sources",
+      "help": "Help & support",
+      "deleteAccount": "Delete my account",
+      "signOut": "Sign Out"
+    },
+    "kycStatus": {
+      "verified": "Verified",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "notStarted": "Not started"
+    },
+    "tier": {
+      "admin": "Admin",
+      "subscriber": "Subscriber",
+      "member": "Member",
+      "regular": "Free",
+      "guest": "Guest"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "memberSince": "Member since {{date}}",
+    "toasts": {
+      "terms": "Terms of service coming soon",
+      "privacy": "Privacy policy coming soon",
+      "dataSources": "Data sources: eBay, Yahoo! JP, domestic Thai marketplaces",
+      "help": "Support contact coming soon",
+      "deleteConfirm": "This is a demo. Account deletion is not implemented.",
+      "deleteRequested": "Account deletion request received (demo)"
+    }
   }
 }

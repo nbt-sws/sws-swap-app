@@ -23,9 +23,13 @@ export interface VaultItem {
   source: string;
   condition: string;
   status: 'held' | 'sold' | 'grading';
+  itemStatus?: import('./api').ApiItemStatus;
   soldFor?: number;
   plAmount: number;
   plPercent: number;
+  serviceOrderId?: string;
+  serviceOrderStatus?: string;
+  listingId?: string;
 }
 
 export interface MarketListing {
@@ -41,6 +45,9 @@ export interface MarketListing {
     rating: number;
   };
   vaultVerified: boolean;
+  itemId?: string;
+  ownerId?: string;
+  holderId?: string;
   timestamp: string;
   status?: 'active' | 'paused' | 'sold';
   views?: number;
@@ -119,6 +126,8 @@ export interface ServicePackage {
   imageUrl?: string;
   enabled: boolean;
   grader?: GradingService;
+  cutoffDate?: string;
+  shippingDate?: string;
 }
 
 export interface ServiceFaq {
@@ -153,6 +162,13 @@ export interface ServiceProvider {
   acceptedGraders?: GradingService[];
 }
 
+export interface ServiceOrderStage {
+  key: string;
+  label: string;
+  completed: boolean;
+  timestamp?: string;
+}
+
 export interface ServiceOrder {
   id: string;
   userId: string;
@@ -161,12 +177,17 @@ export interface ServiceOrder {
   providerName: string;
   storeId: string;
   packageId?: string;
+  packageName?: string;
+  grader?: GradingService;
   cardIds: string[];
   status: 'PENDING' | 'RECEIVED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  stages: ServiceOrderStage[];
   totalAmount: number;
   currency: string;
   shippingAddress?: ShippingAddress;
   trackingNumber?: string;
+  lotNumber?: string;
+  labOrderNumber?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -177,6 +198,14 @@ export interface ServiceOrderInput {
   packageId?: string;
   cardIds: string[];
   shippingAddress?: ShippingAddress;
+}
+
+export interface ServiceOrderUpdate {
+  status?: ServiceOrder['status'];
+  stages?: ServiceOrderStage[];
+  lotNumber?: string;
+  labOrderNumber?: string;
+  trackingNumber?: string;
 }
 
 export interface ProposedPackage {
@@ -345,9 +374,12 @@ export interface Order {
   buyerId: string;
   sellerId: string;
   listing: MarketListing;
+  itemId?: string;
   subtotal: number;
   fee: number;
   shipping: number;
+  platformFee?: number;
+  sellerPayout?: number;
   total: number;
   status: OrderStatus;
   deliveryPreference: 'SHIP' | 'VAULT_STORE';

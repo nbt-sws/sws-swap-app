@@ -1,4 +1,5 @@
 import type { AuthUser, UserRole } from '@/types/auth';
+import { isAdmin, isMember } from '@/stores/auth';
 
 export interface NavLinkDef {
   to: string;
@@ -29,8 +30,8 @@ export function canAccessRoute(
   user: AuthUser | null,
   route: { requiresAuth?: boolean; requiresMember?: boolean; requiresAdmin?: boolean }
 ): boolean {
-  if (route.requiresAdmin) return user?.tier === 'ADMIN';
-  if (route.requiresMember) return user?.tier === 'MEMBER' || user?.tier === 'ADMIN';
+  if (route.requiresAdmin) return isAdmin(user);
+  if (route.requiresMember) return isMember(user);
   if (route.requiresAuth) return !!user;
   return true;
 }
@@ -40,9 +41,9 @@ export function authGuard(user: AuthUser | null): boolean {
 }
 
 export function memberGuard(user: AuthUser | null): boolean {
-  return user?.tier === 'MEMBER' || user?.tier === 'ADMIN';
+  return isMember(user);
 }
 
 export function adminGuard(user: AuthUser | null): boolean {
-  return user?.tier === 'ADMIN';
+  return isAdmin(user);
 }

@@ -5,7 +5,8 @@ import { useServiceProviders, useCreateServiceOrder } from '@/hooks/useServices'
 import { motion } from 'framer-motion';
 import { ScrollablePage } from '@/components/layout/ScrollablePage';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Check, Clock, Package, Store, Upload } from 'lucide-react';
+import { Check, Clock, Package, Store, Upload, FlaskConical } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
 import type { ServiceCategory, ServiceProvider } from '@/types';
 import { GRADER_STYLES } from '@/lib/graderAssets';
@@ -19,11 +20,11 @@ const DELIVERY_ICON: Record<ServiceProvider['deliveryMode'], typeof Upload> = {
 };
 
 const COLOR_RING: Record<ServiceProvider['color'], string> = {
-  brand: 'ring-brand/30 border-brand/30',
-  periwinkle: 'ring-periwinkle/30 border-periwinkle/30',
-  cyan: 'ring-cyan/30 border-cyan/30',
-  pregrade: 'ring-emerald-500/30 border-emerald-500/30',
-  plup: 'ring-violet-500/30 border-violet-500/30',
+  brand: 'ring-2 ring-brand/50 border-brand/50 bg-brand/10',
+  periwinkle: 'ring-2 ring-periwinkle/50 border-periwinkle/50 bg-periwinkle/10',
+  cyan: 'ring-2 ring-cyan/50 border-cyan/50 bg-cyan/10',
+  pregrade: 'ring-2 ring-emerald-500/50 border-emerald-500/50 bg-emerald-500/10',
+  plup: 'ring-2 ring-violet-500/50 border-violet-500/50 bg-violet-500/10',
 };
 
 export function PregradeOrderScreen() {
@@ -139,9 +140,15 @@ export function PregradeOrderScreen() {
           {providersLoading ? (
             <div className="h-24 bg-surface-light rounded-xl animate-pulse" />
           ) : filteredProviders.length === 0 ? (
-            <div className="bg-surface-light rounded-xl p-4 text-center">
-              <p className="text-sm text-muted-foreground">No labs available for this category.</p>
-            </div>
+            <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-10">
+              <EmptyMedia variant="icon">
+                <FlaskConical className="w-8 h-8 text-brand" />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle>No labs available</EmptyTitle>
+                <EmptyDescription>There are no grading providers for this category right now.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <div className="flex flex-col gap-2">
               {filteredProviders.map((p) => {
@@ -216,11 +223,16 @@ export function PregradeOrderScreen() {
           )}
         </div>
 
-        {/* Package selection */}
+        {/* Package selection — sticky & compact */}
         {provider && packages.length > 0 && (
-          <div>
-            <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">PACKAGE</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-surface-dark/95 backdrop-blur border-b border-border/50">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-mono tracking-wider text-muted-foreground">PACKAGE</p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                Selected: <span className="text-foreground font-medium">{selectedPackage?.name}</span>
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {packages.map((pkg) => {
                 const selected = selectedPackage?.id === pkg.id;
                 const DeliveryIcon = DELIVERY_ICON[pkg.deliveryMode];
@@ -229,41 +241,34 @@ export function PregradeOrderScreen() {
                     key={pkg.id}
                     onClick={() => setSelectedPackageId(pkg.id)}
                     className={cn(
-                      'text-left p-3 rounded-xl border transition-all bg-surface-light',
-                      selected ? 'border-brand/30 ring-1 ring-brand/30' : 'border-transparent'
+                      'text-left p-2 rounded-lg border transition-all bg-surface-light flex items-center gap-2',
+                      selected ? 'border-brand/50 ring-2 ring-brand/50 bg-brand/10' : 'border-transparent hover:bg-surface-lighter'
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-sm font-bold truncate">{pkg.name}</span>
-                        {pkg.grader && (
-                          <span className={cn('text-[8px] px-1 py-0.5 rounded border font-medium', GRADER_STYLES[pkg.grader])}>
-                            {pkg.grader === 'OTHER' ? 'Other' : pkg.grader}
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        className={cn(
-                          'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',
-                          selected ? 'bg-brand border-brand' : 'border-muted-foreground/30'
-                        )}
-                      >
-                        {selected && <Check className="w-2.5 h-2.5 text-white" />}
-                      </div>
+                    <div
+                      className={cn(
+                        'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',
+                        selected ? 'bg-brand border-brand' : 'border-muted-foreground/30'
+                      )}
+                    >
+                      {selected && <Check className="w-2.5 h-2.5 text-white" />}
                     </div>
-                    <p className="text-[10px] text-muted-foreground mb-1 flex items-center gap-2">
-                      <span className="flex items-center gap-0.5">
-                        <Clock className="w-3 h-3" />
-                        {pkg.turnaround}
-                      </span>
-                      <span className="flex items-center gap-0.5">
-                        <DeliveryIcon className="w-3 h-3" />
-                        {pkg.deliveryMode.replace(/_/g, ' ').toLowerCase()}
-                      </span>
-                    </p>
-                    <p className="text-xs font-mono font-bold text-brand">
-                      {pkg.currency} {pkg.pricePerCard.toLocaleString()} / card
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold truncate">{pkg.name}</p>
+                      <p className="text-[9px] text-muted-foreground flex items-center gap-1.5 flex-wrap">
+                        <span className="flex items-center gap-0.5">
+                          <Clock className="w-2.5 h-2.5" />
+                          {pkg.turnaround}
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <DeliveryIcon className="w-2.5 h-2.5" />
+                          {pkg.deliveryMode.replace(/_/g, ' ').toLowerCase()}
+                        </span>
+                      </p>
+                      <p className="text-[10px] font-mono font-bold text-brand">
+                        {pkg.currency} {pkg.pricePerCard.toLocaleString()} <span className="text-[9px] font-normal text-muted-foreground">/ card</span>
+                      </p>
+                    </div>
                   </button>
                 );
               })}
@@ -308,9 +313,15 @@ export function PregradeOrderScreen() {
               </button>
             ))}
             {heldCards.length === 0 && (
-              <div className="bg-surface-light rounded-xl p-4 text-center">
-                <p className="text-sm text-muted-foreground">No raw cards available in your vault.</p>
-              </div>
+              <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-10">
+                <EmptyMedia variant="icon">
+                  <Package className="w-8 h-8 text-brand" />
+                </EmptyMedia>
+                <EmptyHeader>
+                  <EmptyTitle>No raw cards</EmptyTitle>
+                  <EmptyDescription>Your vault has no held cards available for grading.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             )}
           </div>
         </div>

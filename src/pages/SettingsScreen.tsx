@@ -1,33 +1,105 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useUser } from '@/hooks/useApi';
 import { motion } from 'framer-motion';
-import { ChevronRight, User, Bell, Palette, FileText, Shield, Database, Trash2, Star, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  ChevronRight,
+  User,
+  Bell,
+  Palette,
+  FileText,
+  Shield,
+  Database,
+  Trash2,
+  Settings,
+  BadgeCheck,
+  Crown,
+  Globe,
+  LifeBuoy,
+  Wallet,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
+import { version as APP_VERSION } from '../../package.json';
+import { cn } from '@/lib/utils';
 
-interface SettingsItem {
-  icon: LucideIcon | null;
+interface SettingsRowProps {
+  icon: LucideIcon;
   label: string;
   value?: string;
   hasArrow?: boolean;
   danger?: boolean;
-  status?: string;
+  status?: 'active' | 'warning' | 'muted';
   onClick?: () => void;
 }
 
-interface SettingsSection {
-  title: string;
-  items: SettingsItem[];
+function SettingsRow({ icon: Icon, label, value, hasArrow, danger, status, onClick }: SettingsRowProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset',
+        onClick ? 'hover:bg-surface-lighter' : '',
+        danger ? 'text-pldown' : ''
+      )}
+    >
+      <div className="w-8 h-8 rounded-lg bg-surface-lighter flex items-center justify-center shrink-0">
+        <Icon className={cn('w-4 h-4', danger ? 'text-pldown' : 'text-muted-foreground')} />
+      </div>
+      <span className={cn('flex-1 text-sm', danger ? 'text-pldown' : '')}>{label}</span>
+      {value && (
+        <span
+          className={cn(
+            'text-xs',
+            status === 'active'
+              ? 'text-cyan'
+              : status === 'warning'
+              ? 'text-warning'
+              : !status
+              ? 'text-muted-foreground'
+              : ''
+          )}
+        >
+          {value}
+        </span>
+      )}
+      {hasArrow && (
+        <ChevronRight className={cn('w-4 h-4 shrink-0', danger ? 'text-pldown' : 'text-muted-foreground')} />
+      )}
+    </button>
+  );
+}
+
+function SectionCard({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn('bg-surface-light rounded-xl overflow-hidden', className)}>
+      {children}
+    </div>
+  );
+}
+
+function formatMemberSince(date?: string, locale = 'en-US'): string | undefined {
+  if (!date) return undefined;
+  try {
+    return new Date(date).toLocaleDateString(locale, { year: 'numeric', month: 'short' });
+  } catch {
+    return undefined;
+  }
 }
 
 export function SettingsScreen() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const logout = useAuthStore((s) => s.logout);
-  const { toggleTheme } = useThemeStore();
-  const { data: user } = useUser();
+  const authUser = useAuthStore((s) => s.user);
+  const { theme, toggleTheme } = useThemeStore();
+  const { data: userQuery } = useUser();
+
+  const user = userQuery ?? authUser;
+  const currentLang = i18n.language?.startsWith('th') ? 'th' : 'en';
 
   const handleSignOut = () => {
     logout();
@@ -40,117 +112,237 @@ export function SettingsScreen() {
     }
   };
 
-  const sections: SettingsSection[] = [
-    {
-      title: 'ACCOUNT',
-      items: [
-        { icon: User, label: 'Account', value: user?.fullName || 'BoBoBoA', hasArrow: true, onClick: () => navigate({ to: '/profile' }) },
-        { icon: null, label: 'Subscription', value: user?.tier === 'MEMBER' ? 'member' : 'free', status: 'active' },
-        { icon: Bell, label: 'Notifications', hasArrow: true, onClick: () => navigate({ to: '/notifications' }) },
-        { icon: Palette, label: 'Appearance', value: 'dark', hasArrow: true, onClick: toggleTheme },
-      ],
+  const displayName = user?.fullName || user?.email || t('home.greeting.collector');
+  const email = user?.fullName ? user?.email : undefined;
+  const tier = user?.tier ?? 'GUEST';
+  const kyc = user?.kycStatus ?? 'NONE';
+  const isSubscribed = tier === 'MEMBER' || tier === 'SUBSCRIBER' || tier === 'ADMIN';
+  const kycVerified = kyc === 'APPROVED';
+
+  const tierLabel = t(`settings.tier.${(tier === 'GUEST' ? 'guest' : tier).toLowerCase()}`);
+  const kycLabel = t(`settings.kycStatus.${(kyc === 'NONE' ? 'notStarted' : kyc).toLowerCase()}`);
+
+  const tierRing =
+    tier === 'ADMIN'
+      ? 'ring-periwinkle shadow-[0_0_20px_rgba(123,138,245,0.3)]'
+      : tier === 'MEMBER' || tier === 'SUBSCRIBER'
+      ? 'ring-brand shadow-glow'
+      : 'ring-muted';
+
+  const tierBadge =
+    tier === 'ADMIN'
+      ? 'bg-periwinkle text-white'
+      : tier === 'MEMBER' || tier === 'SUBSCRIBER'
+      ? 'bg-brand text-white'
+      : 'bg-surface-lighter text-muted-foreground';
+
+  const kycBadge =
+    kyc === 'APPROVED'
+      ? 'bg-cyan/15 text-cyan'
+      : kyc === 'PENDING'
+      ? 'bg-warning/15 text-warning'
+      : kyc === 'REJECTED'
+      ? 'bg-pldown/15 text-pldown'
+      : 'bg-surface-lighter text-muted-foreground';
+
+  const memberSince = formatMemberSince(user?.createdAt, currentLang === 'th' ? 'th-TH' : 'en-US');
+
+  const handleToggleLanguage = () => {
+    const next = currentLang === 'th' ? 'en' : 'th';
+    i18n.changeLanguage(next);
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 },
     },
-    {
-      title: 'LEGAL',
-      items: [
-        { icon: FileText, label: 'Terms of service', hasArrow: true, onClick: () => showToast('Terms of service coming soon') },
-        { icon: Shield, label: 'Privacy policy', hasArrow: true, onClick: () => showToast('Privacy policy coming soon') },
-        { icon: Database, label: 'Data sources', hasArrow: true, onClick: () => showToast('Data sources: eBay, Yahoo! JP, domestic Thai marketplaces') },
-        { icon: Trash2, label: 'Delete my account', danger: true, onClick: () => {
-          if (confirm('This is a demo. Account deletion is not implemented.')) showToast('Account deletion request received (demo)');
-        } },
-      ],
-    },
-    {
-      title: 'ABOUT',
-      items: [
-        { icon: null, label: 'Version', value: '1.0.0 build 42' },
-        { icon: null, label: 'Developer', value: 'I1NOV', hasArrow: true, onClick: () => showToast('Built by I1NOV') },
-        { icon: Star, label: 'Rate on App Store', hasArrow: true, onClick: () => showToast('Thanks for rating!') },
-      ],
-    },
-  ];
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 8 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.15 } },
+  };
 
   return (
     <PageContainer className="py-6">
-      <PageHeader
-        title="Settings"
-        icon={<Settings className="w-6 h-6 text-brand" />}
-      />
+      <PageHeader title={t('settings.title')} icon={<Settings className="w-6 h-6 text-brand" />} />
 
-      <div className="space-y-6">
-        {/* Profile */}
-        <button
+      <motion.div
+        className="space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Identity Card */}
+        <motion.button
+          variants={itemVariants}
           onClick={() => navigate({ to: '/profile' })}
-          className="w-full bg-surface-light rounded-xl p-4 flex items-center gap-3 text-left hover:bg-surface-lighter transition"
+          className="w-full text-left bg-surface-light rounded-xl p-5 flex items-center gap-4 hover:bg-surface-lighter transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dark"
         >
-          <div className="w-12 h-12 rounded-full bg-brand-gradient flex items-center justify-center text-lg font-bold">
-            {user?.fullName?.charAt(0) || 'B'}
+          <div
+            className={cn(
+              'w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold bg-brand-gradient text-white ring-4 ring-offset-2 ring-offset-surface-dark shrink-0',
+              tierRing
+            )}
+          >
+            {user?.fullName?.charAt(0) || user?.email?.charAt(0) || 'C'}
           </div>
-          <div className="flex-1">
-            <p className="font-semibold">{user?.fullName || 'BoBoBoA'}</p>
-            <p className="text-xs text-muted-foreground">
-              {user?.tier === 'MEMBER' ? 'Member' : 'Free'} · {user?.kycStatus === 'APPROVED' ? 'KYC verified' : 'KYC pending'}
-            </p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
-
-        {/* Sections */}
-        {sections.map((section, si) => (
-          <div key={section.title} className="space-y-2">
-            <h3 className="text-[10px] font-mono tracking-wider text-muted-foreground px-1">
-              {section.title}
-            </h3>
-            <div className="bg-surface-light rounded-xl overflow-hidden">
-              {section.items.map((item, ii) => (
-                <motion.button
-                  key={item.label}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: si * 0.1 + ii * 0.05 }}
-                  onClick={item.onClick}
-                  className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors ${
-                    ii < section.items.length - 1 ? 'border-b border-border/50' : ''
-                  } ${item.danger ? 'text-pldown' : ''} ${item.onClick ? 'hover:bg-surface-lighter' : ''}`}
-                >
-                  {item.icon && (
-                    <div className="w-8 h-8 rounded-lg bg-surface-lighter flex items-center justify-center">
-                      <item.icon className={`w-4 h-4 ${item.danger ? 'text-pldown' : 'text-muted-foreground'}`} />
-                    </div>
-                  )}
-                  {!item.icon && <div className="w-8" />}
-                  <span className={`flex-1 text-sm ${item.danger ? 'text-pldown' : ''}`}>{item.label}</span>
-                  {item.value && (
-                    <span className={`text-xs ${
-                      item.status === 'active' ? 'text-cyan' : 'text-muted-foreground'
-                    }`}>
-                      {item.value}
-                    </span>
-                  )}
-                  {item.hasArrow && (
-                    <ChevronRight className={`w-4 h-4 ${item.danger ? 'text-pldown' : 'text-muted-foreground'}`} />
-                  )}
-                </motion.button>
-              ))}
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-semibold truncate">{displayName}</p>
+            {email && <p className="text-xs text-muted-foreground truncate">{email}</p>}
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide', tierBadge)}>
+                {tierLabel}
+              </span>
+              <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide', kycBadge)}>
+                {kycLabel}
+              </span>
             </div>
+            {memberSince && (
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                {t('settings.memberSince', { date: memberSince })}
+              </p>
+            )}
           </div>
-        ))}
+          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+        </motion.button>
 
-        {/* Footer */}
-        <div className="pb-2 text-center">
-          <p className="text-xs font-mono text-muted-foreground mb-1">SWIBSWAP · BY I1NOV</p>
-          <p className="text-[10px] text-muted-foreground/60">© 2026 · made in Bangkok</p>
-        </div>
+        {/* Account */}
+        <motion.div variants={itemVariants} className="space-y-2">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+            {t('settings.sections.account')}
+          </h3>
+          <SectionCard>
+            <SettingsRow
+              icon={User}
+              label={t('settings.items.profile')}
+              value={displayName}
+              hasArrow
+              onClick={() => navigate({ to: '/profile' })}
+            />
+            <SettingsRow
+              icon={Crown}
+              label={t('settings.items.subscription')}
+              value={tierLabel}
+              status={isSubscribed ? 'active' : 'muted'}
+            />
+            <SettingsRow icon={Shield} label={t('settings.items.role')} value={tierLabel} />
+            <SettingsRow
+              icon={BadgeCheck}
+              label={t('settings.items.kyc')}
+              value={kycLabel}
+              status={kycVerified ? 'active' : kyc === 'PENDING' ? 'warning' : 'muted'}
+              hasArrow={!kycVerified}
+              onClick={!kycVerified ? () => navigate({ to: '/profile', search: { tab: 'kyc' } }) : undefined}
+            />
+            <SettingsRow
+              icon={Wallet}
+              label={t('settings.items.currency')}
+              value={user?.currency || 'THB'}
+            />
+          </SectionCard>
+        </motion.div>
+
+        {/* Preferences */}
+        <motion.div variants={itemVariants} className="space-y-2">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+            {t('settings.sections.preferences')}
+          </h3>
+          <SectionCard>
+            <SettingsRow
+              icon={Bell}
+              label={t('settings.items.notifications')}
+              hasArrow
+              onClick={() => navigate({ to: '/notifications' })}
+            />
+            <SettingsRow
+              icon={Palette}
+              label={t('settings.items.appearance')}
+              value={t(`settings.theme.${theme === 'light' ? 'light' : theme === 'system' ? 'system' : 'dark'}`)}
+              hasArrow
+              onClick={toggleTheme}
+            />
+            <SettingsRow
+              icon={Globe}
+              label={t('settings.items.language')}
+              value={currentLang.toUpperCase()}
+              hasArrow
+              onClick={handleToggleLanguage}
+            />
+          </SectionCard>
+        </motion.div>
+
+        {/* Support */}
+        <motion.div variants={itemVariants} className="space-y-2">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+            {t('settings.sections.support')}
+          </h3>
+          <SectionCard>
+            <SettingsRow
+              icon={FileText}
+              label={t('settings.items.terms')}
+              hasArrow
+              onClick={() => showToast(t('settings.toasts.terms'))}
+            />
+            <SettingsRow
+              icon={Shield}
+              label={t('settings.items.privacy')}
+              hasArrow
+              onClick={() => showToast(t('settings.toasts.privacy'))}
+            />
+            <SettingsRow
+              icon={Database}
+              label={t('settings.items.dataSources')}
+              hasArrow
+              onClick={() => showToast(t('settings.toasts.dataSources'))}
+            />
+            <SettingsRow
+              icon={LifeBuoy}
+              label={t('settings.items.help')}
+              hasArrow
+              onClick={() => showToast(t('settings.toasts.help'))}
+            />
+          </SectionCard>
+        </motion.div>
+
+        {/* Danger zone */}
+        <motion.div variants={itemVariants} className="space-y-2">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+            {t('settings.sections.danger')}
+          </h3>
+          <SectionCard>
+            <SettingsRow
+              icon={Trash2}
+              label={t('settings.items.deleteAccount')}
+              danger
+              onClick={() => {
+                if (confirm(t('settings.toasts.deleteConfirm'))) {
+                  showToast(t('settings.toasts.deleteRequested'));
+                }
+              }}
+            />
+          </SectionCard>
+        </motion.div>
 
         {/* Sign out */}
-        <button
+        <motion.button
+          variants={itemVariants}
           onClick={handleSignOut}
-          className="w-full py-4 rounded-xl bg-surface-light text-sm font-medium text-pldown hover:bg-pldown/10 transition-colors"
+          className="w-full py-4 rounded-xl bg-surface-light text-sm font-medium text-pldown hover:bg-pldown/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pldown focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dark"
         >
-          Sign Out
-        </button>
-      </div>
+          {t('settings.items.signOut')}
+        </motion.button>
+
+        {/* Version footer — only version, no branding */}
+        <motion.p
+          variants={itemVariants}
+          className="text-center text-[10px] font-mono text-muted-foreground/60"
+        >
+          v{APP_VERSION}
+        </motion.p>
+      </motion.div>
     </PageContainer>
   );
 }

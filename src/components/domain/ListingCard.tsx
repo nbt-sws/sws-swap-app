@@ -52,7 +52,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl glass-card glass-card-hover hover-glow tilt-card flex flex-col h-full',
+        'group relative overflow-hidden rounded-xl glass-card glass-card-hover hover-glow tilt-card flex flex-col h-full',
         className
       )}
     >

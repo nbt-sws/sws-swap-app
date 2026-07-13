@@ -32,9 +32,11 @@ export function SplashScreen() {
         className="flex flex-col items-center gap-6 z-10"
       >
         {/* Brand mark */}
-        <div className="w-20 h-20 rounded-2xl bg-brand-gradient flex items-center justify-center shadow-glow">
-          <span className="text-white font-bold text-2xl font-mono">SS</span>
-        </div>
+        <img
+          src="/logo.png"
+          alt="SwibSwap"
+          className="w-20 h-20 rounded-xl object-contain shadow-glow"
+        />
         
         {/* Wordmark */}
         <div className="text-center">
@@ -55,15 +57,7 @@ export function SplashScreen() {
         <div className="w-8 h-8 border-2 border-brand/30 border-t-brand rounded-full animate-spin" />
       </motion.div>
       
-      {/* Footer credit */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="absolute bottom-8 text-xs text-muted-foreground font-mono"
-      >
-        by I1NOV
-      </motion.p>
+
     </div>
   );
 }

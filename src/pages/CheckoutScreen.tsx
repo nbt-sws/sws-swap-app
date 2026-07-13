@@ -11,8 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CreditCard, ShieldCheck, MapPin, CheckCircle } from 'lucide-react';
-import { getCardImageUrl } from '@/lib/utils';
+import { CreditCard, ShieldCheck, MapPin, CheckCircle, Store } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
+import { getCardImageUrl, isPlatformHeld } from '@/lib/utils';
 import { useAuthStore, isMember } from '@/stores/auth';
 import type { ShippingAddress } from '@/types';
 
@@ -66,17 +67,26 @@ export function CheckoutScreen() {
   if (!listing) {
     return (
       <PageContainer className="py-6">
-        <p className="text-muted-foreground">Listing not found.</p>
-        <Button asChild className="mt-4">
-          <Link to="/market">Back to market</Link>
-        </Button>
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
+          <EmptyMedia variant="icon">
+            <Store className="w-8 h-8 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Listing not found</EmptyTitle>
+            <EmptyDescription>This listing may have been removed or sold.</EmptyDescription>
+          </EmptyHeader>
+          <Button asChild className="bg-brand hover:bg-brand-light">
+            <Link to="/market">Back to market</Link>
+          </Button>
+        </Empty>
       </PageContainer>
     );
   }
 
   const fee = Math.round(listing.price * 0.05);
   const shipping = delivery === 'SHIP' ? 120 : 0;
-  const total = listing.price + fee + shipping;
+  const platformFee = isPlatformHeld(listing) ? Math.round(listing.price * 0.025) : 0;
+  const total = listing.price + fee + shipping + platformFee;
 
   const shippingErrors: Partial<Record<keyof ShippingAddress, string>> = {};
   if (delivery === 'SHIP') {
@@ -301,6 +311,12 @@ export function CheckoutScreen() {
                 <span className="text-muted-foreground">Service fee (5%)</span>
                 <span>฿{fee.toLocaleString()}</span>
               </div>
+              {platformFee > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">SWS fulfillment fee (2.5%)</span>
+                  <span>฿{platformFee.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Delivery</span>
                 <span>{shipping > 0 ? '฿120' : 'Free'}</span>

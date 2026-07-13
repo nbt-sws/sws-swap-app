@@ -64,6 +64,14 @@ export function ServicesScreen() {
         title="Services"
         icon={<Award className="w-6 h-6 text-brand" />}
         description="Pre-grade, grade, and vault-to-market services from partner stores"
+        action={
+          <Link
+            to="/service-orders"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-light border border-border text-sm font-medium hover:border-brand/30 transition-colors"
+          >
+            My orders
+          </Link>
+        }
       />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)} className="w-full">

@@ -27,7 +27,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/80 backdrop-blur-xl border-t border-border/40 pb-[env(safe-area-inset-bottom)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/85 backdrop-blur-xl border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
       <div className="h-full flex items-center justify-around px-2 relative">
         {LEFT_TABS.map((tab) => {
           const active = isActive(tab.to);

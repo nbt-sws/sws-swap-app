@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import {
   Home, ShoppingBag, Store, Users,
-  Package, ClipboardList, Heart, Scan, Shield,
+  ClipboardList, Heart, Scan, Shield,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -46,9 +46,11 @@ export function Sidebar() {
       {/* Brand */}
       <div className="p-6 shrink-0">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-brand-gradient flex items-center justify-center">
-            <Package className="w-4 h-4 text-white" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="SwibSwap"
+            className="w-8 h-8 rounded-lg object-contain"
+          />
           <span className="font-bold text-lg tracking-tight">SwibSwap</span>
         </Link>
       </div>

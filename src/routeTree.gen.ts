@@ -40,6 +40,7 @@ import { Route as AddToVaultRouteImport } from './routes/add-to-vault'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VaultIndexRouteImport } from './routes/vault.index'
+import { Route as ServiceOrdersIndexRouteImport } from './routes/service-orders.index'
 import { Route as SellerIndexRouteImport } from './routes/seller.index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
@@ -47,6 +48,8 @@ import { Route as MarketIndexRouteImport } from './routes/market.index'
 import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
 import { Route as AchievementsIndexRouteImport } from './routes/achievements.index'
 import { Route as ServiceProviderProviderIdRouteImport } from './routes/service-provider.$providerId'
+import { Route as ServiceOrdersOrderIdRouteImport } from './routes/service-orders.$orderId'
+import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
 import { Route as SellerNewRouteImport } from './routes/seller.new'
 import { Route as SellerSellerIdRouteImport } from './routes/seller.$sellerId'
 import { Route as ProfileKycRouteImport } from './routes/profile.kyc'
@@ -212,6 +215,11 @@ const VaultIndexRoute = VaultIndexRouteImport.update({
   path: '/',
   getParentRoute: () => VaultRoute,
 } as any)
+const ServiceOrdersIndexRoute = ServiceOrdersIndexRouteImport.update({
+  id: '/service-orders/',
+  path: '/service-orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SellerIndexRoute = SellerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -248,6 +256,16 @@ const ServiceProviderProviderIdRoute =
     path: '/service-provider/$providerId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ServiceOrdersOrderIdRoute = ServiceOrdersOrderIdRouteImport.update({
+  id: '/service-orders/$orderId',
+  path: '/service-orders/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerOrdersRoute = SellerOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => SellerRoute,
+} as any)
 const SellerNewRoute = SellerNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -333,6 +351,8 @@ export interface FileRoutesByFullPath {
   '/profile/kyc': typeof ProfileKycRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
   '/seller/new': typeof SellerNewRoute
+  '/seller/orders': typeof SellerOrdersRoute
+  '/service-orders/$orderId': typeof ServiceOrdersOrderIdRoute
   '/service-provider/$providerId': typeof ServiceProviderProviderIdRoute
   '/achievements/': typeof AchievementsIndexRoute
   '/campaigns/': typeof CampaignsIndexRoute
@@ -340,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/orders/': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/seller/': typeof SellerIndexRoute
+  '/service-orders/': typeof ServiceOrdersIndexRoute
   '/vault/': typeof VaultIndexRoute
   '/vault/items/$itemId': typeof VaultItemsItemIdRoute
 }
@@ -375,6 +396,8 @@ export interface FileRoutesByTo {
   '/profile/kyc': typeof ProfileKycRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
   '/seller/new': typeof SellerNewRoute
+  '/seller/orders': typeof SellerOrdersRoute
+  '/service-orders/$orderId': typeof ServiceOrdersOrderIdRoute
   '/service-provider/$providerId': typeof ServiceProviderProviderIdRoute
   '/achievements': typeof AchievementsIndexRoute
   '/campaigns': typeof CampaignsIndexRoute
@@ -382,6 +405,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/seller': typeof SellerIndexRoute
+  '/service-orders': typeof ServiceOrdersIndexRoute
   '/vault': typeof VaultIndexRoute
   '/vault/items/$itemId': typeof VaultItemsItemIdRoute
 }
@@ -425,6 +449,8 @@ export interface FileRoutesById {
   '/profile/kyc': typeof ProfileKycRoute
   '/seller/$sellerId': typeof SellerSellerIdRoute
   '/seller/new': typeof SellerNewRoute
+  '/seller/orders': typeof SellerOrdersRoute
+  '/service-orders/$orderId': typeof ServiceOrdersOrderIdRoute
   '/service-provider/$providerId': typeof ServiceProviderProviderIdRoute
   '/achievements/': typeof AchievementsIndexRoute
   '/campaigns/': typeof CampaignsIndexRoute
@@ -432,6 +458,7 @@ export interface FileRoutesById {
   '/orders/': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/seller/': typeof SellerIndexRoute
+  '/service-orders/': typeof ServiceOrdersIndexRoute
   '/vault/': typeof VaultIndexRoute
   '/vault/items/$itemId': typeof VaultItemsItemIdRoute
 }
@@ -476,6 +503,8 @@ export interface FileRouteTypes {
     | '/profile/kyc'
     | '/seller/$sellerId'
     | '/seller/new'
+    | '/seller/orders'
+    | '/service-orders/$orderId'
     | '/service-provider/$providerId'
     | '/achievements/'
     | '/campaigns/'
@@ -483,6 +512,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/profile/'
     | '/seller/'
+    | '/service-orders/'
     | '/vault/'
     | '/vault/items/$itemId'
   fileRoutesByTo: FileRoutesByTo
@@ -518,6 +548,8 @@ export interface FileRouteTypes {
     | '/profile/kyc'
     | '/seller/$sellerId'
     | '/seller/new'
+    | '/seller/orders'
+    | '/service-orders/$orderId'
     | '/service-provider/$providerId'
     | '/achievements'
     | '/campaigns'
@@ -525,6 +557,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/profile'
     | '/seller'
+    | '/service-orders'
     | '/vault'
     | '/vault/items/$itemId'
   id:
@@ -567,6 +600,8 @@ export interface FileRouteTypes {
     | '/profile/kyc'
     | '/seller/$sellerId'
     | '/seller/new'
+    | '/seller/orders'
+    | '/service-orders/$orderId'
     | '/service-provider/$providerId'
     | '/achievements/'
     | '/campaigns/'
@@ -574,6 +609,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/profile/'
     | '/seller/'
+    | '/service-orders/'
     | '/vault/'
     | '/vault/items/$itemId'
   fileRoutesById: FileRoutesById
@@ -610,7 +646,9 @@ export interface RootRouteChildren {
   VaultDeliveriesRoute: typeof VaultDeliveriesRoute
   WishlistRoute: typeof WishlistRoute
   CheckoutListingIdRoute: typeof CheckoutListingIdRoute
+  ServiceOrdersOrderIdRoute: typeof ServiceOrdersOrderIdRoute
   ServiceProviderProviderIdRoute: typeof ServiceProviderProviderIdRoute
+  ServiceOrdersIndexRoute: typeof ServiceOrdersIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -832,6 +870,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VaultIndexRouteImport
       parentRoute: typeof VaultRoute
     }
+    '/service-orders/': {
+      id: '/service-orders/'
+      path: '/service-orders'
+      fullPath: '/service-orders/'
+      preLoaderRoute: typeof ServiceOrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seller/': {
       id: '/seller/'
       path: '/'
@@ -880,6 +925,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/service-provider/$providerId'
       preLoaderRoute: typeof ServiceProviderProviderIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/service-orders/$orderId': {
+      id: '/service-orders/$orderId'
+      path: '/service-orders/$orderId'
+      fullPath: '/service-orders/$orderId'
+      preLoaderRoute: typeof ServiceOrdersOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/orders': {
+      id: '/seller/orders'
+      path: '/orders'
+      fullPath: '/seller/orders'
+      preLoaderRoute: typeof SellerOrdersRouteImport
+      parentRoute: typeof SellerRoute
     }
     '/seller/new': {
       id: '/seller/new'
@@ -1017,12 +1076,14 @@ const ProfileRouteWithChildren =
 interface SellerRouteChildren {
   SellerSellerIdRoute: typeof SellerSellerIdRoute
   SellerNewRoute: typeof SellerNewRoute
+  SellerOrdersRoute: typeof SellerOrdersRoute
   SellerIndexRoute: typeof SellerIndexRoute
 }
 
 const SellerRouteChildren: SellerRouteChildren = {
   SellerSellerIdRoute: SellerSellerIdRoute,
   SellerNewRoute: SellerNewRoute,
+  SellerOrdersRoute: SellerOrdersRoute,
   SellerIndexRoute: SellerIndexRoute,
 }
 
@@ -1073,7 +1134,9 @@ const rootRouteChildren: RootRouteChildren = {
   VaultDeliveriesRoute: VaultDeliveriesRoute,
   WishlistRoute: WishlistRoute,
   CheckoutListingIdRoute: CheckoutListingIdRoute,
+  ServiceOrdersOrderIdRoute: ServiceOrdersOrderIdRoute,
   ServiceProviderProviderIdRoute: ServiceProviderProviderIdRoute,
+  ServiceOrdersIndexRoute: ServiceOrdersIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -76,7 +76,7 @@ export function RedemptionsScreen() {
         </div>
 
         {redemptions?.length === 0 && (
-          <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-16">
+          <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
             <EmptyMedia variant="icon">
               <Gift className="w-10 h-10 text-brand" />
             </EmptyMedia>

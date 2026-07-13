@@ -13,6 +13,7 @@ import type {
   ApiServicePackage,
   ApiServiceCategory,
   ApiServiceOrder,
+  ApiServiceOrderStage,
   ApiPartnerApplication,
   ApiGradingService,
   ApiProposedPackage,
@@ -229,7 +230,9 @@ export const followsApi = {
 
 export const vaultApi = {
   getItems: (params: {
-    holderId: string;
+    holderId?: string;
+    ownerId?: string;
+    userId?: string;
     status?: string;
     category?: string;
     subCategory?: string;
@@ -262,6 +265,8 @@ export const vaultApi = {
     apiPost<{ status: string }>(`items/${id}/vault-deliveries`, { json: data }),
 
   getVaultDeliveries: () => apiGet<{ deliveries: ApiVaultDelivery[] }>('vault-deliveries'),
+
+  consignToPlatform: (id: string) => apiPost<{ status: string }>(`items/${id}/consign`),
 };
 
 export const auditApi = {
@@ -365,6 +370,14 @@ export const serviceOrdersApi = {
     cardIds: string[];
     shippingAddress?: ApiShippingAddress;
   }) => apiPost<{ order: ApiServiceOrder }>('service-orders', { json: data }),
+  getById: (orderId: string) => apiGet<{ order: ApiServiceOrder }>(`service-orders/${orderId}`),
+  update: (orderId: string, data: {
+    status?: ApiServiceOrder['status'];
+    stages?: ApiServiceOrderStage[];
+    lotNumber?: string;
+    labOrderNumber?: string;
+    trackingNumber?: string;
+  }) => apiPatch<{ order: ApiServiceOrder }>(`service-orders/${orderId}`, { json: data }),
 };
 
 export const partnersApi = {

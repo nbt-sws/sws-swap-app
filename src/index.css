@@ -134,11 +134,11 @@
   }
 
   .glass-card {
-    @apply bg-surface-light/70 backdrop-blur-xl border border-border/50 shadow-sm;
+    @apply bg-surface-light border border-border;
   }
 
   .glass-card-hover {
-    @apply transition-all duration-300 hover:bg-surface-light/90 hover:border-brand/30 hover:shadow-lg hover:shadow-brand/5;
+    @apply transition-colors duration-200 hover:bg-surface-lighter hover:border-brand/30;
   }
 }
 

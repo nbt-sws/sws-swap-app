@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Package, Truck, CheckCircle2, XCircle, Clock, MapPin } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
 import type { Order } from '@/types';
@@ -69,10 +70,18 @@ export function OrderDetailScreen() {
   if (!order) {
     return (
       <PageContainer className="py-6">
-        <p className="text-muted-foreground">Order not found.</p>
-        <Button asChild className="mt-4">
-          <Link to="/orders">Back to orders</Link>
-        </Button>
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
+          <EmptyMedia variant="icon">
+            <Package className="w-8 h-8 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Order not found</EmptyTitle>
+            <EmptyDescription>We couldn't find this order.</EmptyDescription>
+          </EmptyHeader>
+          <Button asChild className="bg-brand hover:bg-brand-light">
+            <Link to="/orders">Back to orders</Link>
+          </Button>
+        </Empty>
       </PageContainer>
     );
   }
@@ -216,6 +225,12 @@ export function OrderDetailScreen() {
                   <span className="text-muted-foreground">Service fee</span>
                   <span>฿{order.fee.toLocaleString()}</span>
                 </div>
+                {order.platformFee ? (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">SWS fulfillment fee</span>
+                    <span>฿{order.platformFee.toLocaleString()}</span>
+                  </div>
+                ) : null}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Delivery</span>
                   <span>{order.shipping > 0 ? `฿${order.shipping.toLocaleString()}` : 'Free'}</span>

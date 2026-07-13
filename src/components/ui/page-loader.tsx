@@ -6,7 +6,7 @@ export function PageLoader() {
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center">
       <div className="relative">
-        <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-brand to-periwinkle opacity-20 animate-pulse" />
+        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand to-periwinkle opacity-20 animate-pulse" />
         <Loader2
           size={24}
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin text-brand"

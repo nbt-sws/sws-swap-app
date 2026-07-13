@@ -67,7 +67,7 @@ export function TopBar() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-16 border-b border-border bg-surface/95 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-16 border-b border-border/80 bg-surface/85 backdrop-blur-xl">
       <div className="flex h-full items-center justify-between px-4 md:pl-64 lg:px-6 lg:pl-64">
         {/* Left: mobile hamburger */}
         <div className="flex items-center gap-4">
@@ -82,9 +82,11 @@ export function TopBar() {
               <SheetContent side="left" className="w-[280px] bg-surface-dark border-r border-border p-0">
                 <SheetHeader className="p-4 border-b border-border">
                   <SheetTitle className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-brand-gradient flex items-center justify-center">
-                      <Package className="w-4 h-4 text-white" />
-                    </div>
+                    <img
+                      src="/logo.png"
+                      alt="SwibSwap"
+                      className="w-8 h-8 rounded-lg object-contain"
+                    />
                     <span className="font-bold text-lg">SwibSwap</span>
                   </SheetTitle>
                 </SheetHeader>

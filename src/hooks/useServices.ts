@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi, servicePackagesApi, serviceOrdersApi, partnersApi } from '@/lib/api';
 import * as mockApi from '@/services/mockApi';
 import { withFallback } from '@/hooks/useApi';
-import type { ServiceCategory, ServiceProvider, ServicePackage, ServiceOrder, PartnerApplication, PartnerApplicationInput, ServiceOrderInput } from '@/types';
+import type { ServiceCategory, ServiceProvider, ServicePackage, ServiceOrder, PartnerApplication, PartnerApplicationInput, ServiceOrderInput, ServiceOrderUpdate } from '@/types';
 
 export function useServiceProviders(category?: ServiceCategory) {
   return useQuery({
@@ -88,6 +88,7 @@ export function useCreateServiceOrder() {
           const res = await serviceOrdersApi.create({
             category: input.category,
             providerId: input.providerId,
+            packageId: input.packageId,
             cardIds: input.cardIds,
             shippingAddress: input.shippingAddress,
           });
@@ -97,7 +98,53 @@ export function useCreateServiceOrder() {
       );
       return order;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['serviceOrders'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['serviceOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['vault'] });
+    },
+  });
+}
+
+export function useServiceOrder(orderId?: string) {
+  return useQuery({
+    queryKey: ['serviceOrder', orderId],
+    queryFn: async () => {
+      if (!orderId) return null;
+      const order = await withFallback(
+        async () => {
+          const res = await serviceOrdersApi.getById(orderId);
+          return res.order as ServiceOrder;
+        },
+        async () => {
+          const orders = (await mockApi.fetchServiceOrders?.()) ?? [];
+          return orders.find((o) => o.id === orderId) ?? null;
+        }
+      );
+      return order as ServiceOrder | null;
+    },
+    enabled: !!orderId,
+    staleTime: 1000 * 60,
+  });
+}
+
+export function useUpdateServiceOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ orderId, update }: { orderId: string; update: ServiceOrderUpdate }) => {
+      const order = await withFallback(
+        async () => {
+          const res = await serviceOrdersApi.update(orderId, update);
+          return res.order as ServiceOrder;
+        },
+        () => mockApi.updateServiceOrder(orderId, update)
+      );
+      return order;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['serviceOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['serviceOrder', variables.orderId] });
+      queryClient.invalidateQueries({ queryKey: ['vault'] });
+    },
   });
 }
 

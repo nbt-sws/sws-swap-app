@@ -72,7 +72,7 @@ export function DeliveryPreferenceSelector({
               onClick={() => handleSelect(option.id)}
               disabled={disabled || isVaultLocked}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-4 transition-all text-left',
+                'relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 p-4 transition-all text-left',
                 isSelected
                   ? 'border-brand bg-brand/10'
                   : 'border-border bg-surface-light hover:bg-surface-lighter',

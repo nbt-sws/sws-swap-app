@@ -1,6 +1,14 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { Card } from "@/types"
+import type { Card, VaultItem } from "@/types"
+
+export const SWS_PLATFORM_USER_ID = 'sws-platform';
+// Well-known backend UUID used to represent the SWS platform holder.
+export const SWS_PLATFORM_USER_UUID = '00000000-0000-0000-0000-000000000001';
+
+export function isPlatformHeld(item: Pick<VaultItem, 'holderId'>): boolean {
+  return item.holderId === SWS_PLATFORM_USER_ID || item.holderId === SWS_PLATFORM_USER_UUID;
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

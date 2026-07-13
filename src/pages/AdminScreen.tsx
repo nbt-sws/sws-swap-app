@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import {
   Shield,
   Users,
@@ -184,7 +185,17 @@ export function AdminScreen() {
           ) : (
             <div className="space-y-3">
               {listings?.map((l) => <ListingRow key={l.id} listing={l} />)}
-              {listings?.length === 0 && <p className="text-sm text-muted-foreground">No listings found.</p>}
+              {listings?.length === 0 && (
+                <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-10">
+                  <EmptyMedia variant="icon">
+                    <Package className="w-8 h-8 text-brand" />
+                  </EmptyMedia>
+                  <EmptyHeader>
+                    <EmptyTitle>No listings found</EmptyTitle>
+                    <EmptyDescription>There are no marketplace listings to review.</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
             </div>
           )}
         </TabsContent>

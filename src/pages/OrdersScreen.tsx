@@ -59,14 +59,14 @@ export function OrdersScreen() {
 
         {isLoading && (
           <div className="space-y-4">
-            <Skeleton className="h-28 w-full rounded-2xl" />
-            <Skeleton className="h-28 w-full rounded-2xl" />
-            <Skeleton className="h-28 w-full rounded-2xl" />
+            <Skeleton className="h-28 w-full rounded-xl" />
+            <Skeleton className="h-28 w-full rounded-xl" />
+            <Skeleton className="h-28 w-full rounded-xl" />
           </div>
         )}
 
         {!isLoading && (!filtered || filtered.length === 0) && (
-          <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-16">
+          <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
             <EmptyMedia variant="icon">
               <Package className="w-10 h-10 text-brand" />
             </EmptyMedia>
@@ -91,7 +91,7 @@ export function OrdersScreen() {
                 params={{ orderId: order.id }}
                 className="block group"
               >
-                <Card className="bg-surface-light border-border hover:border-brand/40 transition cursor-pointer overflow-hidden">
+                <Card className="bg-surface-light border-border hover:border-brand/40 hover:bg-surface-lighter transition cursor-pointer overflow-hidden">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       <div className={cn('w-14 h-[72px] rounded-lg flex items-center justify-center text-2xl shrink-0', config.bg)}>

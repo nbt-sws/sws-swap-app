@@ -3,6 +3,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { useVault, useCardPrice } from '@/hooks/useApi';
 import { ScrollablePage } from '@/components/layout/ScrollablePage';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
+import { Package } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 const TIME_RANGES = ['1M', '3M', '6M', '1Y', 'ALL'];
@@ -21,8 +23,16 @@ export function CardDetailScreen() {
 
   if (!item) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-muted-foreground">Card not found</p>
+      <div className="h-full flex items-center justify-center p-6">
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
+          <EmptyMedia variant="icon">
+            <Package className="w-8 h-8 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Card not found</EmptyTitle>
+            <EmptyDescription>We couldn't find this card in your vault.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     );
   }

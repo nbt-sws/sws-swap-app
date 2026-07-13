@@ -121,7 +121,7 @@ export function NotificationsScreen() {
         </div>
 
         {notifications?.length === 0 && (
-          <Empty className="rounded-2xl border-dashed border-border bg-surface-light/50 py-16">
+          <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
             <EmptyMedia variant="icon">
               <Bell className="w-10 h-10 text-brand" />
             </EmptyMedia>

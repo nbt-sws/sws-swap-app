@@ -4,7 +4,7 @@
  * UI/presentation types live in src/types/index.ts and are mapped from these at the hook layer.
  */
 
-export type ApiUserTier = 'REGULAR' | 'MEMBER' | 'ADMIN';
+export type ApiUserTier = 'REGULAR' | 'MEMBER' | 'SUBSCRIBER' | 'ADMIN';
 export type ApiKycStatus = 'NONE' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface ApiUser {
@@ -250,6 +250,9 @@ export interface ApiServicePackage {
   includes: string[];
   imageUrl?: string;
   enabled: boolean;
+  grader?: ApiGradingService;
+  cutoffDate?: string;
+  shippingDate?: string;
 }
 
 export interface ApiServiceFaq {
@@ -283,6 +286,13 @@ export interface ApiServiceProvider {
   faq?: ApiServiceFaq[];
 }
 
+export interface ApiServiceOrderStage {
+  key: string;
+  label: string;
+  completed: boolean;
+  timestamp?: string;
+}
+
 export interface ApiServiceOrder {
   id: string;
   userId: string;
@@ -291,12 +301,17 @@ export interface ApiServiceOrder {
   providerName: string;
   storeId: string;
   packageId?: string;
+  packageName?: string;
+  grader?: ApiGradingService;
   cardIds: string[];
   status: 'PENDING' | 'RECEIVED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  stages: ApiServiceOrderStage[];
   totalAmount: number;
   currency: string;
   shippingAddress?: ApiShippingAddress;
   trackingNumber?: string;
+  lotNumber?: string;
+  labOrderNumber?: string;
   createdAt: string;
   updatedAt: string;
 }

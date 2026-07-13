@@ -81,9 +81,11 @@ export function RegisterScreen() {
       >
         {/* Brand */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center">
-            <span className="text-white font-bold text-sm font-mono">SS</span>
-          </div>
+          <img
+            src="/logo.png"
+            alt="SwibSwap"
+            className="w-10 h-10 rounded-xl object-contain"
+          />
           <span className="text-xl font-bold">SwibSwap</span>
         </div>
 

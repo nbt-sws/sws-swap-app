@@ -7,6 +7,7 @@ import {
   Mail,
   MessageCircle,
   Clock,
+  Calendar,
   Package,
   Upload,
   Check,
@@ -20,6 +21,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { cn } from '@/lib/utils';
 import { useServiceProvider } from '@/hooks/useServices';
@@ -86,13 +88,19 @@ export function ServiceProviderScreen() {
 
   if (!provider) {
     return (
-      <PageContainer className="py-6 text-center">
-        <Award className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-        <h1 className="text-xl font-bold">Provider not found</h1>
-        <p className="text-muted-foreground mb-4">This service provider does not exist or is inactive.</p>
-        <Button asChild className="bg-brand hover:bg-brand-light">
-          <Link to="/services">Browse services</Link>
-        </Button>
+      <PageContainer className="py-6">
+        <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
+          <EmptyMedia variant="icon">
+            <Award className="w-8 h-8 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Provider not found</EmptyTitle>
+            <EmptyDescription>This service provider does not exist or is inactive.</EmptyDescription>
+          </EmptyHeader>
+          <Button asChild className="bg-brand hover:bg-brand-light">
+            <Link to="/services">Browse services</Link>
+          </Button>
+        </Empty>
       </PageContainer>
     );
   }
@@ -126,7 +134,7 @@ export function ServiceProviderScreen() {
       {/* Banner */}
       <div
         className={cn(
-          'h-48 sm:h-56 rounded-2xl bg-cover bg-center relative overflow-hidden mb-6',
+          'h-48 sm:h-56 rounded-xl bg-cover bg-center relative overflow-hidden mb-6',
           !provider.storeBannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-surface-dark'
         )}
         style={provider.storeBannerUrl ? { backgroundImage: `url(${provider.storeBannerUrl})` } : undefined}
@@ -139,7 +147,7 @@ export function ServiceProviderScreen() {
 
       {/* Header */}
       <div className="flex items-start gap-4 -mt-16 mb-6 relative">
-        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-surface-light bg-surface-lighter overflow-hidden shadow-lg flex items-center justify-center">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-4 border-surface-light bg-surface-lighter overflow-hidden shadow-lg flex items-center justify-center">
           {provider.storeAvatarUrl ? (
             <img src={provider.storeAvatarUrl} alt={provider.storeName} className="w-full h-full object-cover" />
           ) : (
@@ -262,48 +270,80 @@ export function ServiceProviderScreen() {
         )}
 
         {/* Packages */}
-        <section>
-          <h2 className="text-sm font-semibold mb-3">Packages</h2>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold">Packages</h2>
+            {selectedPackage && (
+              <p className="text-[10px] text-muted-foreground">
+                {selectedPackage.currency} {selectedPackage.pricePerCard.toLocaleString()} / card
+              </p>
+            )}
+          </div>
+
           {packages.length === 0 ? (
             <p className="text-sm text-muted-foreground">No packages available.</p>
           ) : (
-            <div className="space-y-6">
-              {groupedPackages.map(([grader, pkgs]) => (
-                <div key={grader} className="space-y-3">
-                  {grader !== 'other' ? (
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={GRADER_IMAGE_URLS[grader]}
-                        alt={grader}
-                        className="h-8 w-auto object-contain rounded bg-surface-light px-2 py-1"
-                        loading="lazy"
-                      />
-                      <h3 className={cn('text-sm font-bold', GRADER_STYLES[grader].split(' ')[1])}>
-                        {grader}
-                      </h3>
+            <>
+              {/* Sticky order bar */}
+              {selectedPackage && (
+                <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-surface-dark/95 backdrop-blur border-b border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground">Selected package</p>
+                      <p className="text-sm font-semibold truncate">{selectedPackage.name}</p>
+                      <p className="text-xs font-mono text-brand">
+                        {selectedPackage.currency} {selectedPackage.pricePerCard.toLocaleString()}{' '}
+                        <span className="font-normal text-muted-foreground">/ card</span>
+                      </p>
                     </div>
-                  ) : provider.category === 'GRADE' ? (
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 px-3 rounded bg-surface-light flex items-center justify-center text-xs text-muted-foreground">
-                        Other
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-400">Other / Custom grader</h3>
-                    </div>
-                  ) : null}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr">
-                    {pkgs.map((pkg) => (
-                      <PackageCard
-                        key={pkg.id}
-                        pkg={pkg}
-                        provider={provider}
-                        selected={selectedPackage?.id === pkg.id}
-                        onSelect={() => setSelectedPackageId(pkg.id)}
-                      />
-                    ))}
+                    <Button
+                      onClick={handleOrder}
+                      className="bg-brand hover:bg-brand-light shrink-0 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dark"
+                    >
+                      Order {provider.category === 'PREGRADE' ? 'Pre-grade' : 'Grade'} →
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+
+              <div className="space-y-4">
+                {groupedPackages.map(([grader, pkgs]) => (
+                  <div key={grader} className="space-y-2">
+                    {grader !== 'other' ? (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={GRADER_IMAGE_URLS[grader]}
+                          alt={grader}
+                          className="h-6 w-auto object-contain rounded bg-surface-light px-2 py-0.5"
+                          loading="lazy"
+                        />
+                        <h3 className={cn('text-xs font-bold', GRADER_STYLES[grader].split(' ')[1])}>
+                          {grader}
+                        </h3>
+                      </div>
+                    ) : provider.category === 'GRADE' ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-6 px-2 rounded bg-surface-light flex items-center justify-center text-[10px] text-muted-foreground">
+                          Other
+                        </div>
+                        <h3 className="text-xs font-bold text-slate-400">Other / Custom grader</h3>
+                      </div>
+                    ) : null}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                      {pkgs.map((pkg) => (
+                        <PackageCard
+                          key={pkg.id}
+                          pkg={pkg}
+                          provider={provider}
+                          selected={selectedPackage?.id === pkg.id}
+                          onSelect={() => setSelectedPackageId(pkg.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </section>
 
@@ -339,22 +379,6 @@ export function ServiceProviderScreen() {
           </section>
         )}
 
-        {/* Sticky order CTA */}
-        {selectedPackage && (
-          <div className="sticky bottom-4 bg-surface-light border border-border rounded-2xl p-4 shadow-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Selected package</p>
-                <p className="text-sm font-bold">
-                  {selectedPackage.name} · {selectedPackage.currency} {selectedPackage.pricePerCard.toLocaleString()} / card
-                </p>
-              </div>
-              <Button onClick={handleOrder} className="bg-brand hover:bg-brand-light w-full sm:w-auto">
-                Order {provider.category === 'PREGRADE' ? 'Pre-grade' : 'Grade'} →
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </PageContainer>
   );
@@ -377,26 +401,31 @@ function PackageCard({
   return (
     <button
       onClick={onSelect}
+      aria-pressed={selected}
       className={cn(
-        'text-left rounded-xl border overflow-hidden glass-card glass-card-hover flex flex-col h-full',
+        'w-full text-left p-4 rounded-xl border transition-colors bg-surface-light flex gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dark',
         selected
-          ? 'ring-2 ring-brand/60 ring-offset-2 ring-offset-surface border-transparent shadow-lg shadow-brand/10'
-          : 'border-border/50'
+          ? 'bg-surface-lighter border-brand/50 ring-1 ring-brand/50'
+          : 'border-transparent hover:bg-surface-lighter'
       )}
     >
-      <div className="aspect-[16/9] overflow-hidden bg-surface flex items-center justify-center p-3">
+      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-surface overflow-hidden shrink-0 flex items-center justify-center p-2">
         <ImageWithFallback
           src={pkg.imageUrl ?? ''}
           alt={pkg.name}
-          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-contain"
           fallbackClassName="text-xl"
         />
       </div>
-      <div className="p-3 flex-1 flex flex-col">
-        <div className="flex items-start justify-between gap-2 mb-1.5">
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="font-bold text-xs truncate">{pkg.name}</h3>
-            <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{pkg.description}</p>
+            <p className="text-sm font-semibold truncate">{pkg.name}</p>
+            {pkg.grader && (
+              <span className={cn('inline-block text-[10px] px-1.5 py-0.5 mt-1 rounded border font-medium', GRADER_STYLES[pkg.grader])}>
+                {pkg.grader === 'OTHER' ? 'Other' : pkg.grader}
+              </span>
+            )}
           </div>
           <div
             className={cn(
@@ -407,30 +436,48 @@ function PackageCard({
             {selected && <Check className="w-2.5 h-2.5 text-white" />}
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground mb-2 flex items-center gap-2 flex-wrap">
-          <span className="flex items-center gap-0.5">
-            <Clock className="w-3 h-3" />
-            {pkg.turnaround}
-          </span>
-          <span className="flex items-center gap-0.5">
-            <DeliveryIcon className="w-3 h-3" />
-            {pkg.deliveryMode.replace(/_/g, ' ').toLowerCase()}
-          </span>
-        </p>
-        <ul className="space-y-0.5 mb-2">
-          {pkg.includes.slice(0, 3).map((inc) => (
-            <li key={inc} className="text-[10px] text-muted-foreground flex items-start gap-1">
-              <Check className={cn('w-3 h-3 mt-0.5 shrink-0', styles.text)} />
-              <span className="truncate">{inc}</span>
-            </li>
-          ))}
-          {pkg.includes.length > 3 && (
-            <li className="text-[10px] text-muted-foreground pl-4">+{pkg.includes.length - 3} more</li>
-          )}
-        </ul>
-        <p className={cn('text-sm font-bold font-mono mt-auto', styles.text)}>
-          {pkg.currency} {pkg.pricePerCard.toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground">/ card</span>
-        </p>
+
+        {pkg.description && (
+          <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{pkg.description}</p>
+        )}
+
+        {pkg.includes.length > 0 && (
+          <ul className="mt-2 space-y-1">
+            {pkg.includes.slice(0, 2).map((inc) => (
+              <li key={inc} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                <Check className={cn('w-3.5 h-3.5 mt-0.5 shrink-0', styles.text)} />
+                <span className="truncate">{inc}</span>
+              </li>
+            ))}
+            {pkg.includes.length > 2 && (
+              <li className="text-xs text-muted-foreground pl-5">+{pkg.includes.length - 2} more</li>
+            )}
+          </ul>
+        )}
+
+        <div className="mt-auto pt-3 flex items-end justify-between gap-3">
+          <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+            <span className="flex items-center gap-0.5">
+              <Clock className="w-3.5 h-3.5" />
+              {pkg.turnaround}
+            </span>
+            <span className="flex items-center gap-0.5">
+              <DeliveryIcon className="w-3.5 h-3.5" />
+              {pkg.deliveryMode.replace(/_/g, ' ').toLowerCase()}
+            </span>
+            {(pkg.cutoffDate || pkg.shippingDate) && (
+              <span className="flex items-center gap-0.5">
+                <Calendar className="w-3.5 h-3.5" />
+                {pkg.cutoffDate && <>closes {pkg.cutoffDate}</>}
+                {pkg.cutoffDate && pkg.shippingDate && ' · '}
+                {pkg.shippingDate && <>ships {pkg.shippingDate}</>}
+              </span>
+            )}
+          </p>
+          <p className={cn('text-sm font-bold font-mono shrink-0', styles.text)}>
+            {pkg.currency} {pkg.pricePerCard.toLocaleString()}
+          </p>
+        </div>
       </div>
     </button>
   );

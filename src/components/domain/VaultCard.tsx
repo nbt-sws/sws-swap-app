@@ -4,7 +4,7 @@ import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TrendingUp, TrendingDown, Tag } from 'lucide-react';
-import { cn, getCardImageUrl, formatPriceChange } from '@/lib/utils';
+import { cn, getCardImageUrl, formatPriceChange, isPlatformHeld } from '@/lib/utils';
 import type { VaultItem } from '@/types';
 
 interface VaultCardProps {
@@ -18,24 +18,31 @@ interface VaultCardProps {
 
 export function VaultCard({ item, selected, selecting, onToggleSelect, onList, className }: VaultCardProps) {
   const { t } = useTranslation();
+  const platformHeld = isPlatformHeld(item);
   const statusLabel =
     item.status === 'held'
-      ? t('common.inVault')
+      ? platformHeld
+        ? 'SWS Vault'
+        : t('common.inVault')
       : item.status === 'sold'
       ? t('common.sold')
+      : item.serviceOrderStatus
+      ? `${t('common.grade')} · ${item.serviceOrderStatus}`
       : t('common.grade');
 
   const statusColor =
     item.status === 'held'
-      ? 'bg-cyan/20 text-cyan'
+      ? platformHeld
+        ? 'bg-brand/20 text-brand'
+        : 'bg-cyan/20 text-cyan'
       : item.status === 'sold'
       ? 'bg-pldown/20 text-pldown'
-      : 'bg-candle/20 text-candle';
+      : 'bg-brand/20 text-brand';
 
   return (
     <div
       className={cn(
-        'group relative bg-surface-light rounded-2xl border border-border shadow-sm hover:shadow-md hover:border-brand/20 transition-all duration-300',
+        'group relative bg-surface-light rounded-xl border border-border shadow-sm hover:shadow-md hover:border-brand/20 transition-all duration-300',
         selecting && selected && 'ring-2 ring-brand border-transparent',
         className
       )}
