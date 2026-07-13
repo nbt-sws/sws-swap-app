@@ -1,6 +1,7 @@
-import type { VaultItem, MarketListing, CardPriceData, GradingSubmission, WishlistItem, Order, Offer, OfferUser, ShippingAddress, CreateListingInput, TradeCard, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, ServiceProvider, ServicePackage, ServiceOrder, PartnerApplication, PartnerApplicationInput, ServiceOrderInput } from '@/types';
+import type { VaultItem, MarketListing, CardPriceData, GradingSubmission, WishlistItem, Order, Offer, OfferUser, ShippingAddress, CreateListingInput, TradeCard, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, ServiceProvider, ServicePackage, ServiceOrder, PartnerApplication, PartnerApplicationInput, ServiceOrderInput, GradingService } from '@/types';
 import type { AuthUser } from '@/types/auth';
 import { getPackagePlaceholderUrl } from '@/lib/utils';
+import { GRADER_IMAGE_URLS } from '@/lib/graderAssets';
 
 const API_BASE = 'https://api.swibswap.app/v1';
 
@@ -672,6 +673,17 @@ const FALLBACK_SERVICE_PROVIDERS: ServiceProvider[] = [
     ],
   }),
 ];
+
+const GRADER_KEYS: GradingService[] = ['PSA', 'BGS', 'CGC', 'TAG', 'RAWLITY', 'BLACKLENS'];
+
+FALLBACK_SERVICE_PROVIDERS.forEach((provider) => {
+  provider.packages = provider.packages.map((pkg) => {
+    if (pkg.grader && GRADER_KEYS.includes(pkg.grader)) {
+      return { ...pkg, imageUrl: GRADER_IMAGE_URLS[pkg.grader] };
+    }
+    return pkg;
+  });
+});
 
 function loadStoreProfiles(): StoreProfile[] {
   if (typeof window === 'undefined') return FALLBACK_STORE_PROFILES;

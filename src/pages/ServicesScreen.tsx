@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useServiceProviders, useSubmitPartnerApplication, usePartnerApplications } from '@/hooks/useServices';
 import type { ServiceCategory, ServiceProvider, PartnerApplicationInput, GradingService } from '@/types';
+import { GRADER_STYLES } from '@/lib/graderAssets';
 
 type TabValue = 'pregrade' | 'grade' | 'partner';
 
@@ -35,15 +36,6 @@ const COLOR_STYLES: Record<
   cyan: { bg: 'bg-cyan/10', text: 'text-cyan', badge: 'bg-cyan/10 text-cyan', ring: 'ring-cyan/30' },
   pregrade: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400', ring: 'ring-emerald-500/30' },
   plup: { bg: 'bg-violet-500/10', text: 'text-violet-400', badge: 'bg-violet-500/10 text-violet-400', ring: 'ring-violet-500/30' },
-};
-
-const GRADER_STYLES: Record<GradingService, string> = {
-  PSA: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  BGS: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  CGC: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
-  TAG: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  RAWLITY: 'bg-brand/10 text-brand border-brand/20',
-  BLACKLENS: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
 };
 
 const HOW_IT_WORKS: Record<ServiceCategory, { num: string; title: string; desc: string }[]> = {

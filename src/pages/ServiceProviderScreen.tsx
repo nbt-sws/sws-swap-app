@@ -24,6 +24,7 @@ import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { cn } from '@/lib/utils';
 import { useServiceProvider } from '@/hooks/useServices';
 import type { ServicePackage, ServiceProvider, GradingService } from '@/types';
+import { GRADER_STYLES, GRADER_IMAGE_URLS } from '@/lib/graderAssets';
 
 const DELIVERY_ICON: Record<ServiceProvider['deliveryMode'], typeof Upload> = {
   PHOTO_UPLOAD: Upload,
@@ -42,14 +43,7 @@ const COLOR_STYLES: Record<
   plup: { bg: 'bg-violet-500/10', text: 'text-violet-400', badge: 'bg-violet-500/10 text-violet-400' },
 };
 
-const GRADER_STYLES: Record<GradingService, string> = {
-  PSA: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  BGS: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  CGC: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
-  TAG: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  RAWLITY: 'bg-brand/10 text-brand border-brand/20',
-  BLACKLENS: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
-};
+
 
 export function ServiceProviderScreen() {
   const { providerId } = useParams({ from: '/service-provider/$providerId' });
@@ -62,6 +56,15 @@ export function ServiceProviderScreen() {
     () => provider?.packages.filter((p) => p.enabled) ?? [],
     [provider]
   );
+  const groupedPackages = useMemo(() => {
+    const groups = new Map<GradingService | 'other', ServicePackage[]>();
+    packages.forEach((pkg) => {
+      const key = pkg.grader ?? 'other';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(pkg);
+    });
+    return Array.from(groups.entries());
+  }, [packages]);
   const selectedPackage = useMemo(
     () => packages.find((p) => p.id === selectedPackageId) || packages[0],
     [packages, selectedPackageId]
@@ -264,15 +267,34 @@ export function ServiceProviderScreen() {
           {packages.length === 0 ? (
             <p className="text-sm text-muted-foreground">No packages available.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
-              {packages.map((pkg) => (
-                <PackageCard
-                  key={pkg.id}
-                  pkg={pkg}
-                  provider={provider}
-                  selected={selectedPackage?.id === pkg.id}
-                  onSelect={() => setSelectedPackageId(pkg.id)}
-                />
+            <div className="space-y-6">
+              {groupedPackages.map(([grader, pkgs]) => (
+                <div key={grader} className="space-y-3">
+                  {grader !== 'other' && (
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={GRADER_IMAGE_URLS[grader]}
+                        alt={grader}
+                        className="h-8 w-auto object-contain rounded bg-surface-light px-2 py-1"
+                        loading="lazy"
+                      />
+                      <h3 className={cn('text-sm font-bold', GRADER_STYLES[grader].split(' ')[1])}>
+                        {grader}
+                      </h3>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr">
+                    {pkgs.map((pkg) => (
+                      <PackageCard
+                        key={pkg.id}
+                        pkg={pkg}
+                        provider={provider}
+                        selected={selectedPackage?.id === pkg.id}
+                        onSelect={() => setSelectedPackageId(pkg.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -355,42 +377,30 @@ function PackageCard({
           : 'border-border/50'
       )}
     >
-      <div className="aspect-[3/2] overflow-hidden bg-surface">
+      <div className="aspect-[16/9] overflow-hidden bg-surface flex items-center justify-center p-3">
         <ImageWithFallback
           src={pkg.imageUrl ?? ''}
           alt={pkg.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          fallbackClassName="text-2xl"
+          className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+          fallbackClassName="text-xl"
         />
       </div>
-      <div className="p-4 flex-1 flex flex-col">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <h3 className="font-bold text-sm">{pkg.name}</h3>
-              {pkg.grader && (
-                <span
-                  className={cn(
-                    'text-[9px] px-1.5 py-0.5 rounded border font-medium',
-                    GRADER_STYLES[pkg.grader]
-                  )}
-                >
-                  {pkg.grader}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">{pkg.description}</p>
+      <div className="p-3 flex-1 flex flex-col">
+        <div className="flex items-start justify-between gap-2 mb-1.5">
+          <div className="min-w-0">
+            <h3 className="font-bold text-xs truncate">{pkg.name}</h3>
+            <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{pkg.description}</p>
           </div>
           <div
             className={cn(
-              'w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0',
+              'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0',
               selected ? 'bg-brand border-brand' : 'border-muted-foreground/30'
             )}
           >
-            {selected && <Check className="w-3 h-3 text-white" />}
+            {selected && <Check className="w-2.5 h-2.5 text-white" />}
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2 flex-wrap">
+        <p className="text-[10px] text-muted-foreground mb-2 flex items-center gap-2 flex-wrap">
           <span className="flex items-center gap-0.5">
             <Clock className="w-3 h-3" />
             {pkg.turnaround}
@@ -400,16 +410,19 @@ function PackageCard({
             {pkg.deliveryMode.replace(/_/g, ' ').toLowerCase()}
           </span>
         </p>
-        <ul className="space-y-1 mb-3">
-          {pkg.includes.map((inc) => (
-            <li key={inc} className="text-xs text-muted-foreground flex items-start gap-1.5">
+        <ul className="space-y-0.5 mb-2">
+          {pkg.includes.slice(0, 3).map((inc) => (
+            <li key={inc} className="text-[10px] text-muted-foreground flex items-start gap-1">
               <Check className={cn('w-3 h-3 mt-0.5 shrink-0', styles.text)} />
-              {inc}
+              <span className="truncate">{inc}</span>
             </li>
           ))}
+          {pkg.includes.length > 3 && (
+            <li className="text-[10px] text-muted-foreground pl-4">+{pkg.includes.length - 3} more</li>
+          )}
         </ul>
-        <p className={cn('text-lg font-bold font-mono mt-auto', styles.text)}>
-          {pkg.currency} {pkg.pricePerCard.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">/ card</span>
+        <p className={cn('text-sm font-bold font-mono mt-auto', styles.text)}>
+          {pkg.currency} {pkg.pricePerCard.toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground">/ card</span>
         </p>
       </div>
     </button>
