@@ -23,7 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { cn } from '@/lib/utils';
 import { useServiceProvider } from '@/hooks/useServices';
-import type { ServicePackage, ServiceProvider } from '@/types';
+import type { ServicePackage, ServiceProvider, GradingService } from '@/types';
 
 const DELIVERY_ICON: Record<ServiceProvider['deliveryMode'], typeof Upload> = {
   PHOTO_UPLOAD: Upload,
@@ -40,6 +40,15 @@ const COLOR_STYLES: Record<
   cyan: { bg: 'bg-cyan/10', text: 'text-cyan', badge: 'bg-cyan/10 text-cyan' },
   pregrade: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400' },
   plup: { bg: 'bg-violet-500/10', text: 'text-violet-400', badge: 'bg-violet-500/10 text-violet-400' },
+};
+
+const GRADER_STYLES: Record<GradingService, string> = {
+  PSA: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  BGS: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  CGC: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
+  TAG: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  RAWLITY: 'bg-brand/10 text-brand border-brand/20',
+  BLACKLENS: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
 };
 
 export function ServiceProviderScreen() {
@@ -167,6 +176,21 @@ export function ServiceProviderScreen() {
               </span>
             ))}
           </div>
+          {provider.acceptedGraders && provider.acceptedGraders.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {provider.acceptedGraders.map((grader) => (
+                <span
+                  key={grader}
+                  className={cn(
+                    'text-[10px] px-2 py-1 rounded-full border font-medium',
+                    GRADER_STYLES[grader]
+                  )}
+                >
+                  {grader}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -342,7 +366,19 @@ function PackageCard({
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
-            <h3 className="font-bold text-sm">{pkg.name}</h3>
+            <div className="flex items-center gap-2 mb-0.5">
+              <h3 className="font-bold text-sm">{pkg.name}</h3>
+              {pkg.grader && (
+                <span
+                  className={cn(
+                    'text-[9px] px-1.5 py-0.5 rounded border font-medium',
+                    GRADER_STYLES[pkg.grader]
+                  )}
+                >
+                  {pkg.grader}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground mt-0.5">{pkg.description}</p>
           </div>
           <div

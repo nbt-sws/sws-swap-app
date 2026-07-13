@@ -35,7 +35,7 @@ export function StatusHubScreen() {
   const filtered = (submissions || []).filter((s) => {
     if (activeFilter === 'All') return true;
     if (activeFilter === 'Pre-grade') return s.service === 'RAWLITY' || s.service === 'BLACKLENS';
-    if (activeFilter === 'Grading') return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC';
+    if (activeFilter === 'Grading') return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC' || s.service === 'TAG';
     return true;
   });
 
@@ -72,7 +72,7 @@ export function StatusHubScreen() {
               >
                 {f} · {f === 'All' ? (submissions?.length || 0) : submissions?.filter(s => {
                   if (f === 'Pre-grade') return s.service === 'RAWLITY' || s.service === 'BLACKLENS';
-                  if (f === 'Grading') return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC';
+                  if (f === 'Grading') return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC' || s.service === 'TAG';
                   return true;
                 }).length || 0}
               </button>
@@ -101,6 +101,8 @@ export function StatusHubScreen() {
                         sub.service === 'RAWLITY' ? 'bg-brand/10 text-brand' :
                         sub.service === 'BLACKLENS' ? 'bg-periwinkle/10 text-periwinkle' :
                         sub.service === 'PSA' ? 'bg-cyan/10 text-cyan' :
+                        sub.service === 'BGS' ? 'bg-amber-500/10 text-amber-400' :
+                        sub.service === 'TAG' ? 'bg-emerald-500/10 text-emerald-400' :
                         'bg-pregrade/10 text-pregrade'
                       }`}>
                         {sub.service}

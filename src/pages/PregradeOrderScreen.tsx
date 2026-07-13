@@ -7,7 +7,7 @@ import { ScrollablePage } from '@/components/layout/ScrollablePage';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Check, Clock, Package, Store, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { ServiceCategory, ServiceProvider } from '@/types';
+import type { ServiceCategory, ServiceProvider, GradingService } from '@/types';
 
 const COURIERS = ['Kerry', 'Flash', 'ThaiPost'];
 
@@ -23,6 +23,15 @@ const COLOR_RING: Record<ServiceProvider['color'], string> = {
   cyan: 'ring-cyan/30 border-cyan/30',
   pregrade: 'ring-emerald-500/30 border-emerald-500/30',
   plup: 'ring-violet-500/30 border-violet-500/30',
+};
+
+const GRADER_STYLES: Record<GradingService, string> = {
+  PSA: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  BGS: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  CGC: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
+  TAG: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  RAWLITY: 'bg-brand/10 text-brand border-brand/20',
+  BLACKLENS: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
 };
 
 export function PregradeOrderScreen() {
@@ -192,6 +201,21 @@ export function PregradeOrderScreen() {
                           {p.serviceTypes.join(' · ')}
                         </p>
                       )}
+                      {p.acceptedGraders && p.acceptedGraders.length > 0 && (
+                        <p className="flex flex-wrap gap-1 mt-0.5">
+                          {p.acceptedGraders.map((grader) => (
+                            <span
+                              key={grader}
+                              className={cn(
+                                'text-[8px] px-1.5 py-0.5 rounded border font-medium',
+                                GRADER_STYLES[grader]
+                              )}
+                            >
+                              {grader}
+                            </span>
+                          ))}
+                        </p>
+                      )}
                     </div>
                   </button>
                 );
@@ -218,7 +242,14 @@ export function PregradeOrderScreen() {
                     )}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <span className="text-sm font-bold">{pkg.name}</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-sm font-bold truncate">{pkg.name}</span>
+                        {pkg.grader && (
+                          <span className={cn('text-[8px] px-1 py-0.5 rounded border font-medium', GRADER_STYLES[pkg.grader])}>
+                            {pkg.grader}
+                          </span>
+                        )}
+                      </div>
                       <div
                         className={cn(
                           'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',

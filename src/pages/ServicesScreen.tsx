@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useServiceProviders, useSubmitPartnerApplication, usePartnerApplications } from '@/hooks/useServices';
-import type { ServiceCategory, ServiceProvider, PartnerApplicationInput } from '@/types';
+import type { ServiceCategory, ServiceProvider, PartnerApplicationInput, GradingService } from '@/types';
 
 type TabValue = 'pregrade' | 'grade' | 'partner';
 
@@ -35,6 +35,15 @@ const COLOR_STYLES: Record<
   cyan: { bg: 'bg-cyan/10', text: 'text-cyan', badge: 'bg-cyan/10 text-cyan', ring: 'ring-cyan/30' },
   pregrade: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400', ring: 'ring-emerald-500/30' },
   plup: { bg: 'bg-violet-500/10', text: 'text-violet-400', badge: 'bg-violet-500/10 text-violet-400', ring: 'ring-violet-500/30' },
+};
+
+const GRADER_STYLES: Record<GradingService, string> = {
+  PSA: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  BGS: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  CGC: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
+  TAG: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  RAWLITY: 'bg-brand/10 text-brand border-brand/20',
+  BLACKLENS: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
 };
 
 const HOW_IT_WORKS: Record<ServiceCategory, { num: string; title: string; desc: string }[]> = {
@@ -212,10 +221,25 @@ function ProviderCard({
       </div>
 
       {provider.serviceTypes.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex flex-wrap gap-1.5 mb-2">
           {provider.serviceTypes.map((type) => (
             <span key={type} className="text-[10px] px-2 py-0.5 rounded-full glass-effect border border-border text-muted-foreground">
               {type}
+            </span>
+          ))}
+        </div>
+      )}
+      {provider.acceptedGraders && provider.acceptedGraders.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {provider.acceptedGraders.map((grader) => (
+            <span
+              key={grader}
+              className={cn(
+                'text-[10px] px-2 py-0.5 rounded-full border font-medium',
+                GRADER_STYLES[grader]
+              )}
+            >
+              {grader}
             </span>
           ))}
         </div>
@@ -270,6 +294,7 @@ function PartnerTab() {
     website: '',
     serviceCategories: [],
     serviceTypes: [],
+    acceptedGraders: [],
     message: '',
   });
 
@@ -288,6 +313,15 @@ function PartnerTab() {
       if (set.has(type)) set.delete(type);
       else set.add(type);
       return { ...prev, serviceTypes: Array.from(set) };
+    });
+  };
+
+  const toggleGrader = (grader: GradingService) => {
+    setForm((prev) => {
+      const set = new Set(prev.acceptedGraders);
+      if (set.has(grader)) set.delete(grader);
+      else set.add(grader);
+      return { ...prev, acceptedGraders: Array.from(set) };
     });
   };
 
@@ -311,6 +345,7 @@ function PartnerTab() {
           website: '',
           serviceCategories: [],
           serviceTypes: [],
+          acceptedGraders: [],
           message: '',
         });
       },
@@ -432,6 +467,28 @@ function PartnerTab() {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <Label>Accepted graders</Label>
+          <div className="flex gap-2 flex-wrap">
+            {(['PSA', 'BGS', 'CGC', 'TAG', 'RAWLITY', 'BLACKLENS'] as GradingService[]).map((grader) => (
+              <button
+                key={grader}
+                type="button"
+                onClick={() => toggleGrader(grader)}
+                className={cn(
+                  'px-3 py-2 rounded-lg text-xs font-medium border transition-all flex items-center gap-2',
+                  form.acceptedGraders?.includes(grader)
+                    ? GRADER_STYLES[grader]
+                    : 'bg-surface-light border-border text-muted-foreground'
+                )}
+              >
+                {form.acceptedGraders?.includes(grader) && <Check className="w-3 h-3" />}
+                {grader}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="message">Message</Label>
           <Textarea
@@ -479,7 +536,9 @@ function PartnerTab() {
                     )}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {app.serviceCategories.map((c) => (c === 'PREGRADE' ? 'Pre-grade' : 'Grade')).join(', ')} · {app.serviceTypes.join(', ')}
+                    {app.serviceCategories.map((c) => (c === 'PREGRADE' ? 'Pre-grade' : 'Grade')).join(', ')}
+                    {app.serviceTypes.length > 0 && ` · ${app.serviceTypes.join(', ')}`}
+                    {app.acceptedGraders && app.acceptedGraders.length > 0 && ` · ${app.acceptedGraders.join(', ')}`}
                   </p>
                 </div>
                 <span

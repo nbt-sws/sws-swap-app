@@ -236,6 +236,7 @@ export interface ApiCollectorProfile {
 
 export type ApiServiceCategory = 'PREGRADE' | 'GRADE';
 export type ApiServiceDeliveryMode = 'PHOTO_UPLOAD' | 'PHYSICAL_DROP_OFF' | 'PHYSICAL_SHIP';
+export type ApiGradingService = 'RAWLITY' | 'BLACKLENS' | 'PSA' | 'BGS' | 'CGC' | 'TAG';
 
 export interface ApiServicePackage {
   id: string;
@@ -309,6 +310,7 @@ export interface ApiPartnerApplication {
   website?: string;
   serviceCategories: ApiServiceCategory[];
   serviceTypes: string[];
+  acceptedGraders?: ApiGradingService[];
   message?: string;
   status: 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
   storeId?: string;

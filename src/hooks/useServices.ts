@@ -115,6 +115,7 @@ export function useSubmitPartnerApplication() {
             website: input.website,
             serviceCategories: input.serviceCategories,
             serviceTypes: input.serviceTypes,
+            acceptedGraders: input.acceptedGraders,
             message: input.message,
           });
           return res.application as PartnerApplication;
