@@ -31,116 +31,129 @@ import type {
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1').replace(/\/?$/, '/');
+const USER_API_BASE_URL = (import.meta.env.VITE_USER_API_BASE_URL || API_BASE_URL).replace(/\/?$/, '/');
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('sws_access_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export const api = ky.create({
-  prefix: API_BASE_URL,
-  hooks: {
-    beforeRequest: [
-      ({ request }) => {
-        const token = localStorage.getItem('sws_access_token');
-        if (token) request.headers.set('Authorization', `Bearer ${token}`);
-      },
-    ],
-  },
-});
+function createKy(prefix: string) {
+  return ky.create({
+    prefix,
+    hooks: {
+      beforeRequest: [
+        ({ request }) => {
+          const token = localStorage.getItem('sws_access_token');
+          if (token) request.headers.set('Authorization', `Bearer ${token}`);
+        },
+      ],
+    },
+  });
+}
+
+export const api = createKy(API_BASE_URL);
+const userKy = createKy(USER_API_BASE_URL);
 
 // ─── HTTP Wrappers ──────────────────────────────────────────────────
 
-export async function apiGet<T>(path: string, options?: { searchParams?: Record<string, string | number | undefined> }): Promise<T> {
-  try {
-    const res = await api.get(path, { ...options, headers: getAuthHeaders() });
-    return res.json();
-  } catch (err) {
-    const error = err as { response?: { status: number } };
-    if (error.response?.status === 401) {
-      localStorage.removeItem('sws_access_token');
-    }
-    console.error(`[API GET Error] ${path}:`, err);
-    throw err;
-  }
+function createWrappers(instance: typeof api) {
+  return {
+    async get<T>(path: string, options?: { searchParams?: Record<string, string | number | undefined> }): Promise<T> {
+      try {
+        const res = await instance.get(path, { ...options, headers: getAuthHeaders() });
+        return res.json();
+      } catch (err) {
+        const error = err as { response?: { status: number } };
+        if (error.response?.status === 401) {
+          localStorage.removeItem('sws_access_token');
+        }
+        console.error(`[API GET Error] ${path}:`, err);
+        throw err;
+      }
+    },
+
+    async post<T>(path: string, options?: { json?: unknown; body?: FormData }): Promise<T> {
+      try {
+        const headers = getAuthHeaders();
+        const opts: { headers: Record<string, string>; json?: unknown; body?: FormData } = { headers };
+        if (options?.body) {
+          opts.body = options.body;
+        } else if (options?.json !== undefined) {
+          opts.json = options.json;
+          opts.headers['Content-Type'] = 'application/json';
+        }
+        const res = await instance.post(path, opts);
+        return res.json();
+      } catch (err) {
+        const error = err as { response?: { status: number } };
+        if (error.response?.status === 401) {
+          localStorage.removeItem('sws_access_token');
+        }
+        console.error(`[API POST Error] ${path}:`, err);
+        throw err;
+      }
+    },
+
+    async put<T>(path: string, options?: { json?: unknown }): Promise<T> {
+      try {
+        const res = await instance.put(path, { json: options?.json, headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+        return res.json();
+      } catch (err) {
+        const error = err as { response?: { status: number } };
+        if (error.response?.status === 401) {
+          localStorage.removeItem('sws_access_token');
+        }
+        console.error(`[API PUT Error] ${path}:`, err);
+        throw err;
+      }
+    },
+
+    async delete<T>(path: string): Promise<T> {
+      try {
+        const res = await instance.delete(path, { headers: getAuthHeaders() });
+        return res.json();
+      } catch (err) {
+        const error = err as { response?: { status: number } };
+        if (error.response?.status === 401) {
+          localStorage.removeItem('sws_access_token');
+        }
+        console.error(`[API DELETE Error] ${path}:`, err);
+        throw err;
+      }
+    },
+
+    async patch<T>(path: string, options?: { json?: unknown }): Promise<T> {
+      try {
+        const res = await instance.patch(path, { json: options?.json, headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
+        return res.json();
+      } catch (err) {
+        const error = err as { response?: { status: number } };
+        if (error.response?.status === 401) {
+          localStorage.removeItem('sws_access_token');
+        }
+        console.error(`[API PATCH Error] ${path}:`, err);
+        throw err;
+      }
+    },
+  };
 }
 
-export async function apiPost<T>(path: string, options?: { json?: unknown; body?: FormData }): Promise<T> {
-  try {
-    const headers = getAuthHeaders();
-    const opts: { headers: Record<string, string>; json?: unknown; body?: FormData } = { headers };
-    if (options?.body) {
-      opts.body = options.body;
-    } else if (options?.json !== undefined) {
-      opts.json = options.json;
-      opts.headers['Content-Type'] = 'application/json';
-    }
-    const res = await api.post(path, opts);
-    return res.json();
-  } catch (err) {
-    const error = err as { response?: { status: number } };
-    if (error.response?.status === 401) {
-      localStorage.removeItem('sws_access_token');
-    }
-    console.error(`[API POST Error] ${path}:`, err);
-    throw err;
-  }
-}
-
-export async function apiPut<T>(path: string, options?: { json?: unknown }): Promise<T> {
-  try {
-    const res = await api.put(path, { json: options?.json, headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
-    return res.json();
-  } catch (err) {
-    const error = err as { response?: { status: number } };
-    if (error.response?.status === 401) {
-      localStorage.removeItem('sws_access_token');
-    }
-    console.error(`[API PUT Error] ${path}:`, err);
-    throw err;
-  }
-}
-
-export async function apiDelete<T>(path: string): Promise<T> {
-  try {
-    const res = await api.delete(path, { headers: getAuthHeaders() });
-    return res.json();
-  } catch (err) {
-    const error = err as { response?: { status: number } };
-    if (error.response?.status === 401) {
-      localStorage.removeItem('sws_access_token');
-    }
-    console.error(`[API DELETE Error] ${path}:`, err);
-    throw err;
-  }
-}
-
-export async function apiPatch<T>(path: string, options?: { json?: unknown }): Promise<T> {
-  try {
-    const res = await api.patch(path, { json: options?.json, headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } });
-    return res.json();
-  } catch (err) {
-    const error = err as { response?: { status: number } };
-    if (error.response?.status === 401) {
-      localStorage.removeItem('sws_access_token');
-    }
-    console.error(`[API PATCH Error] ${path}:`, err);
-    throw err;
-  }
-}
+export const { get: apiGet, post: apiPost, put: apiPut, delete: apiDelete, patch: apiPatch } = createWrappers(api);
+export const { get: userApiGet, post: userApiPost, put: userApiPut, delete: userApiDelete, patch: userApiPatch } = createWrappers(userKy);
 
 // ─── Domain APIs (aligned with real backend contract) ─────────────────
 
 export const authApi = {
   login: (data: { email: string; password: string }) =>
-    api.post('auth/login', { json: data }).json<ApiAuthResponse>(),
+    userKy.post('auth/login', { json: data }).json<ApiAuthResponse>(),
   register: (data: { fullName?: string; email: string; password: string }) =>
-    api.post('auth/register', { json: { email: data.email, password: data.password, name: data.fullName } }).json<ApiAuthResponse>(),
-  me: () => apiGet<ApiUser>('auth/me'),
+    userKy.post('auth/register', { json: { email: data.email, password: data.password, name: data.fullName } }).json<ApiAuthResponse>(),
+  me: () => userApiGet<ApiUser>('auth/me'),
 };
 
 export const userApi = {
-  me: () => apiGet<ApiUser>('auth/me'),
+  me: () => userApiGet<ApiUser>('auth/me'),
 };
 
 export const listingsApi = {
@@ -209,17 +222,17 @@ export const notificationsApi = {
 
 export const storesApi = {
   getAll: (params?: { tier?: string; search?: string; page?: number; limit?: number }) =>
-    apiGet<{ sellers: ApiCollectorProfile[] }>('collectors', { searchParams: params }),
+    userApiGet<{ sellers: ApiCollectorProfile[] }>('collectors', { searchParams: params }),
 };
 
 export const collectorApi = {
-  getProfile: (userId: string) => apiGet<ApiCollectorProfile>(`collectors/${userId}`),
+  getProfile: (userId: string) => userApiGet<ApiCollectorProfile>(`collectors/${userId}`),
   updateProfile: (data: Partial<ApiCollectorProfile>) =>
-    apiPut<ApiCollectorProfile>('collectors/me', { json: data }),
+    userApiPut<ApiCollectorProfile>('collectors/me', { json: data }),
   uploadAvatar: (formData: FormData) =>
-    api.post('collector-profiles/avatar', { body: formData, headers: getAuthHeaders() }).json<{ avatarUrl: string }>(),
+    userKy.post('collector-profiles/avatar', { body: formData, headers: getAuthHeaders() }).json<{ avatarUrl: string }>(),
   uploadBanner: (formData: FormData) =>
-    api.post('collector-profiles/banner', { body: formData, headers: getAuthHeaders() }).json<{ bannerUrl: string }>(),
+    userKy.post('collector-profiles/banner', { body: formData, headers: getAuthHeaders() }).json<{ bannerUrl: string }>(),
 };
 
 export const followsApi = {
@@ -293,9 +306,9 @@ export const offersApi = {
 
 export const kycApi = {
   getStatus: (userId: string) =>
-    apiGet<{ userId: string; status: ApiUser['kycStatus']; submittedAt?: string; reviewedAt?: string }>(`kyc/status/${userId}`),
+    userApiGet<{ userId: string; status: ApiUser['kycStatus']; submittedAt?: string; reviewedAt?: string }>(`kyc/status/${userId}`),
   submit: (data: { documents: { type: string; s3Key: string }[] }) =>
-    apiPost<{ kycId: string; status: ApiUser['kycStatus']; message: string }>('kyc/submit', { json: data }),
+    userApiPost<{ kycId: string; status: ApiUser['kycStatus']; message: string }>('kyc/submit', { json: data }),
 };
 
 export const campaignsApi = {
@@ -314,10 +327,10 @@ export const achievementsApi = {
 };
 
 export const badgesApi = {
-  getAll: () => apiGet<{ badges: ApiBadge[] }>('badges'),
-  getByUser: (userId: string) => apiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges`),
-  getEquipped: (userId: string) => apiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges/equipped`),
-  equip: (badgeId: string) => apiPost<void>('users/me/badges/equip', { json: { badgeId } }),
+  getAll: () => userApiGet<{ badges: ApiBadge[] }>('badges'),
+  getByUser: (userId: string) => userApiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges`),
+  getEquipped: (userId: string) => userApiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges/equipped`),
+  equip: (badgeId: string) => userApiPost<void>('users/me/badges/equip', { json: { badgeId } }),
 };
 
 export const platformApi = {
