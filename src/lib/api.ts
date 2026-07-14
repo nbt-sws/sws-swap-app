@@ -222,17 +222,17 @@ export const notificationsApi = {
 
 export const storesApi = {
   getAll: (params?: { tier?: string; search?: string; page?: number; limit?: number }) =>
-    userApiGet<{ sellers: ApiCollectorProfile[] }>('collectors', { searchParams: params }),
+    apiGet<{ sellers: ApiCollectorProfile[] }>('collectors', { searchParams: params }),
 };
 
 export const collectorApi = {
-  getProfile: (userId: string) => userApiGet<ApiCollectorProfile>(`collectors/${userId}`),
+  getProfile: (userId: string) => apiGet<ApiCollectorProfile>(`collectors/${userId}`),
   updateProfile: (data: Partial<ApiCollectorProfile>) =>
-    userApiPut<ApiCollectorProfile>('collectors/me', { json: data }),
+    apiPut<ApiCollectorProfile>('collectors/me', { json: data }),
   uploadAvatar: (formData: FormData) =>
-    userKy.post('collector-profiles/avatar', { body: formData, headers: getAuthHeaders() }).json<{ avatarUrl: string }>(),
+    api.post('collector-profiles/avatar', { body: formData, headers: getAuthHeaders() }).json<{ avatarUrl: string }>(),
   uploadBanner: (formData: FormData) =>
-    userKy.post('collector-profiles/banner', { body: formData, headers: getAuthHeaders() }).json<{ bannerUrl: string }>(),
+    api.post('collector-profiles/banner', { body: formData, headers: getAuthHeaders() }).json<{ bannerUrl: string }>(),
 };
 
 export const followsApi = {
@@ -306,9 +306,9 @@ export const offersApi = {
 
 export const kycApi = {
   getStatus: (userId: string) =>
-    userApiGet<{ userId: string; status: ApiUser['kycStatus']; submittedAt?: string; reviewedAt?: string }>(`kyc/status/${userId}`),
+    apiGet<{ userId: string; status: ApiUser['kycStatus']; submittedAt?: string; reviewedAt?: string }>(`kyc/status/${userId}`),
   submit: (data: { documents: { type: string; s3Key: string }[] }) =>
-    userApiPost<{ kycId: string; status: ApiUser['kycStatus']; message: string }>('kyc/submit', { json: data }),
+    apiPost<{ kycId: string; status: ApiUser['kycStatus']; message: string }>('kyc/submit', { json: data }),
 };
 
 export const campaignsApi = {
@@ -327,10 +327,10 @@ export const achievementsApi = {
 };
 
 export const badgesApi = {
-  getAll: () => userApiGet<{ badges: ApiBadge[] }>('badges'),
-  getByUser: (userId: string) => userApiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges`),
-  getEquipped: (userId: string) => userApiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges/equipped`),
-  equip: (badgeId: string) => userApiPost<void>('users/me/badges/equip', { json: { badgeId } }),
+  getAll: () => apiGet<{ badges: ApiBadge[] }>('badges'),
+  getByUser: (userId: string) => apiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges`),
+  getEquipped: (userId: string) => apiGet<{ badges: ApiBadge[] }>(`users/${userId}/badges/equipped`),
+  equip: (badgeId: string) => apiPost<void>('users/me/badges/equip', { json: { badgeId } }),
 };
 
 export const platformApi = {
