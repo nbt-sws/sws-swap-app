@@ -52,7 +52,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-xl glass-card glass-card-hover hover-glow tilt-card flex flex-col h-full',
+        'group relative overflow-hidden rounded-xl surface-card surface-card-hover hover-glow tilt-card flex flex-col h-full',
         className
       )}
     >
@@ -115,19 +115,19 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
             <h3 className="line-clamp-1 font-semibold text-sm text-foreground transition-colors group-hover:text-brand">
               {listing.card.nameEn}
             </h3>
-            <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{listing.card.code}</p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{listing.card.code}</p>
           </div>
           {listing.status !== 'active' && (
-            <Badge variant="outline" className="shrink-0 text-[10px] h-5 px-1.5">
+            <Badge variant="outline" className="shrink-0 text-xs h-5 px-1.5">
               {t(status.labelKey)}
             </Badge>
           )}
         </div>
 
         <div className="mt-2 flex flex-wrap gap-1">
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{listing.card.rarity}</span>
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{listing.card.condition}</span>
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{listing.shelf}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{listing.card.rarity}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{listing.card.condition}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{listing.shelf}</span>
         </div>
 
         <div className="mt-auto pt-3 flex items-center justify-between">
@@ -139,7 +139,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           >
             {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
           </span>
-          <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">@{listing.seller.name}</span>
+          <span className="text-xs text-muted-foreground truncate max-w-[80px]">@{listing.seller.name}</span>
         </div>
       </div>
     </div>

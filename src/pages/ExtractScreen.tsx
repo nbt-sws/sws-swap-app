@@ -121,7 +121,7 @@ export function ExtractScreen() {
       </div>
 
       {/* Failure path hint */}
-      <p className="text-center text-[10px] text-muted-foreground pb-8">
+      <p className="text-center text-xs text-muted-foreground pb-8">
         Extraction → Pricing (auto) · failure → back to Scanner
       </p>
     </div>

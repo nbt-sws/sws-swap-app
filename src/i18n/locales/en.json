@@ -42,6 +42,7 @@
     "history": "History",
     "filters": "Filters",
     "clearAll": "Clear all",
+    "clearSearch": "Clear search",
     "showResults": "Show {{count}} results",
     "game": "Game",
     "type": "Type",
@@ -139,7 +140,11 @@
     "memberBadge": "Member",
     "freePlan": "Free",
     "portfolio": {
-      "title": "Portfolio Value",
+      "title": "Portfolio",
+      "totalValue": "Total value",
+      "pl": "P/L",
+      "cards": "Cards",
+      "viewVault": "View vault",
       "change": "{{value}} ({{percent}}%)",
       "topCards": "Top {{count}} cards"
     },
@@ -161,6 +166,7 @@
       "title": "Market Pulse",
       "viewAll": "Browse market",
       "empty": "No trending listings",
+      "emptyDescription": "Check back soon or browse the market now.",
       "trade": "Trade"
     },
     "activity": {
@@ -234,7 +240,7 @@
     "emptyDesc": "We’ll let you know when there are offers, orders, or updates."
   },
   "market": {
-    "title": "SwibSwap Market",
+    "title": "Market",
     "description": "{{count}} LIVE · raw · pre-graded · graded · sealed — all vault-backed",
     "empty": "No listings found",
     "emptyDesc": "Try adjusting your filters or search for a different card.",
@@ -321,7 +327,7 @@
     }
   },
   "vault": {
-    "title": "SwibsVault",
+    "title": "🗄️ SwibsVault",
     "collectionDescription": "my collection · {{count}} cards",
     "vault": "Vault",
     "store": "Store",

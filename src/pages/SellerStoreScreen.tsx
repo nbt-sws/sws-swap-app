@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from '@tanstack/react-router';
 import {
   useMarketListings,
@@ -41,6 +42,7 @@ const SOCIAL_ICONS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
 };
 
 export function SellerStoreScreen() {
+  const { t } = useTranslation();
   const { sellerId } = useParams({ from: '/seller/$sellerId' });
   const { user } = useAuthStore();
   const { data: listings, isLoading: listingsLoading } = useMarketListings();
@@ -158,17 +160,6 @@ export function SellerStoreScreen() {
 
   return (
     <PageContainer className="py-6">
-      {/* Back */}
-      <div className="mb-4">
-        <Link
-          to="/stores"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Stores
-        </Link>
-      </div>
-
       {/* Hero */}
       <div className="relative mb-8">
         <div
@@ -182,6 +173,13 @@ export function SellerStoreScreen() {
             'absolute inset-0 bg-gradient-to-t',
             profile?.bannerUrl ? 'from-black/60 via-black/20 to-transparent' : 'from-surface-dark/60 via-surface-dark/20 to-transparent'
           )} />
+          <Link
+            to="/stores"
+            className="absolute top-4 left-4 z-10 inline-flex items-center gap-1 rounded-lg bg-black/30 px-2.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-black/40 hover:text-white"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            {t('nav.stores')}
+          </Link>
         </div>
 
         <div className="flex flex-col items-center -mt-16 px-4 text-center">
@@ -277,7 +275,7 @@ export function SellerStoreScreen() {
                   />
                 </div>
                 <div className="p-2">
-                  <p className="text-[9px] font-mono text-text-tertiary">{listing.card.code}</p>
+                  <p className="text-xs font-mono text-text-tertiary">{listing.card.code}</p>
                   <p className="text-xs font-semibold line-clamp-1 group-hover:text-brand transition">{listing.card.nameEn}</p>
                   <p className="text-brand font-bold text-xs mt-1">
                     {listing.listingType === 'TRADE' ? 'Trade' : `฿${listing.price.toLocaleString()}`}
@@ -412,7 +410,7 @@ export function SellerStoreScreen() {
                     />
                   ))}
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-1">{reviewCount} reviews</p>
+                <p className="text-xs text-muted-foreground mt-1">{reviewCount} reviews</p>
               </div>
               <div className="h-10 w-px bg-border" />
               <p className="text-sm text-muted-foreground flex-1">
@@ -434,7 +432,7 @@ export function SellerStoreScreen() {
                     </Avatar>
                     <span className="text-sm font-medium">{review.reviewerName}</span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
@@ -519,7 +517,7 @@ function StatCard({ value, label, icon }: { value: number | string; label: strin
       <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center shrink-0">{icon}</div>
       <div>
         <p className="text-lg font-bold leading-none">{value}</p>
-        <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">{label}</p>
+        <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{label}</p>
       </div>
     </div>
   );
@@ -537,7 +535,7 @@ function ProviderRow({ provider }: { provider: ServiceProvider }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-bold">{provider.category === 'PREGRADE' ? 'Pre-grade' : 'Grading'}</h3>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface border border-border text-muted-foreground">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-surface border border-border text-muted-foreground">
                 {provider.packages.length} packages
               </span>
             </div>
@@ -585,17 +583,17 @@ function ListingGrid({ listings }: { listings: MarketListing[] }) {
             />
 
             {listing.listingType === 'TRADE' && (
-              <span className="absolute top-1.5 right-1.5 text-[9px] font-medium bg-periwinkle/90 text-white px-1.5 py-0.5 rounded-full">
+              <span className="absolute top-1.5 right-1.5 text-xs font-medium bg-periwinkle/90 text-white px-1.5 py-0.5 rounded-full">
                 Trade
               </span>
             )}
           </div>
           <div className="p-2.5">
-            <p className="text-[9px] font-mono text-text-tertiary">{listing.card.code}</p>
+            <p className="text-xs font-mono text-text-tertiary">{listing.card.code}</p>
             <h3 className="font-semibold text-xs leading-tight line-clamp-2 group-hover:text-brand transition min-h-[2rem]">{listing.card.nameEn}</h3>
             <div className="flex items-center gap-1 mt-1">
-              <span className="text-[9px] font-mono bg-surface-lighter px-1 py-0.5 rounded">{listing.card.rarity}</span>
-              <span className="text-[9px] font-mono bg-surface-lighter px-1 py-0.5 rounded">{listing.card.condition}</span>
+              <span className="text-xs font-mono bg-surface-lighter px-1 py-0.5 rounded">{listing.card.rarity}</span>
+              <span className="text-xs font-mono bg-surface-lighter px-1 py-0.5 rounded">{listing.card.condition}</span>
             </div>
             <p className="text-brand font-bold text-xs mt-1.5">
               {listing.listingType === 'TRADE' ? 'Trade' : `฿${listing.price.toLocaleString()}`}

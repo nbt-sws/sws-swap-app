@@ -105,7 +105,7 @@ export function RatingsScreen() {
 
         {/* Quick tags */}
         <div>
-          <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-3">
+          <p className="text-xs font-mono tracking-wider text-muted-foreground mb-3">
             QUICK TAGS
           </p>
           <div className="flex flex-wrap gap-2">
@@ -127,7 +127,7 @@ export function RatingsScreen() {
 
         {/* Comment */}
         <div>
-          <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">
+          <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
             COMMENT (OPTIONAL)
           </p>
           <textarea
@@ -150,7 +150,7 @@ export function RatingsScreen() {
 
         {/* Example response */}
         <div>
-          <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">
+          <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
             AFTER THE LAB RESPONDS — EXAMPLE
           </p>
           <div className="bg-surface-light rounded-xl p-4">
@@ -160,7 +160,7 @@ export function RatingsScreen() {
               </div>
               <div>
                 <p className="text-xs font-medium">RAWLITY responded · 1 day ago</p>
-                <p className="text-[10px] text-muted-foreground">Published ✓</p>
+                <p className="text-xs text-muted-foreground">Published ✓</p>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -172,7 +172,7 @@ export function RatingsScreen() {
         {/* Public scorecard */}
         <div>
           <div className="bg-pregrade/5 border border-pregrade/20 rounded-xl p-4">
-            <p className="text-[10px] font-mono text-pregrade mb-2">RAWLITY PUBLIC SCORECARD</p>
+            <p className="text-xs font-mono text-pregrade mb-2">RAWLITY PUBLIC SCORECARD</p>
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-pregrade fill-pregrade" />
               <span className="font-bold">4.9</span>

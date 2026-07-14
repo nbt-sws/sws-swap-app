@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { Route } from '@/routes/vault.index';
@@ -13,7 +13,6 @@ import {
   CheckSquare, Tag, Plus, Package, Store, EyeOff, Gift, Truck, Clock, Wallet,
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { VaultCard } from '@/components/domain/VaultCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -51,16 +50,9 @@ export function VaultScreen() {
   const [confirmUnlistOpen, setConfirmUnlistOpen] = useState(false);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [bulkListModalOpen, setBulkListModalOpen] = useState(false);
-  const [registerModalOpen, setRegisterModalOpen] = useState(false);
-  const [listTargetItem, setListTargetItem] = useState<VaultItem | null>(null);
-
   const { action } = Route.useSearch();
-  useEffect(() => {
-    if (action === 'register') {
-      setRegisterModalOpen(true);
-    }
-  }, [action]);
-
+  const [registerModalOpen, setRegisterModalOpen] = useState(action === 'register');
+  const [listTargetItem, setListTargetItem] = useState<VaultItem | null>(null);
   const listingsMap = useMemo(() => {
     const map = new Map<string, { listingId: string; price: number }>();
     listings?.forEach((l) => {
@@ -192,11 +184,6 @@ export function VaultScreen() {
 
   return (
     <PageContainer className="py-6">
-      <PageHeader
-        title={t('vault.title')}
-        description={t('vault.collectionDescription', { count: cardCount })}
-      />
-
       <div className="space-y-6">
         {/* Profile header */}
         {profileLoading && !profile ? (
@@ -224,14 +211,14 @@ export function VaultScreen() {
         <div className="grid grid-cols-2 gap-3">
           <Link
             to="/redemptions"
-            className="flex items-center gap-2 rounded-xl glass-card glass-card-hover p-3 text-sm font-medium transition"
+            className="flex items-center gap-2 rounded-xl surface-card surface-card-hover p-3 text-sm font-medium transition"
           >
             <Gift className="w-4 h-4 text-brand" />
             Redemptions
           </Link>
           <Link
             to="/vault-deliveries"
-            className="flex items-center gap-2 rounded-xl glass-card glass-card-hover p-3 text-sm font-medium transition"
+            className="flex items-center gap-2 rounded-xl surface-card surface-card-hover p-3 text-sm font-medium transition"
           >
             <Truck className="w-4 h-4 text-brand" />
             Deliveries
@@ -240,31 +227,31 @@ export function VaultScreen() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="glass-card rounded-xl p-3">
+          <div className="surface-card rounded-xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-md bg-brand/10 flex items-center justify-center">
                 <Wallet className="w-3.5 h-3.5 text-brand" />
               </div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.value')}</p>
+              <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.value')}</p>
             </div>
             <p className="text-sm font-bold font-mono text-foreground">฿{totalValue.toLocaleString()}</p>
           </div>
-          <div className="glass-card rounded-xl p-3">
+          <div className="surface-card rounded-xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-md bg-periwinkle/10 flex items-center justify-center">
                 <Package className="w-3.5 h-3.5 text-periwinkle" />
               </div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.cards')}</p>
+              <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.cards')}</p>
             </div>
             <p className="text-sm font-bold font-mono">{cardCount}</p>
-            <p className="text-[9px] text-muted-foreground">{heldCards.length} {t('vault.stats.held')}</p>
+            <p className="text-xs text-muted-foreground">{heldCards.length} {t('vault.stats.held')}</p>
           </div>
-          <div className="glass-card rounded-xl p-3">
+          <div className="surface-card rounded-xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className={cn('w-6 h-6 rounded-md flex items-center justify-center', totalPL >= 0 ? 'bg-cyan/10' : 'bg-pldown/10')}>
                 {totalPL >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-cyan" /> : <TrendingDown className="w-3.5 h-3.5 text-pldown" />}
               </div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.pl')}</p>
+              <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{t('vault.stats.pl')}</p>
             </div>
             <p className={cn(
               'text-sm font-bold font-mono flex items-center gap-1',
@@ -272,7 +259,7 @@ export function VaultScreen() {
             )}>
               ฿{Math.abs(totalPL).toLocaleString()}
             </p>
-            <p className="text-[9px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {totalPL >= 0 ? '+' : '-'}
               {totalValue > totalPL ? ((totalPL / (totalValue - totalPL)) * 100).toFixed(1) : '0.0'}%
             </p>
@@ -281,7 +268,7 @@ export function VaultScreen() {
 
       {/* Vault / Store Toggle */}
       <div className="flex items-center justify-center">
-        <div className="inline-flex items-center rounded-xl glass-card p-1">
+        <div className="inline-flex items-center rounded-xl surface-card p-1">
           <button
             onClick={() => { setVaultViewMode('vault'); clearSelection(); }}
             className={cn(
@@ -326,7 +313,8 @@ export function VaultScreen() {
               <span className="text-xs text-muted-foreground mr-2">{t('common.selected', { count: selectedIds.size })}</span>
               <button
                 onClick={clearSelection}
-                className="w-8 h-8 rounded-lg bg-surface-light flex items-center justify-center text-muted-foreground hover:text-white"
+                className="w-11 h-11 rounded-lg bg-surface-light flex items-center justify-center text-muted-foreground hover:text-white"
+                aria-label={t('common.cancel')}
               >
                 <EyeOff className="w-4 h-4" />
               </button>
@@ -334,7 +322,7 @@ export function VaultScreen() {
           ) : (
             <button
               onClick={() => setSelecting(true)}
-              className="w-8 h-8 rounded-lg bg-surface-light flex items-center justify-center text-muted-foreground hover:text-white"
+              className="w-11 h-11 rounded-lg bg-surface-light flex items-center justify-center text-muted-foreground hover:text-white"
               aria-label={t('common.selectAll')}
             >
               <CheckSquare className="w-4 h-4" />
@@ -345,16 +333,17 @@ export function VaultScreen() {
               key={v.id}
               onClick={() => setActiveView(v.id)}
               className={cn(
-                'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
+                'w-11 h-11 rounded-lg flex items-center justify-center transition-all',
                 activeView === v.id ? 'bg-surface-lighter text-white' : 'text-muted-foreground'
               )}
+              aria-label={t(v.labelKey)}
               title={t(v.labelKey)}
             >
               <v.icon className="w-4 h-4" />
             </button>
           ))}
           {vaultViewMode === 'vault' && (
-            <Button size="sm" className="bg-brand hover:bg-brand-light gap-1.5 ml-1 h-8 px-2.5" onClick={() => setRegisterModalOpen(true)}>
+            <Button size="sm" className="bg-brand hover:bg-brand-light gap-1.5 ml-1 h-10 px-2.5" onClick={() => setRegisterModalOpen(true)}>
               <Plus className="w-3.5 h-3.5" />
               <span className="hidden sm:inline text-xs">{t('common.add')}</span>
             </Button>
@@ -573,13 +562,13 @@ function VaultListRow({
         <div className="flex items-center gap-2">
           <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>
           {isListed && (
-            <span className="text-[10px] font-mono bg-brand/10 text-brand px-1.5 rounded">{t('filters.listed').toUpperCase()}</span>
+            <span className="text-xs font-mono bg-brand/10 text-brand px-1.5 rounded">{t('filters.listed').toUpperCase()}</span>
           )}
         </div>
         <p className="text-sm font-semibold truncate">{item.card.nameEn}</p>
         <div className="flex gap-2 mt-1">
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 rounded">{item.condition}</span>
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 rounded">{item.card.rarity}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 rounded">{item.condition}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 rounded">{item.card.rarity}</span>
         </div>
       </div>
       <div className="text-right">
@@ -594,7 +583,7 @@ function VaultListRow({
               e.stopPropagation();
               onList(item);
             }}
-            className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-brand hover:underline"
+            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
           >
             <Tag className="w-3 h-3" />
             {t('common.list')}

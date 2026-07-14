@@ -42,11 +42,11 @@ export function AchievementsScreen() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-medium text-sm truncate">{a.title}</h3>
-                      {a.unlocked && <span className="text-[10px] text-pregrade font-bold">UNLOCKED</span>}
+                      {a.unlocked && <span className="text-xs text-pregrade font-bold">UNLOCKED</span>}
                     </div>
                     <p className="text-xs text-muted-foreground mb-2">{a.description}</p>
                     <Progress value={a.progress} className="h-1.5" />
-                    <p className="text-[10px] text-muted-foreground mt-1 text-right">{a.progress}%</p>
+                    <p className="text-xs text-muted-foreground mt-1 text-right">{a.progress}%</p>
                   </div>
                 </div>
               </CardContent>

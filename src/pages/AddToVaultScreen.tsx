@@ -4,6 +4,7 @@ import { useAddToVault } from '@/hooks/useApi';
 import { motion } from 'framer-motion';
 import { ScrollablePage } from '@/components/layout/ScrollablePage';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { Input } from '@/components/ui/input';
 import type { Card } from '@/types';
 
 const CONDITIONS = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5'];
@@ -89,17 +90,18 @@ export function AddToVaultScreen() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <label className="text-[10px] font-mono tracking-wider text-muted-foreground block mb-2">
+          <label htmlFor="paidPrice" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
             PAID PRICE (THB)
           </label>
-          <div className="bg-surface-light rounded-xl px-4 py-3 flex items-center gap-2">
-            <span className="text-muted-foreground font-mono">฿</span>
-            <input
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">฿</span>
+            <Input
+              id="paidPrice"
               type="number"
               value={paidPrice}
               onChange={(e) => setPaidPrice(e.target.value)}
               placeholder="0"
-              className="bg-transparent text-lg font-bold font-mono outline-none w-full placeholder:text-muted-foreground/30"
+              className="pl-8 text-lg font-bold font-mono"
             />
           </div>
         </motion.div>
@@ -110,7 +112,7 @@ export function AddToVaultScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <label className="text-[10px] font-mono tracking-wider text-muted-foreground block mb-2">
+          <label className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
             CONDITION
           </label>
           <div className="flex flex-wrap gap-2">
@@ -139,14 +141,15 @@ export function AddToVaultScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <label className="text-[10px] font-mono tracking-wider text-muted-foreground block mb-2">
+          <label htmlFor="dateAcquired" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
             DATE ACQUIRED
           </label>
-          <input
+          <Input
+            id="dateAcquired"
             type="date"
             value={dateAcquired}
             onChange={(e) => setDateAcquired(e.target.value)}
-            className="w-full bg-surface-light rounded-xl px-4 py-3 text-sm font-mono outline-none"
+            className="font-mono"
           />
         </motion.div>
 
@@ -156,15 +159,15 @@ export function AddToVaultScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <label className="text-[10px] font-mono tracking-wider text-muted-foreground block mb-2">
+          <label htmlFor="source" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
             SOURCE / NOTE
           </label>
-          <input
+          <Input
+            id="source"
             type="text"
             value={source}
             onChange={(e) => setSource(e.target.value)}
             placeholder="Yahoo! JP auction · via proxy"
-            className="w-full bg-surface-light rounded-xl px-4 py-3 text-sm outline-none placeholder:text-muted-foreground/30"
           />
         </motion.div>
 
@@ -176,12 +179,12 @@ export function AddToVaultScreen() {
           >
             <div className="bg-surface-light rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-mono text-muted-foreground">MARKET NOW</span>
+                <span className="text-xs font-mono text-muted-foreground">MARKET NOW</span>
                 <span className="text-sm font-bold font-mono">฿{currentPrice.toLocaleString()}</span>
               </div>
               <div className="h-px bg-border mb-3" />
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-muted-foreground">P/L PREVIEW</span>
+                <span className="text-xs font-mono text-muted-foreground">P/L PREVIEW</span>
                 <span className={`text-sm font-bold font-mono ${plAmount >= 0 ? 'text-plup' : 'text-pldown'}`}>
                   {plAmount >= 0 ? '+' : ''}฿{plAmount.toLocaleString()} · {plAmount >= 0 ? '+' : ''}{plPercent.toFixed(1)}%
                 </span>

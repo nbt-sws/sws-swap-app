@@ -63,6 +63,13 @@
     --color-border-strong: #3D4280;
     --color-bg-overlay: rgba(0, 0, 0, 0.7);
 
+    /* Chart / dataviz tokens */
+    --chart-brand: #F06AA8;
+    --chart-brand-light: rgba(240, 106, 168, 0.3);
+    --chart-surface: #1E2248;
+    --chart-border: #282D5A;
+    --chart-line: #FFFFFF;
+
     /* Z-index scale from buyer */
     --z-bg: 0;
     --z-content: 10;
@@ -105,14 +112,10 @@
       radial-gradient(ellipse at 100% 100%, rgba(123, 138, 245, 0.10) 0%, transparent 45%),
       radial-gradient(ellipse at 0% 100%, rgba(79, 224, 208, 0.07) 0%, transparent 40%),
       radial-gradient(ellipse at 50% 35%, rgba(240, 106, 168, 0.05) 0%, transparent 50%);
-    animation: ambient-drift 30s ease-in-out infinite alternate;
+
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    body::before {
-      animation: none;
-    }
-  }
+
 }
 
 @layer utilities {
@@ -133,11 +136,11 @@
     @apply font-mono tabular-nums tracking-tight;
   }
 
-  .glass-card {
+  .surface-card {
     @apply bg-surface-light border border-border;
   }
 
-  .glass-card-hover {
+  .surface-card-hover {
     @apply transition-colors duration-200 hover:bg-surface-lighter hover:border-brand/30;
   }
 }
@@ -149,22 +152,22 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0D0F26;
+  background: var(--color-bg-default);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #282D5A;
+  background: var(--color-border-default);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3D4280;
+  background: var(--color-border-strong);
 }
 
 /* Selection color */
 ::selection {
-  background: rgba(240, 106, 168, 0.3);
-  color: white;
+  background: var(--color-brand-primary-light);
+  color: var(--color-text-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════

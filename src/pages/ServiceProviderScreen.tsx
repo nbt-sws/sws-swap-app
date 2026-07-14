@@ -41,8 +41,8 @@ const COLOR_STYLES: Record<
   brand: { bg: 'bg-brand/10', text: 'text-brand', badge: 'bg-brand/10 text-brand' },
   periwinkle: { bg: 'bg-periwinkle/10', text: 'text-periwinkle', badge: 'bg-periwinkle/10 text-periwinkle' },
   cyan: { bg: 'bg-cyan/10', text: 'text-cyan', badge: 'bg-cyan/10 text-cyan' },
-  pregrade: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400' },
-  plup: { bg: 'bg-violet-500/10', text: 'text-violet-400', badge: 'bg-violet-500/10 text-violet-400' },
+  pregrade: { bg: 'bg-success/10', text: 'text-success', badge: 'bg-success/10 text-success' },
+  plup: { bg: 'bg-periwinkle/10', text: 'text-periwinkle', badge: 'bg-periwinkle/10 text-periwinkle' },
 };
 
 
@@ -182,7 +182,7 @@ export function ServiceProviderScreen() {
           </p>
           <div className="flex flex-wrap gap-2 mt-2">
             {provider.serviceTypes.map((type) => (
-              <span key={type} className="text-[10px] px-2 py-1 rounded-full glass-card text-muted-foreground">
+              <span key={type} className="text-xs px-2 py-1 rounded-full surface-card text-muted-foreground">
                 {type}
               </span>
             ))}
@@ -193,7 +193,7 @@ export function ServiceProviderScreen() {
                 <span
                   key={grader}
                   className={cn(
-                    'text-[10px] px-2 py-1 rounded-full border font-medium',
+                    'text-xs px-2 py-1 rounded-full border font-medium',
                     GRADER_STYLES[grader]
                   )}
                 >
@@ -212,7 +212,7 @@ export function ServiceProviderScreen() {
             {provider.contactPhone && (
               <a
                 href={`tel:${provider.contactPhone}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl glass-card glass-card-hover text-xs font-medium"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl surface-card surface-card-hover text-xs font-medium"
               >
                 <Phone className="w-3.5 h-3.5" />
                 {provider.contactPhone}
@@ -221,7 +221,7 @@ export function ServiceProviderScreen() {
             {provider.contactEmail && (
               <a
                 href={`mailto:${provider.contactEmail}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl glass-card glass-card-hover text-xs font-medium"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl surface-card surface-card-hover text-xs font-medium"
               >
                 <Mail className="w-3.5 h-3.5" />
                 {provider.contactEmail}
@@ -274,7 +274,7 @@ export function ServiceProviderScreen() {
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold">Packages</h2>
             {selectedPackage && (
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {selectedPackage.currency} {selectedPackage.pricePerCard.toLocaleString()} / card
               </p>
             )}
@@ -323,10 +323,10 @@ export function ServiceProviderScreen() {
                       </div>
                     ) : provider.category === 'GRADE' ? (
                       <div className="flex items-center gap-2">
-                        <div className="h-6 px-2 rounded bg-surface-light flex items-center justify-center text-[10px] text-muted-foreground">
+                        <div className="h-6 px-2 rounded bg-surface-light flex items-center justify-center text-xs text-muted-foreground">
                           Other
                         </div>
-                        <h3 className="text-xs font-bold text-slate-400">Other / Custom grader</h3>
+                        <h3 className="text-xs font-bold text-muted-foreground">Other / Custom grader</h3>
                       </div>
                     ) : null}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -422,7 +422,7 @@ function PackageCard({
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate">{pkg.name}</p>
             {pkg.grader && (
-              <span className={cn('inline-block text-[10px] px-1.5 py-0.5 mt-1 rounded border font-medium', GRADER_STYLES[pkg.grader])}>
+              <span className={cn('inline-block text-xs px-1.5 py-0.5 mt-1 rounded border font-medium', GRADER_STYLES[pkg.grader])}>
                 {pkg.grader === 'OTHER' ? 'Other' : pkg.grader}
               </span>
             )}

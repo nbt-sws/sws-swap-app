@@ -275,7 +275,7 @@ export function CreateListingScreen() {
                   <p className="text-sm">{photos.length > 0 ? `${photos.length} photo(s) selected` : 'Upload card photos'}</p>
                   <p className="text-xs">{photos.length > 0 ? photos.map(f => f.name).join(', ') : 'Tap to select files'}</p>
                 </button>
-                <input
+                <Input
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"

@@ -71,7 +71,7 @@ export function VaultItemDetailScreen() {
         }
       );
     },
-    [item?.id, vaultDelivery]
+    [item?.id, vaultDelivery, t]
   );
 
   const handleRedemptionSubmit = useCallback(
@@ -87,7 +87,7 @@ export function VaultItemDetailScreen() {
         }
       );
     },
-    [item?.id, createRedemption]
+    [item?.id, createRedemption, t]
   );
 
   if (isLoading) {
@@ -185,13 +185,13 @@ export function VaultItemDetailScreen() {
             <div className="grid grid-cols-2 gap-3">
               <Card className="bg-surface-light border-border">
                 <CardContent className="p-3">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('vault.item.paid')}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('vault.item.paid')}</p>
                   <p className="font-mono font-bold">฿{item.paidPrice.toLocaleString()}</p>
                 </CardContent>
               </Card>
               <Card className="bg-surface-light border-border">
                 <CardContent className="p-3">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('vault.item.current')}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('vault.item.current')}</p>
                   <p className="font-mono font-bold">฿{item.currentPrice.toLocaleString()}</p>
                 </CardContent>
               </Card>

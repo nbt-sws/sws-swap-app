@@ -27,7 +27,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/85 backdrop-blur-xl border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/90 backdrop-blur-md border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
       <div className="h-full flex items-center justify-around px-2 relative">
         {LEFT_TABS.map((tab) => {
           const active = isActive(tab.to);
@@ -41,7 +41,7 @@ export function BottomNav() {
               <div className={cn('p-1 rounded-lg transition-all', active && 'bg-brand/10')}>
                 <Icon className={cn('w-[18px] h-[18px] transition-colors', active ? 'text-brand' : 'text-muted-foreground')} />
               </div>
-              <span className={cn('text-[9px] transition-colors', active ? 'text-brand font-medium' : 'text-muted-foreground')}>
+              <span className={cn('text-xs transition-colors', active ? 'text-brand font-medium' : 'text-muted-foreground')}>
                 {t(tab.label)}
               </span>
               {active && (
@@ -77,7 +77,7 @@ export function BottomNav() {
               <div className={cn('p-1 rounded-lg transition-all', active && 'bg-brand/10')}>
                 <Icon className={cn('w-[18px] h-[18px] transition-colors', active ? 'text-brand' : 'text-muted-foreground')} />
               </div>
-              <span className={cn('text-[9px] transition-colors', active ? 'text-brand font-medium' : 'text-muted-foreground')}>
+              <span className={cn('text-xs transition-colors', active ? 'text-brand font-medium' : 'text-muted-foreground')}>
                 {t(tab.label)}
               </span>
               {active && (

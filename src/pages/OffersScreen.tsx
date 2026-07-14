@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import type { Offer } from '@/types';
 
 const statusConfig: Record<Offer['status'], { label: string; color: string }> = {
-  PENDING: { label: 'Pending', color: 'text-amber-400 bg-amber-400/10' },
+  PENDING: { label: 'Pending', color: 'text-warning bg-warning/10' },
   ACCEPTED: { label: 'Accepted', color: 'text-plup bg-plup/10' },
   DECLINED: { label: 'Declined', color: 'text-pldown bg-pldown/10' },
   COUNTERED: { label: 'Countered', color: 'text-cyan bg-cyan/10' },

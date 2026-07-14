@@ -109,7 +109,7 @@ export function NotificationsScreen() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <h3 className={cn('font-medium text-sm', !n.read && 'text-brand')}>{n.title}</h3>
-                      <span className="text-[10px] text-muted-foreground">{relativeTime(n.createdAt)}</span>
+                      <span className="text-xs text-muted-foreground">{relativeTime(n.createdAt)}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>
                   </div>

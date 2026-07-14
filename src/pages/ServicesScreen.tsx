@@ -34,8 +34,8 @@ const COLOR_STYLES: Record<
   brand: { bg: 'bg-brand/10', text: 'text-brand', badge: 'bg-brand/10 text-brand', ring: 'ring-brand/30' },
   periwinkle: { bg: 'bg-periwinkle/10', text: 'text-periwinkle', badge: 'bg-periwinkle/10 text-periwinkle', ring: 'ring-periwinkle/30' },
   cyan: { bg: 'bg-cyan/10', text: 'text-cyan', badge: 'bg-cyan/10 text-cyan', ring: 'ring-cyan/30' },
-  pregrade: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400', ring: 'ring-emerald-500/30' },
-  plup: { bg: 'bg-violet-500/10', text: 'text-violet-400', badge: 'bg-violet-500/10 text-violet-400', ring: 'ring-violet-500/30' },
+  pregrade: { bg: 'bg-success/10', text: 'text-success', badge: 'bg-success/10 text-success', ring: 'ring-success/30' },
+  plup: { bg: 'bg-periwinkle/10', text: 'text-periwinkle', badge: 'bg-periwinkle/10 text-periwinkle', ring: 'ring-periwinkle/30' },
 };
 
 const HOW_IT_WORKS: Record<ServiceCategory, { num: string; title: string; desc: string }[]> = {
@@ -112,7 +112,7 @@ function ServiceCatalog({
     return (
       <div className="space-y-4">
         {[1, 2].map((i) => (
-          <div key={i} className="glass-card rounded-xl p-4 h-40 animate-pulse" />
+          <div key={i} className="surface-card rounded-xl p-4 h-40 animate-pulse" />
         ))}
       </div>
     );
@@ -146,8 +146,8 @@ function ServiceCatalog({
               <div className="w-10 h-10 rounded-full bg-surface-light flex items-center justify-center mx-auto mb-2">
                 <span className="text-sm font-bold text-brand">{step.num}</span>
               </div>
-              <p className="text-[10px] font-medium mb-0.5">{step.title}</p>
-              <p className="text-[9px] text-muted-foreground">{step.desc}</p>
+              <p className="text-xs font-medium mb-0.5">{step.title}</p>
+              <p className="text-xs text-muted-foreground">{step.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -183,7 +183,7 @@ function ProviderCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="glass-card glass-card-hover rounded-xl p-4"
+      className="surface-card surface-card-hover rounded-xl p-4"
     >
       <div className="flex items-start gap-3 mb-4">
         <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold overflow-hidden shrink-0', styles.bg, styles.text)}>
@@ -223,7 +223,7 @@ function ProviderCard({
       {provider.serviceTypes.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2">
           {provider.serviceTypes.map((type) => (
-            <span key={type} className="text-[10px] px-2 py-0.5 rounded-full glass-effect border border-border text-muted-foreground">
+            <span key={type} className="text-xs px-2 py-0.5 rounded-full surface-card border border-border text-muted-foreground">
               {type}
             </span>
           ))}
@@ -235,7 +235,7 @@ function ProviderCard({
             <span
               key={grader}
               className={cn(
-                'text-[10px] px-2 py-0.5 rounded-full border font-medium',
+                'text-xs px-2 py-0.5 rounded-full border font-medium',
                 GRADER_STYLES[grader]
               )}
             >
@@ -249,7 +249,7 @@ function ProviderCard({
         <div className="grid grid-cols-4 gap-2 mb-4">
           {provider.subScores.map((sub) => (
             <div key={sub.label} className="text-center">
-              <p className="text-[9px] font-mono text-muted-foreground mb-1">{sub.label}</p>
+              <p className="text-xs font-mono text-muted-foreground mb-1">{sub.label}</p>
               <p className={cn('text-sm font-bold font-mono', styles.text)}>{sub.value}</p>
             </div>
           ))}
@@ -261,7 +261,7 @@ function ProviderCard({
           to="/seller/$sellerId"
           params={{ sellerId: provider.storeId }}
           className={cn(
-            'flex-1 py-3 rounded-xl text-sm font-medium text-center transition-all glass-effect border border-border text-foreground hover:bg-white/10'
+            'flex-1 py-3 rounded-xl text-sm font-medium text-center transition-all surface-card border border-border text-foreground hover:bg-white/10'
           )}
         >
           View store
@@ -391,7 +391,7 @@ function PartnerTab() {
 
   return (
     <div className="space-y-6">
-      <div className="glass-card rounded-xl p-4">
+      <div className="surface-card rounded-xl p-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-xl bg-periwinkle/10 flex items-center justify-center">
             <Building2 className="w-5 h-5 text-periwinkle" />
@@ -537,7 +537,7 @@ function PartnerTab() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label>Proposed packages</Label>
-            <span className="text-[10px] text-muted-foreground">{form.proposedPackages?.length ?? 0} package(s)</span>
+            <span className="text-xs text-muted-foreground">{form.proposedPackages?.length ?? 0} package(s)</span>
           </div>
           <p className="text-xs text-muted-foreground">Add the packages you plan to offer. You can edit these later after approval.</p>
           <div className="space-y-3">
@@ -548,7 +548,7 @@ function PartnerTab() {
                   <button
                     type="button"
                     onClick={() => removePackage(index)}
-                    className="text-[10px] text-red-400 hover:text-red-300"
+                    className="text-xs text-danger hover:text-danger-light"
                   >
                     Remove
                   </button>
@@ -607,7 +607,7 @@ function PartnerTab() {
                       type="button"
                       onClick={() => togglePackageGrader(index, grader)}
                       className={cn(
-                        'text-[10px] px-2 py-1 rounded border transition-all',
+                        'text-xs px-2 py-1 rounded border transition-all',
                         pkg.grader === grader
                           ? GRADER_STYLES[grader]
                           : 'bg-surface border-border text-muted-foreground'
@@ -655,7 +655,7 @@ function PartnerTab() {
           <motion.p
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-center text-emerald-400"
+            className="text-xs text-center text-success"
           >
             Application received. Our partnerships team will reach out within 2 business days.
           </motion.p>
@@ -690,10 +690,10 @@ function PartnerTab() {
                   className={cn(
                     'text-xs font-medium px-2 py-1 rounded-full',
                     app.status === 'APPROVED'
-                      ? 'bg-emerald-500/10 text-emerald-400'
+                      ? 'bg-success/10 text-success'
                       : app.status === 'REJECTED'
-                        ? 'bg-red-500/10 text-red-400'
-                        : 'bg-amber-500/10 text-amber-400'
+                        ? 'bg-danger/10 text-danger'
+                        : 'bg-warning/10 text-warning'
                   )}
                 >
                   {app.status.replace(/_/g, ' ')}

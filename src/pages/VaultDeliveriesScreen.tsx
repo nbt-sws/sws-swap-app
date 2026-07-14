@@ -17,7 +17,7 @@ import { Truck, Package, CheckCircle2, Clock, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const statusConfig = {
-  PENDING: { label: 'Pending', icon: Clock, color: 'text-amber-400 bg-amber-400/10' },
+  PENDING: { label: 'Pending', icon: Clock, color: 'text-warning bg-warning/10' },
   PROCESSING: { label: 'Processing', icon: Package, color: 'text-cyan bg-cyan/10' },
   SHIPPED: { label: 'Shipped', icon: Truck, color: 'text-brand bg-brand/10' },
   DELIVERED: { label: 'Delivered', icon: CheckCircle2, color: 'text-plup bg-plup/10' },

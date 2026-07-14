@@ -5,7 +5,7 @@ import { useMarketListings, useVault, useMyListings } from '@/hooks/useApi';
 import { motion } from 'framer-motion';
 import {
   Search, SlidersHorizontal, LayoutGrid, List as ListIcon,
-  ChevronDown, X, ShieldCheck, Package,
+  ChevronDown, X, ShieldCheck, Package, ShoppingBag,
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -15,6 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { MarketListing } from '@/types';
 
 const SHELVES: { id: string; key: string }[] = [
@@ -115,7 +117,7 @@ export function MarketScreen() {
     }
 
     return result;
-  }, [listings, activeGame, activeType, searchQuery, activePriceRange, showVerifiedOnly, activeSort]);
+  }, [listings, activeGame, activeType, searchQuery, activePriceRange, showVerifiedOnly, activeSort, t]);
 
   const activeFilterCount = [
     activeGame !== null,
@@ -138,27 +140,31 @@ export function MarketScreen() {
     <PageContainer className="py-6">
       <PageHeader
         title={t('market.title')}
-        description={t('market.description', { count: isLoading ? 0 : filteredListings.length })}
+        icon={<ShoppingBag className="w-6 h-6 text-brand" />}
       />
 
       <div className="space-y-6">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('market.searchPlaceholder')}
-            className="w-full bg-surface-light rounded-xl pl-11 pr-4 py-3 text-sm outline-none placeholder:text-muted-foreground/50 border border-transparent focus:border-brand transition-colors"
+            aria-label={t('market.searchPlaceholder')}
+            className="w-full bg-surface-light pl-11 pr-11 placeholder:text-muted-foreground/50 border-transparent focus:border-brand"
           />
           {searchQuery && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-surface-lighter"
+              aria-label={t('common.clearSearch')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full text-muted-foreground hover:bg-surface-lighter"
             >
               <X className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -178,7 +184,7 @@ export function MarketScreen() {
             >
               {tab.label}
               {tab.count !== null && (
-                <span className="ml-1.5 rounded-md bg-surface-lighter px-1.5 py-0.5 text-[10px]">
+                <span className="ml-1.5 rounded-md bg-surface-lighter px-1.5 py-0.5 text-xs">
                   {tab.count}
                 </span>
               )}
@@ -193,7 +199,7 @@ export function MarketScreen() {
               <button
                 key={shelf.id}
                 onClick={() => setActiveShelf(shelf.id)}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
                   activeShelf === shelf.id
                     ? 'bg-brand text-white'
                     : 'bg-surface-light text-muted-foreground hover:text-white'
@@ -206,12 +212,13 @@ export function MarketScreen() {
 
           <button
             onClick={() => setShowMobileFilters(true)}
+            aria-label={t('common.filters')}
             className="relative flex shrink-0 items-center gap-2 rounded-lg border border-border bg-surface-light px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-surface-lighter transition-colors"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             {t('common.filters')}
             {activeFilterCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
                 {activeFilterCount}
               </span>
             )}
@@ -471,13 +478,13 @@ function MarketListRow({
         <div className="flex items-center gap-2">
           <p className="text-xs font-mono text-muted-foreground">{listing.card.code}</p>
           {listing.vaultVerified && (
-            <span className="text-[10px] font-mono bg-brand/10 text-brand px-1.5 rounded">{t('market.verified').toUpperCase()}</span>
+            <span className="text-xs font-mono bg-brand/10 text-brand px-1.5 rounded">{t('market.verified').toUpperCase()}</span>
           )}
         </div>
         <p className="text-sm font-semibold truncate">{listing.card.nameEn}</p>
         <div className="flex gap-2 mt-1">
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 rounded">{listing.shelf}</span>
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 rounded">{listing.listingType}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 rounded">{listing.shelf}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 rounded">{listing.listingType}</span>
         </div>
       </div>
       <div className="text-right shrink-0">
@@ -612,11 +619,10 @@ function MobileFilterSheet({
           </div>
 
           <label className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 transition-colors hover:bg-surface-lighter">
-            <input
-              type="checkbox"
+            <Checkbox
+              id="verified-only"
               checked={showVerifiedOnly}
-              onChange={(e) => setShowVerifiedOnly(e.target.checked)}
-              className="h-4 w-4 rounded border-border"
+              onCheckedChange={(checked) => setShowVerifiedOnly(checked === true)}
             />
             <span className="text-sm text-muted-foreground">{t('common.verifiedSellersOnly')}</span>
             <ShieldCheck className="ml-auto w-4 h-4 text-brand" />

@@ -19,7 +19,9 @@ function loadVault(): VaultItem[] {
   try {
     const raw = localStorage.getItem('sws_vault');
     if (raw) return JSON.parse(raw) as VaultItem[];
-  } catch {}
+  } catch {
+    // ignore corrupted localStorage vault data
+  }
   return FALLBACK_VAULT;
 }
 

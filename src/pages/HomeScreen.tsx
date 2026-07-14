@@ -3,8 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
   Scan, Package, Plus, Store, ShoppingBag, ClipboardList, Handshake,
-  Heart, TrendingUp, TrendingDown, ChevronRight,
-  ShieldCheck, Zap, Sparkles,
+  Heart, ChevronRight, ShieldCheck, Zap, Sparkles,
 } from 'lucide-react';
 import {
   useUser, useVault, useOrders, useOffers, useWishlist,
@@ -17,23 +16,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { useAuthStore, isMember, type AuthUser } from '@/stores/auth';
 import type { VaultItem, MarketListing, WishlistItem, Order, Offer } from '@/types';
 
 function formatPrice(n: number) {
   return `฿${n.toLocaleString()}`;
-}
-
-function portfolioHistory(totalValue: number, plAmount: number, days = 7) {
-  const start = totalValue - plAmount;
-  const step = days > 1 ? plAmount / (days - 1) : 0;
-  return Array.from({ length: days }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (days - 1 - i));
-    return { date: date.toISOString().split('T')[0], value: Math.round(start + step * i) };
-  });
 }
 
 function greetingKey(hour: number) {
@@ -43,55 +31,62 @@ function greetingKey(hour: number) {
 }
 
 function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: boolean; t: (k: string, o?: Record<string, unknown>) => string }) {
-  const { totalValue, plAmount, plPercent, topCards, history } = useMemo(() => {
+  const { totalValue, plAmount, topCards, heldCount } = useMemo(() => {
     const held = vault?.filter((v) => v.status === 'held') ?? [];
     const totalValue = held.reduce((sum, v) => sum + (v.currentPrice ?? 0), 0);
     const totalPaid = held.reduce((sum, v) => sum + (v.paidPrice ?? 0), 0);
     const plAmount = totalValue - totalPaid;
-    const plPercent = totalPaid > 0 ? (plAmount / totalPaid) * 100 : 0;
     const topCards = [...held].sort((a, b) => b.currentPrice - a.currentPrice).slice(0, 3);
-    const history = portfolioHistory(totalValue, plAmount);
-    return { totalValue, plAmount, plPercent, topCards, history };
+    return { totalValue, plAmount, topCards, heldCount: held.length };
   }, [vault]);
 
   if (loading) {
     return (
-      <Card className="bg-surface-light border-border overflow-hidden">
+      <Card className="surface-card overflow-hidden">
         <CardContent className="p-5">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="mt-3 h-10 w-40" />
-          <Skeleton className="mt-3 h-6 w-28" />
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="relative overflow-hidden glass-card glass-card-hover">
-      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-brand/10 blur-3xl" />
-      <CardContent className="relative p-5">
-        <p className="text-xs font-medium text-muted-foreground">{t('home.portfolio.title')}</p>
-        <p className="mt-2 text-3xl font-bold tracking-tight mono-num whitespace-nowrap">{formatPrice(totalValue)}</p>
-        <div className={cn('mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold', plAmount >= 0 ? 'bg-cyan/10 text-cyan' : 'bg-pldown/10 text-pldown')}>
-          {plAmount >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-          {t('home.portfolio.change', { value: formatPrice(Math.abs(plAmount)), percent: Math.abs(plPercent).toFixed(1) })}
+    <Card className="surface-card surface-card-hover overflow-hidden">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm font-semibold">{t('home.portfolio.title')}</p>
+          <Link
+            to="/vault"
+            className="flex items-center gap-0.5 text-xs font-medium text-brand hover:underline"
+          >
+            {t('home.portfolio.viewVault')} <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
-        {totalValue > 0 && (
-          <div className="mt-4 h-20">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={history}>
-                <defs>
-                  <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F06AA8" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#F06AA8" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="value" stroke="#F06AA8" strokeWidth={2} fill="url(#portfolioGradient)" />
-              </AreaChart>
-            </ResponsiveContainer>
+        <div className="mt-4 grid grid-cols-3 gap-4">
+          <div>
+            <p className="text-xs text-muted-foreground">{t('home.portfolio.totalValue')}</p>
+            <p className="mt-1 text-lg sm:text-xl font-bold mono-num whitespace-nowrap">{formatPrice(totalValue)}</p>
           </div>
-        )}
+          <div>
+            <p className="text-xs text-muted-foreground">{t('home.portfolio.pl')}</p>
+            <p className={cn('mt-1 text-lg sm:text-xl font-bold mono-num whitespace-nowrap', plAmount >= 0 ? 'text-cyan' : 'text-pldown')}>
+              {plAmount >= 0 ? '+' : ''}{formatPrice(plAmount)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">{t('home.portfolio.cards')}</p>
+            <p className="mt-1 text-lg sm:text-xl font-bold mono-num">{heldCount}</p>
+          </div>
+        </div>
 
         {topCards.length > 0 && (
           <div className="mt-5 flex items-center gap-3">
@@ -109,7 +104,7 @@ function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
                       loading="lazy"
                     />
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[8px] font-bold text-muted-foreground">
+                    <div className="h-full w-full flex items-center justify-center text-xs font-bold text-muted-foreground">
                       {item.card.code.charAt(0)}
                     </div>
                   )}
@@ -151,7 +146,7 @@ function QuickActions({ t }: { t: (k: string, o?: Record<string, unknown>) => st
             >
               <div
                 className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-xl glass-card text-foreground transition-all active:scale-95',
+                  'flex h-12 w-12 items-center justify-center rounded-xl surface-card text-foreground transition-all active:scale-95',
                   'hover:bg-surface-lighter hover:-translate-y-0.5',
                   a.className
                 )}
@@ -222,7 +217,7 @@ function VaultSnapshot({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
                 </div>
                 <p className="mt-2 truncate text-xs font-medium">{item.card.nameEn}</p>
                 <p className="text-xs font-semibold mono-num whitespace-nowrap">{formatPrice(item.currentPrice)}</p>
-                <p className={cn('text-[10px] font-medium', pl >= 0 ? 'text-cyan' : 'text-pldown')}>
+                <p className={cn('text-xs font-medium', pl >= 0 ? 'text-cyan' : 'text-pldown')}>
                   {pl >= 0 ? '+' : ''}{pl.toLocaleString()} ({item.plPercent?.toFixed(1) ?? '0.0'}%)
                 </p>
               </Link>
@@ -257,7 +252,7 @@ function MarketPulse({ listings, loading, t }: { listings?: MarketListing[]; loa
           </EmptyMedia>
           <EmptyHeader>
             <EmptyTitle>{t('home.marketPulse.empty')}</EmptyTitle>
-            <EmptyDescription>Check back soon or browse the market now.</EmptyDescription>
+            <EmptyDescription>{t('home.marketPulse.emptyDescription')}</EmptyDescription>
           </EmptyHeader>
           <Button asChild size="sm" className="bg-brand hover:bg-brand-light">
             <Link to="/market">{t('home.marketPulse.viewAll')}</Link>
@@ -278,12 +273,12 @@ function MarketPulse({ listings, loading, t }: { listings?: MarketListing[]; loa
                   alt={listing.card.nameEn}
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute left-2 top-2 rounded-full bg-surface-dark/80 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
+                <div className="absolute left-2 top-2 rounded-full bg-surface-dark/80 px-1.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
                   {listing.listingType === 'TRADE' ? t('home.marketPulse.trade') : formatPrice(listing.price)}
                 </div>
               </div>
               <p className="mt-2 truncate text-xs font-medium">{listing.card.nameEn}</p>
-              <p className="text-[10px] text-muted-foreground truncate">@{listing.seller.name}</p>
+              <p className="text-xs text-muted-foreground truncate">@{listing.seller.name}</p>
             </Link>
           ))}
         </div>
@@ -310,30 +305,30 @@ function ActivitySummary({ orders, offers, loading, t }: { orders?: Order[]; off
   return (
     <section>
       <h2 className="text-base font-bold tracking-tight">{t('home.activity.title')}</h2>
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Link to="/orders" className="group">
-          <Card className="glass-card glass-card-hover">
-            <CardContent className="p-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand/10 text-brand">
+      <Card className="mt-3 surface-card surface-card-hover">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-2 divide-x divide-border">
+            <Link to="/orders" className="group flex items-center gap-3 pr-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">
                 <ClipboardList className="h-4 w-4" />
               </div>
-              <p className="mt-3 text-2xl font-bold mono-num">{pendingOrders}</p>
-              <p className="text-xs text-muted-foreground">{t('home.activity.pendingOrders', { count: pendingOrders })}</p>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link to="/offers" className="group">
-          <Card className="glass-card glass-card-hover">
-            <CardContent className="p-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-periwinkle/10 text-periwinkle">
+              <div className="min-w-0">
+                <p className="text-2xl font-bold mono-num leading-none">{pendingOrders}</p>
+                <p className="text-xs text-muted-foreground mt-1 truncate">{t('home.activity.pendingOrders', { count: pendingOrders })}</p>
+              </div>
+            </Link>
+            <Link to="/offers" className="group flex items-center gap-3 pl-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-periwinkle/10 text-periwinkle">
                 <Handshake className="h-4 w-4" />
               </div>
-              <p className="mt-3 text-2xl font-bold mono-num">{pendingOffers}</p>
-              <p className="text-xs text-muted-foreground">{t('home.activity.pendingOffers', { count: pendingOffers })}</p>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
+              <div className="min-w-0">
+                <p className="text-2xl font-bold mono-num leading-none">{pendingOffers}</p>
+                <p className="text-xs text-muted-foreground mt-1 truncate">{t('home.activity.pendingOffers', { count: pendingOffers })}</p>
+              </div>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }
@@ -354,12 +349,14 @@ function WishlistSnapshot({ items, loading, t }: { items?: WishlistItem[]; loadi
           <Skeleton className="h-14 rounded-xl" />
         </div>
       ) : !items || items.length === 0 ? (
-        <Card className="mt-3 border-border bg-surface-light">
-          <CardContent className="flex flex-col items-center py-6 text-center">
-            <Heart className="h-8 w-8 text-muted-foreground/60" />
-            <p className="mt-2 text-xs text-muted-foreground">{t('home.wishlist.empty')}</p>
-          </CardContent>
-        </Card>
+        <Empty className="mt-3 rounded-xl border-dashed border-border bg-surface-light/50 py-8">
+          <EmptyMedia variant="icon">
+            <Heart className="w-6 h-6 text-brand" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>{t('home.wishlist.empty')}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="mt-3 space-y-2">
           {items.slice(0, 4).map((item) => {
@@ -373,12 +370,12 @@ function WishlistSnapshot({ items, loading, t }: { items?: WishlistItem[]; loadi
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{item.cardName}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground">{item.cardCode}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{item.cardCode}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-semibold mono-num whitespace-nowrap">{formatPrice(item.currentPrice)}</p>
                   {item.targetPrice > 0 && (
-                    <p className={cn('text-[10px] font-medium', diff <= 0 ? 'text-cyan' : 'text-muted-foreground')}>
+                    <p className={cn('text-xs font-medium', diff <= 0 ? 'text-cyan' : 'text-muted-foreground')}>
                       {t('home.wishlist.target')}: {formatPrice(item.targetPrice)}
                     </p>
                   )}

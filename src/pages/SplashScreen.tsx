@@ -35,7 +35,7 @@ export function SplashScreen() {
         <img
           src="/logo.png"
           alt="SwibSwap"
-          className="w-20 h-20 rounded-xl object-contain shadow-glow"
+          className="w-20 h-20 rounded-xl object-contain"
         />
         
         {/* Wordmark */}

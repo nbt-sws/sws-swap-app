@@ -46,7 +46,7 @@ export function VaultFilterTabs({ activeFilter, onFilterChange, counts, isOwner 
             key={f.id}
             onClick={() => onFilterChange(f.id)}
             className={cn(
-              'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all',
+              'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all',
               active
                 ? 'bg-brand text-white shadow-sm'
                 : 'bg-surface-light text-muted-foreground hover:text-white'
@@ -57,7 +57,7 @@ export function VaultFilterTabs({ activeFilter, onFilterChange, counts, isOwner 
             <span>{t(f.labelKey)}</span>
             <span
               className={cn(
-                'ml-0.5 min-w-[1.25rem] rounded-full px-1 py-0 text-[10px] text-center',
+                'ml-0.5 min-w-[1.25rem] rounded-full px-1 py-0 text-xs text-center',
                 active ? 'bg-white/20 text-white' : 'bg-surface-lighter text-muted-foreground'
               )}
             >

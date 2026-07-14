@@ -123,13 +123,13 @@ export function BrowseScreen() {
                   />
                 </div>
                 <div className="p-3">
-                  <p className="text-[10px] font-mono text-muted-foreground">{listing.card.code}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{listing.card.code}</p>
                   <h3 className="font-semibold text-sm truncate group-hover:text-brand transition">{listing.card.nameEn}</h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-xs">
                       {listing.card.rarity}
                     </Badge>
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-xs">
                       {listing.card.condition}
                     </Badge>
                   </div>

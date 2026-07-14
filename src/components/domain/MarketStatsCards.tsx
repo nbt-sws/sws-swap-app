@@ -40,7 +40,7 @@ export function MarketStatsCards({ stats, className, compact, showCount }: Marke
               <div className={cn('w-6 h-6 rounded-md flex items-center justify-center', card.tone)}>
                 <Icon className="w-3.5 h-3.5" />
               </div>
-              <p className={cn('text-muted-foreground', compact ? 'text-[10px]' : 'text-xs')}>
+              <p className={cn('text-muted-foreground', compact ? 'text-xs' : 'text-xs')}>
                 {card.label}
               </p>
             </div>
@@ -62,7 +62,7 @@ export function MarketStatsCards({ stats, className, compact, showCount }: Marke
             compact ? 'p-2 px-3' : 'p-3'
           )}
         >
-          <p className={cn('text-muted-foreground', compact ? 'text-[10px]' : 'text-xs')}>
+          <p className={cn('text-muted-foreground', compact ? 'text-xs' : 'text-xs')}>
             {t('common.sampleSize')}
           </p>
           <div className="flex items-center gap-2">

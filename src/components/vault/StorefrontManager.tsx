@@ -207,15 +207,15 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
             <div className="flex items-center gap-4 text-sm shrink-0">
               <div className="text-center">
                 <p className="font-bold">{items.length}</p>
-                <p className="text-[10px] text-muted-foreground">Listings</p>
+                <p className="text-xs text-muted-foreground">Listings</p>
               </div>
               <div className="text-center">
                 <p className="font-bold">{profile?.sales ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Sales</p>
+                <p className="text-xs text-muted-foreground">Sales</p>
               </div>
               <div className="text-center">
                 <p className="font-bold">{profile?.followers ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Followers</p>
+                <p className="text-xs text-muted-foreground">Followers</p>
               </div>
             </div>
           </div>
@@ -254,7 +254,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Store avatar</Label>
-                  <input
+                  <Input
                     ref={avatarInputRef}
                     type="file"
                     accept="image/*"
@@ -280,7 +280,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
                 </div>
                 <div className="space-y-2">
                   <Label>Store banner</Label>
-                  <input
+                  <Input
                     ref={bannerInputRef}
                     type="file"
                     accept="image/*"
@@ -324,7 +324,10 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
         </CardContent>
       </Card>
 
-      {/* Group manager */}
+      {/* Public preview / Group manager */}
+      {!isEditing ? (
+        <StorefrontPreview items={items} listingsMap={listingsMap} />
+      ) : (
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -402,7 +405,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
                   <Package className="w-3.5 h-3.5 text-muted-foreground" />
                   Ungrouped
                 </h4>
-                <span className="text-[10px] text-muted-foreground">{ungroupedItems.length}</span>
+                <span className="text-xs text-muted-foreground">{ungroupedItems.length}</span>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                 {ungroupedItems.map((item) => (
@@ -418,7 +421,75 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
           </div>
         )}
       </section>
+      )}
     </div>
+  );
+}
+
+function StorefrontPreview({
+  items,
+  listingsMap,
+}: {
+  items: VaultItem[];
+  listingsMap: Map<string, { listingId: string; price: number }>;
+}) {
+  const listedItems = useMemo(
+    () => items.filter((i) => listingsMap.has(i.card.code)),
+    [items, listingsMap]
+  );
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <Package className="w-4 h-4 text-brand" />
+          All listings
+        </h3>
+        <span className="text-xs text-muted-foreground">{listedItems.length}</span>
+      </div>
+
+      {listedItems.length === 0 ? (
+        <Card className="bg-surface-light border-border">
+          <CardContent className="py-14 text-center space-y-2">
+            <Package className="w-8 h-8 mx-auto text-muted-foreground" />
+            <p className="font-semibold">No active listings</p>
+            <p className="text-sm text-muted-foreground">List cards from your vault to start selling.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {listedItems.map((item) => {
+            const listing = listingsMap.get(item.card.code);
+            return (
+              <Link
+                key={item.id}
+                to={listing ? '/market/$listingId' : '/vault/items/$itemId'}
+                params={{ listingId: listing?.listingId ?? '', itemId: item.id }}
+                className="group block bg-surface-light rounded-xl overflow-hidden border border-border hover:border-brand/40 transition"
+              >
+                <div className="aspect-[5/7] overflow-hidden relative">
+                  <img
+                    src={getCardImageUrl(item.card)}
+                    alt={item.card.nameEn}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
+                <div className="p-2">
+                  <p className="text-xs font-mono text-text-tertiary">{item.card.code}</p>
+                  <p className="text-xs font-semibold line-clamp-1 group-hover:text-brand transition">{item.card.nameEn}</p>
+                  <p className="text-brand font-bold text-xs mt-1">
+                    {listing ? `฿${listing.price.toLocaleString()}` : '—'}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -461,7 +532,7 @@ function DropGroup({
           {group.name}
         </h4>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground">{items.length}</span>
+          <span className="text-xs text-muted-foreground">{items.length}</span>
           <button
             onClick={onDelete}
             className="text-muted-foreground hover:text-pldown transition"
@@ -516,9 +587,9 @@ function DraggableItem({
         />
       </div>
       <div className="p-1.5">
-        <p className="text-[9px] font-mono text-text-tertiary truncate">{item.card.code}</p>
-        <h5 className="text-[11px] font-semibold leading-tight line-clamp-2 group-hover:text-brand transition min-h-[1.75rem]">{item.card.nameEn}</h5>
-        <p className="text-[10px] text-brand font-bold mt-0.5">
+        <p className="text-xs font-mono text-text-tertiary truncate">{item.card.code}</p>
+        <h5 className="text-xs font-semibold leading-tight line-clamp-2 group-hover:text-brand transition min-h-[1.75rem]">{item.card.nameEn}</h5>
+        <p className="text-xs text-brand font-bold mt-0.5">
           {listing ? `฿${listing.price.toLocaleString()}` : '—'}
         </p>
       </div>

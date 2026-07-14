@@ -47,7 +47,7 @@ function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label
 }
 
 const orderStatusConfig: Record<Order['status'], { label: string; color: string }> = {
-  PENDING_PAYMENT: { label: 'Pending', color: 'text-amber-400 bg-amber-400/10' },
+  PENDING_PAYMENT: { label: 'Pending', color: 'text-warning bg-warning/10' },
   PAID: { label: 'Paid', color: 'text-cyan bg-cyan/10' },
   SHIPPED: { label: 'Shipped', color: 'text-brand bg-brand/10' },
   DELIVERED: { label: 'Delivered', color: 'text-plup bg-plup/10' },

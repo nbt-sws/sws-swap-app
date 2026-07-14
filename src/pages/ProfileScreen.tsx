@@ -65,7 +65,7 @@ export function ProfileScreen() {
 
       <div className="space-y-6">
         {/* Profile Card */}
-        <Card className="glass-card glass-card-hover text-center">
+        <Card className="surface-card surface-card-hover text-center">
           <CardContent className="p-6">
             {userLoading ? (
               <div className="flex justify-center py-4">
@@ -104,25 +104,25 @@ export function ProfileScreen() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           <Link to="/orders">
-            <Card className="glass-card glass-card-hover">
+            <Card className="surface-card surface-card-hover">
               <CardContent className="p-3 text-center">
                 <p className="text-lg font-bold">{ordersLoading ? '-' : orderCount}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Orders</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Orders</p>
               </CardContent>
             </Card>
           </Link>
           <Link to="/wishlist">
-            <Card className="glass-card glass-card-hover">
+            <Card className="surface-card surface-card-hover">
               <CardContent className="p-3 text-center">
                 <p className="text-lg font-bold">{wishlistLoading ? '-' : wishlistCount}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Wishlist</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Wishlist</p>
               </CardContent>
             </Card>
           </Link>
-          <Card className="glass-card glass-card-hover">
+          <Card className="surface-card surface-card-hover">
             <CardContent className="p-3 text-center">
               <p className="text-lg font-bold">{ordersLoading ? '-' : `฿${totalSpent.toLocaleString()}`}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Spent</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Spent</p>
             </CardContent>
           </Card>
         </div>
@@ -139,7 +139,7 @@ export function ProfileScreen() {
                 : undefined;
 
             const content = (
-              <div className="flex items-center gap-3 p-3 rounded-xl glass-card glass-card-hover">
+              <div className="flex items-center gap-3 p-3 rounded-xl surface-card surface-card-hover">
                 <div className="p-2 rounded-lg bg-surface text-brand">
                   <Icon className="w-5 h-5" />
                 </div>

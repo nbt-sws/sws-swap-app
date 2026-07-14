@@ -42,7 +42,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex w-64 flex-col h-screen sticky top-0 z-[60] border-r border-border bg-surface-dark/95 backdrop-blur-xl">
+    <aside className="hidden md:flex w-64 flex-col h-screen sticky top-0 z-[60] border-r border-border bg-surface-dark">
       {/* Brand */}
       <div className="p-6 shrink-0">
         <Link to="/" className="flex items-center gap-2">

@@ -101,9 +101,9 @@ export function StatusHubScreen() {
                         sub.service === 'RAWLITY' ? 'bg-brand/10 text-brand' :
                         sub.service === 'BLACKLENS' ? 'bg-periwinkle/10 text-periwinkle' :
                         sub.service === 'PSA' ? 'bg-cyan/10 text-cyan' :
-                        sub.service === 'BGS' ? 'bg-amber-500/10 text-amber-400' :
-                        sub.service === 'TAG' ? 'bg-emerald-500/10 text-emerald-400' :
-                        sub.service === 'OTHER' ? 'bg-slate-500/10 text-slate-400' :
+                        sub.service === 'BGS' ? 'bg-warning/10 text-warning' :
+                        sub.service === 'TAG' ? 'bg-success/10 text-success' :
+                        sub.service === 'OTHER' ? 'bg-muted/10 text-muted-foreground' :
                         'bg-pregrade/10 text-pregrade'
                       }`}>
                         {sub.service}
@@ -133,7 +133,7 @@ export function StatusHubScreen() {
                         )}
                       </div>
                       <div className="ml-1 mr-2">
-                        <p className={`text-[9px] font-mono whitespace-nowrap ${
+                        <p className={`text-xs font-mono whitespace-nowrap ${
                           stage.completed ? 'text-white' : 'text-muted-foreground'
                         }`}>
                           {stage.name}
@@ -170,7 +170,7 @@ export function StatusHubScreen() {
 
                 {/* ETA */}
                 {sub.estimatedDays && (
-                  <p className="text-[10px] text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     est. {sub.estimatedDays} days · updated 2h ago via {sub.service} API
                   </p>
                 )}
@@ -190,7 +190,7 @@ export function StatusHubScreen() {
         {/* Update channels */}
         <div>
           <div className="bg-surface-light rounded-xl p-4">
-            <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-3">
+            <p className="text-xs font-mono tracking-wider text-muted-foreground mb-3">
               UPDATES VIA
             </p>
             <div className="flex gap-4">

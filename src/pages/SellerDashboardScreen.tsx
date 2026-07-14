@@ -28,7 +28,7 @@ import type { MarketListing } from '@/types';
 
 const statusConfig: Record<NonNullable<MarketListing['status']>, { label: string; color: string }> = {
   active: { label: 'Active', color: 'text-plup bg-plup/10' },
-  paused: { label: 'Paused', color: 'text-amber-400 bg-amber-400/10' },
+  paused: { label: 'Paused', color: 'text-warning bg-warning/10' },
   sold: { label: 'Sold', color: 'text-cyan bg-cyan/10' },
 };
 

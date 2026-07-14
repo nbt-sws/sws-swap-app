@@ -229,8 +229,13 @@ export function RegisterScreen() {
           className="text-xs text-muted-foreground text-center mt-6"
         >
           By continuing you accept our{' '}
-          <span className="text-brand cursor-pointer">terms</span> and{' '}
-          <span className="text-brand cursor-pointer">privacy policy</span>
+          <button type="button" onClick={() => window.alert('Terms of service coming soon')} className="text-brand hover:underline">
+            terms
+          </button>{' '}
+          and{' '}
+          <button type="button" onClick={() => window.alert('Privacy policy coming soon')} className="text-brand hover:underline">
+            privacy policy
+          </button>
         </motion.p>
       </motion.div>
     </div>

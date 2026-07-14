@@ -49,12 +49,15 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
         <DialogHeader className="sr-only">
           <DialogTitle>{listing.card.nameEn}</DialogTitle>
         </DialogHeader>
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-surface-lighter flex items-center justify-center text-muted-foreground hover:text-white"
+          aria-label={t('common.close')}
+          className="absolute top-3 right-3 z-10 rounded-full bg-surface-lighter text-muted-foreground hover:text-white"
         >
           <X className="w-4 h-4" />
-        </button>
+        </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr]">
           {/* Image */}

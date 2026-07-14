@@ -48,10 +48,10 @@ export function CardDetailScreen() {
 
         {/* Condition + Tags */}
         <div className="flex flex-wrap gap-2">
-          <span className="text-[10px] font-mono bg-surface-light px-2 py-1 rounded-md">{item.condition}</span>
-          <span className="text-[10px] font-mono bg-surface-light px-2 py-1 rounded-md">{item.card.rarity}</span>
-          <span className="text-[10px] font-mono bg-surface-light px-2 py-1 rounded-md">{item.card.type}</span>
-          <span className="text-[10px] font-mono bg-surface-light px-2 py-1 rounded-md">{item.card.language}</span>
+          <span className="text-xs font-mono bg-surface-light px-2 py-1 rounded-md">{item.condition}</span>
+          <span className="text-xs font-mono bg-surface-light px-2 py-1 rounded-md">{item.card.rarity}</span>
+          <span className="text-xs font-mono bg-surface-light px-2 py-1 rounded-md">{item.card.type}</span>
+          <span className="text-xs font-mono bg-surface-light px-2 py-1 rounded-md">{item.card.language}</span>
         </div>
 
         {/* Provenance */}
@@ -63,27 +63,27 @@ export function CardDetailScreen() {
 
         {/* Position Tiles */}
         <div>
-          <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">
+          <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
             POSITION · THB
           </p>
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-surface-light rounded-xl p-3">
-              <p className="text-[9px] font-mono text-muted-foreground mb-1">PAID</p>
+              <p className="text-xs font-mono text-muted-foreground mb-1">PAID</p>
               <p className="text-sm font-bold font-mono">฿{item.paidPrice.toLocaleString()}</p>
             </div>
             <div className="bg-surface-light rounded-xl p-3 relative">
               <div className="absolute inset-0 rounded-xl border-2 border-cyan/30" />
-              <p className="text-[9px] font-mono text-muted-foreground mb-1 relative z-10">CURRENT</p>
+              <p className="text-xs font-mono text-muted-foreground mb-1 relative z-10">CURRENT</p>
               <p className="text-sm font-bold font-mono relative z-10">
                 {item.status === 'sold' ? '—' : `฿${item.currentPrice.toLocaleString()}`}
               </p>
             </div>
             <div className="bg-surface-light rounded-xl p-3">
-              <p className="text-[9px] font-mono text-muted-foreground mb-1">P/L</p>
+              <p className="text-xs font-mono text-muted-foreground mb-1">P/L</p>
               <p className={`text-sm font-bold font-mono ${item.plAmount >= 0 ? 'text-plup' : 'text-pldown'}`}>
                 {item.plAmount >= 0 ? '+' : ''}฿{item.plAmount.toLocaleString()}
               </p>
-              <p className={`text-[9px] font-mono ${item.plPercent >= 0 ? 'text-plup' : 'text-pldown'}`}>
+              <p className={`text-xs font-mono ${item.plPercent >= 0 ? 'text-plup' : 'text-pldown'}`}>
                 {item.plPercent >= 0 ? '▲' : '▼'} {Math.abs(item.plPercent).toFixed(1)}%
               </p>
             </div>
@@ -92,7 +92,7 @@ export function CardDetailScreen() {
 
         {/* Price History */}
         <div>
-          <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">
+          <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
             PRICE HISTORY
           </p>
 
@@ -118,15 +118,15 @@ export function CardDetailScreen() {
                 <AreaChart data={priceData?.history || []}>
                   <defs>
                     <linearGradient id="detailGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#F06AA8" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#F06AA8" stopOpacity={0} />
+                      <stop offset="0%" stopColor="var(--chart-brand)" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="var(--chart-brand)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="price" stroke="#F06AA8" strokeWidth={2} fill="url(#detailGradient)" />
+                  <Area type="monotone" dataKey="price" stroke="var(--chart-brand)" strokeWidth={2} fill="url(#detailGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">
+            <p className="text-xs text-muted-foreground text-center mt-2">
               your buy-in ฿{item.paidPrice.toLocaleString()}
             </p>
           </div>

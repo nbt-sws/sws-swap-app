@@ -238,15 +238,15 @@ export function StoresScreen() {
                       <div className="grid grid-cols-3 gap-2 mt-4 text-center">
                         <div className="bg-surface rounded-lg p-2">
                           <p className="font-bold text-sm">{seller.listings}</p>
-                          <p className="text-[10px] text-text-tertiary">Listings</p>
+                          <p className="text-xs text-text-tertiary">Listings</p>
                         </div>
                         <div className="bg-surface rounded-lg p-2">
                           <p className="font-bold text-sm">{seller.sales}</p>
-                          <p className="text-[10px] text-text-tertiary">Sales</p>
+                          <p className="text-xs text-text-tertiary">Sales</p>
                         </div>
                         <div className="bg-surface rounded-lg p-2">
                           <p className="font-bold text-sm">{seller.followers}</p>
-                          <p className="text-[10px] text-text-tertiary">Followers</p>
+                          <p className="text-xs text-text-tertiary">Followers</p>
                         </div>
                       </div>
 

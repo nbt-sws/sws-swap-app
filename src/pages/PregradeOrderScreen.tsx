@@ -23,8 +23,8 @@ const COLOR_RING: Record<ServiceProvider['color'], string> = {
   brand: 'ring-2 ring-brand/50 border-brand/50 bg-brand/10',
   periwinkle: 'ring-2 ring-periwinkle/50 border-periwinkle/50 bg-periwinkle/10',
   cyan: 'ring-2 ring-cyan/50 border-cyan/50 bg-cyan/10',
-  pregrade: 'ring-2 ring-emerald-500/50 border-emerald-500/50 bg-emerald-500/10',
-  plup: 'ring-2 ring-violet-500/50 border-violet-500/50 bg-violet-500/10',
+  pregrade: 'ring-2 ring-success/50 border-success/50 bg-success/10',
+  plup: 'ring-2 ring-periwinkle/50 border-periwinkle/50 bg-periwinkle/10',
 };
 
 export function PregradeOrderScreen() {
@@ -134,7 +134,7 @@ export function PregradeOrderScreen() {
       <div className="space-y-6">
         {/* Provider selection */}
         <div>
-          <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">
+          <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
             {category === 'PREGRADE' ? 'PRE-GRADE PROVIDER' : 'GRADING PROVIDER'}
           </p>
           {providersLoading ? (
@@ -182,7 +182,7 @@ export function PregradeOrderScreen() {
                         <span className="font-bold text-sm">{p.storeName}</span>
                         {selected && <Check className="w-3 h-3 text-brand" />}
                       </div>
-                      <p className="text-[10px] text-muted-foreground flex items-center gap-2 flex-wrap">
+                      <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
                         <span className="flex items-center gap-0.5">
                           <Clock className="w-3 h-3" />
                           {p.turnaround}
@@ -196,7 +196,7 @@ export function PregradeOrderScreen() {
                         </span>
                       </p>
                       {p.serviceTypes.length > 0 && (
-                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
                           {p.serviceTypes.join(' · ')}
                         </p>
                       )}
@@ -206,7 +206,7 @@ export function PregradeOrderScreen() {
                             <span
                               key={grader}
                               className={cn(
-                                'text-[8px] px-1.5 py-0.5 rounded border font-medium',
+                                'text-xs px-1.5 py-0.5 rounded border font-medium',
                                 GRADER_STYLES[grader]
                               )}
                             >
@@ -227,8 +227,8 @@ export function PregradeOrderScreen() {
         {provider && packages.length > 0 && (
           <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-surface-dark/95 backdrop-blur border-b border-border/50">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-mono tracking-wider text-muted-foreground">PACKAGE</p>
-              <p className="text-[10px] text-muted-foreground truncate">
+              <p className="text-xs font-mono tracking-wider text-muted-foreground">PACKAGE</p>
+              <p className="text-xs text-muted-foreground truncate">
                 Selected: <span className="text-foreground font-medium">{selectedPackage?.name}</span>
               </p>
             </div>
@@ -255,7 +255,7 @@ export function PregradeOrderScreen() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold truncate">{pkg.name}</p>
-                      <p className="text-[9px] text-muted-foreground flex items-center gap-1.5 flex-wrap">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
                         <span className="flex items-center gap-0.5">
                           <Clock className="w-2.5 h-2.5" />
                           {pkg.turnaround}
@@ -265,8 +265,8 @@ export function PregradeOrderScreen() {
                           {pkg.deliveryMode.replace(/_/g, ' ').toLowerCase()}
                         </span>
                       </p>
-                      <p className="text-[10px] font-mono font-bold text-brand">
-                        {pkg.currency} {pkg.pricePerCard.toLocaleString()} <span className="text-[9px] font-normal text-muted-foreground">/ card</span>
+                      <p className="text-xs font-mono font-bold text-brand">
+                        {pkg.currency} {pkg.pricePerCard.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">/ card</span>
                       </p>
                     </div>
                   </button>
@@ -278,7 +278,7 @@ export function PregradeOrderScreen() {
 
         {/* Card selection */}
         <div>
-          <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">
+          <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
             FROM YOUR VAULT · {cardCount} OF {heldCards.length} SELECTED
           </p>
           <div className="space-y-2">
@@ -357,7 +357,7 @@ export function PregradeOrderScreen() {
         {cardCount > 0 && provider && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <div className="bg-surface-light rounded-xl p-4">
-              <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">
+              <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
                 {activeDeliveryMode === 'PHOTO_UPLOAD' ? 'UPLOAD DESTINATION' : 'SHIP TO'} · {provider.storeName.toUpperCase()}
               </p>
               {activeDeliveryMode === 'PHOTO_UPLOAD' ? (
@@ -375,7 +375,7 @@ export function PregradeOrderScreen() {
         {/* Courier selection */}
         {cardCount > 0 && provider && activeDeliveryMode !== 'PHOTO_UPLOAD' && (
           <div>
-            <p className="text-[10px] font-mono tracking-wider text-muted-foreground mb-2">COURIER</p>
+            <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">COURIER</p>
             <div className="flex gap-2">
               {COURIERS.map((c) => (
                 <button

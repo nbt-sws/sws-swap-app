@@ -42,6 +42,7 @@
     "history": "ประวัติ",
     "filters": "ตัวกรอง",
     "clearAll": "ล้างทั้งหมด",
+    "clearSearch": "ล้างการค้นหา",
     "showResults": "แสดง {{count}} รายการ",
     "game": "เกม",
     "type": "ประเภท",
@@ -139,7 +140,11 @@
     "memberBadge": "สมาชิก",
     "freePlan": "ฟรี",
     "portfolio": {
-      "title": "มูลค่าพอร์ต",
+      "title": "พอร์ต",
+      "totalValue": "มูลค่ารวม",
+      "pl": "กำไร/ขาดทุน",
+      "cards": "การ์ด",
+      "viewVault": "ดูตู้เซฟ",
       "change": "{{value}} ({{percent}}%)",
       "topCards": "การ์ดท็อป {{count}} ใบ"
     },
@@ -161,6 +166,7 @@
       "title": "ตลาดวันนี้",
       "viewAll": "เข้าตลาด",
       "empty": "ยังไม่มีรายการมาแรง",
+      "emptyDescription": "กรุณากลับมาตรวจสอบใหม่ หรือเรียกดูตลาดตอนนี้",
       "trade": "เทรด"
     },
     "activity": {
@@ -234,7 +240,7 @@
     "emptyDesc": "เราจะแจ้งให้ทราบเมื่อมีข้อเสนอ คำสั่งซื้อ หรืออัปเดต"
   },
   "market": {
-    "title": "ตลาด SwibSwap",
+    "title": "ตลาด",
     "description": "{{count}} รายการสด · raw · pre-graded · graded · sealed — ทั้งหมดมีตู้เซฟรับรอง",
     "empty": "ไม่พบรายการ",
     "emptyDesc": "ลองปรับตัวกรองหรือค้นหาการ์ดอื่น",
@@ -321,7 +327,7 @@
     }
   },
   "vault": {
-    "title": "SwibsVault",
+    "title": "🗄️ SwibsVault",
     "collectionDescription": "คอลเลกชันของฉัน · {{count}} ใบ",
     "vault": "ตู้เซฟ",
     "store": "ร้านค้า",

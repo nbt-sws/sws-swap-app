@@ -11,11 +11,11 @@ export const GRADER_IMAGE_URLS: Record<GradingService, string> = {
 };
 
 export const GRADER_STYLES: Record<GradingService, string> = {
-  PSA: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  BGS: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  CGC: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
-  TAG: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  PSA: 'bg-cyan/10 text-cyan border-cyan/20',
+  BGS: 'bg-warning/10 text-warning border-warning/20',
+  CGC: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
+  TAG: 'bg-success/10 text-success border-success/20',
   RAWLITY: 'bg-brand/10 text-brand border-brand/20',
   BLACKLENS: 'bg-periwinkle/10 text-periwinkle border-periwinkle/20',
-  OTHER: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+  OTHER: 'bg-muted/10 text-muted-foreground border-muted/20',
 };

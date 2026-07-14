@@ -1,7 +1,6 @@
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { BottomNav } from './BottomNav';
-import { SocialFooter } from './SocialFooter';
 import { ScrollableOutlet } from '@/routes/__root';
 
 export function AppShell() {
@@ -13,7 +12,6 @@ export function AppShell() {
         <TopBar />
         <ScrollableOutlet />
         <BottomNav />
-        <SocialFooter />
       </div>
     </div>
   );

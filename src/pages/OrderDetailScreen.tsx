@@ -14,7 +14,7 @@ import { useAuthStore } from '@/stores/auth';
 import type { Order } from '@/types';
 
 const statusConfig: Record<Order['status'], { label: string; icon: typeof Clock; color: string; step: number }> = {
-  PENDING_PAYMENT: { label: 'Pending payment', icon: Clock, color: 'text-amber-400 bg-amber-400/10', step: 1 },
+  PENDING_PAYMENT: { label: 'Pending payment', icon: Clock, color: 'text-warning bg-warning/10', step: 1 },
   PAID: { label: 'Paid', icon: CheckCircle2, color: 'text-cyan bg-cyan/10', step: 2 },
   SHIPPED: { label: 'Shipped', icon: Truck, color: 'text-brand bg-brand/10', step: 3 },
   DELIVERED: { label: 'Delivered', icon: Package, color: 'text-plup bg-plup/10', step: 4 },

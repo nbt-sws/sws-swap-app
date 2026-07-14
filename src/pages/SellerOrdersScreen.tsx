@@ -19,11 +19,11 @@ import { GRADER_STYLES } from '@/lib/graderAssets';
 import type { ServiceOrder, ServiceOrderStage } from '@/types';
 
 const STATUS_COLORS: Record<ServiceOrder['status'], string> = {
-  PENDING: 'bg-amber-500/10 text-amber-400',
-  RECEIVED: 'bg-cyan-500/10 text-cyan-400',
+  PENDING: 'bg-warning/10 text-warning',
+  RECEIVED: 'bg-cyan/10 text-cyan',
   IN_PROGRESS: 'bg-brand/10 text-brand',
-  COMPLETED: 'bg-emerald-500/10 text-emerald-400',
-  CANCELLED: 'bg-red-500/10 text-red-400',
+  COMPLETED: 'bg-success/10 text-success',
+  CANCELLED: 'bg-danger/10 text-danger',
 };
 
 export function SellerOrdersScreen() {
@@ -146,9 +146,9 @@ function OrderManager({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <span className="text-xs font-mono text-muted-foreground">{order.id}</span>
-              <Badge className={cn('text-[10px]', STATUS_COLORS[order.status])}>{order.status}</Badge>
+              <Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>
               {order.grader && (
-                <span className={cn('text-[10px] px-1.5 py-0.5 rounded border', GRADER_STYLES[order.grader])}>
+                <span className={cn('text-xs px-1.5 py-0.5 rounded border', GRADER_STYLES[order.grader])}>
                   {order.grader}
                 </span>
               )}
@@ -221,7 +221,7 @@ function OrderManager({
                         key={stage.key}
                         className={cn(
                           'flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors',
-                          stage.completed ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-background border-border'
+                          stage.completed ? 'bg-success/5 border-success/20' : 'bg-background border-border'
                         )}
                       >
                         <Checkbox
@@ -233,7 +233,7 @@ function OrderManager({
                             {stage.label}
                           </p>
                           {stage.timestamp && (
-                            <p className="text-[10px] text-muted-foreground">{new Date(stage.timestamp).toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(stage.timestamp).toLocaleString()}</p>
                           )}
                         </div>
                       </label>

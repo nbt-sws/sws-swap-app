@@ -67,7 +67,7 @@ export function TopBar() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-16 border-b border-border/80 bg-surface/85 backdrop-blur-xl">
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 lg:h-16 border-b border-border/80 bg-surface/90 backdrop-blur-md">
       <div className="flex h-full items-center justify-between px-4 md:pl-64 lg:px-6 lg:pl-64">
         {/* Left: mobile hamburger */}
         <div className="flex items-center gap-4">

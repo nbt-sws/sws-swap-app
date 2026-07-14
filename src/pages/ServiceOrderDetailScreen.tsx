@@ -26,11 +26,11 @@ import { GRADER_STYLES } from '@/lib/graderAssets';
 import type { ServiceOrder } from '@/types';
 
 const STATUS_COLORS: Record<ServiceOrder['status'], string> = {
-  PENDING: 'bg-amber-500/10 text-amber-400',
-  RECEIVED: 'bg-cyan-500/10 text-cyan-400',
+  PENDING: 'bg-warning/10 text-warning',
+  RECEIVED: 'bg-cyan/10 text-cyan',
   IN_PROGRESS: 'bg-brand/10 text-brand',
-  COMPLETED: 'bg-emerald-500/10 text-emerald-400',
-  CANCELLED: 'bg-red-500/10 text-red-400',
+  COMPLETED: 'bg-success/10 text-success',
+  CANCELLED: 'bg-danger/10 text-danger',
 };
 
 export function ServiceOrderDetailScreen() {
@@ -199,7 +199,7 @@ export function ServiceOrderDetailScreen() {
                 <li key={stage.key} className="relative flex items-start gap-3">
                   <div className="relative z-10 mt-0.5">
                     {stage.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      <CheckCircle2 className="w-5 h-5 text-success" />
                     ) : idx === stages.findIndex((s) => !s.completed) ? (
                       <Circle className="w-5 h-5 text-brand" />
                     ) : (

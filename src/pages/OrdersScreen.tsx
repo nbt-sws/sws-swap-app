@@ -100,7 +100,7 @@ export function OrdersScreen() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <p className="text-xs font-mono text-muted-foreground">{order.id.slice(0, 8)}</p>
-                          <Badge className={cn('text-[10px] border-0', config.badge)}>
+                          <Badge className={cn('text-xs border-0', config.badge)}>
                             <Icon className="w-3 h-3 mr-1" />
                             {config.label}
                           </Badge>
@@ -131,8 +131,8 @@ function getStatusConfig(t: (key: string) => string) {
     PENDING_PAYMENT: {
       label: t('orders.status.PENDING_PAYMENT'),
       icon: Clock,
-      badge: 'text-amber-400 bg-amber-400/10',
-      bg: 'text-amber-400 bg-amber-400/10',
+      badge: 'text-warning bg-warning/10',
+      bg: 'text-warning bg-warning/10',
     },
     PAID: {
       label: t('orders.status.PAID'),
@@ -170,13 +170,13 @@ function getStatusConfig(t: (key: string) => string) {
 function DeliveryBadge({ delivery }: { delivery?: 'SHIP' | 'VAULT_STORE' }) {
   if (delivery === 'SHIP') {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <Truck className="w-3 h-3" /> Ship
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
       <Warehouse className="w-3 h-3" /> Vault
     </span>
   );

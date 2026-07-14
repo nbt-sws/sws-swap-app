@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Image } from 'lucide-react';
 import type { Card } from '@/types';
 
 export function ScannerScreen() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [captured, setCaptured] = useState(false);
   const [selectedGame] = useState<'one-piece' | 'yu-gi-oh'>('one-piece');
   const [selectedLanguage] = useState<string>('JP');
@@ -47,6 +49,7 @@ export function ScannerScreen() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate({ to: '/scan' })}
+              aria-label={t('common.back')}
               className="w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center active:scale-95 transition-transform"
             >
               <ChevronLeft className="w-5 h-5 text-white" />
@@ -61,7 +64,7 @@ export function ScannerScreen() {
 
         {/* Center framing brackets */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-72 h-96 relative">
+          <div className="w-72 h-96 max-w-[90vw] max-h-[60vh] relative">
             {/* Corner brackets */}
             <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-brand" />
             <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-brand" />
@@ -70,7 +73,7 @@ export function ScannerScreen() {
 
             {/* Code hint box */}
             <div className="absolute bottom-12 right-4 w-32 h-10 border border-dashed border-cyan/60 rounded flex items-center justify-center">
-              <span className="text-[10px] text-cyan/80 font-mono">code here →</span>
+              <span className="text-xs text-cyan/80 font-mono">code here →</span>
             </div>
           </div>
         </div>
@@ -78,7 +81,7 @@ export function ScannerScreen() {
         {/* Hint text */}
         <div className="absolute top-24 left-0 right-0 text-center">
           <p className="text-xs text-white/60">AI reads code from bottom-right corner</p>
-          <p className="text-[10px] text-white/40 mt-1">DON!! cards have no code — fill the frame</p>
+          <p className="text-xs text-white/40 mt-1">DON!! cards have no code — fill the frame</p>
         </div>
       </div>
 
@@ -105,7 +108,7 @@ export function ScannerScreen() {
           {/* Placeholder for symmetry */}
           <div className="w-14 h-14" />
         </div>
-        <p className="text-center text-[10px] text-white/40 mt-4 font-mono">
+        <p className="text-center text-xs text-white/40 mt-4 font-mono">
           tap to capture
         </p>
       </div>

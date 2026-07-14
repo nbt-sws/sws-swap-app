@@ -83,7 +83,7 @@ export function DeliveryPreferenceSelector({
               <span className="text-sm font-semibold text-foreground">{option.label}</span>
               <span className="text-xs text-muted-foreground text-center">{option.description}</span>
               {isVaultLocked && (
-                <span className="absolute -top-2 right-3 rounded-full bg-brand px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm flex items-center gap-1">
+                <span className="absolute -top-2 right-3 rounded-full bg-brand px-2 py-0.5 text-xs font-semibold text-white shadow-sm flex items-center gap-1">
                   <Lock size={10} /> {t('delivery.memberOnlyBadge')}
                 </span>
               )}

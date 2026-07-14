@@ -13,11 +13,11 @@ import { GRADER_STYLES } from '@/lib/graderAssets';
 import type { ServiceOrder } from '@/types';
 
 const STATUS_COLORS: Record<ServiceOrder['status'], string> = {
-  PENDING: 'bg-amber-500/10 text-amber-400',
-  RECEIVED: 'bg-cyan-500/10 text-cyan-400',
+  PENDING: 'bg-warning/10 text-warning',
+  RECEIVED: 'bg-cyan/10 text-cyan',
   IN_PROGRESS: 'bg-brand/10 text-brand',
-  COMPLETED: 'bg-emerald-500/10 text-emerald-400',
-  CANCELLED: 'bg-red-500/10 text-red-400',
+  COMPLETED: 'bg-success/10 text-success',
+  CANCELLED: 'bg-danger/10 text-danger',
 };
 
 export function ServiceOrdersScreen() {
@@ -70,9 +70,9 @@ export function ServiceOrdersScreen() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="text-xs font-mono text-muted-foreground">{order.id}</span>
-                        <Badge className={cn('text-[10px]', STATUS_COLORS[order.status])}>{order.status}</Badge>
+                        <Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>
                         {order.grader && (
-                          <span className={cn('text-[10px] px-1.5 py-0.5 rounded border', GRADER_STYLES[order.grader])}>
+                          <span className={cn('text-xs px-1.5 py-0.5 rounded border', GRADER_STYLES[order.grader])}>
                             {order.grader === 'OTHER' ? 'Other' : order.grader}
                           </span>
                         )}

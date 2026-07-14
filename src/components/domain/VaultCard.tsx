@@ -82,21 +82,21 @@ export function VaultCard({ item, selected, selecting, onToggleSelect, onList, c
         <p className="text-sm font-semibold truncate">{item.card.nameEn}</p>
 
         <div className="flex flex-wrap gap-1.5 mt-2">
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.condition}</span>
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.card.rarity}</span>
-          <span className="text-[10px] font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.card.language}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.condition}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.card.rarity}</span>
+          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.card.language}</span>
         </div>
 
         <div className="flex items-center justify-between mt-3">
           <div>
-            <p className="text-[10px] text-muted-foreground">{t('common.value')}</p>
+            <p className="text-xs text-muted-foreground">{t('common.value')}</p>
             <p className="text-sm font-bold font-mono">
               {item.status === 'sold' && item.soldFor ? `฿${item.soldFor.toLocaleString()}` : `฿${item.currentPrice.toLocaleString()}`}
             </p>
           </div>
           {item.status !== 'sold' && (
             <div className="text-right">
-              <p className="text-[10px] text-muted-foreground">{t('common.pl')}</p>
+              <p className="text-xs text-muted-foreground">{t('common.pl')}</p>
               <div className={cn('flex items-center justify-end text-xs font-bold', item.plPercent >= 0 ? 'text-plup' : 'text-pldown')}>
                 {item.plPercent >= 0 ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
                 {formatPriceChange(item.plPercent)}

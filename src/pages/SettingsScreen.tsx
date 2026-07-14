@@ -193,15 +193,15 @@ export function SettingsScreen() {
             <p className="text-base font-semibold truncate">{displayName}</p>
             {email && <p className="text-xs text-muted-foreground truncate">{email}</p>}
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide', tierBadge)}>
+              <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide', tierBadge)}>
                 {tierLabel}
               </span>
-              <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide', kycBadge)}>
+              <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide', kycBadge)}>
                 {kycLabel}
               </span>
             </div>
             {memberSince && (
-              <p className="text-[10px] text-muted-foreground mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 {t('settings.memberSince', { date: memberSince })}
               </p>
             )}
@@ -211,9 +211,9 @@ export function SettingsScreen() {
 
         {/* Account */}
         <motion.div variants={itemVariants} className="space-y-2">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+          <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
             {t('settings.sections.account')}
-          </h3>
+          </h2>
           <SectionCard>
             <SettingsRow
               icon={User}
@@ -247,9 +247,9 @@ export function SettingsScreen() {
 
         {/* Preferences */}
         <motion.div variants={itemVariants} className="space-y-2">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+          <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
             {t('settings.sections.preferences')}
-          </h3>
+          </h2>
           <SectionCard>
             <SettingsRow
               icon={Bell}
@@ -276,9 +276,9 @@ export function SettingsScreen() {
 
         {/* Support */}
         <motion.div variants={itemVariants} className="space-y-2">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+          <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
             {t('settings.sections.support')}
-          </h3>
+          </h2>
           <SectionCard>
             <SettingsRow
               icon={FileText}
@@ -309,9 +309,9 @@ export function SettingsScreen() {
 
         {/* Danger zone */}
         <motion.div variants={itemVariants} className="space-y-2">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
+          <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
             {t('settings.sections.danger')}
-          </h3>
+          </h2>
           <SectionCard>
             <SettingsRow
               icon={Trash2}
@@ -338,7 +338,7 @@ export function SettingsScreen() {
         {/* Version footer — only version, no branding */}
         <motion.p
           variants={itemVariants}
-          className="text-center text-[10px] font-mono text-muted-foreground/60"
+          className="text-center text-xs font-mono text-muted-foreground/60"
         >
           v{APP_VERSION}
         </motion.p>

@@ -21,7 +21,7 @@ const statusLabel: Record<KycStatus, string> = {
 
 const statusColor: Record<KycStatus, string> = {
   NONE: 'text-muted-foreground bg-surface',
-  PENDING: 'text-amber-400 bg-amber-400/10',
+  PENDING: 'text-warning bg-warning/10',
   APPROVED: 'text-plup bg-plup/10',
   REJECTED: 'text-pldown bg-pldown/10',
 };
@@ -209,7 +209,7 @@ export function KycScreen() {
                         <span className="text-sm text-muted-foreground">Click to upload ID image</span>
                       </>
                     )}
-                    <input
+                    <Input
                       ref={fileInputRef}
                       type="file"
                       accept="image/*"

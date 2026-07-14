@@ -81,7 +81,7 @@ export function PricingScreen() {
         {/* Tag pills */}
         <div className="flex flex-wrap gap-2">
           {['SR', 'Character', 'JP'].map((tag) => (
-            <span key={tag} className="text-[10px] font-mono bg-surface-light px-2 py-1 rounded-md text-muted-foreground">
+            <span key={tag} className="text-xs font-mono bg-surface-light px-2 py-1 rounded-md text-muted-foreground">
               {tag}
             </span>
           ))}
@@ -90,25 +90,25 @@ export function PricingScreen() {
         {/* Four key stats */}
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-surface-light rounded-xl p-3">
-            <p className="text-[10px] font-mono text-muted-foreground mb-1">HIGHEST</p>
+            <p className="text-xs font-mono text-muted-foreground mb-1">HIGHEST</p>
             <p className="text-lg font-bold font-mono text-plup">
               ฿{priceData?.highest.toLocaleString() || '27,033'}
             </p>
           </div>
           <div className="bg-surface-light rounded-xl p-3">
-            <p className="text-[10px] font-mono text-muted-foreground mb-1">LOWEST</p>
+            <p className="text-xs font-mono text-muted-foreground mb-1">LOWEST</p>
             <p className="text-lg font-bold font-mono text-pldown">
               ฿{priceData?.lowest.toLocaleString() || '8,435'}
             </p>
           </div>
           <div className="bg-surface-light rounded-xl p-3">
-            <p className="text-[10px] font-mono text-muted-foreground mb-1">30-DAY TREND</p>
+            <p className="text-xs font-mono text-muted-foreground mb-1">30-DAY TREND</p>
             <p className="text-lg font-bold font-mono text-plup">
               ↑ {priceData?.trend30d || 8.2}%
             </p>
           </div>
           <div className="bg-surface-light rounded-xl p-3">
-            <p className="text-[10px] font-mono text-muted-foreground mb-1">CURRENT PRICE</p>
+            <p className="text-xs font-mono text-muted-foreground mb-1">CURRENT PRICE</p>
             <p className="text-lg font-bold font-mono text-white">
               ฿{priceData?.current.toLocaleString() || '18,440'}
             </p>
@@ -187,14 +187,14 @@ export function PricingScreen() {
                   <ReAreaChart data={priceData?.history || []}>
                     <defs>
                       <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#F06AA8" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#F06AA8" stopOpacity={0} />
+                        <stop offset="0%" stopColor="var(--chart-brand)" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="var(--chart-brand)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <Area
                       type="monotone"
                       dataKey="price"
-                      stroke="#F06AA8"
+                      stroke="var(--chart-brand)"
                       strokeWidth={2}
                       fill="url(#priceGradient)"
                     />

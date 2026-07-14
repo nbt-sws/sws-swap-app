@@ -55,7 +55,7 @@ export function PriceChart({
                     key={p.id}
                     onClick={() => onPeriodChange(p.id)}
                     className={cn(
-                      'px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors',
+                      'px-1.5 py-0.5 rounded text-xs font-medium transition-colors',
                       period === p.id
                         ? 'bg-surface-lighter text-foreground'
                         : 'text-muted-foreground hover:text-foreground'
@@ -78,19 +78,19 @@ export function PriceChart({
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#F06AA8" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#F06AA8" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--chart-brand)" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="var(--chart-brand)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="date" hide />
               <YAxis hide domain={['dataMin', 'dataMax']} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1E2248', border: '1px solid #282D5A', borderRadius: '12px' }}
-                itemStyle={{ color: '#fff' }}
+                contentStyle={{ backgroundColor: 'var(--chart-surface)', border: '1px solid var(--chart-border)', borderRadius: '12px' }}
+                itemStyle={{ color: 'var(--chart-line)' }}
                 formatter={(value: number) => [`฿${value.toLocaleString()}`, 'Price']}
                 labelFormatter={() => ''}
               />
-              <Area type="monotone" dataKey="price" stroke="#F06AA8" strokeWidth={2} fill="url(#priceGradient)" />
+              <Area type="monotone" dataKey="price" stroke="var(--chart-brand)" strokeWidth={2} fill="url(#priceGradient)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
