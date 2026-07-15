@@ -90,13 +90,37 @@ function MiniPortfolioChart({ data, isPositive }: { data: { date: string; value:
 
 /* ─── Portfolio Card ─────────────────────────────────────────────── */
 function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: boolean; t: (k: string, o?: Record<string, unknown>) => string }) {
-  const { totalValue, plAmount, topCards, heldCount } = useMemo(() => {
+  const { totalValue, plAmount, topCards, heldCount, chartData } = useMemo(() => {
     const held = vault?.filter((v) => v.status === 'held') ?? [];
     const totalValue = held.reduce((sum, v) => sum + (v.currentPrice ?? 0), 0);
     const totalPaid = held.reduce((sum, v) => sum + (v.paidPrice ?? 0), 0);
     const plAmount = totalValue - totalPaid;
     const topCards = [...held].sort((a, b) => b.currentPrice - a.currentPrice).slice(0, 3);
-    return { totalValue, plAmount, topCards, heldCount: held.length };
+
+    // Generate mock portfolio value history (7 points) for the mini chart
+    const chartData: { date: string; value: number }[] = [];
+    if (held.length > 0) {
+      const days = 7;
+      const base = totalPaid || totalValue || 1000;
+      const volatility = Math.max(base * 0.05, 500);
+      let current = base;
+      const now = new Date();
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const target = totalValue;
+        const progress = (days - 1 - i) / (days - 1);
+        const drift = base + (target - base) * progress;
+        const noise = (Math.random() - 0.5) * volatility;
+        current = Math.max(0, Math.round(drift + noise));
+        chartData.push({ date: date.toISOString().split('T')[0], value: current });
+      }
+      if (chartData.length > 0) {
+        chartData[chartData.length - 1].value = totalValue;
+      }
+    }
+
+    return { totalValue, plAmount, topCards, heldCount: held.length, chartData };
   }, [vault]);
 
   if (loading) {
@@ -153,6 +177,13 @@ function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
             <p className="mt-1.5 text-xl sm:text-2xl font-bold mono-num tracking-tight">{heldCount}</p>
           </div>
         </div>
+
+        {/* Mini portfolio chart */}
+        {chartData.length > 0 && (
+          <div className="mt-4">
+            <MiniPortfolioChart data={chartData} isPositive={plAmount >= 0} />
+          </div>
+        )}
 
         {topCards.length > 0 && (
           <div className="mt-5 flex items-center gap-3 pt-4 border-t border-border/40">
