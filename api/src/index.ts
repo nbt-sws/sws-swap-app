@@ -14,7 +14,7 @@ const app = new Hono<{ Bindings: Env }>();
 // Global middleware
 app.use('*', logger());
 app.use('*', cors({
-  origin: ['http://localhost:5173', 'https://swibswap.app', 'https://www.swibswap.app'],
+  origin: ['http://localhost:5173', 'https://swibswap.app', 'https://www.swibswap.app', 'https://*.vercel.app', 'https://sws-demo-nine.vercel.app'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID'],
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
