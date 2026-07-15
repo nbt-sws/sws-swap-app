@@ -24,7 +24,7 @@ interface VaultFilterTabsProps {
 const FILTER_CONFIG: { id: VaultFilter; labelKey: string; icon: React.ElementType; ownerOnly?: boolean }[] = [
   { id: 'ALL', labelKey: 'filters.all', icon: Layers },
   { id: 'AVAILABLE', labelKey: 'filters.available', icon: CheckCircle },
-  { id: 'VAULT_HELD', labelKey: 'filters.vaultHeld', icon: Package },
+  { id: 'VAULT_HELD', labelKey: 'filters.held', icon: Package },
   { id: 'LISTED', labelKey: 'filters.listed', icon: Tag },
   { id: 'IN_TRANSIT', labelKey: 'filters.inTransit', icon: Truck },
   { id: 'REDEEMING', labelKey: 'filters.redeeming', icon: Gift },
@@ -46,10 +46,10 @@ export function VaultFilterTabs({ activeFilter, onFilterChange, counts, isOwner 
             key={f.id}
             onClick={() => onFilterChange(f.id)}
             className={cn(
-              'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all',
+              'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all',
               active
                 ? 'bg-brand text-white shadow-sm'
-                : 'bg-surface-light text-muted-foreground hover:text-white'
+                : 'bg-surface-light text-muted-foreground hover:text-foreground hover:bg-surface'
             )}
             aria-pressed={active}
           >
@@ -57,7 +57,7 @@ export function VaultFilterTabs({ activeFilter, onFilterChange, counts, isOwner 
             <span>{t(f.labelKey)}</span>
             <span
               className={cn(
-                'ml-0.5 min-w-[1.25rem] rounded-full px-1 py-0 text-xs text-center',
+                'ml-0.5 min-w-[1.25rem] rounded-full px-1.5 py-0 text-[11px] text-center',
                 active ? 'bg-white/20 text-white' : 'bg-surface-lighter text-muted-foreground'
               )}
             >

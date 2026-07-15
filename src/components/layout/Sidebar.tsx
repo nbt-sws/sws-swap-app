@@ -6,7 +6,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore, isAdmin } from '@/stores/auth';
-import { Button } from '@/components/ui/button';
 
 interface NavItem {
   to: string;
@@ -33,7 +32,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const router = useRouterState();
   const currentPath = router.location.pathname;
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const userIsAdmin = isAdmin(user);
 
   const isActive = (to: string) => {
@@ -136,22 +135,17 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* Bottom: authenticated user + logout (login is now in TopBar) */}
+      {/* Bottom: authenticated user info only */}
       {isAuthenticated && (
         <div className="p-4 border-t border-border shrink-0">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 px-3 py-2">
-              <div className="w-8 h-8 rounded-full bg-surface-lighter flex items-center justify-center text-sm font-semibold">
-                {user?.fullName?.charAt(0) ?? 'C'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.fullName ?? user?.email}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-              </div>
+          <div className="flex items-center gap-3 px-3 py-2">
+            <div className="w-8 h-8 rounded-full bg-surface-lighter flex items-center justify-center text-sm font-semibold">
+              {user?.fullName?.charAt(0) ?? 'C'}
             </div>
-            <Button variant="ghost" className="w-full justify-start" onClick={logout}>
-              {t('nav.logout')}
-            </Button>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{user?.fullName ?? user?.email}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
           </div>
         </div>
       )}

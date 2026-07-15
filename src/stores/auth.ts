@@ -3,7 +3,6 @@ import { userApi } from '@/lib/api';
 import type { AuthUser, UserTier, UserRole } from '@/types/auth';
 
 const STORAGE_KEY = 'sws_access_token';
-const DEV_USER_KEY = 'sws_dev_user';
 
 export type { UserTier, AuthUser, UserRole };
 
@@ -43,7 +42,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem('sws_refresh_token');
-        localStorage.removeItem(DEV_USER_KEY);
         window.location.href = '/login';
       }
       set({ user: null, accessToken: null, isAuthenticated: false });
@@ -85,16 +83,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     initAuth: () => {
       const token = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-      const devUser = typeof window !== 'undefined' ? localStorage.getItem(DEV_USER_KEY) : null;
-      if (devUser) {
-        try {
-          const user = JSON.parse(devUser) as AuthUser;
-          set({ accessToken: token, isAuthenticated: true, user, isLoading: false });
-          return;
-        } catch {
-          localStorage.removeItem(DEV_USER_KEY);
-        }
-      }
       if (token) {
         set({ accessToken: token, isAuthenticated: true });
         // Fetch user from API instead of using hardcoded mock

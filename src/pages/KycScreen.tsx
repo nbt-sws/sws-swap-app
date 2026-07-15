@@ -37,7 +37,7 @@ function readFileAsBase64(file: File): Promise<string> {
 
 export function KycScreen() {
   const { data: user, isLoading: userLoading } = useUser();
-  const { data: kycStatus, isLoading: statusLoading } = useKycStatus(user?.id);
+  const { data: kycStatus, isLoading: statusLoading } = useKycStatus((user as any)?.id);
   const submitKyc = useSubmitKyc();
 
   const [fullName, setFullName] = useState('');
@@ -46,7 +46,7 @@ export function KycScreen() {
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const effectiveStatus = kycStatus?.status ?? user?.kycStatus ?? 'NONE';
+  const effectiveStatus: KycStatus = kycStatus?.status ?? (user as any)?.kycStatus ?? 'NONE';
   const isSubmitted = effectiveStatus === 'PENDING' || effectiveStatus === 'APPROVED';
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,7 +136,7 @@ export function KycScreen() {
                 {effectiveStatus === 'REJECTED' && <AlertCircle className="w-4 h-4" />}
                 {effectiveStatus === 'PENDING' && <CheckCircle className="w-4 h-4" />}
                 {effectiveStatus === 'NONE' && <Shield className="w-4 h-4" />}
-                {statusLabel[effectiveStatus]}
+                {statusLabel[effectiveStatus as keyof typeof statusLabel]}
               </span>
             </div>
 

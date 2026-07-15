@@ -1,9 +1,19 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { TrendingUp, TrendingDown, Tag } from 'lucide-react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Tag,
+  Sparkles,
+  EyeOff,
+  Trash2,
+  Gift,
+  Package,
+  ExternalLink,
+  Pencil,
+} from 'lucide-react';
 import { cn, getCardImageUrl, formatPriceChange, isPlatformHeld } from '@/lib/utils';
 import type { VaultItem } from '@/types';
 
@@ -13,43 +23,73 @@ interface VaultCardProps {
   selecting?: boolean;
   onToggleSelect?: (itemId: string) => void;
   onList?: (item: VaultItem) => void;
+  onDelist?: (item: VaultItem) => void;
+  onRedeem?: (item: VaultItem) => void;
+  onDelete?: (item: VaultItem) => void;
+  isListed?: boolean;
+  isOwner?: boolean;
   className?: string;
 }
 
-export function VaultCard({ item, selected, selecting, onToggleSelect, onList, className }: VaultCardProps) {
+export function VaultCard({
+  item,
+  selected,
+  selecting,
+  onToggleSelect,
+  onList,
+  onDelist,
+  onRedeem,
+  onDelete,
+  isListed,
+  isOwner,
+  className,
+}: VaultCardProps) {
   const { t } = useTranslation();
   const platformHeld = isPlatformHeld(item);
-  const statusLabel =
-    item.status === 'held'
-      ? platformHeld
-        ? 'SWS Vault'
-        : t('common.inVault')
-      : item.status === 'sold'
-      ? t('common.sold')
-      : item.serviceOrderStatus
-      ? `${t('common.grade')} · ${item.serviceOrderStatus}`
-      : t('common.grade');
 
-  const statusColor =
-    item.status === 'held'
-      ? platformHeld
-        ? 'bg-brand/20 text-brand'
-        : 'bg-cyan/20 text-cyan'
-      : item.status === 'sold'
-      ? 'bg-pldown/20 text-pldown'
-      : 'bg-brand/20 text-brand';
+  // Status configuration
+  const statusConfig = isListed
+    ? {
+        label: t('filters.listed'),
+        color: 'bg-brand text-white shadow-md',
+        icon: Sparkles,
+      }
+    : item.status === 'sold'
+    ? { label: t('common.sold'), color: 'bg-danger/15 text-danger border-danger/30', icon: null }
+    : item.serviceOrderStatus
+    ? {
+        label: `${t('common.grade')} · ${item.serviceOrderStatus}`,
+        color: 'bg-warning/15 text-warning border-warning/30',
+        icon: null,
+      }
+    : platformHeld
+    ? {
+        label: 'SWS Vault',
+        color: 'bg-success/15 text-success border-success/30',
+        icon: Package,
+      }
+    : {
+        label: t('common.inVault'),
+        color: 'bg-cyan/15 text-cyan border-cyan/30',
+        icon: null,
+      };
+
+  const StatusIcon = statusConfig.icon;
 
   return (
     <div
       className={cn(
-        'group relative bg-surface-light rounded-xl border border-border shadow-sm hover:shadow-md hover:border-brand/20 transition-all duration-300',
+        'group relative overflow-hidden rounded-2xl border border-border/60 bg-surface-light',
+        'transition-all duration-300 hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20',
+        'hover:-translate-y-1',
         selecting && selected && 'ring-2 ring-brand border-transparent',
+        isListed && 'ring-1 ring-brand/20',
         className
       )}
     >
       {/* Selection checkbox */}
       {selecting && (
-        <div className="absolute top-3 left-3 z-20">
+        <div className="absolute top-2.5 left-2.5 z-20">
           <Checkbox
             checked={selected}
             onCheckedChange={() => onToggleSelect?.(item.id)}
@@ -57,67 +97,269 @@ export function VaultCard({ item, selected, selecting, onToggleSelect, onList, c
         </div>
       )}
 
+      {/* Card Image */}
       <Link
         to="/vault/items/$itemId"
         params={{ itemId: item.id }}
-        className="block relative aspect-[5/7] overflow-hidden rounded-t-2xl"
+        className="block relative aspect-[5/7] overflow-hidden"
       >
         <ImageWithFallback
           src={getCardImageUrl(item.card)}
           alt={item.card.nameEn}
-          className="transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full transition-transform duration-300 group-hover:scale-105"
         />
 
-        {/* Status badge */}
-        <div className="absolute top-3 right-3 z-10">
-          <Badge className={statusColor}>{statusLabel}</Badge>
-        </div>
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-surface-dark/40 via-transparent to-transparent" />
 
-        {/* Hover gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </Link>
-
-      <div className="p-3">
-        <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>
-        <p className="text-sm font-semibold truncate">{item.card.nameEn}</p>
-
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.condition}</span>
-          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.card.rarity}</span>
-          <span className="text-xs font-mono bg-surface-lighter px-1.5 py-0.5 rounded">{item.card.language}</span>
-        </div>
-
-        <div className="flex items-center justify-between mt-3">
-          <div>
-            <p className="text-xs text-muted-foreground">{t('common.value')}</p>
-            <p className="text-sm font-bold font-mono">
-              {item.status === 'sold' && item.soldFor ? `฿${item.soldFor.toLocaleString()}` : `฿${item.currentPrice.toLocaleString()}`}
-            </p>
+        {/* Hover overlay with glow */}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/30">
+            <ExternalLink className="w-4 h-4 text-white" />
           </div>
-          {item.status !== 'sold' && (
-            <div className="text-right">
-              <p className="text-xs text-muted-foreground">{t('common.pl')}</p>
-              <div className={cn('flex items-center justify-end text-xs font-bold', item.plPercent >= 0 ? 'text-plup' : 'text-pldown')}>
-                {item.plPercent >= 0 ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
-                {formatPriceChange(item.plPercent)}
-              </div>
-            </div>
-          )}
         </div>
 
-        {onList && item.status === 'held' && !selecting && (
+        {/* Delete button on hover — hide when listed or selecting */}
+        {!selecting && isOwner && onDelete && item.status !== 'sold' && !isListed && (
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              onList(item);
+              if (confirm('Are you sure you want to remove this item from your vault?')) {
+                onDelete(item);
+              }
             }}
-            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-brand/10 text-brand text-xs font-medium hover:bg-brand/20 transition"
+            className="absolute top-2.5 right-2.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            aria-label="Delete item"
           >
-            <Tag className="w-3 h-3" />
-            {t('common.listForSale')}
+            <div className="w-7 h-7 rounded-full bg-danger/90 flex items-center justify-center hover:bg-danger transition-colors">
+              <Trash2 className="w-3.5 h-3.5 text-white" />
+            </div>
           </button>
         )}
+
+        {/* Status badge */}
+        {!selecting && (
+          <div className="absolute top-2.5 left-2.5 z-10">
+            <span
+              className={cn(
+                'text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border inline-flex items-center gap-1 shadow-lg backdrop-blur-sm',
+                statusConfig.color,
+                isListed && 'animate-pulse'
+              )}
+            >
+              {StatusIcon && <StatusIcon className="w-3 h-3" />}
+              {statusConfig.label}
+            </span>
+          </div>
+        )}
+
+        {/* Condition badge */}
+        {item.condition && (
+          <div className="absolute bottom-2.5 left-2.5 z-10">
+            <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white border border-white/10">
+              {item.condition}
+            </span>
+          </div>
+        )}
+
+        {/* Price badge */}
+        <div className="absolute bottom-2.5 right-2.5 z-10">
+          <span className="text-xs font-bold font-mono bg-brand text-white px-2.5 py-1 rounded-full shadow-lg shadow-brand/20">
+            ฿{item.currentPrice.toLocaleString()}
+          </span>
+        </div>
+      </Link>
+
+      {/* Card Info */}
+      <div className="p-3">
+        {/* Card name */}
+        <h3 className="line-clamp-1 font-semibold text-sm text-foreground transition-colors group-hover:text-brand">
+          {item.card.nameEn}
+        </h3>
+
+        {/* SKU */}
+        <p className="mt-0.5 line-clamp-1 text-xs font-mono text-muted-foreground">
+          {item.card.code}
+        </p>
+
+        {/* Tags */}
+        <div className="mt-2 flex flex-wrap gap-1">
+          {item.card.rarity && (
+            <span className="text-[10px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
+              {item.card.rarity}
+            </span>
+          )}
+          {item.condition && (
+            <span className="text-[10px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
+              {item.condition}
+            </span>
+          )}
+          {item.card.language && (
+            <span className="text-[10px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
+              {item.card.language}
+            </span>
+          )}
+        </div>
+
+        {/* P/L indicator */}
+        {item.status !== 'sold' && (
+          <div
+            className={cn(
+              'mt-2 flex items-center text-xs font-mono font-bold',
+              item.plPercent >= 0 ? 'text-success' : 'text-danger'
+            )}
+          >
+            {item.plPercent >= 0 ? (
+              <TrendingUp className="w-3 h-3 mr-0.5" />
+            ) : (
+              <TrendingDown className="w-3 h-3 mr-0.5" />
+            )}
+            {formatPriceChange(item.plPercent)}
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="mt-2.5 flex gap-1.5">
+          {/* Listed → Unlist + Edit + Redeem/Delivery */}
+          {isListed && isOwner && onDelist && !selecting && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelist(item);
+                }}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl',
+                  'bg-surface-lighter text-muted-foreground text-[11px] font-semibold',
+                  'border border-border hover:border-warning/30 hover:text-warning hover:bg-warning/10',
+                  'active:scale-[0.97] transition-all duration-150'
+                )}
+                aria-label="Unlist item"
+              >
+                <EyeOff className="w-3 h-3" />
+                {t('common.delist')}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onList?.(item);
+                }}
+                className={cn(
+                  'flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-xl',
+                  'bg-surface-lighter text-muted-foreground text-[11px] font-semibold',
+                  'border border-border hover:border-brand/30 hover:text-brand hover:bg-brand/10',
+                  'active:scale-[0.97] transition-all duration-150'
+                )}
+                aria-label="Edit listing"
+              >
+                <Pencil className="w-3 h-3" />
+              </button>
+              {/* Redeem button for listed + platform held items */}
+              {platformHeld && onRedeem && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onRedeem(item);
+                  }}
+                  className={cn(
+                    'flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-xl',
+                    'bg-periwinkle/10 text-periwinkle text-[11px] font-semibold',
+                    'border border-periwinkle/20 hover:bg-periwinkle hover:text-white',
+                    'active:scale-[0.97] transition-all duration-150'
+                  )}
+                  aria-label="Redeem item"
+                >
+                  <Gift className="w-3 h-3" />
+                </button>
+              )}
+            </>
+          )}
+
+          {/* Not Listed + In Vault → List + Redeem */}
+          {!isListed &&
+            isOwner &&
+            item.status === 'held' &&
+            !platformHeld &&
+            onList &&
+            !selecting && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onList(item);
+                  }}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl',
+                    'bg-brand text-white text-[11px] font-semibold',
+                    'hover:bg-brand-light shadow-sm',
+                    'active:scale-[0.97] transition-all duration-150'
+                  )}
+                  aria-label="List item for sale"
+                >
+                  <Tag className="w-3 h-3" />
+                  {t('common.list')}
+                </button>
+                {/* Delivery button for non-listed vault items */}
+                {onRedeem && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onRedeem(item);
+                    }}
+                    className={cn(
+                      'flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-xl',
+                      'bg-surface-lighter text-muted-foreground text-[11px] font-semibold',
+                      'border border-border hover:border-periwinkle/30 hover:text-periwinkle hover:bg-periwinkle/10',
+                      'active:scale-[0.97] transition-all duration-150'
+                    )}
+                    aria-label="Request delivery"
+                  >
+                    <Gift className="w-3 h-3" />
+                  </button>
+                )}
+              </>
+            )}
+
+          {/* SWS Vault → Redeem */}
+          {!isListed &&
+            isOwner &&
+            item.status === 'held' &&
+            platformHeld &&
+            onRedeem &&
+            !selecting && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRedeem(item);
+                }}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl',
+                  'bg-periwinkle/10 text-periwinkle text-[11px] font-semibold',
+                  'border border-periwinkle/20 hover:bg-periwinkle hover:text-white',
+                  'active:scale-[0.97] transition-all duration-150'
+                )}
+                aria-label="Redeem item"
+              >
+                <Gift className="w-3 h-3" />
+                {t('common.redeem')}
+              </button>
+            )}
+
+          {/* Not owner */}
+          {!isOwner && (
+            <div className="flex-1 py-1.5 text-center text-[11px] text-muted-foreground/50">
+              {t('vault.heldByPlatform')}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

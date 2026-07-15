@@ -31,7 +31,6 @@ import type {
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1').replace(/\/?$/, '/');
-const USER_API_BASE_URL = (import.meta.env.VITE_USER_API_BASE_URL || API_BASE_URL).replace(/\/?$/, '/');
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('sws_access_token');
@@ -41,19 +40,23 @@ function getAuthHeaders(): Record<string, string> {
 function createKy(prefix: string) {
   return ky.create({
     prefix,
+    retry: 0,
+    timeout: 30000,
     hooks: {
       beforeRequest: [
         ({ request }) => {
           const token = localStorage.getItem('sws_access_token');
           if (token) request.headers.set('Authorization', `Bearer ${token}`);
+          // Multi-tenant header
+          request.headers.set('X-Tenant-ID', import.meta.env.VITE_TENANT_ID || 'default');
         },
       ],
     },
   });
 }
 
+// Single API instance — all routes go through the same Worker
 export const api = createKy(API_BASE_URL);
-const userKy = createKy(USER_API_BASE_URL);
 
 // ─── HTTP Wrappers ──────────────────────────────────────────────────
 
@@ -67,6 +70,7 @@ function createWrappers(instance: typeof api) {
         const error = err as { response?: { status: number } };
         if (error.response?.status === 401) {
           localStorage.removeItem('sws_access_token');
+          window.location.href = '/login';
         }
         console.error(`[API GET Error] ${path}:`, err);
         throw err;
@@ -89,6 +93,7 @@ function createWrappers(instance: typeof api) {
         const error = err as { response?: { status: number } };
         if (error.response?.status === 401) {
           localStorage.removeItem('sws_access_token');
+          window.location.href = '/login';
         }
         console.error(`[API POST Error] ${path}:`, err);
         throw err;
@@ -103,6 +108,7 @@ function createWrappers(instance: typeof api) {
         const error = err as { response?: { status: number } };
         if (error.response?.status === 401) {
           localStorage.removeItem('sws_access_token');
+          window.location.href = '/login';
         }
         console.error(`[API PUT Error] ${path}:`, err);
         throw err;
@@ -117,6 +123,7 @@ function createWrappers(instance: typeof api) {
         const error = err as { response?: { status: number } };
         if (error.response?.status === 401) {
           localStorage.removeItem('sws_access_token');
+          window.location.href = '/login';
         }
         console.error(`[API DELETE Error] ${path}:`, err);
         throw err;
@@ -131,6 +138,7 @@ function createWrappers(instance: typeof api) {
         const error = err as { response?: { status: number } };
         if (error.response?.status === 401) {
           localStorage.removeItem('sws_access_token');
+          window.location.href = '/login';
         }
         console.error(`[API PATCH Error] ${path}:`, err);
         throw err;
@@ -140,20 +148,19 @@ function createWrappers(instance: typeof api) {
 }
 
 export const { get: apiGet, post: apiPost, put: apiPut, delete: apiDelete, patch: apiPatch } = createWrappers(api);
-export const { get: userApiGet, post: userApiPost, put: userApiPut, delete: userApiDelete, patch: userApiPatch } = createWrappers(userKy);
 
 // ─── Domain APIs (aligned with real backend contract) ─────────────────
 
 export const authApi = {
   login: (data: { email: string; password: string }) =>
-    userKy.post('auth/login', { json: data }).json<ApiAuthResponse>(),
+    api.post('auth/login', { json: data }).json<ApiAuthResponse>(),
   register: (data: { fullName?: string; email: string; password: string }) =>
-    userKy.post('auth/register', { json: { email: data.email, password: data.password, name: data.fullName } }).json<ApiAuthResponse>(),
-  me: () => userApiGet<ApiUser>('auth/me'),
+    api.post('auth/register', { json: { email: data.email, password: data.password, name: data.fullName } }).json<ApiAuthResponse>(),
+  me: () => apiGet<ApiUser>('user'),
 };
 
 export const userApi = {
-  me: () => userApiGet<ApiUser>('auth/me'),
+  me: () => apiGet<ApiUser>('user'),
 };
 
 export const listingsApi = {

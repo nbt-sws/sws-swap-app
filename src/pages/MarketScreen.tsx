@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react';
+import { cn } from '@/lib/utils';import { useState, useMemo } from 'react';
 import { Link, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useMarketListings, useVault, useMyListings } from '@/hooks/useApi';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   Search, SlidersHorizontal, LayoutGrid, List as ListIcon,
-  ChevronDown, X, ShieldCheck, Package, ShoppingBag,
+  ChevronDown, X, ShieldCheck, Package, ShoppingBag, RefreshCw,
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -52,6 +53,7 @@ const PRICE_RANGES: { id: string; key: string; min: number; max: number }[] = [
 ];
 
 export function MarketScreen() {
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const searchParams = useSearch({ from: '/market/' });
   const [activeShelf, setActiveShelf] = useState('All');
@@ -65,9 +67,17 @@ export function MarketScreen() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [quickView, setQuickView] = useState<MarketListing | null>(null);
 
-  const { data: listings, isLoading } = useMarketListings(activeShelf === 'All' ? undefined : activeShelf);
+  const { data: listings, isLoading, isFetching, refetch } = useMarketListings(activeShelf === 'All' ? undefined : activeShelf);
   const { data: vault } = useVault();
   const { data: myListings } = useMyListings();
+
+  const handleRefresh = () => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: ['market'] });
+    queryClient.invalidateQueries({ queryKey: ['listings'] });
+    queryClient.invalidateQueries({ queryKey: ['myListings'] });
+    queryClient.invalidateQueries({ queryKey: ['vault'] });
+  };
 
   const vaultCount = vault?.length ?? 0;
   const myListingsCount = myListings?.length ?? 0;
@@ -236,6 +246,21 @@ export function MarketScreen() {
             </select>
             <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
           </div>
+
+          <button
+            onClick={handleRefresh}
+            disabled={isFetching}
+            className={cn(
+              'w-8 h-8 rounded-lg flex items-center justify-center transition-all shrink-0',
+              isFetching
+                ? 'text-brand bg-brand/10'
+                : 'text-muted-foreground hover:text-brand hover:bg-brand/10'
+            )}
+            aria-label="Refresh"
+            title="รีเฟรช"
+          >
+            <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin')} />
+          </button>
 
           <div className="hidden sm:flex rounded-lg border border-border bg-surface-light p-0.5">
             <button

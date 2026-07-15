@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sws-swap-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-04-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "env": {
+    "dev": {
+      "vars": {
+        "ENVIRONMENT": "development"
+      }
+    }
+  },
+  "workers_dev": true
+}

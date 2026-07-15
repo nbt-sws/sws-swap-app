@@ -8,7 +8,7 @@ import {
 } from '@/lib/api';
 import * as mockApi from '@/services/mockApi';
 import type {
-  CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, Card,
+  CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, Card, MarketListing,
 } from '@/types';
 import type { ApiCollectorProfile } from '@/types/api';
 import {
@@ -31,7 +31,16 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 
 export async function withFallback<T>(apiCall: () => Promise<T>, fallback: () => Promise<T>): Promise<T> {
   if (USE_MOCK) return fallback();
-  return apiCall();
+  try {
+    return await apiCall();
+  } catch (err: any) {
+    // Only fallback on network errors, not 4xx/5xx responses
+    if (err?.name === 'TypeError' || err?.message?.includes('fetch') || err?.message?.includes('network')) {
+      console.warn('[withFallback] Network error, using fallback:', err.message);
+      return fallback();
+    }
+    throw err;
+  }
 }
 
 // ─── Vault hooks ────────────────────────────────────────────────────
@@ -51,7 +60,8 @@ export function useVault() {
       );
       return items;
     },
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 5,
+    refetchOnWindowFocus: true,
     enabled: isAuthenticated && !!user?.id,
   });
 }
@@ -137,7 +147,8 @@ export function useMarketListings(shelf?: string) {
       );
       return listings;
     },
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 5,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -154,7 +165,8 @@ export function useListings(params?: { q?: string; page?: number; limit?: number
       );
       return { results: listings };
     },
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 5,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -241,6 +253,9 @@ export function useUser() {
   });
 }
 
+// Separate error handling for useUser - TanStack Query v5 removed onError from useQuery
+// We handle 401 errors via the queryClient's default error handler or in components
+
 export function useAuthLogin() {
   const setTokens = useAuthStore((s) => s.setTokens);
   const setUser = useAuthStore((s) => s.setUser);
@@ -325,7 +340,8 @@ export function useMyListings() {
       );
       return listings;
     },
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 5,
+    refetchOnWindowFocus: true,
     enabled: isAuthenticated,
   });
 }
@@ -333,36 +349,125 @@ export function useMyListings() {
 export function useCreateListing() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const { data: myListings } = useMyListings();
+  const { data: storeProfile } = useStoreProfile(user?.id ?? '');
+  
   return useMutation({
     mutationFn: async (input: CreateListingInput) => {
-      if (USE_MOCK) {
-        return mockApi.createListing(input, user?.id, user?.fullName ?? 'Me');
+      // Check if item already has an active listing
+      const itemId = input.itemId ?? input.card.id;
+      const existing = myListings?.find(l => l.itemId === itemId && l.status === 'active');
+      if (existing) {
+        throw new Error('This item is already listed for sale');
       }
-      const res = await listingsApi.create({
-        itemId: input.itemId ?? input.card.id,
-        title: input.card.nameEn,
-        description: input.description,
-        price: input.price,
-        category: input.shelf,
-        itemFormat: input.listingType,
-      });
-      return mapApiListingToMarketListing({
-        listingId: res.listingId,
-        itemId: input.itemId ?? input.card.id,
-        sellerId: user?.id ?? '',
-        title: input.card.nameEn,
+      
+      // Use store profile display name if available, fallback to fullName or email
+      const sellerName = storeProfile?.displayName || storeProfile?.name || user?.fullName || user?.email || 'Me';
+      
+      return withFallback(
+        async () => {
+          const res = await listingsApi.create({
+            itemId,
+            title: input.card.nameEn,
+            description: input.description,
+            price: input.price,
+            category: input.shelf,
+            itemFormat: input.listingType,
+          });
+          return mapApiListingToMarketListing({
+            listingId: res.listingId,
+            itemId,
+            sellerId: user?.id ?? '',
+            title: input.card.nameEn,
+            price: input.price,
+            currency: 'THB',
+            status: 'ACTIVE',
+            createdAt: new Date().toISOString(),
+          });
+        },
+        async () => mockApi.createListing(input, user?.id, sellerName)
+      );
+    },
+    // Optimistic update: add the new listing to cache immediately
+    onMutate: async (input) => {
+      const itemId = input.itemId ?? input.card.id;
+      const sellerId = user?.id ?? '';
+      // Use store profile display name for optimistic update
+      const profile = queryClient.getQueryData<StoreProfile>(['storeProfile', user?.id]);
+      const sellerName = profile?.displayName || profile?.name || user?.fullName || user?.email || 'Me';
+      
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['listingsBySeller', sellerId] });
+      await queryClient.cancelQueries({ queryKey: ['myListings'] });
+      await queryClient.cancelQueries({ queryKey: ['vault'] });
+      await queryClient.cancelQueries({ queryKey: ['market'] });
+      
+      // Snapshot previous values
+      const previousListings = queryClient.getQueryData(['listingsBySeller', sellerId]);
+      const previousMyListings = queryClient.getQueryData(['myListings']);
+      const previousVault = queryClient.getQueryData(['vault']);
+      const previousMarket = queryClient.getQueryData(['market']);
+      
+      // Build a proper optimistic MarketListing
+      const optimisticListing: MarketListing = {
+        id: `temp-${Date.now()}`,
+        card: input.card,
         price: input.price,
         currency: 'THB',
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
+        listingType: input.listingType,
+        shelf: input.shelf,
+        seller: { id: sellerId, name: sellerName, rating: 0 },
+        vaultVerified: true,
+        itemId,
+        timestamp: new Date().toISOString(),
+        status: 'active',
+        views: 0,
+        watchers: 0,
+      };
+      
+      // Optimistically add to all relevant caches
+      queryClient.setQueryData(['listingsBySeller', sellerId], (old: any) => {
+        return old ? [...old, optimisticListing] : [optimisticListing];
       });
+      queryClient.setQueryData(['myListings'], (old: any) => {
+        return old ? [...old, optimisticListing] : [optimisticListing];
+      });
+      queryClient.setQueryData(['market'], (old: any) => {
+        if (!old) return [optimisticListing];
+        return Array.isArray(old) ? [optimisticListing, ...old] : { results: [optimisticListing, ...(old.results || [])] };
+      });
+      
+      // Optimistically update vault item status
+      queryClient.setQueryData(['vault'], (old: any) => {
+        if (!old) return old;
+        return old.map((v: any) => v.id === itemId ? { ...v, itemStatus: 'LOCKED', listingId: optimisticListing.id } : v);
+      });
+      queryClient.setQueryData(['vault', user?.id], (old: any) => {
+        if (!old) return old;
+        return old.map((v: any) => v.id === itemId ? { ...v, itemStatus: 'LOCKED', listingId: optimisticListing.id } : v);
+      });
+      
+      return { previousListings, previousMyListings, previousVault, previousMarket, itemId };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myListings'] });
-      queryClient.invalidateQueries({ queryKey: ['market'] });
-      queryClient.invalidateQueries({ queryKey: ['listings'] });
-      queryClient.invalidateQueries({ queryKey: ['listingsBySeller', user?.id] });
-      queryClient.invalidateQueries({ queryKey: ['vault'] });
+    onSuccess: async () => {
+      // Force immediate refetch with fresh data - invalidate ALL queries (not just active)
+      await queryClient.invalidateQueries({ queryKey: ['myListings'] });
+      await queryClient.invalidateQueries({ queryKey: ['market'] });
+      await queryClient.invalidateQueries({ queryKey: ['listings'] });
+      await queryClient.invalidateQueries({ queryKey: ['listingsBySeller', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['vault'] });
+      // Also refetch store profile to update listing counts
+      await queryClient.invalidateQueries({ queryKey: ['storeProfile', user?.id] });
+    },
+    onError: (err, _input, context) => {
+      // Rollback on error
+      if (context) {
+        queryClient.setQueryData(['listingsBySeller', user?.id], context.previousListings);
+        queryClient.setQueryData(['myListings'], context.previousMyListings);
+        queryClient.setQueryData(['vault'], context.previousVault);
+        queryClient.setQueryData(['market'], context.previousMarket);
+      }
+      console.error('[useCreateListing] Error:', err);
     },
   });
 }
@@ -375,6 +480,8 @@ export function useDeleteListing() {
       queryClient.invalidateQueries({ queryKey: ['myListings'] });
       queryClient.invalidateQueries({ queryKey: ['market'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listingsBySeller'] });
+      queryClient.invalidateQueries({ queryKey: ['vault'] });
     },
   });
 }
@@ -398,6 +505,8 @@ export function useUpdateListingStatus() {
       queryClient.invalidateQueries({ queryKey: ['myListings'] });
       queryClient.invalidateQueries({ queryKey: ['market'] });
       queryClient.invalidateQueries({ queryKey: ['listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listingsBySeller'] });
+      queryClient.invalidateQueries({ queryKey: ['vault'] });
     },
   });
 }
@@ -977,23 +1086,91 @@ export function useListingsBySeller(sellerId?: string) {
           const res = await listingsApi.getBySeller(sellerId);
           return res.results.map(mapApiListingToMarketListing);
         },
-        () => mockApi.fetchListingsBySeller(sellerId)
+        async () => mockApi.fetchListingsBySeller(sellerId)
       );
       return listings;
     },
     enabled: !!sellerId && isAuthenticated,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 5,
+    refetchOnWindowFocus: true,
   });
 }
 
 export function useDelistListing() {
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  
   return useMutation({
     mutationFn: listingsApi.delist,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myListings'] });
-      queryClient.invalidateQueries({ queryKey: ['market'] });
-      queryClient.invalidateQueries({ queryKey: ['listings'] });
+    // Optimistic update: remove the listing from cache immediately
+    onMutate: async (listingId: string) => {
+      const sellerId = user?.id ?? '';
+      
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['listingsBySeller', sellerId] });
+      await queryClient.cancelQueries({ queryKey: ['myListings'] });
+      await queryClient.cancelQueries({ queryKey: ['vault'] });
+      
+      // Snapshot previous values
+      const previousListings = queryClient.getQueryData(['listingsBySeller', sellerId]);
+      const previousMyListings = queryClient.getQueryData(['myListings']);
+      const previousVault = queryClient.getQueryData(['vault']);
+      
+      // Find the itemId associated with this listingId for vault cache update
+      const listingsData = queryClient.getQueryData<MarketListing[]>(['listingsBySeller', sellerId]);
+      const listing = listingsData?.find((l: any) => l.id === listingId || l.listingId === listingId);
+      const itemId = listing?.itemId;
+      
+      // Optimistically remove the listing from listings caches
+      queryClient.setQueryData(['listingsBySeller', sellerId], (old: any) => {
+        return old ? old.filter((l: any) => l.id !== listingId && l.listingId !== listingId) : old;
+      });
+      queryClient.setQueryData(['myListings'], (old: any) => {
+        return old ? old.filter((l: any) => l.id !== listingId && l.listingId !== listingId) : old;
+      });
+      
+      // Optimistically update vault item status if we know the itemId
+      if (itemId) {
+        queryClient.setQueryData(['vault'], (old: any) => {
+          if (!old) return old;
+          return old.map((item: any) => {
+            if (item.id === itemId) {
+              return { ...item, itemStatus: 'AVAILABLE', listingId: undefined };
+            }
+            return item;
+          });
+        });
+        queryClient.setQueryData(['vault', user?.id], (old: any) => {
+          if (!old) return old;
+          return old.map((item: any) => {
+            if (item.id === itemId) {
+              return { ...item, itemStatus: 'AVAILABLE', listingId: undefined };
+            }
+            return item;
+          });
+        });
+      }
+      
+      return { previousListings, previousMyListings, previousVault, itemId };
+    },
+    onSuccess: async () => {
+      // Force immediate refetch - invalidate ALL queries (not just active)
+      await queryClient.invalidateQueries({ queryKey: ['myListings'] });
+      await queryClient.invalidateQueries({ queryKey: ['market'] });
+      await queryClient.invalidateQueries({ queryKey: ['listings'] });
+      await queryClient.invalidateQueries({ queryKey: ['listingsBySeller', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['vault'] });
+      await queryClient.invalidateQueries({ queryKey: ['storeProfile', user?.id] });
+    },
+    onError: (err, _listingId, context) => {
+      // Rollback on error
+      if (context) {
+        queryClient.setQueryData(['listingsBySeller', user?.id], context.previousListings);
+        queryClient.setQueryData(['myListings'], context.previousMyListings);
+        queryClient.setQueryData(['vault'], context.previousVault);
+        queryClient.setQueryData(['vault', user?.id], context.previousVault);
+      }
+      console.error('[useDelistListing] Error:', err);
     },
   });
 }

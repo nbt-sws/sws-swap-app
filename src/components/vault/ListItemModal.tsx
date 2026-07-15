@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import type { VaultItem } from '@/types';
 import { Tag, ArrowRightLeft } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ListItemModalProps {
   open: boolean;
@@ -49,9 +50,13 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
       },
       {
         onSuccess: () => {
+          toast.success('Listing published successfully');
           setPrice('');
           setListingType('SALE');
           onClose();
+        },
+        onError: (err) => {
+          toast.error(err instanceof Error ? err.message : 'Failed to create listing');
         },
       }
     );
@@ -140,6 +145,11 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
           >
             {createListing.isPending ? 'Creating listing...' : 'Publish listing'}
           </Button>
+          {createListing.isError && (
+            <p className="text-xs text-center text-red-500 mt-2">
+              Error: {createListing.error instanceof Error ? createListing.error.message : 'Failed to create listing'}
+            </p>
+          )}
         </div>
       </DialogContent>
     </Dialog>

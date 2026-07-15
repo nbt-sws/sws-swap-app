@@ -112,10 +112,10 @@ export function SettingsScreen() {
     }
   };
 
-  const displayName = user?.fullName || user?.email || t('home.greeting.collector');
-  const email = user?.fullName ? user?.email : undefined;
-  const tier = user?.tier ?? 'GUEST';
-  const kyc = user?.kycStatus ?? 'NONE';
+  const displayName = (user as any)?.fullName || (user as any)?.email || t('home.greeting.collector');
+  const email = (user as any)?.fullName ? (user as any)?.email : undefined;
+  const tier = (user as any)?.tier ?? 'GUEST';
+  const kyc = (user as any)?.kycStatus ?? 'NONE';
   const isSubscribed = tier === 'MEMBER' || tier === 'SUBSCRIBER' || tier === 'ADMIN';
   const kycVerified = kyc === 'APPROVED';
 
@@ -145,7 +145,7 @@ export function SettingsScreen() {
       ? 'bg-pldown/15 text-pldown'
       : 'bg-surface-lighter text-muted-foreground';
 
-  const memberSince = formatMemberSince(user?.createdAt, currentLang === 'th' ? 'th-TH' : 'en-US');
+  const memberSince = formatMemberSince((user as any)?.createdAt, currentLang === 'th' ? 'th-TH' : 'en-US');
 
   const handleToggleLanguage = () => {
     const next = currentLang === 'th' ? 'en' : 'th';
@@ -187,7 +187,7 @@ export function SettingsScreen() {
               tierRing
             )}
           >
-            {user?.fullName?.charAt(0) || user?.email?.charAt(0) || 'C'}
+            {(user as any)?.fullName?.charAt(0) || (user as any)?.email?.charAt(0) || 'C'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold truncate">{displayName}</p>
@@ -240,7 +240,7 @@ export function SettingsScreen() {
             <SettingsRow
               icon={Wallet}
               label={t('settings.items.currency')}
-              value={user?.currency || 'THB'}
+              value={(user as any)?.currency || 'THB'}
             />
           </SectionCard>
         </motion.div>

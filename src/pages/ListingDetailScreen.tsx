@@ -26,7 +26,7 @@ import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import {
   Heart, Share2, Star, ArrowRightLeft, Clock, Package,
 } from 'lucide-react';
-import { cn, getCardImageUrl } from '@/lib/utils';
+import { cn, getCardImageUrl, formatTimeAgo } from '@/lib/utils';
 import { PriceChart } from '@/components/domain/PriceChart';
 import { MarketStatsCards } from '@/components/domain/MarketStatsCards';
 import { useAuthStore, isMember } from '@/stores/auth';
@@ -192,7 +192,7 @@ export function ListingDetailScreen() {
             </div>
           </div>
 
-          {/* Seller */}
+          {/* Seller + Listing Meta */}
           <Link
             to="/seller/$sellerId"
             params={{ sellerId: listing.seller.id }}
@@ -209,8 +209,37 @@ export function ListingDetailScreen() {
                 <span>· {t('common.verifiedSeller')}</span>
               </div>
             </div>
-
           </Link>
+
+          {/* Listing Details */}
+          <div className="bg-surface-light rounded-xl p-4 border border-border space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Listed</span>
+              <span className="text-xs font-medium">{formatTimeAgo(listing.timestamp)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Item ID</span>
+              <span className="text-xs font-mono">{listing.itemId?.slice(0, 12)}...</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Listing ID</span>
+              <span className="text-xs font-mono">{listing.id?.slice(0, 12)}...</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Condition</span>
+              <span className="text-xs font-medium">{listing.card.condition}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Shelf</span>
+              <Badge variant="outline" className="text-xs">{listing.shelf}</Badge>
+            </div>
+            {listing.listingType === 'TRADE' && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Type</span>
+                <Badge className="bg-cyan/10 text-cyan text-xs">Trade Only</Badge>
+              </div>
+            )}
+          </div>
 
           {/* Price */}
           <div>

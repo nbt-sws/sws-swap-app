@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useAddToVault } from '@/hooks/useApi';
 import { motion } from 'framer-motion';
 import { ScrollablePage } from '@/components/layout/ScrollablePage';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Input } from '@/components/ui/input';
+import { X, ImagePlus } from 'lucide-react';
 import type { Card } from '@/types';
 
 const CONDITIONS = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5'];
@@ -12,8 +13,8 @@ const CONDITIONS = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5'];
 export function AddToVaultScreen() {
   const navigate = useNavigate();
   const addToVault = useAddToVault();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Read card from sessionStorage (set by Scanner or Pricing screen)
   const card = (() => {
     const raw = sessionStorage.getItem('pricingCard') || sessionStorage.getItem('scanResult');
     if (raw) {
@@ -26,11 +27,40 @@ export function AddToVaultScreen() {
   const [condition, setCondition] = useState('Raw');
   const [dateAcquired, setDateAcquired] = useState(new Date().toISOString().split('T')[0]);
   const [source, setSource] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const currentPrice = 18440;
   const paidNum = parseFloat(paidPrice) || 0;
   const plAmount = currentPrice - paidNum;
   const plPercent = paidNum > 0 ? (plAmount / paidNum) * 100 : 0;
+
+  const handleImageSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    const newImages: string[] = [];
+
+    for (const file of Array.from(files)) {
+      // Convert to base64 for preview (in production, upload to R2/S3)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          newImages.push(event.target.result as string);
+          if (newImages.length === files.length) {
+            setImages((prev) => [...prev, ...newImages]);
+            setIsUploading(false);
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSave = () => {
     if (!card || paidNum <= 0) return;
@@ -43,6 +73,13 @@ export function AddToVaultScreen() {
         itemFormat: card.language,
         condition,
         description: `Type: ${card.type}, NameJP: ${card.nameJp}, Source: ${source || 'Scanned import'}, Paid: ${paidNum} THB`,
+        metadata: {
+          paidPrice: paidNum,
+          dateAcquired,
+          source: source || 'Scanned import',
+          images,
+          cardImageUrl: card.imageUrl,
+        },
       },
       {
         onSuccess: () => {
@@ -84,11 +121,74 @@ export function AddToVaultScreen() {
         </div>
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-5">
+        {/* Card Image Preview */}
+        {card?.imageUrl && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center"
+          >
+            <div className="relative">
+              <img
+                src={card.imageUrl}
+                alt={card.nameEn}
+                className="w-40 h-56 object-contain rounded-xl bg-surface-light"
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Photo Upload */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <label className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
+            PHOTOS
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {images.map((img, i) => (
+              <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden bg-surface-light">
+                <img src={img} alt="" className="w-full h-full object-cover" />
+                <button
+                  onClick={() => removeImage(i)}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="w-20 h-20 rounded-xl bg-surface-light border border-dashed border-border flex flex-col items-center justify-center gap-1 hover:border-brand transition-colors"
+            >
+              {isUploading ? (
+                <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <ImagePlus className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground">Add</span>
+                </>
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+          </div>
+        </motion.div>
+
         {/* Paid Price */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
         >
           <label htmlFor="paidPrice" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
             PAID PRICE (THB)
@@ -129,46 +229,40 @@ export function AddToVaultScreen() {
                 {c}
               </button>
             ))}
-            <button className="px-4 py-2 rounded-xl text-xs font-medium bg-surface-light text-muted-foreground hover:text-white transition-all">
-              more…
-            </button>
           </div>
         </motion.div>
 
-        {/* Date Acquired */}
+        {/* Date & Source (collapsible) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.15 }}
+          className="bg-surface-light rounded-xl p-4 space-y-3"
         >
-          <label htmlFor="dateAcquired" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
-            DATE ACQUIRED
-          </label>
-          <Input
-            id="dateAcquired"
-            type="date"
-            value={dateAcquired}
-            onChange={(e) => setDateAcquired(e.target.value)}
-            className="font-mono"
-          />
-        </motion.div>
-
-        {/* Source/Note */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <label htmlFor="source" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
-            SOURCE / NOTE
-          </label>
-          <Input
-            id="source"
-            type="text"
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            placeholder="Yahoo! JP auction · via proxy"
-          />
+          <div>
+            <label htmlFor="dateAcquired" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
+              DATE ACQUIRED
+            </label>
+            <Input
+              id="dateAcquired"
+              type="date"
+              value={dateAcquired}
+              onChange={(e) => setDateAcquired(e.target.value)}
+              className="font-mono"
+            />
+          </div>
+          <div>
+            <label htmlFor="source" className="text-xs font-mono tracking-wider text-muted-foreground block mb-2">
+              SOURCE / NOTE
+            </label>
+            <Input
+              id="source"
+              type="text"
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              placeholder="Where did you get this card?"
+            />
+          </div>
         </motion.div>
 
         {/* P/L Preview */}

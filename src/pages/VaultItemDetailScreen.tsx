@@ -5,7 +5,6 @@ import { useState, useCallback } from 'react';
 import {
   useVault, useListingsBySeller, useDelistListing,
   useItemAuditHistory, useVaultDelivery, useCreateRedemption,
-  useConsignToPlatform,
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -37,18 +36,16 @@ export function VaultItemDetailScreen() {
   const delistListing = useDelistListing();
   const vaultDelivery = useVaultDelivery();
   const createRedemption = useCreateRedemption();
-  const consign = useConsignToPlatform();
   const itemAudit = useItemAuditHistory(itemId);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [addressModalMode, setAddressModalMode] = useState<'delivery' | 'redemption' | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'history'>('details');
 
   const item = vault?.find((v) => v.id === itemId);
-  const listing = listings?.find((l) => l.card.code === item?.card.code);
+  const listing = listings?.find((l) => l.itemId === item?.id);
   const isListed = !!listing;
   const isOwner = !!item && item.ownerId === user?.id;
   const canList = isOwner && item?.itemStatus !== 'REDEEMING' && item?.itemStatus !== 'REDEEMED' && item?.itemStatus !== 'LOCKED';
-  const canConsign = isOwner && item?.holderId === user?.id;
   const canRequestDelivery = isOwner && item?.itemStatus === 'VAULT_HELD';
   const canRedeem = isOwner && item?.holderId === user?.id && item?.itemStatus === 'AVAILABLE';
 
@@ -348,17 +345,7 @@ export function VaultItemDetailScreen() {
               </Button>
             </div>
 
-            {canConsign && (
-              <Button
-                variant="outline"
-                className="w-full border-brand text-brand hover:bg-brand/10 h-12"
-                onClick={() => consign.mutate(item.id)}
-                disabled={consign.isPending}
-              >
-                <Package className="w-4 h-4 mr-2" />
-                {consign.isPending ? 'Depositing...' : 'Deposit to SWS Vault'}
-              </Button>
-            )}
+            {/* Deposit to SWS Vault - REMOVED per user request */}
 
             {(canRequestDelivery || canRedeem) && (
               <div className="flex gap-3">

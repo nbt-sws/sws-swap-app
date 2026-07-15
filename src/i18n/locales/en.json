@@ -116,7 +116,7 @@
   "filters": {
     "all": "All",
     "available": "Available",
-    "vaultHeld": "Vault held",
+    "held": "Vault held",
     "listed": "Listed",
     "inTransit": "In transit",
     "redeeming": "Redeeming",
@@ -335,7 +335,10 @@
       "value": "VALUE",
       "cards": "CARDS",
       "held": "held",
-      "pl": "P/L"
+      "pl": "P/L",
+      "listed": "Listed",
+      "available": "Available",
+      "inTransit": "In Transit"
     },
     "empty": {
       "vaultTitle": "No items found",

@@ -140,18 +140,21 @@ const MY_LISTINGS: MarketListing[] = [
     card: { id: 'c10', code: 'OP02-013', nameEn: 'Portgas D. Ace', nameJp: 'ポートガス・D・エース', rarity: 'SR', type: 'Character', language: 'JP', game: 'one-piece', condition: 'Raw' },
     price: 18500, currency: 'THB', listingType: 'SALE', shelf: 'RAW',
     seller: { id: 'u1', name: 'BoBoBoA', rating: 4.9 }, vaultVerified: true, timestamp: '1h ago', status: 'active', views: 42, watchers: 1, isFeatured: true,
+    itemId: 'v1', ownerId: 'u1', holderId: 'u1',
   },
   {
     id: 'my2',
     card: { id: 'c11', code: 'QCAC-JP001', nameEn: 'Blue-Eyes White Dragon', nameJp: '青眼の白龍', rarity: 'QCSR', type: 'Monster', language: 'JP', game: 'yu-gi-oh', condition: 'Raw' },
     price: 0, currency: 'THB', listingType: 'TRADE', shelf: 'RAW',
     seller: { id: 'u1', name: 'BoBoBoA', rating: 4.9 }, vaultVerified: true, timestamp: '2d ago', status: 'active', views: 18, watchers: 0,
+    itemId: 'v2', ownerId: 'u1', holderId: 'sws-platform',
   },
   {
     id: 'my3',
     card: { id: 'c12', code: 'OP01-001', nameEn: 'Roronoa Zoro', nameJp: 'ロロノア・ゾロ', rarity: 'L', type: 'Leader', language: 'JP', game: 'one-piece', condition: 'PSA 10' },
     price: 7000, currency: 'THB', listingType: 'SALE', shelf: 'GRADED',
     seller: { id: 'u1', name: 'BoBoBoA', rating: 4.9 }, vaultVerified: true, timestamp: '1w ago', status: 'paused', views: 89, watchers: 3, isFeatured: true,
+    itemId: 'v4', ownerId: 'u1', holderId: 'u1',
   },
 ];
 
@@ -814,7 +817,8 @@ export async function fetchMarketListings(shelf?: string): Promise<MarketListing
   } catch {
     await delay(300);
     const all = [...FALLBACK_MARKET, ...MY_LISTINGS];
-    return shelf ? all.filter((m) => m.shelf === shelf) : all;
+    const active = all.filter((m) => m.status !== 'sold');
+    return shelf ? active.filter((m) => m.shelf === shelf) : active;
   }
 }
 
@@ -1514,7 +1518,7 @@ export async function fetchMyListings(): Promise<MarketListing[]> {
     return await res.json();
   } catch {
     await delay(300);
-    return MY_LISTINGS;
+    return MY_LISTINGS.filter(l => l.status !== 'sold');
   }
 }
 
@@ -1547,6 +1551,12 @@ export async function createListing(input: CreateListingInput, sellerId = 'u1', 
     item.itemStatus = 'LOCKED';
     saveVault(vault);
   }
+  // Also update FALLBACK_VAULT reference so new vault items get the linkage
+  const fallbackItem = FALLBACK_VAULT.find((v) => v.id === input.itemId);
+  if (fallbackItem) {
+    fallbackItem.listingId = newListing.id;
+    fallbackItem.itemStatus = 'LOCKED';
+  }
   MY_LISTINGS.unshift(newListing);
   return newListing;
 }
@@ -1559,16 +1569,40 @@ export async function updateListingStatus(listingId: string, status: 'active' | 
   return MY_LISTINGS[idx];
 }
 
-export async function fetchListingsBySeller(_sellerId: string): Promise<MarketListing[]> {
-  void _sellerId;
-  await delay(300);
-  return MY_LISTINGS;
+export async function fetchListingsBySeller(sellerId: string): Promise<MarketListing[]> {
+  try {
+    const res = await fetch(`${API_BASE}/listings?sellerId=${sellerId}`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    return data.results || [];
+  } catch {
+    await delay(300);
+    return MY_LISTINGS.filter(l => l.seller.id === sellerId && l.status !== 'sold');
+  }
 }
 
 export async function deleteListing(listingId: string): Promise<void> {
   await delay(300);
   const idx = MY_LISTINGS.findIndex((l) => l.id === listingId);
-  if (idx !== -1) MY_LISTINGS.splice(idx, 1);
+  if (idx !== -1) {
+    const listing = MY_LISTINGS[idx];
+    MY_LISTINGS.splice(idx, 1);
+    // Also clear from vault
+    if (listing.itemId) {
+      const vault = loadVault();
+      const item = vault.find((v) => v.id === listing.itemId);
+      if (item) {
+        item.listingId = undefined;
+        item.itemStatus = 'AVAILABLE';
+        saveVault(vault);
+      }
+      const fallbackItem = FALLBACK_VAULT.find((v) => v.id === listing.itemId);
+      if (fallbackItem) {
+        fallbackItem.listingId = undefined;
+        fallbackItem.itemStatus = 'AVAILABLE';
+      }
+    }
+  }
 }
 
 // ─── Market data mock ─────────────────────────────────────────────
@@ -1778,5 +1812,23 @@ export async function requestVaultDelivery(itemId: string): Promise<{ success: b
 export async function delistListing(listingId: string): Promise<void> {
   await delay(300);
   const idx = MY_LISTINGS.findIndex((l) => l.id === listingId);
-  if (idx !== -1) MY_LISTINGS.splice(idx, 1);
+  if (idx !== -1) {
+    const listing = MY_LISTINGS[idx];
+    MY_LISTINGS.splice(idx, 1);
+    // Also clear from vault
+    if (listing.itemId) {
+      const vault = loadVault();
+      const item = vault.find((v) => v.id === listing.itemId);
+      if (item) {
+        item.listingId = undefined;
+        item.itemStatus = 'AVAILABLE';
+        saveVault(vault);
+      }
+      const fallbackItem = FALLBACK_VAULT.find((v) => v.id === listing.itemId);
+      if (fallbackItem) {
+        fallbackItem.listingId = undefined;
+        fallbackItem.itemStatus = 'AVAILABLE';
+      }
+    }
+  }
 }

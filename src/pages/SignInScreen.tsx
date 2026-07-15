@@ -172,7 +172,7 @@ export function SignInScreen() {
         {(import.meta.env.DEV || import.meta.env.VITE_USE_MOCK_API === 'true') && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             <Link to="/dev-login" className="text-brand hover:underline">
-              Dev login (test accounts)
+              Quick login
             </Link>
           </p>
         )}

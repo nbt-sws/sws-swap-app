@@ -53,8 +53,8 @@ export function ProfileScreen() {
   const unreadNotifications = notifications?.filter((n: Notification) => !n.read).length ?? 0;
 
   // Derive KYC status from user data
-  const kycStatus = user?.kycStatus ?? 'PENDING';
-  const tier = user?.tier ?? 'REGULAR';
+  const kycStatus = (user as any)?.kycStatus ?? 'PENDING';
+  const tier = (user as any)?.tier ?? 'REGULAR';
 
   return (
     <PageContainer size="md" className="py-6">
@@ -74,10 +74,10 @@ export function ProfileScreen() {
             ) : (
               <>
                 <div className="w-20 h-20 rounded-full bg-brand-gradient mx-auto flex items-center justify-center text-2xl font-bold text-white border-4 border-surface-lighter">
-                  {displayUser?.fullName?.charAt(0) ?? displayUser?.email?.charAt(0) ?? 'G'}
+                  {(displayUser as any)?.fullName?.charAt(0) ?? (displayUser as any)?.email?.charAt(0) ?? 'G'}
                 </div>
-                <h1 className="mt-4 text-xl font-bold">{displayUser?.fullName ?? 'Guest'}</h1>
-                <p className="text-sm text-muted-foreground">{displayUser?.email ?? 'Sign in to access your account'}</p>
+                <h1 className="mt-4 text-xl font-bold">{(displayUser as any)?.fullName ?? 'Guest'}</h1>
+                <p className="text-sm text-muted-foreground">{(displayUser as any)?.email ?? 'Sign in to access your account'}</p>
                 <div className="mt-3 flex items-center justify-center gap-2">
                   <Badge className="bg-brand/10 text-brand">
                     <Crown className="w-3 h-3 mr-1" />
