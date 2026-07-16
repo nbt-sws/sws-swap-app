@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { hash, verify } from '../../scripts/hash';
-import { createToken } from '../middleware/auth';
+import { createToken, optionalAuth } from '../middleware/auth';
 import { withTenant } from '../db';
 import type { Env } from '../db';
 
@@ -17,6 +17,7 @@ const registerSchema = z.object({
 });
 
 export const authRoutes = new Hono<{ Bindings: Env }>();
+authRoutes.use('*', optionalAuth);
 
 // POST /api/v1/auth/login
 authRoutes.post('/auth/login', async (c) => {
