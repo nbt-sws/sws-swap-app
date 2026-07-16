@@ -52,7 +52,8 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-border/60 bg-surface-light',
+        'group relative overflow-hidden rounded-2xl border border-border/60',
+        'bg-gradient-to-br from-surface-light via-surface to-surface-lighter/30',
         'transition-all duration-300 hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20',
         'hover:-translate-y-1',
         className
