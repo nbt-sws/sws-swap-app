@@ -75,7 +75,7 @@ function mapApiOwnerId(ownerId?: string): string | undefined {
 }
 
 export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
-  const inVault = ['VAULT_HELD', 'AVAILABLE', 'LOCKED', 'IN_TRANSIT', 'REDEEMING', 'SUSPENDED'].includes(apiItem.status);
+  const inVault = ['VAULT_HELD', 'AVAILABLE', 'LOCKED', 'LISTING', 'IN_TRANSIT', 'REDEEMING', 'SUSPENDED'].includes(apiItem.status);
   const metadata = apiItem.metadata ?? {};
   const paidPrice = typeof metadata.paidPrice === 'number' ? metadata.paidPrice : 0;
   const dateAcquired = typeof metadata.dateAcquired === 'string' ? metadata.dateAcquired : apiItem.createdAt;

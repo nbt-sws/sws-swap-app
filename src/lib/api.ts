@@ -166,6 +166,7 @@ export const userApi = {
 export const listingsApi = {
   getAll: (params?: {
     q?: string;
+    category?: string;
     page?: number;
     limit?: number;
     sort?: string;

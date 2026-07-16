@@ -79,7 +79,7 @@ export function useMarketListings(shelf?: string) {
   return useQuery({
     queryKey: ['market', shelf],
     queryFn: async () => {
-      const res = await listingsApi.getAll(shelf ? { q: shelf } : undefined);
+      const res = await listingsApi.getAll(shelf && shelf !== 'All' ? { category: shelf } : undefined);
       return res.results.map(mapApiListingToMarketListing);
     },
     staleTime: 1000 * 5,
