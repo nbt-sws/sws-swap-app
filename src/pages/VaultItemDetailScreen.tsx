@@ -30,9 +30,9 @@ export function VaultItemDetailScreen() {
   const { t } = useTranslation();
   const { itemId } = useParams({ from: '/vault/items/$itemId' });
   const navigate = useNavigate();
-  const { data: vault, isLoading } = useVault();
+  const { data: vault, isLoading: isVaultLoading } = useVault();
   const { user } = useAuthStore();
-  const { data: listings } = useListingsBySeller(user?.id);
+  const { data: listings, isLoading: isListingsLoading } = useListingsBySeller(user?.id);
   const delistListing = useDelistListing();
   const vaultDelivery = useVaultDelivery();
   const createRedemption = useCreateRedemption();
@@ -87,7 +87,7 @@ export function VaultItemDetailScreen() {
     [item?.id, createRedemption, t]
   );
 
-  if (isLoading) {
+  if (isVaultLoading || isListingsLoading) {
     return (
       <PageContainer className="py-6">
         <PageLoader />
