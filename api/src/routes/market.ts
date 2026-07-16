@@ -19,28 +19,82 @@ const listingSchema = z.object({
 export const marketRoutes = new Hono<{ Bindings: Env }>();
 marketRoutes.use('*', optionalAuth);
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Join listings -> vault_items -> cards to enrich with real card catalog data
+const LISTING_SELECT = `
+  SELECT l.*, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
+         c.rarity, c.type as card_type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
+  FROM listings l
+  LEFT JOIN vault_items v ON l.item_id = v.id
+  LEFT JOIN cards c ON v.card_id = c.id`;
+
+const mapListingRow = (l: any) => ({
+  listingId: l.listing_id,
+  itemId: l.item_id,
+  sellerId: l.seller_id,
+  title: l.title,
+  description: l.description,
+  price: l.price,
+  currency: l.currency,
+  status: l.status,
+  category: l.category,
+  subCategory: l.sub_category,
+  itemFormat: l.item_format,
+  condition: l.condition,
+  imageUrl: l.image_url,
+  sellerDisplayName: l.seller_display_name,
+  sellerAvatarUrl: l.seller_avatar_url,
+  sellerBio: l.seller_bio,
+  sellerTier: l.seller_tier,
+  ownerId: l.owner_id,
+  holderId: l.holder_id,
+  views: l.views,
+  watchers: l.watchers,
+  isFeatured: l.is_featured,
+  createdAt: l.created_at,
+  cardCode: l.card_code ?? undefined,
+  cardNameEn: l.card_name_en ?? undefined,
+  cardNameJp: l.card_name_jp ?? undefined,
+  rarity: l.rarity ?? undefined,
+  cardType: l.card_type ?? undefined,
+  language: l.language ?? undefined,
+  game: l.game ?? undefined,
+  cardImageUrl: l.card_image_url ?? undefined,
+  cardCondition: l.card_condition ?? undefined,
+});
+
 // GET /api/v1/market/listings
 marketRoutes.get('/listings', async (c) => {
   const tenantId = c.get('tenantId');
-  const status = c.req.query('status') || 'ACTIVE';
+  const statusParam = c.req.query('status') || 'ACTIVE';
+  const statusFilter = statusParam.toUpperCase() === 'ALL' ? null : statusParam;
   const category = c.req.query('category');
-  const minPrice = c.req.query('minPrice');
-  const maxPrice = c.req.query('maxPrice');
+  // Accept both camelCase and snake_case param names (frontend sends snake_case)
+  const minPrice = c.req.query('minPrice') ?? c.req.query('min_price');
+  const maxPrice = c.req.query('maxPrice') ?? c.req.query('max_price');
   const sellerId = c.req.query('sellerId');
+  const q = c.req.query('q');
+  const sort = c.req.query('sort');
   const limit = Math.min(parseInt(c.req.query('limit') || '20'), 100);
-  const offset = parseInt(c.req.query('offset') || '0');
+  // Accept either explicit offset or 1-based page number
+  const page = parseInt(c.req.query('page') || '0');
+  const offset = parseInt(c.req.query('offset') || '0') || (page > 0 ? (page - 1) * limit : 0);
+
+  const orderBy =
+    sort === 'price_asc' || sort === 'price-asc' ? 'l.price ASC NULLS LAST' :
+    sort === 'price_desc' || sort === 'price-desc' ? 'l.price DESC NULLS LAST' :
+    'l.created_at DESC'; // newest / trending / default
 
   const listings = await withTenant(c.env, tenantId, async (client) => {
-    const params: (string | number)[] = [status];
-    let sql = `
-      SELECT l.*, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
-             c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
-      FROM listings l
-      LEFT JOIN cards c ON l.item_id = c.id
-      WHERE l.status = $1
-    `;
-    let paramIndex = 2;
+    const params: (string | number)[] = [];
+    let sql = `${LISTING_SELECT} WHERE 1=1`;
+    let paramIndex = 1;
 
+    if (statusFilter) {
+      sql += ` AND l.status = $${paramIndex}`;
+      params.push(statusFilter);
+      paramIndex++;
+    }
     if (category) {
       sql += ` AND l.category = $${paramIndex}`;
       params.push(category);
@@ -61,8 +115,13 @@ marketRoutes.get('/listings', async (c) => {
       params.push(sellerId);
       paramIndex++;
     }
+    if (q) {
+      sql += ` AND (l.title ILIKE $${paramIndex} OR c.code ILIKE $${paramIndex} OR c.name_en ILIKE $${paramIndex})`;
+      params.push(`%${q}%`);
+      paramIndex++;
+    }
 
-    sql += ` ORDER BY l.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    sql += ` ORDER BY ${orderBy} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
     const { rows } = await client.query(sql, params);
@@ -70,31 +129,7 @@ marketRoutes.get('/listings', async (c) => {
   });
 
   return c.json({
-    listings: listings.map((l: any) => ({
-      listingId: l.listing_id,
-      itemId: l.item_id,
-      sellerId: l.seller_id,
-      title: l.title,
-      description: l.description,
-      price: l.price,
-      currency: l.currency,
-      status: l.status,
-      category: l.category,
-      subCategory: l.sub_category,
-      itemFormat: l.item_format,
-      condition: l.condition,
-      imageUrl: l.image_url,
-      sellerDisplayName: l.seller_display_name,
-      sellerAvatarUrl: l.seller_avatar_url,
-      sellerBio: l.seller_bio,
-      sellerTier: l.seller_tier,
-      ownerId: l.owner_id,
-      holderId: l.holder_id,
-      views: l.views,
-      watchers: l.watchers,
-      isFeatured: l.is_featured,
-      createdAt: l.created_at,
-    })),
+    listings: listings.map(mapListingRow),
   });
 });
 
@@ -105,11 +140,7 @@ marketRoutes.get('/listings/:id', async (c) => {
 
   const listings = await withTenant(c.env, tenantId, async (client) => {
     const { rows } = await client.query(
-      `SELECT l.*, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
-              c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
-       FROM listings l
-       LEFT JOIN cards c ON l.item_id = c.id
-       WHERE l.listing_id = $1`,
+      `${LISTING_SELECT} WHERE l.listing_id = $1`,
       [listingId]
     );
     return rows;
@@ -120,31 +151,7 @@ marketRoutes.get('/listings/:id', async (c) => {
     return c.json({ error: 'Listing not found' }, 404);
   }
 
-  return c.json({
-    listingId: listing.listing_id,
-    itemId: listing.item_id,
-    sellerId: listing.seller_id,
-    title: listing.title,
-    description: listing.description,
-    price: listing.price,
-    currency: listing.currency,
-    status: listing.status,
-    category: listing.category,
-    subCategory: listing.sub_category,
-    itemFormat: listing.item_format,
-    condition: listing.condition,
-    imageUrl: listing.image_url,
-    sellerDisplayName: listing.seller_display_name,
-    sellerAvatarUrl: listing.seller_avatar_url,
-    sellerBio: listing.seller_bio,
-    sellerTier: listing.seller_tier,
-    ownerId: listing.owner_id,
-    holderId: listing.holder_id,
-    views: listing.views,
-    watchers: listing.watchers,
-    isFeatured: listing.is_featured,
-    createdAt: listing.created_at,
-  });
+  return c.json(mapListingRow(listing));
 });
 
 // POST /api/v1/market/listings

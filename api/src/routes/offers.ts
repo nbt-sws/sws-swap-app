@@ -246,6 +246,8 @@ offerRoutes.get('/received', async (c) => {
       expiresAt: o.expires_at,
       createdAt: o.created_at,
       updatedAt: o.updated_at,
+      buyerName: o.buyer_name ?? undefined,
+      sellerName: o.seller_name ?? undefined,
       listing: o.listing_title ? {
         listingId: o.listing_id,
         title: o.listing_title,
@@ -295,6 +297,8 @@ offerRoutes.get('/sent', async (c) => {
       expiresAt: o.expires_at,
       createdAt: o.created_at,
       updatedAt: o.updated_at,
+      buyerName: o.buyer_name ?? undefined,
+      sellerName: o.seller_name ?? undefined,
       listing: o.listing_title ? {
         listingId: o.listing_id,
         title: o.listing_title,
