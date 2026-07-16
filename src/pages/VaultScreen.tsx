@@ -788,8 +788,8 @@ export function VaultScreen() {
 
       {/* Confirm Unlist Dialog */}
       {confirmUnlistOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-surface-light p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-surface-light p-6 space-y-4 animate-scale-in">
             <h3 className="text-lg font-semibold">Confirm Delist</h3>
             <p className="text-sm text-muted-foreground">
               Are you sure you want to delist {selectedIds.size} item(s)?
@@ -803,8 +803,8 @@ export function VaultScreen() {
       )}
       {/* Confirm Single Unlist Dialog */}
       {confirmSingleUnlistItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-surface-light p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-surface-light p-6 space-y-4 animate-scale-in">
             <h3 className="text-lg font-semibold">Confirm Delist</h3>
             <p className="text-sm text-muted-foreground">
               Are you sure you want to delist <strong className="text-foreground">{confirmSingleUnlistItem.card.nameEn}</strong>?

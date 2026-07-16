@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import {
   listingsApi, ordersApi, authApi, wishlistApi, vaultApi,
   auditApi, marketApi, offersApi, pricesApi, submissionsApi,
@@ -91,6 +91,8 @@ export function useMarketListings(shelf?: string) {
       return res.results.map(mapApiListingToMarketListing);
     },
     staleTime: 1000 * 30,
+    // Keep showing previous results while a new shelf loads — no skeleton flash
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -103,6 +105,7 @@ export function useListings(params?: { q?: string; page?: number; limit?: number
       return { results: listings };
     },
     staleTime: 1000 * 30,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -925,6 +928,7 @@ export function useListingsBySeller(sellerId?: string) {
     },
     enabled: !!sellerId && isAuthenticated,
     staleTime: 1000 * 30,
+    placeholderData: keepPreviousData,
   });
 }
 

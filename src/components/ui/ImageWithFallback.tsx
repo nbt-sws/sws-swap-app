@@ -9,6 +9,7 @@ interface ImageWithFallbackProps {
 }
 
 export function ImageWithFallback({ src, alt, className, fallbackClassName }: ImageWithFallbackProps) {
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
   if (error || !src) {
@@ -25,13 +26,26 @@ export function ImageWithFallback({ src, alt, className, fallbackClassName }: Im
   }
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={cn('w-full h-full object-cover', className)}
-      loading="lazy"
-      decoding="async"
-      onError={() => setError(true)}
-    />
+    <div className="relative h-full w-full">
+      {/* Shimmer placeholder while loading — sibling so caller transitions on <img> stay intact */}
+      {!loaded && <div className="absolute inset-0 shimmer bg-surface-lighter" aria-hidden="true" />}
+      {/* Fade the wrapper, not the img: caller's hover/scale transition classes keep working */}
+      <div
+        className={cn(
+          'h-full w-full overflow-hidden transition-opacity duration-300 ease-out',
+          loaded ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className={cn('w-full h-full object-cover', className)}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+        />
+      </div>
+    </div>
   );
 }

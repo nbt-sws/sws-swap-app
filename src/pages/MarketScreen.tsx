@@ -608,8 +608,8 @@ function MobileFilterSheet({
   const { t } = useTranslation();
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-surface-light p-6 shadow-xl">
+      <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-y-auto rounded-t-3xl bg-surface-light p-6 shadow-xl animate-slide-up">
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">{t('common.filters')}</h2>
