@@ -253,6 +253,32 @@ marketRoutes.patch('/listings/:id', async (c) => {
   return c.json({ listingId: result.listing_id, message: 'Listing updated' });
 });
 
+// POST /api/v1/market/listings/:id/activate
+marketRoutes.post('/listings/:id/activate', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  const listingId = c.req.param('id');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const listings = await withTenant(c.env, tenantId, async (client) => {
+    const { rows } = await client.query(
+      "UPDATE listings SET status = 'ACTIVE' WHERE listing_id = $1 AND seller_id = $2 RETURNING *",
+      [listingId, userId]
+    );
+    return rows;
+  });
+
+  const result = listings[0];
+  if (!result) {
+    return c.json({ error: 'Listing not found or not owned by user' }, 404);
+  }
+
+  return c.json({ listingId: result.listing_id, status: 'ACTIVE' });
+});
+
 // DELETE /api/v1/market/listings/:id
 marketRoutes.delete('/listings/:id', async (c) => {
   const tenantId = c.get('tenantId');

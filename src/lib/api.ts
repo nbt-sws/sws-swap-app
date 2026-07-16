@@ -156,11 +156,11 @@ export const authApi = {
     api.post('auth/login', { json: data }).json<ApiAuthResponse>(),
   register: (data: { fullName?: string; email: string; password: string }) =>
     api.post('auth/register', { json: { email: data.email, password: data.password, name: data.fullName } }).json<ApiAuthResponse>(),
-  me: () => apiGet<ApiUser>('user'),
+  me: () => apiGet<ApiUser>('auth/user'),
 };
 
 export const userApi = {
-  me: () => apiGet<ApiUser>('user'),
+  me: () => apiGet<ApiUser>('auth/user'),
 };
 
 export const listingsApi = {

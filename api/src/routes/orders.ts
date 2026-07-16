@@ -321,3 +321,66 @@ orderRoutes.patch('/:id', async (c) => {
     updatedAt: order.updated_at,
   });
 });
+
+// POST /api/v1/orders/:id/cancel
+orderRoutes.post('/:id/cancel', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  const orderId = c.req.param('id');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const body = await c.req.json().catch(() => ({}));
+  const { reason } = body;
+
+  const orders = await withTenant(c.env, tenantId, async (client) => {
+    const { rows: currentRows } = await client.query(
+      'SELECT * FROM orders WHERE id = $1 AND (buyer_id = $2 OR seller_id = $2)',
+      [orderId, userId]
+    );
+    const current = currentRows[0];
+
+    if (!current) {
+      throw new Error('Order not found');
+    }
+
+    const allowed = ['CREATED', 'PAYMENT_PENDING', 'PAYMENT_CONFIRMED', 'SHIPPING_ARRANGED'];
+    if (!allowed.includes(current.status)) {
+      throw new Error(`Cannot cancel order in status ${current.status}`);
+    }
+
+    const updates = ['status = $1', 'cancelled_at = NOW()'];
+    const values: (string | null)[] = ['CANCELLED'];
+    let paramIndex = 2;
+
+    if (reason) {
+      updates.push(`cancel_reason = $${paramIndex}`);
+      values.push(reason);
+      paramIndex++;
+    }
+
+    values.push(orderId);
+
+    const { rows } = await client.query(
+      `UPDATE orders SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values
+    );
+
+    if (current.item_id) {
+      await client.query("UPDATE vault_items SET status = 'AVAILABLE' WHERE id = $1", [current.item_id]);
+    }
+    await client.query("UPDATE listings SET status = 'ACTIVE' WHERE listing_id = $1", [current.listing_id]);
+
+    return rows;
+  });
+
+  const order = orders[0];
+  return c.json({
+    orderId: order.id,
+    status: order.status,
+    cancelledAt: order.cancelled_at,
+    cancelReason: order.cancel_reason,
+  });
+});

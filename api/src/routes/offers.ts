@@ -208,3 +208,185 @@ offerRoutes.patch('/:id', async (c) => {
     updatedAt: offer.updated_at,
   });
 });
+
+// GET /api/v1/offers/received
+offerRoutes.get('/received', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const offers = await withTenant(c.env, tenantId, async (client) => {
+    const { rows } = await client.query(
+      `SELECT o.*, 
+              l.title as listing_title, l.price as listing_price, l.currency as listing_currency,
+              l.image_url as listing_image_url, l.seller_id as listing_seller_id,
+              b.name as buyer_name, s.name as seller_name
+       FROM offers o
+       LEFT JOIN listings l ON o.listing_id = l.listing_id
+       LEFT JOIN users b ON o.buyer_id = b.id
+       LEFT JOIN users s ON o.seller_id = s.id
+       WHERE o.seller_id = $1
+       ORDER BY o.created_at DESC`,
+      [userId]
+    );
+    return rows;
+  });
+
+  return c.json({
+    offers: offers.map((o: any) => ({
+      id: o.id,
+      listingId: o.listing_id,
+      buyerId: o.buyer_id,
+      sellerId: o.seller_id,
+      offerPrice: o.offer_price,
+      status: o.status,
+      expiresAt: o.expires_at,
+      createdAt: o.created_at,
+      updatedAt: o.updated_at,
+      listing: o.listing_title ? {
+        listingId: o.listing_id,
+        title: o.listing_title,
+        price: o.listing_price,
+        currency: o.listing_currency,
+        imageUrl: o.listing_image_url,
+        sellerId: o.listing_seller_id,
+      } : null,
+    })),
+  });
+});
+
+// GET /api/v1/offers/sent
+offerRoutes.get('/sent', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const offers = await withTenant(c.env, tenantId, async (client) => {
+    const { rows } = await client.query(
+      `SELECT o.*, 
+              l.title as listing_title, l.price as listing_price, l.currency as listing_currency,
+              l.image_url as listing_image_url, l.seller_id as listing_seller_id,
+              b.name as buyer_name, s.name as seller_name
+       FROM offers o
+       LEFT JOIN listings l ON o.listing_id = l.listing_id
+       LEFT JOIN users b ON o.buyer_id = b.id
+       LEFT JOIN users s ON o.seller_id = s.id
+       WHERE o.buyer_id = $1
+       ORDER BY o.created_at DESC`,
+      [userId]
+    );
+    return rows;
+  });
+
+  return c.json({
+    offers: offers.map((o: any) => ({
+      id: o.id,
+      listingId: o.listing_id,
+      buyerId: o.buyer_id,
+      sellerId: o.seller_id,
+      offerPrice: o.offer_price,
+      status: o.status,
+      expiresAt: o.expires_at,
+      createdAt: o.created_at,
+      updatedAt: o.updated_at,
+      listing: o.listing_title ? {
+        listingId: o.listing_id,
+        title: o.listing_title,
+        price: o.listing_price,
+        currency: o.listing_currency,
+        imageUrl: o.listing_image_url,
+        sellerId: o.listing_seller_id,
+      } : null,
+    })),
+  });
+});
+
+// POST /api/v1/offers/:id/accept
+offerRoutes.post('/:id/accept', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  const offerId = c.req.param('id');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const offers = await withTenant(c.env, tenantId, async (client) => {
+    const { rows: currentRows } = await client.query(
+      'SELECT * FROM offers WHERE id = $1 AND seller_id = $2 AND status = $3',
+      [offerId, userId, 'PENDING']
+    );
+    const current = currentRows[0];
+
+    if (!current) {
+      throw new Error('Offer not found or not authorized');
+    }
+
+    if (new Date(current.expires_at) < new Date()) {
+      await client.query("UPDATE offers SET status = 'DECLINED' WHERE id = $1", [offerId]);
+      throw new Error('Offer has expired');
+    }
+
+    const { rows } = await client.query(
+      "UPDATE offers SET status = 'ACCEPTED' WHERE id = $1 RETURNING *",
+      [offerId]
+    );
+
+    await client.query(
+      'UPDATE listings SET price = $1, status = $2 WHERE listing_id = $3',
+      [current.offer_price, 'INACTIVE', current.listing_id]
+    );
+
+    return rows;
+  });
+
+  const offer = offers[0];
+  return c.json({
+    id: offer.id,
+    status: offer.status,
+    offerPrice: offer.offer_price,
+    updatedAt: offer.updated_at,
+  });
+});
+
+// POST /api/v1/offers/:id/decline
+offerRoutes.post('/:id/decline', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  const offerId = c.req.param('id');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const offers = await withTenant(c.env, tenantId, async (client) => {
+    const { rows: currentRows } = await client.query(
+      'SELECT * FROM offers WHERE id = $1 AND seller_id = $2 AND status = $3',
+      [offerId, userId, 'PENDING']
+    );
+    const current = currentRows[0];
+
+    if (!current) {
+      throw new Error('Offer not found or not authorized');
+    }
+
+    const { rows } = await client.query(
+      "UPDATE offers SET status = 'DECLINED' WHERE id = $1 RETURNING *",
+      [offerId]
+    );
+    return rows;
+  });
+
+  const offer = offers[0];
+  return c.json({
+    id: offer.id,
+    status: offer.status,
+    updatedAt: offer.updated_at,
+  });
+});

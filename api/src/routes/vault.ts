@@ -251,3 +251,125 @@ vaultRoutes.delete('/items/:id', async (c) => {
 
   return c.json({ message: 'Item deleted' });
 });
+
+// POST /api/v1/vault/items/:id/redemptions
+vaultRoutes.post('/items/:id/redemptions', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  const itemId = c.req.param('id');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const body = await c.req.json();
+  const { shippingAddress } = body;
+
+  const result = await withTenant(c.env, tenantId, async (client) => {
+    const { rows: itemRows } = await client.query(
+      'SELECT * FROM vault_items WHERE id = $1 AND owner_id = $2',
+      [itemId, userId]
+    );
+    if (!itemRows.length) {
+      throw new Error('Item not found or not owned by user');
+    }
+
+    const { rows } = await client.query(
+      `INSERT INTO redemptions (item_id, user_id, shipping_address, status)
+       VALUES ($1, $2, $3, 'PENDING')
+       RETURNING *`,
+      [itemId, userId, shippingAddress ? JSON.stringify(shippingAddress) : null]
+    );
+
+    await client.query("UPDATE vault_items SET status = 'REDEEMING' WHERE id = $1", [itemId]);
+
+    return rows[0];
+  });
+
+  return c.json({
+    redemptionId: result.id,
+    itemId: result.item_id,
+    userId: result.user_id,
+    status: result.status,
+    shippingAddress: result.shipping_address,
+    createdAt: result.created_at,
+  }, 201);
+});
+
+// POST /api/v1/vault/items/:id/vault-deliveries
+vaultRoutes.post('/items/:id/vault-deliveries', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  const itemId = c.req.param('id');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const body = await c.req.json();
+  const { shippingAddress } = body;
+
+  const result = await withTenant(c.env, tenantId, async (client) => {
+    const { rows: itemRows } = await client.query(
+      'SELECT * FROM vault_items WHERE id = $1 AND owner_id = $2',
+      [itemId, userId]
+    );
+    if (!itemRows.length) {
+      throw new Error('Item not found or not owned by user');
+    }
+
+    const { rows } = await client.query(
+      `INSERT INTO vault_deliveries (item_id, user_id, shipping_address, status)
+       VALUES ($1, $2, $3, 'PENDING')
+       RETURNING *`,
+      [itemId, userId, shippingAddress ? JSON.stringify(shippingAddress) : null]
+    );
+
+    await client.query("UPDATE vault_items SET status = 'IN_TRANSIT' WHERE id = $1", [itemId]);
+
+    return rows[0];
+  });
+
+  return c.json({
+    deliveryId: result.id,
+    itemId: result.item_id,
+    userId: result.user_id,
+    status: result.status,
+    shippingAddress: result.shipping_address,
+    createdAt: result.created_at,
+  }, 201);
+});
+
+// POST /api/v1/vault/items/:id/consign
+vaultRoutes.post('/items/:id/consign', async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  const itemId = c.req.param('id');
+
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const result = await withTenant(c.env, tenantId, async (client) => {
+    const { rows: itemRows } = await client.query(
+      'SELECT * FROM vault_items WHERE id = $1 AND owner_id = $2',
+      [itemId, userId]
+    );
+    if (!itemRows.length) {
+      throw new Error('Item not found or not owned by user');
+    }
+
+    const { rows } = await client.query(
+      "UPDATE vault_items SET status = 'VAULT_HELD' WHERE id = $1 AND owner_id = $2 RETURNING *",
+      [itemId, userId]
+    );
+
+    return rows[0];
+  });
+
+  return c.json({
+    itemId: result.id,
+    status: result.status,
+    message: 'Item consigned to platform vault',
+  });
+});
