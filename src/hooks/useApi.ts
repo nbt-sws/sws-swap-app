@@ -36,8 +36,8 @@ export function useVault() {
       const res = await vaultApi.getItems({ ownerId: user.id });
       return res.items.map(mapApiItemToVaultItem);
     },
-    staleTime: 1000 * 5,
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 30,
+    refetchOnWindowFocus: false,
     enabled: isAuthenticated && !!user?.id,
   });
 }
@@ -249,8 +249,8 @@ export function useMyListings() {
       const res = await listingsApi.getBySeller(user.id);
       return res.results.map(mapApiListingToMarketListing);
     },
-    staleTime: 1000 * 5,
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 30,
+    refetchOnWindowFocus: false,
     enabled: isAuthenticated,
   });
 }
