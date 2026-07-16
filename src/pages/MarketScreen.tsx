@@ -132,6 +132,10 @@ export function MarketScreen() {
     searchQuery.trim().length > 0,
   ].filter(Boolean).length;
 
+  // Debug: log listings data
+  console.log('[MarketScreen] listings:', listings?.length, 'isLoading:', isLoading, 'activeShelf:', activeShelf);
+  console.log('[MarketScreen] filteredListings:', filteredListings?.length, 'activeFilterCount:', activeFilterCount);
+
   const clearAllFilters = () => {
     setActiveGame(null);
     setActiveType(null);
