@@ -46,7 +46,7 @@ async function seed() {
         ($2, $6, $6, (SELECT id FROM public.cards WHERE code = 'QCAC-JP001'), 'QCAC-JP001', 'Blue-Eyes White Dragon', 'VAULT_HELD', 8800, 9850, 'THB', '2026-01-20', 'Local shop', 'Raw'),
         ($3, $6, $6, (SELECT id FROM public.cards WHERE code = 'OP01-025'), 'OP01-025', 'Nami (Alt Art)', 'AVAILABLE', 5200, 4120, 'THB', '2025-11-05', 'Trade', 'Raw'),
         ($4, $6, $6, (SELECT id FROM public.cards WHERE code = 'OP01-001'), 'OP01-001', 'Roronoa Zoro', 'AVAILABLE', 4500, 6900, 'THB', '2026-02-14', 'eBay', 'PSA 10'),
-        ($5, $6, $6, (SELECT id FROM public.cards WHERE code = 'OP05-060'), 'OP05-060', 'Monkey D. Luffy G5', 'AVAILABLE', 28000, 32000, 'THB', '2026-04-01', 'SwibSwap Market', 'RAWLITY 9')
+        ($5, $6, $6, (SELECT id FROM public.cards WHERE code = 'OP05-060'), 'OP05-060', 'Monkey D. Luffy G5', 'LOCKED', 28000, 32000, 'THB', '2026-04-01', 'SwibSwap Market', 'RAWLITY 9')
       ON CONFLICT (id) DO NOTHING
     `, [V1, V2, V3, V4, V5, USER1_ID]);
     console.log('✓ Vault items seeded');
