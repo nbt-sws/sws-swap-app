@@ -264,7 +264,7 @@ export function SellerStoreScreen() {
                 key={listing.id}
                 to="/market/$listingId"
                 params={{ listingId: listing.id }}
-                className="group shrink-0 w-36 sm:w-40 bg-surface-light rounded-xl border border-border overflow-hidden hover:border-brand/40 transition"
+                className="group shrink-0 w-36 sm:w-40 rounded-xl border border-border overflow-hidden hover:border-brand/40 transition bg-gradient-to-br from-surface-light via-surface to-surface-lighter/30"
               >
                 <div className="aspect-[5/7] overflow-hidden relative">
                   <img
