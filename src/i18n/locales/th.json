@@ -102,6 +102,10 @@
     "selectAll": "เลือกทั้งหมดที่แสดง",
     "list": "ลงขาย",
     "delist": "ปิดการขาย",
+    "delistSuccess": "ปิดการขายแล้ว",
+    "delistSuccessCount": "ปิดการขาย {{count}} รายการแล้ว",
+    "delistError": "ปิดการขายไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+    "new": "ใหม่",
     "gridView": "มุมมองตาราง",
     "listView": "มุมมองรายการ",
     "compactView": "มุมมองกระชับ",
@@ -281,12 +285,22 @@
       "over50k": "> ฿50,000"
     },
     "verified": "ยืนยันแล้ว",
-    "sellerRating": "คะแนน {{rating}}"
+    "sellerRating": "คะแนน {{rating}}",
+    "resultsCount": "{{count}} รายการ",
+    "stats": {
+      "live": "ลงขายอยู่ {{count}}",
+      "floor": "ต่ำสุด ฿{{price}}",
+      "sellers": "ผู้ขาย {{count}} คน",
+      "forTrade": "เทรด {{count}} รายการ"
+    }
   },
   "listing": {
     "title": "รายละเอียดรายการ",
     "notFound": "ไม่พบรายการ",
     "backToMarket": "กลับไปที่ตลาด",
+    "yourListing": "นี่คือประกาศขายของคุณ",
+    "yourListingDesc": "คุณไม่สามารถซื้อหรือเสนอราคาสินค้าของตัวเองได้",
+    "manageInVault": "จัดการใน Vault",
     "status": {
       "active": "กำลังขาย",
       "draft": "ร่าง",

@@ -481,7 +481,10 @@ export function useCreateOrder() {
         deliveryPreference: data.deliveryType,
         shippingAddress: data.shippingAddress,
       });
-      const full = await ordersApi.getById(created.orderId);
+      // Backend returns the new order id as `id` (older contract used `orderId`)
+      const orderId = created.orderId ?? created.id;
+      if (!orderId) throw new Error('Order created but no order id returned');
+      const full = await ordersApi.getById(orderId);
       return mapApiOrderToOrder(full);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),

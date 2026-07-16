@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
 import { useWishlistIds, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useApi';
@@ -14,6 +14,9 @@ interface ListingCardProps {
   onQuickView?: (listing: MarketListing) => void;
   className?: string;
 }
+
+// Captured once at page load — reference time for the NEW badge (< 72h)
+const PAGE_LOADED_AT = Date.now();
 
 const statusConfig = {
   active: { variant: 'success' as const, labelKey: 'listing.status.active' },
@@ -31,6 +34,12 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
   const removeFromWishlist = useRemoveFromWishlist();
   const isWishlisted = wishlistIds?.has(listing.id) ?? false;
   const [heartAnimating, setHeartAnimating] = useState(false);
+
+  // Fresh listings (< 72h) get a NEW badge — market convention
+  const isNew = useMemo(() => {
+    const ts = new Date(listing.timestamp).getTime();
+    return Number.isFinite(ts) && PAGE_LOADED_AT - ts < 72 * 60 * 60 * 1000;
+  }, [listing.timestamp]);
 
   const status = statusConfig[listing.status as keyof typeof statusConfig] ?? statusConfig.active;
 
@@ -77,6 +86,9 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
             ) : (
               <Badge className="bg-brand/20 text-brand border border-brand/30 shadow-lg backdrop-blur-sm">{t('market.listingTypes.sale').toUpperCase()}</Badge>
             )}
+            {isNew && (
+              <Badge className="bg-success/20 text-success border border-success/30 shadow-lg backdrop-blur-sm">{t('common.new')}</Badge>
+            )}
           </div>
 
           {/* Quick-view hint on hover */}
@@ -121,7 +133,9 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
             <h3 className="line-clamp-1 font-semibold text-sm text-foreground transition-colors group-hover:text-brand">
               {listing.card.nameEn}
             </h3>
-            <p className="text-xs text-muted-foreground font-mono mt-0.5">{listing.card.code}</p>
+            {listing.card.code && (
+              <p className="text-xs text-muted-foreground font-mono mt-0.5">{listing.card.code}</p>
+            )}
           </div>
           {listing.status !== 'active' && (
             <Badge variant="outline" className="shrink-0 text-xs h-5 px-1.5">
@@ -131,16 +145,20 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
         </div>
 
         <div className="mt-2 flex flex-wrap gap-1">
-          <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.rarity}</span>
-          <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.condition}</span>
+          {listing.card.rarity && (
+            <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.rarity}</span>
+          )}
+          {listing.card.condition && (
+            <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.condition}</span>
+          )}
           <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.shelf}</span>
         </div>
 
         <div className="mt-auto pt-3 flex items-center justify-between">
           <span
             className={cn(
-              'text-base font-bold font-mono',
-              listing.listingType === 'TRADE' ? 'text-cyan' : 'text-brand'
+              'text-base font-bold font-mono whitespace-nowrap',
+              listing.listingType === 'TRADE' ? 'text-cyan text-sm' : 'text-brand'
             )}
           >
             {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}

@@ -147,6 +147,7 @@ export function ListingDetailScreen() {
   };
 
   const isTrade = listing.listingType === 'TRADE';
+  const isOwnListing = !!user && user.id === listing.seller.id;
 
   return (
     <PageContainer className="py-6">
@@ -251,17 +252,31 @@ export function ListingDetailScreen() {
             )}
           </div>
 
-          {/* Delivery options */}
-          <div className="space-y-2">
-            <p className="text-xs font-mono text-muted-foreground">{t('common.deliveryOptions').toUpperCase()}</p>
-            <DeliveryPreferenceSelector
-              value={delivery}
-              onChange={setDelivery}
-              isMember={isListingMember}
-            />
-          </div>
+          {/* Delivery options — only relevant when purchasing */}
+          {!isOwnListing && (
+            <div className="space-y-2">
+              <p className="text-xs font-mono text-muted-foreground">{t('common.deliveryOptions').toUpperCase()}</p>
+              <DeliveryPreferenceSelector
+                value={delivery}
+                onChange={setDelivery}
+                isMember={isListingMember}
+              />
+            </div>
+          )}
 
           {/* Actions */}
+          {isOwnListing ? (
+            <div className="flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/5 p-4">
+              <Package className="w-5 h-5 text-brand shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{t('listing.yourListing')}</p>
+                <p className="text-xs text-muted-foreground">{t('listing.yourListingDesc')}</p>
+              </div>
+              <Button variant="outline" size="sm" className="border-border shrink-0" asChild>
+                <Link to="/vault">{t('listing.manageInVault')}</Link>
+              </Button>
+            </div>
+          ) : (
           <div className="flex gap-3">
             {!isTrade ? (
               <>
@@ -361,6 +376,7 @@ export function ListingDetailScreen() {
               </Dialog>
             )}
           </div>
+          )}
 
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={handleWishlist} disabled={addToWishlist.isPending || removeFromWishlist.isPending}>

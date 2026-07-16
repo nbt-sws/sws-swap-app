@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';import { useState, useMemo } from 'react';
+import { cn, getCardImageUrl } from '@/lib/utils';import { useState, useMemo } from 'react';
 import { Link, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useMarketListings } from '@/hooks/useApi';
@@ -12,6 +12,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ListingCard } from '@/components/domain/ListingCard';
 import { QuickViewModal } from '@/components/domain/QuickViewModal';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
@@ -132,9 +133,19 @@ export function MarketScreen() {
     searchQuery.trim().length > 0,
   ].filter(Boolean).length;
 
-  // Debug: log listings data
-  console.log('[MarketScreen] listings:', listings?.length, 'isLoading:', isLoading, 'activeShelf:', activeShelf);
-  console.log('[MarketScreen] filteredListings:', filteredListings?.length, 'activeFilterCount:', activeFilterCount);
+  // Market pulse — computed from the live listing set
+  const marketStats = useMemo(() => {
+    if (!listings || listings.length === 0) return null;
+    const salePrices = listings
+      .filter((l) => l.listingType !== 'TRADE' && l.price > 0)
+      .map((l) => l.price);
+    return {
+      count: listings.length,
+      floor: salePrices.length > 0 ? Math.min(...salePrices) : null,
+      sellers: new Set(listings.map((l) => l.seller.id)).size,
+      trades: listings.filter((l) => l.listingType === 'TRADE').length,
+    };
+  }, [listings]);
 
   const clearAllFilters = () => {
     setActiveGame(null);
@@ -152,29 +163,96 @@ export function MarketScreen() {
         icon={<ShoppingBag className="w-6 h-6 text-brand" />}
       />
 
-      <div className="space-y-6">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('market.searchPlaceholder')}
-            aria-label={t('market.searchPlaceholder')}
-            className="w-full bg-surface-light pl-11 pr-11 placeholder:text-muted-foreground/50 border-transparent focus:border-brand"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSearchQuery('')}
-              aria-label={t('common.clearSearch')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full text-muted-foreground hover:bg-surface-lighter"
-            >
-              <X className="w-3.5 h-3.5" />
-            </Button>
+      {/* Market pulse */}
+      {marketStats && (
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-y border-border py-2.5 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-2 font-medium text-foreground">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+            </span>
+            {t('market.stats.live', { count: marketStats.count })}
+          </span>
+          {marketStats.floor !== null && (
+            <span className="font-mono">{t('market.stats.floor', { price: marketStats.floor.toLocaleString() })}</span>
           )}
+          <span className="font-mono">{t('market.stats.sellers', { count: marketStats.sellers })}</span>
+          {marketStats.trades > 0 && (
+            <span className="font-mono text-cyan">{t('market.stats.forTrade', { count: marketStats.trades })}</span>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-6 mt-6">
+        {/* Search + sort + view toolbar */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('market.searchPlaceholder')}
+              aria-label={t('market.searchPlaceholder')}
+              className="w-full bg-surface-light pl-11 pr-11 placeholder:text-muted-foreground/50 border-transparent focus:border-brand"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSearchQuery('')}
+                aria-label={t('common.clearSearch')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full text-muted-foreground hover:bg-surface-lighter"
+              >
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            )}
+          </div>
+
+          <div className="relative hidden sm:block shrink-0">
+            <select
+              value={activeSort}
+              onChange={(e) => setActiveSort(e.target.value)}
+              className="h-10 appearance-none rounded-xl border border-border bg-surface-light pl-3 pr-8 text-xs text-muted-foreground outline-none focus:border-brand"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.id} value={opt.id}>{t(opt.key)}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+          </div>
+
+          <button
+            onClick={handleRefresh}
+            disabled={isFetching}
+            className={cn(
+              'w-10 h-10 rounded-xl bg-surface-light flex items-center justify-center transition-all shrink-0',
+              isFetching
+                ? 'text-brand bg-brand/10'
+                : 'text-muted-foreground hover:text-brand hover:bg-brand/10'
+            )}
+            aria-label="Refresh"
+            title="รีเฟรช"
+          >
+            <RefreshCw className={cn('w-4 h-4', isFetching && 'animate-spin')} />
+          </button>
+
+          <div className="hidden sm:flex rounded-xl border border-border bg-surface-light p-1 shrink-0">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`rounded-lg p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-surface-lighter text-brand' : 'text-muted-foreground hover:text-foreground'}`}
+              aria-label={t('common.gridView')}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`rounded-lg p-1.5 transition-colors ${viewMode === 'list' ? 'bg-surface-lighter text-brand' : 'text-muted-foreground hover:text-foreground'}`}
+              aria-label={t('common.listView')}
+            >
+              <ListIcon className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -201,7 +279,7 @@ export function MarketScreen() {
           ))}
         </div>
 
-        {/* Toolbar */}
+        {/* Shelf categories + filters */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1">
             {SHELVES.map((shelf) => (
@@ -232,51 +310,6 @@ export function MarketScreen() {
               </span>
             )}
           </button>
-
-          <div className="relative hidden sm:block">
-            <select
-              value={activeSort}
-              onChange={(e) => setActiveSort(e.target.value)}
-              className="h-8 appearance-none rounded-lg border border-border bg-surface-light pl-2.5 pr-7 text-xs text-muted-foreground outline-none focus:border-brand"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>{t(opt.key)}</option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-          </div>
-
-          <button
-            onClick={handleRefresh}
-            disabled={isFetching}
-            className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center transition-all shrink-0',
-              isFetching
-                ? 'text-brand bg-brand/10'
-                : 'text-muted-foreground hover:text-brand hover:bg-brand/10'
-            )}
-            aria-label="Refresh"
-            title="รีเฟรช"
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin')} />
-          </button>
-
-          <div className="hidden sm:flex rounded-lg border border-border bg-surface-light p-0.5">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`rounded-md p-1 transition-colors ${viewMode === 'grid' ? 'bg-surface-lighter text-brand' : 'text-muted-foreground hover:text-foreground'}`}
-              aria-label={t('common.gridView')}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`rounded-md p-1 transition-colors ${viewMode === 'list' ? 'bg-surface-lighter text-brand' : 'text-muted-foreground hover:text-foreground'}`}
-              aria-label={t('common.listView')}
-            >
-              <ListIcon className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
 
         {/* Filters */}
@@ -379,80 +412,100 @@ export function MarketScreen() {
           </div>
         )}
 
-        {/* Listings */}
-        {isLoading ? (
-          viewMode === 'grid' ? (
+        {/* Market shelf — persistent zone so the page feels composed with any item count */}
+        <section className="rounded-xl border border-border/50 bg-surface-light/40 p-3 sm:p-5 space-y-4">
+          {/* Results header */}
+          {!isLoading && (
+            <div className="flex items-baseline justify-between px-1">
+              <p className="text-sm font-medium">
+                {t('market.resultsCount', { count: filteredListings.length })}
+              </p>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs text-muted-foreground hover:text-brand transition-colors lg:hidden"
+                >
+                  {t('common.clearAll')}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Listings */}
+          {isLoading ? (
+            viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="space-y-2 h-full">
+                    <Skeleton className="aspect-[5/7] rounded-xl" />
+                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 bg-surface-light rounded-xl p-3 border border-border">
+                    <Skeleton className="w-16 aspect-[5/7] rounded-lg" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                    <div className="text-right space-y-2">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : filteredListings.length === 0 ? (
+            <Empty className="py-16">
+              <EmptyMedia variant="icon">
+                <Package className="w-8 h-8 text-brand" />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle>{t('market.empty')}</EmptyTitle>
+                <EmptyDescription>{t('market.emptyDesc')}</EmptyDescription>
+              </EmptyHeader>
+              {activeFilterCount > 0 && (
+                <Button variant="outline" size="sm" className="border-border" onClick={clearAllFilters}>
+                  {t('market.clearFilters')}
+                </Button>
+              )}
+            </Empty>
+          ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="space-y-2 h-full">
-                  <Skeleton className="aspect-[5/7] rounded-xl" />
-                  <Skeleton className="h-3 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
+              {filteredListings.map((listing, i) => (
+                <motion.div
+                  key={listing.id}
+                  className="h-full"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.04, 0.4) }}
+                >
+                  <ListingCard
+                    listing={listing}
+                    onQuickView={(l) => setQuickView(l)}
+                    className="h-full"
+                  />
+                </motion.div>
               ))}
             </div>
           ) : (
             <div className="space-y-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4 bg-surface-light rounded-xl p-3 border border-border">
-                  <Skeleton className="w-16 aspect-[5/7] rounded-lg" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                  <div className="text-right space-y-2">
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-3 w-12" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        ) : filteredListings.length === 0 ? (
-          <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
-            <EmptyMedia variant="icon">
-              <Package className="w-8 h-8 text-brand" />
-            </EmptyMedia>
-            <EmptyHeader>
-              <EmptyTitle>{t('market.empty')}</EmptyTitle>
-              <EmptyDescription>{t('market.emptyDesc')}</EmptyDescription>
-            </EmptyHeader>
-            {activeFilterCount > 0 && (
-              <Button variant="outline" size="sm" className="border-border" onClick={clearAllFilters}>
-                {t('market.clearFilters')}
-              </Button>
-            )}
-          </Empty>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
-            {filteredListings.map((listing, i) => (
-              <motion.div
-                key={listing.id}
-                className="h-full"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.04, 0.4) }}
-              >
-                <ListingCard
+              {filteredListings.map((listing) => (
+                <MarketListRow
+                  key={listing.id}
                   listing={listing}
                   onQuickView={(l) => setQuickView(l)}
-                  className="h-full"
                 />
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredListings.map((listing) => (
-              <MarketListRow
-                key={listing.id}
-                listing={listing}
-                onQuickView={(l) => setQuickView(l)}
-              />
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </section>
 
         <QuickViewModal
           listing={quickView}
@@ -496,7 +549,11 @@ function MarketListRow({
       onClick={() => onQuickView?.(listing)}
     >
       <div className="w-16 aspect-[5/7] rounded-lg overflow-hidden bg-surface-lighter shrink-0 flex items-center justify-center text-sm font-bold text-muted-foreground">
-        {listing.card.code}
+        <ImageWithFallback
+          src={getCardImageUrl(listing.card)}
+          alt={listing.card.nameEn}
+          className="h-full w-full"
+        />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">

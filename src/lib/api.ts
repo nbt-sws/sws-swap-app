@@ -216,7 +216,7 @@ export const ordersApi = {
     price?: number;
     deliveryPreference: ApiOrder['deliveryPreference'];
     shippingAddress?: ApiShippingAddress;
-  }) => apiPost<{ orderId: string; status: string }>('orders', { json: data }),
+  }) => apiPost<{ orderId?: string; id?: string; status: string }>('orders', { json: data }),
   cancel: (id: string, data?: { reason?: string }) =>
     apiPost<{ orderId: string; status: string }>(`orders/${id}/cancel`, { json: data }),
 };

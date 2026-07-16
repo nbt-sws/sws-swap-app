@@ -193,6 +193,7 @@ export function VaultScreen() {
     if (listing) {
       delistListing.mutate(listing.listingId, {
         onSuccess: () => {
+          toast.success(t('common.delistSuccess'));
           // Force immediate refetch after delist
           queryClient.invalidateQueries({ queryKey: ['vault'] });
           queryClient.invalidateQueries({ queryKey: ['listingsBySeller', userId] });
@@ -200,10 +201,11 @@ export function VaultScreen() {
           refetchVault();
           refetchListings();
         },
+        onError: () => toast.error(t('common.delistError')),
       });
     }
     setConfirmSingleUnlistItem(null);
-  }, [confirmSingleUnlistItem, listingsMap, delistListing, queryClient, userId, refetchVault, refetchListings]);
+  }, [confirmSingleUnlistItem, listingsMap, delistListing, queryClient, userId, refetchVault, refetchListings, t]);
 
   const handleDeleteItem = useCallback((item: VaultItem) => {
     deleteVaultItem.mutate(item.id, {
@@ -227,27 +229,29 @@ export function VaultScreen() {
     setConfirmUnlistOpen(true);
   }, []);
 
-  const confirmBulkDelist = useCallback(() => {
-    selectedItems.forEach((item) => {
-      const listing = listingsMap.get(item.id);
-      if (listing) {
-        delistListing.mutate(listing.listingId, {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['vault'] });
-            queryClient.invalidateQueries({ queryKey: ['listingsBySeller', userId] });
-            queryClient.invalidateQueries({ queryKey: ['myListings'] });
-          },
-        });
-      }
-    });
+  const confirmBulkDelist = useCallback(async () => {
+    const targets = selectedItems
+      .map((item) => listingsMap.get(item.id))
+      .filter((l): l is { listingId: string; price: number } => !!l);
     setConfirmUnlistOpen(false);
     clearSelection();
-    // Force refetch all after bulk delist completes
-    setTimeout(() => {
-      refetchVault();
-      refetchListings();
-    }, 300);
-  }, [selectedItems, listingsMap, delistListing, clearSelection, queryClient, userId, refetchVault, refetchListings]);
+    if (targets.length === 0) return;
+
+    const results = await Promise.allSettled(
+      targets.map((l) => delistListing.mutateAsync(l.listingId))
+    );
+    const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.length - succeeded;
+
+    if (succeeded > 0) toast.success(t('common.delistSuccessCount', { count: succeeded }));
+    if (failed > 0) toast.error(t('common.delistError'));
+
+    queryClient.invalidateQueries({ queryKey: ['vault'] });
+    queryClient.invalidateQueries({ queryKey: ['listingsBySeller', userId] });
+    queryClient.invalidateQueries({ queryKey: ['myListings'] });
+    refetchVault();
+    refetchListings();
+  }, [selectedItems, listingsMap, delistListing, clearSelection, queryClient, userId, refetchVault, refetchListings, t]);
 
   const selectedItem = listTargetItem ?? (selectedItems.length === 1 ? selectedItems[0] : null);
 

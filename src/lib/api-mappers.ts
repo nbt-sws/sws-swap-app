@@ -109,10 +109,17 @@ export function mapApiListingToMarketListing(apiListing: ApiListing): MarketList
     id: apiListing.listingId,
     card: placeholderCard({
       id: apiListing.itemId,
-      code: apiListing.itemId,
-      nameEn: apiListing.title,
-      imageUrl: apiListing.imageUrl,
-      condition: (apiListing.condition ?? 'Raw') as Card['condition'],
+      // Never fall back to the raw itemId here — the market UI must not show it.
+      // itemId is exposed separately on MarketListing.itemId for the detail page.
+      code: apiListing.cardCode ?? '',
+      nameEn: apiListing.cardNameEn ?? apiListing.title,
+      nameJp: apiListing.cardNameJp ?? '',
+      rarity: apiListing.rarity ?? '',
+      type: apiListing.cardType ?? '',
+      language: apiListing.language ?? '',
+      game: (apiListing.game ?? 'one-piece') as Card['game'],
+      imageUrl: apiListing.cardImageUrl ?? apiListing.imageUrl,
+      condition: (apiListing.cardCondition ?? apiListing.condition ?? 'Raw') as Card['condition'],
     }),
     price: apiListing.price,
     currency: apiListing.currency,
@@ -182,11 +189,12 @@ export function mapApiOfferToOffer(apiOffer: ApiOffer, currentUserId?: string): 
     listingId: apiOffer.listingId,
     itemId: '',
     sellerId: apiOffer.sellerId,
-    title: 'Unknown item',
-    price: apiOffer.offerPrice,
-    currency: 'THB',
+    title: apiOffer.listing?.title ?? 'Unknown item',
+    price: apiOffer.listing?.price ?? apiOffer.offerPrice,
+    currency: apiOffer.listing?.currency ?? 'THB',
     status: 'ACTIVE',
     createdAt: apiOffer.createdAt,
+    imageUrl: apiOffer.listing?.imageUrl,
   });
 
   return {
@@ -197,8 +205,8 @@ export function mapApiOfferToOffer(apiOffer: ApiOffer, currentUserId?: string): 
       ? 'DECLINED'
       : (apiOffer.status as Offer['status']),
     direction: isIncoming ? 'INCOMING' : 'OUTGOING',
-    fromUser: { id: apiOffer.buyerId, name: `User ${apiOffer.buyerId.slice(0, 6)}` },
-    toUser: { id: apiOffer.sellerId, name: `User ${apiOffer.sellerId.slice(0, 6)}` },
+    fromUser: { id: apiOffer.buyerId, name: apiOffer.buyerName ?? `User ${apiOffer.buyerId.slice(0, 6)}` },
+    toUser: { id: apiOffer.sellerId, name: apiOffer.sellerName ?? `User ${apiOffer.sellerId.slice(0, 6)}` },
     createdAt: apiOffer.createdAt,
     expiresAt: apiOffer.expiresAt,
   };

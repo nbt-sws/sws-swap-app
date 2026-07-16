@@ -120,6 +120,9 @@ export function CheckoutScreen() {
     createOrder.mutate(
       {
         listingId: listing.id,
+        itemId: listing.itemId,
+        sellerId: listing.seller.id,
+        price: listing.price,
         deliveryType: delivery,
         shippingAddress,
       },

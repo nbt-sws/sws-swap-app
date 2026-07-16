@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import {
   usePlatformStats,
   useListings,
@@ -56,6 +58,7 @@ const orderStatusConfig: Record<Order['status'], { label: string; color: string 
 };
 
 function ListingRow({ listing }: { listing: MarketListing }) {
+  const { t } = useTranslation();
   const delist = useDelistListing();
   const updateStatus = useUpdateListingStatus();
   const isActive = listing.status === 'active';
@@ -82,7 +85,10 @@ function ListingRow({ listing }: { listing: MarketListing }) {
           size="sm"
           variant="outline"
           className="border-border text-pldown hover:text-pldown"
-          onClick={() => delist.mutate(listing.id)}
+          onClick={() => delist.mutate(listing.id, {
+            onSuccess: () => toast.success(t('common.delistSuccess')),
+            onError: () => toast.error(t('common.delistError')),
+          })}
           disabled={delist.isPending}
         >
           Delist

@@ -91,6 +91,16 @@ export interface ApiListing {
   ownerId?: string;
   holderId?: string;
   createdAt: string;
+  // Enriched from the cards catalog (via vault_items.card_id)
+  cardCode?: string;
+  cardNameEn?: string;
+  cardNameJp?: string;
+  rarity?: string;
+  cardType?: string;
+  language?: string;
+  game?: string;
+  cardImageUrl?: string;
+  cardCondition?: string;
 }
 
 export type ApiOrderStatus =
@@ -144,6 +154,16 @@ export interface ApiOffer {
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
+  buyerName?: string;
+  sellerName?: string;
+  listing?: {
+    listingId: string;
+    title: string;
+    price: number;
+    currency?: string;
+    imageUrl?: string;
+    sellerId?: string;
+  } | null;
 }
 
 export interface ApiWishlistItem {

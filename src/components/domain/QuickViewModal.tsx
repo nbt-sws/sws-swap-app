@@ -17,6 +17,7 @@ import { Heart, ShoppingBag, ExternalLink, X } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { PriceChart } from './PriceChart';
 import { MarketStatsCards } from './MarketStatsCards';
+import { useAuthStore } from '@/stores/auth';
 import type { MarketListing } from '@/types';
 
 interface QuickViewModalProps {
@@ -27,10 +28,12 @@ interface QuickViewModalProps {
 
 export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
   const { data: wishlistIds } = useWishlistIds();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
   const isWishlisted = listing ? (wishlistIds?.has(listing.id) ?? false) : false;
+  const isOwnListing = !!user && !!listing && user.id === listing.seller.id;
 
   const cardCode = listing?.card.code ?? '';
   const { data: marketStats } = useMarketStats(cardCode, { enabled: open && !!cardCode });
@@ -124,7 +127,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
 
             {/* Actions */}
             <div className="mt-auto pt-6 flex items-center gap-3">
-              {listing.listingType === 'SALE' && (
+              {listing.listingType === 'SALE' && !isOwnListing && (
                 <Button asChild className="flex-1 bg-brand hover:bg-brand-light rounded-full" onClick={onClose}>
                   <Link to="/checkout/$listingId" params={{ listingId: listing.id }}>
                     <ShoppingBag className="w-4 h-4 mr-2" />

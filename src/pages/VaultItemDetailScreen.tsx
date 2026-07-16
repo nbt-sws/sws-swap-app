@@ -51,9 +51,12 @@ export function VaultItemDetailScreen() {
 
   const handleDelist = useCallback(() => {
     if (listing) {
-      delistListing.mutate(listing.id);
+      delistListing.mutate(listing.id, {
+        onSuccess: () => toast.success(t('common.delistSuccess')),
+        onError: () => toast.error(t('common.delistError')),
+      });
     }
-  }, [listing, delistListing]);
+  }, [listing, delistListing, t]);
 
   const handleDeliverySubmit = useCallback(
     (address: ShippingAddress) => {

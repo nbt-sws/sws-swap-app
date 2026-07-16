@@ -102,6 +102,10 @@
     "selectAll": "Select all visible",
     "list": "List",
     "delist": "Delist",
+    "delistSuccess": "Listing delisted",
+    "delistSuccessCount": "Delisted {{count}} listing(s)",
+    "delistError": "Failed to delist. Please try again.",
+    "new": "NEW",
     "gridView": "Grid view",
     "listView": "List view",
     "compactView": "Compact view",
@@ -281,12 +285,22 @@
       "over50k": "> ฿50,000"
     },
     "verified": "VERIFIED",
-    "sellerRating": "Rating {{rating}}"
+    "sellerRating": "Rating {{rating}}",
+    "resultsCount": "{{count}} listings",
+    "stats": {
+      "live": "{{count}} live",
+      "floor": "Floor ฿{{price}}",
+      "sellers": "{{count}} sellers",
+      "forTrade": "{{count}} for trade"
+    }
   },
   "listing": {
     "title": "Listing details",
     "notFound": "Listing not found.",
     "backToMarket": "Back to market",
+    "yourListing": "This is your listing",
+    "yourListingDesc": "You can't buy or make offers on your own item.",
+    "manageInVault": "Manage in Vault",
     "status": {
       "active": "Active",
       "draft": "Draft",
