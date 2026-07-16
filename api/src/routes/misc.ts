@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
 import { withTenant } from '../db';
 import type { Env } from '../db';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, optionalAuth } from '../middleware/auth';
 
 export const miscRoutes = new Hono<{ Bindings: Env }>();
-miscRoutes.use('*', authMiddleware);
+miscRoutes.use('*', optionalAuth);
 
 // Wishlist
-miscRoutes.get('/wishlist', async (c) => {
+miscRoutes.get('/wishlist', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const items = await withTenant(c.env, tenantId, async (client) => {
@@ -17,7 +17,7 @@ miscRoutes.get('/wishlist', async (c) => {
   return c.json({ items });
 });
 
-miscRoutes.post('/wishlist/:listingId', async (c) => {
+miscRoutes.post('/wishlist/:listingId', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const listingId = c.req.param('listingId');
@@ -31,7 +31,7 @@ miscRoutes.post('/wishlist/:listingId', async (c) => {
   return c.json(item, 201);
 });
 
-miscRoutes.delete('/wishlist/:listingId', async (c) => {
+miscRoutes.delete('/wishlist/:listingId', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const listingId = c.req.param('listingId');
@@ -42,7 +42,7 @@ miscRoutes.delete('/wishlist/:listingId', async (c) => {
 });
 
 // Notifications
-miscRoutes.get('/notifications', async (c) => {
+miscRoutes.get('/notifications', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const notifications = await withTenant(c.env, tenantId, async (client) => {
@@ -52,7 +52,7 @@ miscRoutes.get('/notifications', async (c) => {
   return c.json({ notifications });
 });
 
-miscRoutes.patch('/notifications/:id/read', async (c) => {
+miscRoutes.patch('/notifications/:id/read', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const id = c.req.param('id');
   await withTenant(c.env, tenantId, async (client) => {
@@ -82,7 +82,7 @@ miscRoutes.get('/collectors/:userId', async (c) => {
   return c.json(profile);
 });
 
-miscRoutes.put('/collectors/me', async (c) => {
+miscRoutes.put('/collectors/me', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const body = await c.req.json();
@@ -97,7 +97,7 @@ miscRoutes.put('/collectors/me', async (c) => {
 });
 
 // Follows
-miscRoutes.post('/follows', async (c) => {
+miscRoutes.post('/follows', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const { followingId } = await c.req.json();
@@ -107,7 +107,7 @@ miscRoutes.post('/follows', async (c) => {
   return c.json({ status: 'followed' }, 201);
 });
 
-miscRoutes.delete('/follows/:followingId', async (c) => {
+miscRoutes.delete('/follows/:followingId', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const followingId = c.req.param('followingId');
@@ -117,7 +117,7 @@ miscRoutes.delete('/follows/:followingId', async (c) => {
   return c.json({ status: 'unfollowed' });
 });
 
-miscRoutes.get('/follows', async (c) => {
+miscRoutes.get('/follows', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const follows = await withTenant(c.env, tenantId, async (client) => {
@@ -128,7 +128,7 @@ miscRoutes.get('/follows', async (c) => {
 });
 
 // Redemptions
-miscRoutes.get('/redemptions', async (c) => {
+miscRoutes.get('/redemptions', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const redemptions = await withTenant(c.env, tenantId, async (client) => {
@@ -139,7 +139,7 @@ miscRoutes.get('/redemptions', async (c) => {
 });
 
 // Vault Deliveries
-miscRoutes.get('/vault-deliveries', async (c) => {
+miscRoutes.get('/vault-deliveries', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const deliveries = await withTenant(c.env, tenantId, async (client) => {
@@ -150,7 +150,7 @@ miscRoutes.get('/vault-deliveries', async (c) => {
 });
 
 // Audit
-miscRoutes.get('/audit/items/:itemId', async (c) => {
+miscRoutes.get('/audit/items/:itemId', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const itemId = c.req.param('itemId');
   const history = await withTenant(c.env, tenantId, async (client) => {
@@ -160,7 +160,7 @@ miscRoutes.get('/audit/items/:itemId', async (c) => {
   return c.json({ itemId, history });
 });
 
-miscRoutes.get('/audit/users/:userId', async (c) => {
+miscRoutes.get('/audit/users/:userId', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.req.param('userId');
   const history = await withTenant(c.env, tenantId, async (client) => {
@@ -210,7 +210,7 @@ miscRoutes.get('/kyc/status/:userId', async (c) => {
   return c.json({ userId: result.id, status: result.kyc_status, submittedAt: result.created_at, reviewedAt: result.updated_at });
 });
 
-miscRoutes.post('/kyc/submit', async (c) => {
+miscRoutes.post('/kyc/submit', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const body = await c.req.json();
@@ -233,11 +233,11 @@ miscRoutes.get('/campaigns/:slug', async (c) => {
   return c.json({ campaign: null });
 });
 
-miscRoutes.post('/campaigns/:slug/claim', async (c) => {
+miscRoutes.post('/campaigns/:slug/claim', authMiddleware, async (c) => {
   return c.json({ success: false });
 });
 
-miscRoutes.get('/campaigns/my', async (c) => {
+miscRoutes.get('/campaigns/my', authMiddleware, async (c) => {
   return c.json({ campaigns: [] });
 });
 
@@ -250,11 +250,11 @@ miscRoutes.get('/achievements/:slug', async (c) => {
   return c.json({ achievement: null });
 });
 
-miscRoutes.get('/achievements/my', async (c) => {
+miscRoutes.get('/achievements/my', authMiddleware, async (c) => {
   return c.json({ achievements: [] });
 });
 
-miscRoutes.post('/achievements/:slug/progress', async (c) => {
+miscRoutes.post('/achievements/:slug/progress', authMiddleware, async (c) => {
   return c.json({ achievement: null });
 });
 
@@ -271,7 +271,7 @@ miscRoutes.get('/users/:userId/badges/equipped', async (c) => {
   return c.json({ badges: [] });
 });
 
-miscRoutes.post('/users/me/badges/equip', async (c) => {
+miscRoutes.post('/users/me/badges/equip', authMiddleware, async (c) => {
   return c.json({ status: 'equipped' });
 });
 
@@ -281,19 +281,19 @@ miscRoutes.get('/platform/stats', async (c) => {
 });
 
 // Shipments
-miscRoutes.get('/shipments/:orderId', async (c) => {
+miscRoutes.get('/shipments/:orderId', authMiddleware, async (c) => {
   return c.json({});
 });
 
-miscRoutes.get('/shipments/:id/track', async (c) => {
+miscRoutes.get('/shipments/:id/track', authMiddleware, async (c) => {
   return c.json({ timeline: [] });
 });
 
 // Collector profile avatar/banner (stub)
-miscRoutes.post('/collector-profiles/avatar', async (c) => {
+miscRoutes.post('/collector-profiles/avatar', authMiddleware, async (c) => {
   return c.json({ avatarUrl: '' });
 });
 
-miscRoutes.post('/collector-profiles/banner', async (c) => {
+miscRoutes.post('/collector-profiles/banner', authMiddleware, async (c) => {
   return c.json({ bannerUrl: '' });
 });

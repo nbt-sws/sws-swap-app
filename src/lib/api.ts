@@ -173,12 +173,12 @@ export const listingsApi = {
     max_price?: number;
     sellerId?: string;
     status?: string;
-  }) => apiGet<{ results: ApiListing[] }>('listings', { searchParams: params }),
+  }) => apiGet<{ results: ApiListing[] }>('market/listings', { searchParams: params }),
 
-  getById: (id: string) => apiGet<ApiListing>(`listings/${id}`),
+  getById: (id: string) => apiGet<ApiListing>(`market/listings/${id}`),
 
   getBySeller: (sellerId: string) =>
-    apiGet<{ results: ApiListing[] }>('listings', { searchParams: { sellerId } }),
+    apiGet<{ results: ApiListing[] }>('market/listings', { searchParams: { sellerId } }),
 
   create: (data: {
     itemId: string;
@@ -188,11 +188,11 @@ export const listingsApi = {
     category?: string;
     subCategory?: string;
     itemFormat?: string;
-  }) => apiPost<{ listingId: string; status: string }>('listings', { json: data }),
+  }) => apiPost<{ listingId: string; status: string }>('market/listings', { json: data }),
 
-  activate: (id: string) => apiPost<{ listingId: string; status: string }>(`listings/${id}/activate`),
+  activate: (id: string) => apiPost<{ listingId: string; status: string }>(`market/listings/${id}/activate`),
 
-  delist: (id: string) => apiDelete<{ listingId: string; status: string }>(`listings/${id}`),
+  delist: (id: string) => apiDelete<{ listingId: string; status: string }>(`market/listings/${id}`),
 };
 
 export const ordersApi = {
