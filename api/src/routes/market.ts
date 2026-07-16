@@ -187,9 +187,9 @@ marketRoutes.post('/listings', async (c) => {
 
     const { rows } = await client.query(
       `INSERT INTO listings (item_id, seller_id, title, description, price, currency, status, category, item_format, condition, image_url, seller_display_name, seller_tier, owner_id, holder_id)
-       VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', $7, $8, $9, $10, $11, $12, $13, $13)
+       VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', $7, $8, $9, $10, $11, $12, $13, $14)
        RETURNING *`,
-      [data.itemId, userId, data.title, data.description, data.price, data.currency, data.category, data.itemFormat, data.condition, data.imageUrl, user?.name, user?.tier]
+      [data.itemId || null, userId, data.title, data.description || null, data.price, data.currency, data.category || null, data.itemFormat || null, data.condition || null, data.imageUrl || null, user?.name || null, user?.tier || null, userId, userId]
     );
     return rows;
   });
