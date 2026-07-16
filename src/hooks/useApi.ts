@@ -73,6 +73,14 @@ export function useConsignToPlatform() {
   });
 }
 
+export function useDeleteVaultItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (itemId: string) => vaultApi.deleteItem(itemId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vault'] }),
+  });
+}
+
 // ─── Market hooks ───────────────────────────────────────────────────
 
 export function useMarketListings(shelf?: string) {
@@ -82,8 +90,7 @@ export function useMarketListings(shelf?: string) {
       const res = await listingsApi.getAll(shelf && shelf !== 'All' ? { category: shelf } : undefined);
       return res.results.map(mapApiListingToMarketListing);
     },
-    staleTime: 1000 * 5,
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 30,
   });
 }
 
@@ -95,8 +102,7 @@ export function useListings(params?: { q?: string; page?: number; limit?: number
       const listings = res.results.map(mapApiListingToMarketListing);
       return { results: listings };
     },
-    staleTime: 1000 * 5,
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 30,
   });
 }
 
@@ -203,21 +209,41 @@ export function useAuthRegister() {
 
 // ─── Wishlist hooks ─────────────────────────────────────────────────
 
+// Raw wishlist items (light) — shared by useWishlist and useWishlistIds
+async function fetchRawWishlistItems() {
+  const res = await wishlistApi.getAll();
+  return res.items;
+}
+
+// Lightweight hook: only the set of wishlisted listingIds.
+// Use this for heart-button state (ListingCard, QuickView, ListingDetail)
+// so we don't re-fetch all listings on every market page render.
+export function useWishlistIds() {
+  const { isAuthenticated } = useAuthStore();
+  return useQuery({
+    queryKey: ['wishlistIds'],
+    queryFn: fetchRawWishlistItems,
+    select: (items) => new Set(items.map((i) => i.listingId)),
+    staleTime: 1000 * 60 * 5,
+    enabled: isAuthenticated,
+  });
+}
+
 export function useWishlist() {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: ['wishlist'],
     queryFn: async () => {
-      const [wishlistRes, listingsRes] = await Promise.all([
-        wishlistApi.getAll(),
+      const [items, listingsRes] = await Promise.all([
+        fetchRawWishlistItems(),
         listingsApi.getAll({ limit: 1000 }),
       ]);
       const listings = listingsRes.results;
-      return wishlistRes.items.map((i) =>
+      return items.map((i) =>
         mapApiWishlistItemToWishlistItem(i, listings.find((l) => l.listingId === i.listingId))
       );
     },
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 5,
     enabled: isAuthenticated,
   });
 }
@@ -226,7 +252,10 @@ export function useAddToWishlist() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (listingId: string) => wishlistApi.add(listingId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['wishlist'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlistIds'] });
+    },
   });
 }
 
@@ -234,7 +263,10 @@ export function useRemoveFromWishlist() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (listingId: string) => wishlistApi.remove(listingId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['wishlist'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlistIds'] });
+    },
   });
 }
 
@@ -889,8 +921,7 @@ export function useListingsBySeller(sellerId?: string) {
       return res.results.map(mapApiListingToMarketListing);
     },
     enabled: !!sellerId && isAuthenticated,
-    staleTime: 1000 * 5,
-    refetchOnWindowFocus: true,
+    staleTime: 1000 * 30,
   });
 }
 

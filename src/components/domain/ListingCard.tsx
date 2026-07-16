@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heart } from 'lucide-react';
-import { useWishlist, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useApi';
+import { useWishlistIds, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useApi';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { Badge } from '@/components/ui/badge';
 import { cn, getCardImageUrl } from '@/lib/utils';
@@ -26,10 +26,10 @@ const statusConfig = {
 export function ListingCard({ listing, onQuickView, className }: ListingCardProps) {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuthStore();
-  const { data: wishlist } = useWishlist();
+  const { data: wishlistIds } = useWishlistIds();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
-  const isWishlisted = wishlist?.some((w) => w.cardCode === listing.card.code) ?? false;
+  const isWishlisted = wishlistIds?.has(listing.id) ?? false;
   const [heartAnimating, setHeartAnimating] = useState(false);
 
   const status = statusConfig[listing.status as keyof typeof statusConfig] ?? statusConfig.active;

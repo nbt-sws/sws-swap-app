@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import {
-  useListing, useCardPrice, useAddToWishlist, useRemoveFromWishlist, useWishlist,
+  useListing, useCardPrice, useAddToWishlist, useRemoveFromWishlist, useWishlistIds,
   useCreateOffer, useVault, useCreateTradeOffer, useMarketStats, useMarketHistory,
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -52,7 +52,7 @@ export function ListingDetailScreen() {
   const { data: priceData } = useCardPrice(listing?.card.code ?? '');
   const { data: marketStats } = useMarketStats(listing?.card.code ?? '');
   const { data: marketHistory } = useMarketHistory(listing?.card.code ?? '', '30d');
-  const { data: wishlist } = useWishlist();
+  const { data: wishlistIds } = useWishlistIds();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
   const createOffer = useCreateOffer();
@@ -66,7 +66,7 @@ export function ListingDetailScreen() {
   const [delivery, setDelivery] = useState<'SHIP' | 'VAULT_STORE'>('SHIP');
   const [period, setPeriod] = useState<string>('30d');
 
-  const isWishlisted = listing ? wishlist?.some((w: { listingId: string }) => w.listingId === listing.id) : false;
+  const isWishlisted = listing ? (wishlistIds?.has(listing.id) ?? false) : false;
 
   if (isLoading) {
     return (

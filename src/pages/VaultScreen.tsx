@@ -5,8 +5,9 @@ import { Link } from '@tanstack/react-router';
 import { Route } from '@/routes/vault.index';
 import {
   useVault, useListingsBySeller, useDelistListing, useStoreProfile,
-  useFollowedSellers, useFollowSeller, useUnfollowSeller,
+  useFollowedSellers, useFollowSeller, useUnfollowSeller, useDeleteVaultItem,
 } from '@/hooks/useApi';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth';
 import { StorefrontManager } from '@/components/vault/StorefrontManager';
 import {
@@ -43,6 +44,7 @@ export function VaultScreen() {
   const { data: vault, isLoading, isFetching, refetch: refetchVault } = useVault();
   const { data: listings, refetch: refetchListings } = useListingsBySeller(userId);
   const delistListing = useDelistListing();
+  const deleteVaultItem = useDeleteVaultItem();
 
   const [activeFilter, setActiveFilter] = useState<VaultFilter>('ALL');
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -204,10 +206,11 @@ export function VaultScreen() {
   }, [confirmSingleUnlistItem, listingsMap, delistListing, queryClient, userId, refetchVault, refetchListings]);
 
   const handleDeleteItem = useCallback((item: VaultItem) => {
-    // TODO: Implement delete API call
-    console.log('[VaultScreen] Delete item:', item.id);
-    alert('Delete functionality will be implemented soon');
-  }, []);
+    deleteVaultItem.mutate(item.id, {
+      onSuccess: () => toast.success(t('vault.itemDeleted', { defaultValue: 'Item removed from vault' })),
+      onError: () => toast.error(t('common.error')),
+    });
+  }, [deleteVaultItem, t]);
 
   const handleRedeemItem = useCallback((item: VaultItem) => {
     // TODO: Implement redeem API call
@@ -685,6 +688,7 @@ export function VaultScreen() {
                         onDelist={handleDelistItem}
                         onRedeem={handleRedeemItem}
                         onDelete={handleDeleteItem}
+                        isListed={item.itemStatus === 'LISTING'}
                         isOwner={item.ownerId === userId}
                       />
                     ))}

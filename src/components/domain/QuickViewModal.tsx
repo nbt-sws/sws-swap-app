@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
-  useWishlist, useAddToWishlist, useRemoveFromWishlist,
+  useWishlistIds, useAddToWishlist, useRemoveFromWishlist,
   useMarketStats, useMarketHistory,
 } from '@/hooks/useApi';
 import {
@@ -27,10 +27,10 @@ interface QuickViewModalProps {
 
 export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) {
   const { t } = useTranslation();
-  const { data: wishlist } = useWishlist();
+  const { data: wishlistIds } = useWishlistIds();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
-  const isWishlisted = listing ? wishlist?.some((w) => w.cardCode === listing.card.code) : false;
+  const isWishlisted = listing ? (wishlistIds?.has(listing.id) ?? false) : false;
 
   const cardCode = listing?.card.code ?? '';
   const { data: marketStats } = useMarketStats(cardCode, { enabled: open && !!cardCode });

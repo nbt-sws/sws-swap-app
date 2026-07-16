@@ -164,7 +164,7 @@ export const userApi = {
 };
 
 export const listingsApi = {
-  getAll: (params?: {
+  getAll: async (params?: {
     q?: string;
     category?: string;
     page?: number;
@@ -174,12 +174,19 @@ export const listingsApi = {
     max_price?: number;
     sellerId?: string;
     status?: string;
-  }) => apiGet<{ results: ApiListing[] }>('market/listings', { searchParams: params }),
+  }) => {
+    // Backend returns { listings: [...] } — normalize to { results: [...] }
+    const res = await apiGet<{ listings?: ApiListing[]; results?: ApiListing[] }>('market/listings', { searchParams: params });
+    return { results: res.listings ?? res.results ?? [] };
+  },
 
   getById: (id: string) => apiGet<ApiListing>(`market/listings/${id}`),
 
-  getBySeller: (sellerId: string) =>
-    apiGet<{ results: ApiListing[] }>('market/listings', { searchParams: { sellerId } }),
+  getBySeller: async (sellerId: string) => {
+    // Backend returns { listings: [...] } — normalize to { results: [...] }
+    const res = await apiGet<{ listings?: ApiListing[]; results?: ApiListing[] }>('market/listings', { searchParams: { sellerId } });
+    return { results: res.listings ?? res.results ?? [] };
+  },
 
   create: (data: {
     itemId: string;
