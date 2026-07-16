@@ -53,6 +53,18 @@ export interface ApiItem {
   metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+  card?: {
+    id: string;
+    code: string;
+    nameEn: string;
+    nameJp?: string;
+    rarity?: string;
+    type?: string;
+    language?: string;
+    game?: string;
+    imageUrl?: string;
+    condition?: string;
+  };
 }
 
 export type ApiListingStatus = 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'SOLD' | 'DELISTED';

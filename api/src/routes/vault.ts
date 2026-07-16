@@ -35,7 +35,7 @@ vaultRoutes.get('/items', async (c) => {
   const items = await withTenant(c.env, tenantId, async (client) => {
     const params: (string | number)[] = [ownerId];
     let sql = `
-      SELECT v.*, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
+      SELECT v.*, v.card_id, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
              c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
       FROM vault_items v
       LEFT JOIN cards c ON v.card_id = c.id
@@ -97,7 +97,7 @@ vaultRoutes.get('/items/:id', async (c) => {
 
   const items = await withTenant(c.env, tenantId, async (client) => {
     const { rows } = await client.query(
-      `SELECT v.*, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
+      `SELECT v.*, v.card_id, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
               c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
        FROM vault_items v
        LEFT JOIN cards c ON v.card_id = c.id

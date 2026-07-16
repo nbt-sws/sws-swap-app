@@ -83,7 +83,7 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
   return {
     id: apiItem.id,
     card: placeholderCard({
-      id: apiItem.id,
+      id: apiItem.card?.id ?? apiItem.id,
       code: apiItem.sku,
       nameEn: apiItem.name,
       imageUrl: apiItem.imageUrl,
