@@ -279,6 +279,7 @@ export const vaultApi = {
     itemFormat?: string;
     condition?: string;
     description?: string;
+    images?: string[];
     metadata?: Record<string, unknown>;
   }) => apiPost<ApiItem>('vault/items', { json: data }),
 
@@ -428,6 +429,11 @@ export const partnersApi = {
 
 export const checkoutApi = {
   getDefaultAddress: () => apiGet<ApiShippingAddress>('addresses/default'),
+};
+
+export const uploadsApi = {
+  upload: (formData: FormData) =>
+    api.post('uploads', { body: formData, headers: getAuthHeaders() }).json<{ url: string; key: string }>(),
 };
 
 export { USE_MOCK };

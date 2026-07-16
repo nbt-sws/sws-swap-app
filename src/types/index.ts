@@ -30,6 +30,8 @@ export interface VaultItem {
   serviceOrderId?: string;
   serviceOrderStatus?: string;
   listingId?: string;
+  /** Uploaded photos, cover first */
+  images?: string[];
 }
 
 export interface MarketListing {

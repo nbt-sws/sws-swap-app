@@ -4,7 +4,7 @@ import {
   auditApi, marketApi, offersApi, pricesApi, submissionsApi,
   userApi, ratingsApi, pregradeApi, checkoutApi,
   storesApi, collectorApi, notificationsApi, followsApi, kycApi, platformApi,
-  apiPost,
+  uploadsApi, apiPost,
 } from '@/lib/api';
 import type {
   CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, MarketListing,
@@ -78,6 +78,17 @@ export function useDeleteVaultItem() {
   return useMutation({
     mutationFn: (itemId: string) => vaultApi.deleteItem(itemId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vault'] }),
+  });
+}
+
+export function useUploadItemImage() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await uploadsApi.upload(formData);
+      return res.url;
+    },
   });
 }
 

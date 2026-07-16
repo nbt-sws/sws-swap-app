@@ -37,6 +37,7 @@ export function VaultItemDetailScreen() {
   const vaultDelivery = useVaultDelivery();
   const createRedemption = useCreateRedemption();
   const itemAudit = useItemAuditHistory(itemId);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [addressModalMode, setAddressModalMode] = useState<'delivery' | 'redemption' | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'history'>('details');
@@ -119,6 +120,14 @@ export function VaultItemDetailScreen() {
 
   const isPositive = item.plPercent >= 0;
 
+  // Uploaded photos (cover first); fall back to the card image when no uploads
+  const gallery = item.images && item.images.length > 0
+    ? item.images
+    : item.card.imageUrl
+      ? [item.card.imageUrl]
+      : [];
+  const activeImage = gallery[Math.min(activeImageIndex, gallery.length - 1)];
+
   return (
     <PageContainer className="py-6">
       <PageHeader
@@ -129,25 +138,50 @@ export function VaultItemDetailScreen() {
 
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Image */}
-          <Card className="bg-surface-light border-border overflow-hidden">
-            <CardContent className="p-0 aspect-[4/5] relative flex items-center justify-center">
-              <img
-                src={getCardImageUrl(item.card)}
-                alt={item.card.nameEn}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              />
-              <div className={cn(
-                'absolute inset-0 flex items-center justify-center -z-10',
-                item.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
-              )}>
-                <span className="text-6xl">{item.card.game === 'one-piece' ? '⚓' : '⚔'}</span>
+          {/* Image gallery */}
+          <div className="space-y-2">
+            <Card className="bg-surface-light border-border overflow-hidden">
+              <CardContent className="p-0 aspect-[4/5] relative flex items-center justify-center">
+                <img
+                  key={activeImage ?? 'placeholder'}
+                  src={activeImage ?? getCardImageUrl(item.card)}
+                  alt={item.card.nameEn}
+                  className="w-full h-full object-cover animate-fade-in"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <div className={cn(
+                  'absolute inset-0 flex items-center justify-center -z-10',
+                  item.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
+                )}>
+                  <span className="text-6xl">{item.card.game === 'one-piece' ? '⚓' : '⚔'}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Thumbnails */}
+            {gallery.length > 1 && (
+              <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
+                {gallery.map((url, i) => (
+                  <button
+                    key={url}
+                    type="button"
+                    onClick={() => setActiveImageIndex(i)}
+                    aria-label={`Photo ${i + 1}`}
+                    className={cn(
+                      'aspect-[5/7] rounded-lg overflow-hidden border transition-all',
+                      i === activeImageIndex
+                        ? 'border-brand ring-2 ring-brand/40'
+                        : 'border-border opacity-60 hover:opacity-100'
+                    )}
+                  >
+                    <img src={url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  </button>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
 
           {/* Info */}
           <div className="space-y-5">

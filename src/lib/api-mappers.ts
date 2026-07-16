@@ -101,6 +101,7 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
     itemStatus: apiItem.status,
     plAmount: 0,
     plPercent: 0,
+    images: Array.isArray(metadata.images) ? (metadata.images as string[]) : [],
   };
 }
 

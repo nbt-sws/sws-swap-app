@@ -4,6 +4,9 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-04-10",
   "compatibility_flags": ["nodejs_compat"],
+  "r2_buckets": [
+    { "binding": "IMAGES", "bucket_name": "sws-swap-images" }
+  ],
   "vars": {
     "ENVIRONMENT": "production"
   },

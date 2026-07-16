@@ -3,6 +3,7 @@ import { Pool } from '@neondatabase/serverless';
 export interface Env {
   DATABASE_URL: string;
   JWT_SECRET: string;
+  IMAGES: R2Bucket;
 }
 
 export async function withTenant<T>(

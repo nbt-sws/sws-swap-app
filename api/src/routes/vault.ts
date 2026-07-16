@@ -14,6 +14,7 @@ const vaultItemSchema = z.object({
   itemFormat: z.string().optional(),
   condition: z.string().optional(),
   imageUrl: z.string().optional(),
+  images: z.array(z.string()).max(10).optional(),
   paidPrice: z.number().int().min(0).optional(),
   currentPrice: z.number().int().min(0).optional(),
   dateAcquired: z.string().optional(),
@@ -24,6 +25,7 @@ const vaultItemSchema = z.object({
     currentPrice: z.number().int().min(0).optional(),
     dateAcquired: z.string().optional(),
     source: z.string().optional(),
+    images: z.array(z.string()).max(10).optional(),
   }).passthrough().optional(),
 });
 
@@ -80,6 +82,7 @@ vaultRoutes.get('/items', async (c) => {
         paidPrice: item.paid_price,
         dateAcquired: item.date_acquired,
         source: item.source,
+        images: item.metadata?.images ?? [],
       },
       createdAt: item.created_at,
       updatedAt: item.updated_at,
@@ -138,6 +141,7 @@ vaultRoutes.get('/items/:id', async (c) => {
       paidPrice: item.paid_price,
       dateAcquired: item.date_acquired,
       source: item.source,
+      images: item.metadata?.images ?? [],
     },
     createdAt: item.created_at,
     updatedAt: item.updated_at,
@@ -176,16 +180,19 @@ vaultRoutes.post('/items', async (c) => {
   const currentPrice = data.currentPrice ?? data.metadata?.currentPrice ?? paidPrice;
   const dateAcquired = data.dateAcquired ?? data.metadata?.dateAcquired;
   const source = data.source ?? data.metadata?.source;
+  // Images: first image is always the cover (image_url)
+  const images = data.images ?? data.metadata?.images ?? [];
+  const imageUrl = images[0] ?? data.imageUrl ?? null;
 
   const items = await withTenant(c.env, tenantId, async (client) => {
     const { rows: cardRows } = await client.query('SELECT id FROM cards WHERE code = $1', [data.sku]);
     const cardId = cardRows[0]?.id || null;
 
     const { rows } = await client.query(
-      `INSERT INTO vault_items (owner_id, holder_id, card_id, sku, name, status, description, category, sub_category, item_format, condition, image_url, paid_price, current_price, date_acquired, source)
-       VALUES ($1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      `INSERT INTO vault_items (owner_id, holder_id, card_id, sku, name, status, description, category, sub_category, item_format, condition, image_url, paid_price, current_price, date_acquired, source, metadata)
+       VALUES ($1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
        RETURNING *`,
-      [userId, cardId, data.sku, data.name, data.status, data.description, data.category, data.subCategory, data.itemFormat, data.condition, data.imageUrl, paidPrice, currentPrice, dateAcquired, source]
+      [userId, cardId, data.sku, data.name, data.status, data.description, data.category, data.subCategory, data.itemFormat, data.condition, imageUrl, paidPrice, currentPrice, dateAcquired, source, JSON.stringify({ images })]
     );
     return rows;
   });
