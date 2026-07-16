@@ -449,15 +449,17 @@ export function useCreateListing() {
       
       return { previousListings, previousMyListings, previousVault, previousMarket, itemId };
     },
-    onSuccess: async () => {
+    onSuccess: async (_data, _variables) => {
       // Force immediate refetch with fresh data - invalidate ALL queries (not just active)
       await queryClient.invalidateQueries({ queryKey: ['myListings'] });
       await queryClient.invalidateQueries({ queryKey: ['market'] });
       await queryClient.invalidateQueries({ queryKey: ['listings'] });
-      await queryClient.invalidateQueries({ queryKey: ['listingsBySeller', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['listingsBySeller'] });
       await queryClient.invalidateQueries({ queryKey: ['vault'] });
+      // Force immediate refetch for vault to update item status
+      await queryClient.refetchQueries({ queryKey: ['vault'], exact: false });
       // Also refetch store profile to update listing counts
-      await queryClient.invalidateQueries({ queryKey: ['storeProfile', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['storeProfile'] });
     },
     onError: (err, _input, context) => {
       // Rollback on error
