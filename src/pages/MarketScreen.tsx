@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';import { useState, useMemo } from 'react';
 import { Link, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { useMarketListings, useVault, useMyListings } from '@/hooks/useApi';
+import { useMarketListings } from '@/hooks/useApi';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -68,8 +68,6 @@ export function MarketScreen() {
   const [quickView, setQuickView] = useState<MarketListing | null>(null);
 
   const { data: listings, isLoading, isFetching, refetch } = useMarketListings(activeShelf === 'All' ? undefined : activeShelf);
-  const { data: vault } = useVault();
-  const { data: myListings } = useMyListings();
 
   const handleRefresh = () => {
     refetch();
@@ -78,9 +76,6 @@ export function MarketScreen() {
     queryClient.invalidateQueries({ queryKey: ['myListings'] });
     queryClient.invalidateQueries({ queryKey: ['vault'] });
   };
-
-  const vaultCount = vault?.length ?? 0;
-  const myListingsCount = myListings?.length ?? 0;
 
   const filteredListings = useMemo(() => {
     let result = [...(listings || [])];
@@ -182,8 +177,8 @@ export function MarketScreen() {
         <div className="flex gap-4 border-b border-border overflow-x-auto scrollbar-hide">
           {[
             { label: t('market.tabs.browse'), count: null, to: '/market' },
-            { label: t('market.tabs.myCollection'), count: vaultCount, to: '/vault' },
-            { label: t('market.tabs.myListings'), count: myListingsCount, to: '/seller' },
+            { label: t('market.tabs.myCollection'), count: null, to: '/vault' },
+            { label: t('market.tabs.myListings'), count: null, to: '/seller' },
           ].map((tab, i) => (
             <Link
               key={tab.label}
