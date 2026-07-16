@@ -6,9 +6,8 @@ import {
   storesApi, collectorApi, notificationsApi, followsApi, kycApi, platformApi,
   apiPost,
 } from '@/lib/api';
-import * as mockApi from '@/services/mockApi';
 import type {
-  CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, Card, MarketListing,
+  CreateListingInput, TradeCard, ShippingAddress, CardPriceData, GradingSubmission, Notification, Redemption, VaultDelivery, StoreProfile, StoreGroup, StoreReview, MarketListing,
 } from '@/types';
 import type { ApiCollectorProfile } from '@/types/api';
 import {
@@ -22,26 +21,9 @@ import {
   mapApiNotification,
   mapApiRedemption,
   mapApiVaultDelivery,
-  placeholderCard,
 } from '@/lib/api-mappers';
 
 import { useAuthStore } from '@/stores/auth';
-
-const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
-
-export async function withFallback<T>(apiCall: () => Promise<T>, fallback: () => Promise<T>): Promise<T> {
-  if (USE_MOCK) return fallback();
-  try {
-    return await apiCall();
-  } catch (err: any) {
-    // Only fallback on network errors, not 4xx/5xx responses
-    if (err?.name === 'TypeError' || err?.message?.includes('fetch') || err?.message?.includes('network')) {
-      console.warn('[withFallback] Network error, using fallback:', err.message);
-      return fallback();
-    }
-    throw err;
-  }
-}
 
 // ─── Vault hooks ────────────────────────────────────────────────────
 
@@ -75,30 +57,8 @@ export function useVaultItem(itemId: string) {
 
 export function useAddToVault() {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
   return useMutation({
     mutationFn: async (item: Parameters<typeof vaultApi.registerItem>[0]) => {
-      if (USE_MOCK) {
-        return mockApi.addToVault({
-          card: placeholderCard({
-            id: item.sku,
-            code: item.sku,
-            nameEn: item.name,
-            condition: (item.condition ?? 'Raw') as Card['condition'],
-          }),
-          ownerId: user?.id,
-          holderId: user?.id,
-          paidPrice: typeof item.metadata?.paidPrice === 'number' ? item.metadata.paidPrice : 0,
-          currency: 'THB',
-          dateAcquired: typeof item.metadata?.dateAcquired === 'string' ? item.metadata.dateAcquired : new Date().toISOString().split('T')[0],
-          source: typeof item.metadata?.source === 'string' ? item.metadata.source : (item.category ?? 'Manual entry'),
-          condition: item.condition ?? 'Raw',
-          status: 'held',
-          itemStatus: 'AVAILABLE',
-          plAmount: 0,
-          plPercent: 0,
-        } as Omit<import('@/types').VaultItem, 'id' | 'currentPrice' | 'plAmount' | 'plPercent'>);
-      }
       return vaultApi.registerItem(item);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vault'] }),
@@ -107,12 +67,8 @@ export function useAddToVault() {
 
 export function useConsignToPlatform() {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
   return useMutation({
-    mutationFn: (itemId: string) =>
-      USE_MOCK
-        ? mockApi.consignItemToPlatform(itemId, user?.id)
-        : vaultApi.consignToPlatform(itemId),
+    mutationFn: (itemId: string) => vaultApi.consignToPlatform(itemId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vault'] }),
   });
 }
@@ -441,10 +397,6 @@ export function useUpdateListingStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ listingId, status }: { listingId: string; status: 'active' | 'paused' | 'sold' }) => {
-      if (USE_MOCK) {
-        await mockApi.updateListingStatus(listingId, status);
-        return;
-      }
       if (status === 'active') {
         await listingsApi.activate(listingId);
       } else {
@@ -494,14 +446,6 @@ export function useCreateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: { listingId: string; deliveryType: 'SHIP' | 'VAULT_STORE'; shippingAddress?: ShippingAddress; itemId?: string; sellerId?: string; price?: number }) => {
-      if (USE_MOCK) {
-        const order = await mockApi.createOrder({
-          listingId: data.listingId,
-          deliveryPreference: data.deliveryType,
-          shippingAddress: data.shippingAddress,
-        });
-        return order;
-      }
       const created = await ordersApi.create({
         listingId: data.listingId,
         itemId: data.itemId,
@@ -532,10 +476,6 @@ export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: import('@/types').Order['status'] }) => {
-      if (USE_MOCK) {
-        await mockApi.updateOrderStatus(orderId, status);
-        return;
-      }
       // Real backend only exposes cancel for buyer-facing status transitions.
       if (status === 'CANCELLED') {
         await ordersApi.cancel(orderId);
@@ -596,7 +536,7 @@ export function useCreateOffer() {
   return useMutation({
     mutationFn: async (data: { listingId: string; sellerId?: string; offerPrice: number }) => {
       let sellerId = data.sellerId;
-      if (!sellerId && !USE_MOCK) {
+      if (!sellerId) {
         const listing = await listingsApi.getById(data.listingId);
         sellerId = listing.sellerId;
       }
@@ -624,7 +564,7 @@ export function useCreateTradeOffer() {
   return useMutation({
     mutationFn: async (payload: { listingId: string; sellerId?: string; tradeCards: TradeCard[] }) => {
       let sellerId = payload.sellerId;
-      if (!sellerId && !USE_MOCK) {
+      if (!sellerId) {
         const listing = await listingsApi.getById(payload.listingId);
         sellerId = listing.sellerId;
       }
@@ -703,12 +643,8 @@ export function useUserAuditHistory(userId: string) {
 
 export function useVaultDelivery() {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
   return useMutation({
     mutationFn: async ({ itemId, shippingAddress }: { itemId: string; shippingAddress?: ShippingAddress }) => {
-      if (USE_MOCK) {
-        return mockApi.createVaultDelivery(itemId, shippingAddress ?? { name: '', address: '', province: '', postalCode: '', phone: '' }, user?.id);
-      }
       const res = await vaultApi.createVaultDelivery(itemId, { shippingAddress: shippingAddress ?? { name: '', address: '', province: '', postalCode: '', phone: '' } });
       return res;
     },
@@ -721,12 +657,8 @@ export function useVaultDelivery() {
 
 export function useCreateRedemption() {
   const queryClient = useQueryClient();
-  const { user } = useAuthStore();
   return useMutation({
     mutationFn: async ({ itemId, shippingAddress }: { itemId: string; shippingAddress: ShippingAddress }) => {
-      if (USE_MOCK) {
-        return mockApi.createRedemption(itemId, shippingAddress, user?.id);
-      }
       const res = await vaultApi.createRedemption(itemId, { shippingAddress });
       return res;
     },
@@ -1046,18 +978,22 @@ export function useDelistListing() {
   });
 }
 
-// ─── Buyer-web-like home data hooks (mock-backed) ───────────────────
+// ─── Buyer-web-like home data hooks ───────────────────────────────
 
 export function useRecentActivity() {
   return useQuery({
     queryKey: ['recentActivity'],
     queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 400));
-      return [
-        { orderId: 'ORD-001', title: 'Monkey D. Luffy G5', imageUrl: '', totalAmount: 32000, createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(), buyerName: 'collector_a' },
-        { orderId: 'ORD-002', title: 'Charlotte Katakuri PSA 10', imageUrl: '', totalAmount: 5900, createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), buyerName: 'duelist_bkk' },
-        { orderId: 'ORD-003', title: 'Awakening Booster Box', imageUrl: '', totalAmount: 3200, createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(), buyerName: 'yugi_tha' },
-      ];
+      // TODO: replace with real endpoint when available
+      const res = await ordersApi.getAll();
+      return res.orders.slice(0, 3).map((o: any) => ({
+        orderId: o.id,
+        title: o.listing?.title || 'Order',
+        imageUrl: o.listing?.imageUrl || '',
+        totalAmount: o.price || 0,
+        createdAt: o.createdAt,
+        buyerName: o.buyerId || 'buyer',
+      }));
     },
     staleTime: 1000 * 60,
   });

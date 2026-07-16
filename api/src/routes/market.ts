@@ -177,7 +177,7 @@ marketRoutes.post('/listings', async (c) => {
     }
 
     await withTenant(c.env, tenantId, async (client) => {
-      await client.query("UPDATE vault_items SET status = 'LOCKED' WHERE id = $1", [data.itemId]);
+      await client.query("UPDATE vault_items SET status = 'LISTING' WHERE id = $1", [data.itemId]);
     });
   }
 

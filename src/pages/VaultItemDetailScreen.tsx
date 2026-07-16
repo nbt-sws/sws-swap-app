@@ -21,7 +21,7 @@ import { cn, getCardImageUrl } from '@/lib/utils';
 import { ListItemModal } from '@/components/vault/ListItemModal';
 import { ShippingAddressModal } from '@/components/domain/ShippingAddressModal';
 import { toast } from 'sonner';
-import type { AuditRecord } from '@/services/mockApi';
+import type { AuditRecord } from '@/types';
 import type { ShippingAddress } from '@/types';
 
 
@@ -43,9 +43,9 @@ export function VaultItemDetailScreen() {
 
   const item = vault?.find((v) => v.id === itemId);
   const listing = listings?.find((l) => l.itemId === item?.id);
-  const isListed = !!listing;
   const isOwner = !!item && item.ownerId === user?.id;
-  const canList = isOwner && item?.itemStatus !== 'REDEEMING' && item?.itemStatus !== 'REDEEMED' && item?.itemStatus !== 'LOCKED';
+  const isListing = item?.itemStatus === 'LISTING';
+  const canList = isOwner && item?.itemStatus === 'AVAILABLE';
   const canRequestDelivery = isOwner && item?.itemStatus === 'VAULT_HELD';
   const canRedeem = isOwner && item?.holderId === user?.id && item?.itemStatus === 'AVAILABLE';
 
@@ -170,7 +170,7 @@ export function VaultItemDetailScreen() {
                 )}>
                   {item.status.toUpperCase()}
                 </span>
-                {isListed && (
+                {isListing && (
                   <span className="inline-flex items-center rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
                     LISTED
                   </span>
@@ -309,7 +309,7 @@ export function VaultItemDetailScreen() {
 
             {/* Actions */}
             <div className="flex gap-3">
-              {isListed ? (
+              {isListing ? (
                 <Button
                   className="flex-1 bg-pldown hover:bg-pldown/90 h-12"
                   onClick={handleDelist}

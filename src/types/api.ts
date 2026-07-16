@@ -29,6 +29,7 @@ export interface ApiUser {
 
 export type ApiItemStatus =
   | 'AVAILABLE'
+  | 'LISTING'
   | 'LOCKED'
   | 'IN_TRANSIT'
   | 'DELIVERED'

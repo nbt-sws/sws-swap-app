@@ -442,3 +442,12 @@ export type Screen =
   | 'userPanel';
 
 export type Tab = 'home' | 'market' | 'vault' | 'settings';
+
+export interface AuditRecord {
+  id: string;
+  eventType: string;
+  actorId: string;
+  occurredAt: string;
+  previousState?: unknown;
+  newState?: unknown;
+}

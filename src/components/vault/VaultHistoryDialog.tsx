@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserAuditHistory } from '@/hooks/useApi';
 import { Clock, Package } from 'lucide-react';
-import type { AuditRecord } from '@/services/mockApi';
+import type { AuditRecord } from '@/types';
 
 interface VaultHistoryDialogProps {
   open: boolean;
