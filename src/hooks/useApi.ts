@@ -50,15 +50,9 @@ export function useVault() {
   return useQuery({
     queryKey: ['vault', user?.id],
     queryFn: async () => {
-      const items = await withFallback(
-        async () => {
-          if (!user?.id) return [];
-          const res = await vaultApi.getItems({ ownerId: user.id });
-          return res.items.map(mapApiItemToVaultItem);
-        },
-        () => mockApi.fetchVault()
-      );
-      return items;
+      if (!user?.id) return [];
+      const res = await vaultApi.getItems({ ownerId: user.id });
+      return res.items.map(mapApiItemToVaultItem);
     },
     staleTime: 1000 * 5,
     refetchOnWindowFocus: true,
@@ -71,17 +65,8 @@ export function useVaultItem(itemId: string) {
   return useQuery({
     queryKey: ['vault', itemId],
     queryFn: async () => {
-      const item = await withFallback(
-        async () => {
-          const res = await vaultApi.getItemById(itemId);
-          return mapApiItemToVaultItem(res);
-        },
-        async () => {
-          const items = await mockApi.fetchVault();
-          return items.find((i) => i.id === itemId) ?? null;
-        }
-      );
-      return item;
+      const res = await vaultApi.getItemById(itemId);
+      return mapApiItemToVaultItem(res);
     },
     enabled: !!itemId && isAuthenticated,
     staleTime: 1000 * 60 * 2,
@@ -138,14 +123,8 @@ export function useMarketListings(shelf?: string) {
   return useQuery({
     queryKey: ['market', shelf],
     queryFn: async () => {
-      const listings = await withFallback(
-        async () => {
-          const res = await listingsApi.getAll(shelf ? { q: shelf } : undefined);
-          return res.results.map(mapApiListingToMarketListing);
-        },
-        () => mockApi.fetchMarketListings(shelf)
-      );
-      return listings;
+      const res = await listingsApi.getAll(shelf ? { q: shelf } : undefined);
+      return res.results.map(mapApiListingToMarketListing);
     },
     staleTime: 1000 * 5,
     refetchOnWindowFocus: true,
@@ -156,13 +135,8 @@ export function useListings(params?: { q?: string; page?: number; limit?: number
   return useQuery({
     queryKey: ['listings', params],
     queryFn: async () => {
-      const listings = await withFallback(
-        async () => {
-          const res = await listingsApi.getAll(params);
-          return res.results.map(mapApiListingToMarketListing);
-        },
-        () => mockApi.fetchMarketListings(params?.q)
-      );
+      const res = await listingsApi.getAll(params);
+      const listings = res.results.map(mapApiListingToMarketListing);
       return { results: listings };
     },
     staleTime: 1000 * 5,
@@ -174,14 +148,8 @@ export function useListing(listingId: string) {
   return useQuery({
     queryKey: ['listing', listingId],
     queryFn: async () => {
-      const listing = await withFallback(
-        async () => {
-          const res = await listingsApi.getById(listingId);
-          return mapApiListingToMarketListing(res);
-        },
-        () => mockApi.fetchListingById(listingId)
-      );
-      return listing;
+      const res = await listingsApi.getById(listingId);
+      return mapApiListingToMarketListing(res);
     },
     enabled: !!listingId,
     staleTime: 1000 * 60,
@@ -191,7 +159,10 @@ export function useListing(listingId: string) {
 export function useCardPrice(cardCode: string) {
   return useQuery<CardPriceData>({
     queryKey: ['price', cardCode],
-    queryFn: () => withFallback(() => pricesApi.getByCode(cardCode) as Promise<CardPriceData>, () => mockApi.fetchCardPrice(cardCode)),
+    queryFn: async () => {
+      const res = await pricesApi.getByCode(cardCode);
+      return res as CardPriceData;
+    },
     staleTime: 1000 * 60 * 5,
     enabled: !!cardCode,
   });
@@ -239,14 +210,8 @@ export function useUser() {
   return useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      const user = await withFallback(
-        async () => {
-          const res = await userApi.me();
-          return mapApiUserToAuthUser(res);
-        },
-        () => mockApi.fetchUser()
-      );
-      return user;
+      const res = await userApi.me();
+      return mapApiUserToAuthUser(res);
     },
     staleTime: 1000 * 60 * 5,
     enabled: isAuthenticated,
@@ -287,20 +252,14 @@ export function useWishlist() {
   return useQuery({
     queryKey: ['wishlist'],
     queryFn: async () => {
-      const wishlist = await withFallback(
-        async () => {
-          const [wishlistRes, listingsRes] = await Promise.all([
-            wishlistApi.getAll(),
-            listingsApi.getAll({ limit: 1000 }),
-          ]);
-          const listings = listingsRes.results;
-          return wishlistRes.items.map((i) =>
-            mapApiWishlistItemToWishlistItem(i, listings.find((l) => l.listingId === i.listingId))
-          );
-        },
-        () => mockApi.fetchWishlist()
+      const [wishlistRes, listingsRes] = await Promise.all([
+        wishlistApi.getAll(),
+        listingsApi.getAll({ limit: 1000 }),
+      ]);
+      const listings = listingsRes.results;
+      return wishlistRes.items.map((i) =>
+        mapApiWishlistItemToWishlistItem(i, listings.find((l) => l.listingId === i.listingId))
       );
-      return wishlist;
     },
     staleTime: 1000 * 60 * 2,
     enabled: isAuthenticated,
@@ -330,15 +289,9 @@ export function useMyListings() {
   return useQuery({
     queryKey: ['myListings'],
     queryFn: async () => {
-      const listings = await withFallback(
-        async () => {
-          if (!user?.id) return [];
-          const res = await listingsApi.getBySeller(user.id);
-          return res.results.map(mapApiListingToMarketListing);
-        },
-        () => mockApi.fetchMyListings()
-      );
-      return listings;
+      if (!user?.id) return [];
+      const res = await listingsApi.getBySeller(user.id);
+      return res.results.map(mapApiListingToMarketListing);
     },
     staleTime: 1000 * 5,
     refetchOnWindowFocus: true,
@@ -362,31 +315,27 @@ export function useCreateListing() {
       }
       
       // Use store profile display name if available, fallback to fullName or email
-      const sellerName = storeProfile?.displayName || storeProfile?.name || user?.fullName || user?.email || 'Me';
+      const _sellerName = storeProfile?.displayName || storeProfile?.name || user?.fullName || user?.email || 'Me';
+      void _sellerName; // used in optimistic update
       
-      return withFallback(
-        async () => {
-          const res = await listingsApi.create({
-            itemId,
-            title: input.card.nameEn,
-            description: input.description,
-            price: input.price,
-            category: input.shelf,
-            itemFormat: input.listingType,
-          });
-          return mapApiListingToMarketListing({
-            listingId: res.listingId,
-            itemId,
-            sellerId: user?.id ?? '',
-            title: input.card.nameEn,
-            price: input.price,
-            currency: 'THB',
-            status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-          });
-        },
-        async () => mockApi.createListing(input, user?.id, sellerName)
-      );
+      const res = await listingsApi.create({
+        itemId,
+        title: input.card.nameEn,
+        description: input.description,
+        price: input.price,
+        category: input.shelf,
+        itemFormat: input.listingType,
+      });
+      return mapApiListingToMarketListing({
+        listingId: res.listingId,
+        itemId,
+        sellerId: user?.id ?? '',
+        title: input.card.nameEn,
+        price: input.price,
+        currency: 'THB',
+        status: 'ACTIVE',
+        createdAt: new Date().toISOString(),
+      });
     },
     // Optimistic update: add the new listing to cache immediately
     onMutate: async (input) => {
@@ -520,14 +469,8 @@ export function useOrders() {
   return useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
-      const orders = await withFallback(
-        async () => {
-          const res = await ordersApi.getAll();
-          return res.orders.map(mapApiOrderToOrder);
-        },
-        () => mockApi.fetchOrders()
-      );
-      return orders;
+      const res = await ordersApi.getAll();
+      return res.orders.map(mapApiOrderToOrder);
     },
     staleTime: 1000 * 60 * 2,
     enabled: isAuthenticated,
@@ -539,14 +482,8 @@ export function useOrder(orderId: string) {
   return useQuery({
     queryKey: ['order', orderId],
     queryFn: async () => {
-      const order = await withFallback(
-        async () => {
-          const res = await ordersApi.getById(orderId);
-          return mapApiOrderToOrder(res);
-        },
-        async () => mockApi.fetchOrderById(orderId)
-      );
-      return order;
+      const res = await ordersApi.getById(orderId);
+      return mapApiOrderToOrder(res);
     },
     enabled: !!orderId && isAuthenticated,
     staleTime: 1000 * 60 * 2,
@@ -645,15 +582,9 @@ export function useOffers() {
   return useQuery({
     queryKey: ['offers'],
     queryFn: async () => {
-      const offers = await withFallback(
-        async () => {
-          const [received, sent] = await Promise.all([offersApi.getReceived(), offersApi.getSent()]);
-          const currentUserId = user?.id;
-          return [...received.offers.map((o) => mapApiOfferToOffer(o, currentUserId)), ...sent.offers.map((o) => mapApiOfferToOffer(o, currentUserId))];
-        },
-        () => mockApi.fetchOffers()
-      );
-      return offers;
+      const [received, sent] = await Promise.all([offersApi.getReceived(), offersApi.getSent()]);
+      const currentUserId = user?.id;
+      return [...received.offers.map((o) => mapApiOfferToOffer(o, currentUserId)), ...sent.offers.map((o) => mapApiOfferToOffer(o, currentUserId))];
     },
     staleTime: 1000 * 60 * 2,
     enabled: isAuthenticated,
@@ -712,10 +643,10 @@ export function useMarketHistory(
 ) {
   return useQuery({
     queryKey: ['marketHistory', cardCode, range],
-    queryFn: () => withFallback(
-      () => marketApi.getHistory(cardCode, range).then((r) => r.trades.map((t) => ({ date: t.time, price: t.price }))),
-      () => mockApi.fetchMarketHistory(cardCode, range).then((r) => r.data)
-    ),
+    queryFn: async () => {
+      const res = await marketApi.getHistory(cardCode, range);
+      return res.trades.map((t) => ({ date: t.time, price: t.price }));
+    },
     staleTime: 1000 * 60 * 5,
     enabled: !!cardCode && (options?.enabled ?? true),
   });
@@ -727,16 +658,16 @@ export function useMarketStats(
 ) {
   return useQuery({
     queryKey: ['marketStats', cardCode],
-    queryFn: () => withFallback(
-      () => marketApi.getStats(cardCode).then((r) => ({
-        lastSold: r.lastSold,
-        average: r.avgPrice,
-        min: r.minPrice,
-        max: r.maxPrice,
-        count: r.count,
-      })),
-      () => mockApi.fetchMarketStats(cardCode)
-    ),
+    queryFn: async () => {
+      const res = await marketApi.getStats(cardCode);
+      return {
+        lastSold: res.lastSold,
+        average: res.avgPrice,
+        min: res.minPrice,
+        max: res.maxPrice,
+        count: res.count,
+      };
+    },
     staleTime: 1000 * 60 * 5,
     enabled: !!cardCode && (options?.enabled ?? true),
   });
@@ -811,14 +742,8 @@ export function useRedemptions() {
   return useQuery<Redemption[]>({
     queryKey: ['redemptions'],
     queryFn: async () => {
-      const redemptions = await withFallback(
-        async () => {
-          const res = await vaultApi.getRedemptions();
-          return res.redemptions.map(mapApiRedemption);
-        },
-        () => mockApi.fetchRedemptions()
-      );
-      return redemptions;
+      const res = await vaultApi.getRedemptions();
+      return res.redemptions.map(mapApiRedemption);
     },
     staleTime: 1000 * 60 * 2,
     enabled: isAuthenticated,
@@ -830,14 +755,8 @@ export function useVaultDeliveries() {
   return useQuery<VaultDelivery[]>({
     queryKey: ['vaultDeliveries'],
     queryFn: async () => {
-      const deliveries = await withFallback(
-        async () => {
-          const res = await vaultApi.getVaultDeliveries();
-          return res.deliveries.map(mapApiVaultDelivery);
-        },
-        () => mockApi.fetchVaultDeliveries()
-      );
-      return deliveries;
+      const res = await vaultApi.getVaultDeliveries();
+      return res.deliveries.map(mapApiVaultDelivery);
     },
     staleTime: 1000 * 60 * 2,
     enabled: isAuthenticated,
@@ -860,14 +779,8 @@ export function useStores() {
   return useQuery<StoreProfile[]>({
     queryKey: ['stores'],
     queryFn: async () => {
-      const sellers = await withFallback(
-        async () => {
-          const res = await storesApi.getAll();
-          return res.sellers.map(mapApiCollectorProfileToStore);
-        },
-        async () => mockApi.fetchStores()
-      );
-      return sellers;
+      const res = await storesApi.getAll();
+      return res.sellers.map(mapApiCollectorProfileToStore);
     },
     staleTime: 1000 * 60 * 2,
   });
@@ -877,14 +790,8 @@ export function useStoreProfile(userId: string) {
   return useQuery<StoreProfile | null>({
     queryKey: ['storeProfile', userId],
     queryFn: async () => {
-      const profile = await withFallback(
-        async () => {
-          const res = await collectorApi.getProfile(userId);
-          return mapApiCollectorProfileToStore(res);
-        },
-        async () => mockApi.fetchStoreProfile(userId)
-      );
-      return profile;
+      const res = await collectorApi.getProfile(userId);
+      return mapApiCollectorProfileToStore(res);
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 2,
@@ -894,22 +801,19 @@ export function useStoreProfile(userId: string) {
 export function useUpdateStoreProfile() {
   const queryClient = useQueryClient();
   return useMutation<StoreProfile, Error, { userId: string; data: Partial<StoreProfile> }>({
-    mutationFn: ({ userId, data }) => withFallback(
-      async () => {
-        const profileUpdate: Partial<ApiCollectorProfile> = {
-          displayName: data.displayName,
-          bio: data.bio,
-          avatarUrl: data.avatarUrl,
-          bannerUrl: data.bannerUrl,
-          socialLinks: data.socialLinks
-            ? Object.fromEntries(data.socialLinks.map((l) => [l.platform, l.url]))
-            : undefined,
-        };
-        const res = await collectorApi.updateProfile(profileUpdate);
-        return mapApiCollectorProfileToStore(res);
-      },
-      async () => mockApi.updateStoreProfile(userId, data)
-    ),
+    mutationFn: async ({ userId: _userId, data }) => {
+      const profileUpdate: Partial<ApiCollectorProfile> = {
+        displayName: data.displayName,
+        bio: data.bio,
+        avatarUrl: data.avatarUrl,
+        bannerUrl: data.bannerUrl,
+        socialLinks: data.socialLinks
+          ? Object.fromEntries(data.socialLinks.map((l) => [l.platform, l.url]))
+          : undefined,
+      };
+      const res = await collectorApi.updateProfile(profileUpdate);
+      return mapApiCollectorProfileToStore(res);
+    },
     onSuccess: (_, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ['storeProfile', userId] });
       queryClient.invalidateQueries({ queryKey: ['stores'] });
@@ -919,29 +823,23 @@ export function useUpdateStoreProfile() {
 
 export function useUploadStoreAvatar() {
   return useMutation<string, Error, File>({
-    mutationFn: (file) => withFallback(
-      async () => {
-        const formData = new FormData();
-        formData.append('avatar', file);
-        const res = await collectorApi.uploadAvatar(formData);
-        return res.avatarUrl;
-      },
-      async () => mockApi.uploadStoreAvatar(file)
-    ),
+    mutationFn: async (file) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      const res = await collectorApi.uploadAvatar(formData);
+      return res.avatarUrl;
+    },
   });
 }
 
 export function useUploadStoreBanner() {
   return useMutation<string, Error, File>({
-    mutationFn: (file) => withFallback(
-      async () => {
-        const formData = new FormData();
-        formData.append('banner', file);
-        const res = await collectorApi.uploadBanner(formData);
-        return res.bannerUrl;
-      },
-      async () => mockApi.uploadStoreBanner(file)
-    ),
+    mutationFn: async (file) => {
+      const formData = new FormData();
+      formData.append('banner', file);
+      const res = await collectorApi.uploadBanner(formData);
+      return res.bannerUrl;
+    },
   });
 }
 
@@ -949,11 +847,7 @@ export function useStoreGroups(userId: string) {
   return useQuery<StoreGroup[]>({
     queryKey: ['storeGroups', userId],
     queryFn: async () => {
-      const groups = await withFallback(
-        async () => [],
-        async () => mockApi.fetchStoreGroups(userId)
-      );
-      return groups;
+      return [];
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 2,
@@ -964,11 +858,7 @@ export function useStoreReviews(storeId: string) {
   return useQuery<StoreReview[]>({
     queryKey: ['storeReviews', storeId],
     queryFn: async () => {
-      const reviews = await withFallback(
-        async () => [] as StoreReview[],
-        async () => mockApi.fetchStoreReviews(storeId)
-      );
-      return reviews;
+      return [] as StoreReview[];
     },
     enabled: !!storeId,
     staleTime: 1000 * 60 * 2,
@@ -978,10 +868,7 @@ export function useStoreReviews(storeId: string) {
 export function useUpdateStoreGroups() {
   const queryClient = useQueryClient();
   return useMutation<StoreGroup[], Error, { userId: string; groups: StoreGroup[] }>({
-    mutationFn: ({ userId, groups }) => withFallback(
-      async () => groups,
-      async () => mockApi.updateStoreGroups(userId, groups)
-    ),
+    mutationFn: async ({ userId: _userId, groups }) => groups,
     onSuccess: (_, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ['storeGroups', userId] });
     },
@@ -995,14 +882,8 @@ export function useNotifications() {
   return useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const notifications = await withFallback(
-        async () => {
-          const res = await notificationsApi.getAll();
-          return res.notifications.map(mapApiNotification);
-        },
-        () => mockApi.fetchNotifications()
-      );
-      return notifications;
+      const res = await notificationsApi.getAll();
+      return res.notifications.map(mapApiNotification);
     },
     staleTime: 1000 * 60,
     enabled: isAuthenticated,
@@ -1046,14 +927,8 @@ export function useFollowedSellers() {
   return useQuery({
     queryKey: ['followedSellers'],
     queryFn: async () => {
-      const sellers = await withFallback(
-        async () => {
-          const res = await followsApi.getAll();
-          return res.follows.map((f) => f.followingId);
-        },
-        () => mockApi.getFollowedSellers()
-      );
-      return sellers;
+      const res = await followsApi.getAll();
+      return res.follows.map((f) => f.followingId);
     },
     staleTime: 1000 * 60,
   });
@@ -1083,14 +958,8 @@ export function useListingsBySeller(sellerId?: string) {
     queryKey: ['listingsBySeller', sellerId],
     queryFn: async () => {
       if (!sellerId) return [];
-      const listings = await withFallback(
-        async () => {
-          const res = await listingsApi.getBySeller(sellerId);
-          return res.results.map(mapApiListingToMarketListing);
-        },
-        async () => mockApi.fetchListingsBySeller(sellerId)
-      );
-      return listings;
+      const res = await listingsApi.getBySeller(sellerId);
+      return res.results.map(mapApiListingToMarketListing);
     },
     enabled: !!sellerId && isAuthenticated,
     staleTime: 1000 * 5,
@@ -1198,14 +1067,8 @@ export function usePlatformStats() {
   return useQuery({
     queryKey: ['platformStats'],
     queryFn: async () => {
-      const stats = await withFallback(
-        async () => {
-          const res = await platformApi.getStats();
-          return res;
-        },
-        () => mockApi.fetchPlatformStats()
-      );
-      return stats;
+      const res = await platformApi.getStats();
+      return res;
     },
     staleTime: 1000 * 60,
   });
@@ -1215,13 +1078,8 @@ export function useTrendingListings() {
   return useQuery({
     queryKey: ['trendingListings'],
     queryFn: async () => {
-      const listings = await withFallback(
-        async () => {
-          const res = await listingsApi.getAll({ sort: 'price_desc', limit: 8 });
-          return res.results.map(mapApiListingToMarketListing);
-        },
-        () => mockApi.fetchMarketListings()
-      );
+      const res = await listingsApi.getAll({ sort: 'price_desc', limit: 8 });
+      const listings = res.results.map(mapApiListingToMarketListing);
       return listings.slice(0, 8);
     },
     staleTime: 1000 * 60,
