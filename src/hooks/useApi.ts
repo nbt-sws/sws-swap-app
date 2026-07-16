@@ -258,21 +258,16 @@ export function useMyListings() {
 export function useCreateListing() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  const { data: myListings } = useMyListings();
-  const { data: storeProfile } = useStoreProfile(user?.id ?? '');
   
   return useMutation({
     mutationFn: async (input: CreateListingInput) => {
-      // Check if item already has an active listing
+      // Check if item already has an active listing using vault data (faster than myListings)
       const itemId = input.itemId ?? input.card.id;
-      const existing = myListings?.find(l => l.itemId === itemId && l.status === 'active');
+      const vault = queryClient.getQueryData<{ items: any[] }>(['vault']);
+      const existing = vault?.items?.find((v: any) => v.id === itemId && v.itemStatus === 'LISTING');
       if (existing) {
         throw new Error('This item is already listed for sale');
       }
-      
-      // Use store profile display name if available, fallback to fullName or email
-      const _sellerName = storeProfile?.displayName || storeProfile?.name || user?.fullName || user?.email || 'Me';
-      void _sellerName; // used in optimistic update
       
       const res = await listingsApi.create({
         itemId,
@@ -342,14 +337,14 @@ export function useCreateListing() {
         return Array.isArray(old) ? [optimisticListing, ...old] : { results: [optimisticListing, ...(old.results || [])] };
       });
       
-      // Optimistically update vault item status
+      // Optimistically update vault item status to LISTING
       queryClient.setQueryData(['vault'], (old: any) => {
         if (!old) return old;
-        return old.map((v: any) => v.id === itemId ? { ...v, itemStatus: 'LOCKED', listingId: optimisticListing.id } : v);
+        return old.map((v: any) => v.id === itemId ? { ...v, itemStatus: 'LISTING', listingId: optimisticListing.id } : v);
       });
       queryClient.setQueryData(['vault', user?.id], (old: any) => {
         if (!old) return old;
-        return old.map((v: any) => v.id === itemId ? { ...v, itemStatus: 'LOCKED', listingId: optimisticListing.id } : v);
+        return old.map((v: any) => v.id === itemId ? { ...v, itemStatus: 'LISTING', listingId: optimisticListing.id } : v);
       });
       
       return { previousListings, previousMyListings, previousVault, previousMarket, itemId };

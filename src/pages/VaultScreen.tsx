@@ -111,11 +111,11 @@ export function VaultScreen() {
       const itemStatus = v.itemStatus;
       if (itemStatus === 'AVAILABLE') c.AVAILABLE++;
       if (itemStatus === 'VAULT_HELD') c.VAULT_HELD++;
+      if (itemStatus === 'LISTING') c.LISTED++;
       if (itemStatus === 'LOCKED') c.LOCKED++;
       if (itemStatus === 'IN_TRANSIT') c.IN_TRANSIT++;
       if (itemStatus === 'REDEEMING') c.REDEEMING++;
       if (itemStatus === 'DELIVERED' || v.status === 'sold') c.COMPLETED++;
-      if (listingsMap.has(v.id)) c.LISTED++;
     });
     return c;
   }, [vault, listingsMap]);
@@ -123,11 +123,11 @@ export function VaultScreen() {
   const filteredCards = useMemo(() => {
     if (!vault) return [];
     return vault.filter((v) => {
-      if (vaultViewMode === 'store') return listingsMap.has(v.id);
+      if (vaultViewMode === 'store') return v.itemStatus === 'LISTING';
       if (activeFilter === 'ALL') return true;
-      if (activeFilter === 'AVAILABLE') return v.itemStatus === 'AVAILABLE' && !listingsMap.has(v.id);
+      if (activeFilter === 'AVAILABLE') return v.itemStatus === 'AVAILABLE';
       if (activeFilter === 'VAULT_HELD') return v.itemStatus === 'VAULT_HELD';
-      if (activeFilter === 'LISTED') return listingsMap.has(v.id);
+      if (activeFilter === 'LISTED') return v.itemStatus === 'LISTING';
       if (activeFilter === 'IN_TRANSIT') return v.itemStatus === 'IN_TRANSIT';
       if (activeFilter === 'REDEEMING') return v.itemStatus === 'REDEEMING';
       if (activeFilter === 'COMPLETED') return v.itemStatus === 'DELIVERED' || v.status === 'sold';
@@ -666,7 +666,6 @@ export function VaultScreen() {
                         onDelist={handleDelistItem}
                         onRedeem={handleRedeemItem}
                         onDelete={handleDeleteItem}
-                        isListed={listingsMap.has(item.id)}
                         isOwner={item.ownerId === userId}
                       />
                     ))}
@@ -686,7 +685,6 @@ export function VaultScreen() {
                         onDelist={handleDelistItem}
                         onRedeem={handleRedeemItem}
                         onDelete={handleDeleteItem}
-                        isListed={listingsMap.has(item.id)}
                         isOwner={item.ownerId === userId}
                       />
                     ))}
@@ -706,7 +704,6 @@ export function VaultScreen() {
                         onDelist={handleDelistItem}
                         onRedeem={handleRedeemItem}
                         onDelete={handleDeleteItem}
-                        isListed={listingsMap.has(item.id)}
                         isOwner={item.ownerId === userId}
                         className="rounded-xl"
                       />

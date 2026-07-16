@@ -40,15 +40,15 @@ export function VaultCard({
   onDelist,
   onRedeem,
   onDelete,
-  isListed,
   isOwner,
   className,
 }: VaultCardProps) {
   const { t } = useTranslation();
   const platformHeld = isPlatformHeld(item);
+  const isListing = item.itemStatus === 'LISTING';
 
   // Status configuration
-  const statusConfig = isListed
+  const statusConfig = isListing
     ? {
         label: t('filters.listed'),
         color: 'bg-brand text-white shadow-md',
@@ -84,7 +84,7 @@ export function VaultCard({
         'transition-all duration-300 hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20',
         'hover:-translate-y-1',
         selecting && selected && 'ring-2 ring-brand border-transparent',
-        isListed && 'ring-1 ring-brand/20',
+        isListing && 'ring-1 ring-brand/20',
         className
       )}
     >
@@ -122,7 +122,7 @@ export function VaultCard({
         </div>
 
         {/* Delete button on hover — hide when listed or selecting */}
-        {!selecting && isOwner && onDelete && item.status !== 'sold' && !isListed && (
+        {!selecting && isOwner && onDelete && item.status !== 'sold' && !isListing && (
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -147,7 +147,7 @@ export function VaultCard({
               className={cn(
                 'text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border inline-flex items-center gap-1 shadow-lg backdrop-blur-sm',
                 statusConfig.color,
-                isListed && 'animate-pulse'
+                isListing && 'animate-pulse'
               )}
             >
               {StatusIcon && <StatusIcon className="w-3 h-3" />}
@@ -224,7 +224,7 @@ export function VaultCard({
         {/* Action buttons */}
         <div className="mt-2.5 flex gap-1.5">
           {/* Listed → Unlist + Edit + Redeem/Delivery */}
-          {isListed && isOwner && onDelist && !selecting && (
+          {isListing && isOwner && onDelist && !selecting && (
             <>
               <button
                 onClick={(e) => {
@@ -282,7 +282,7 @@ export function VaultCard({
           )}
 
           {/* Not Listed + In Vault → List + Redeem */}
-          {!isListed &&
+          {!isListing &&
             isOwner &&
             item.status === 'held' &&
             !platformHeld &&
@@ -329,7 +329,7 @@ export function VaultCard({
             )}
 
           {/* SWS Vault → Redeem */}
-          {!isListed &&
+          {!isListing &&
             isOwner &&
             item.status === 'held' &&
             platformHeld &&

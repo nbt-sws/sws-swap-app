@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { VaultItem } from '@/types';
-import { Tag, ArrowRightLeft } from 'lucide-react';
+import { Tag, ArrowRightLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ListItemModalProps {
@@ -143,7 +143,14 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
             onClick={handleSubmit}
             disabled={createListing.isPending || (listingType === 'SALE' && !price)}
           >
-            {createListing.isPending ? 'Creating listing...' : 'Publish listing'}
+            {createListing.isPending ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Creating listing...
+              </span>
+            ) : (
+              'Publish listing'
+            )}
           </Button>
           {createListing.isError && (
             <p className="text-xs text-center text-red-500 mt-2">
