@@ -259,9 +259,9 @@ export const vaultApi = {
     itemFormat?: string;
     page?: number;
     limit?: number;
-  }) => apiGet<{ items: ApiItem[] }>('items', { searchParams: params }),
+  }) => apiGet<{ items: ApiItem[] }>('vault/items', { searchParams: params }),
 
-  getItemById: (id: string) => apiGet<ApiItem>(`items/${id}`),
+  getItemById: (id: string) => apiGet<ApiItem>(`vault/items/${id}`),
 
   registerItem: (data: {
     name: string;
@@ -272,21 +272,21 @@ export const vaultApi = {
     condition?: string;
     description?: string;
     metadata?: Record<string, unknown>;
-  }) => apiPost<ApiItem>('items', { json: data }),
+  }) => apiPost<ApiItem>('vault/items', { json: data }),
 
-  deleteItem: (id: string) => apiDelete<void>(`items/${id}`),
+  deleteItem: (id: string) => apiDelete<void>(`vault/items/${id}`),
 
   createRedemption: (id: string, data: { shippingAddress: ApiShippingAddress }) =>
-    apiPost<{ status: string }>(`items/${id}/redemptions`, { json: data }),
+    apiPost<{ status: string }>(`vault/items/${id}/redemptions`, { json: data }),
 
   getRedemptions: () => apiGet<{ redemptions: ApiRedemption[] }>('redemptions'),
 
   createVaultDelivery: (id: string, data: { shippingAddress: ApiShippingAddress }) =>
-    apiPost<{ status: string }>(`items/${id}/vault-deliveries`, { json: data }),
+    apiPost<{ status: string }>(`vault/items/${id}/vault-deliveries`, { json: data }),
 
   getVaultDeliveries: () => apiGet<{ deliveries: ApiVaultDelivery[] }>('vault-deliveries'),
 
-  consignToPlatform: (id: string) => apiPost<{ status: string }>(`items/${id}/consign`),
+  consignToPlatform: (id: string) => apiPost<{ status: string }>(`vault/items/${id}/consign`),
 };
 
 export const auditApi = {

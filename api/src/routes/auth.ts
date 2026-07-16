@@ -19,7 +19,7 @@ const registerSchema = z.object({
 export const authRoutes = new Hono<{ Bindings: Env }>();
 
 // POST /api/v1/auth/login
-authRoutes.post('/login', async (c) => {
+authRoutes.post('/auth/login', async (c) => {
   const tenantId = c.get('tenantId');
   const body = await c.req.json();
   const parsed = loginSchema.safeParse(body);
@@ -63,7 +63,7 @@ authRoutes.post('/login', async (c) => {
 });
 
 // POST /api/v1/auth/register
-authRoutes.post('/register', async (c) => {
+authRoutes.post('/auth/register', async (c) => {
   const tenantId = c.get('tenantId');
   const body = await c.req.json();
   const parsed = registerSchema.safeParse(body);
@@ -108,8 +108,8 @@ authRoutes.post('/register', async (c) => {
   }
 });
 
-// GET /api/v1/user
-authRoutes.get('/user', async (c) => {
+// GET /api/v1/auth/user
+authRoutes.get('/auth/user', async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   if (!userId) {

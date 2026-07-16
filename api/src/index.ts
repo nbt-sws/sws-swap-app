@@ -8,6 +8,7 @@ import { vaultRoutes } from './routes/vault';
 import { marketRoutes } from './routes/market';
 import { orderRoutes } from './routes/orders';
 import { offerRoutes } from './routes/offers';
+import { miscRoutes } from './routes/misc';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -25,14 +26,14 @@ app.use('*', tenantMiddleware);
 app.get('/health', (c) => c.json({ status: 'ok', env: c.env.ENVIRONMENT }));
 
 // Auth routes (no auth required for login/register)
-app.route('/api/v1/auth', authRoutes);
-app.route('/api/v1/user', authRoutes);
+app.route('/api/v1', authRoutes);
 
 // Protected routes
 app.route('/api/v1/vault', vaultRoutes);
 app.route('/api/v1/market', marketRoutes);
 app.route('/api/v1/orders', orderRoutes);
 app.route('/api/v1/offers', offerRoutes);
+app.route('/api/v1', miscRoutes);
 
 // 404 handler
 app.notFound((c) => c.json({ error: 'Not found' }, 404));
