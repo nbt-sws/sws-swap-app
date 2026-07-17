@@ -9,11 +9,7 @@ import type {
   ApiWishlistItem,
   ApiNotification,
   ApiCollectorProfile,
-  ApiServiceProvider,
-  ApiServicePackage,
   ApiServiceCategory,
-  ApiServiceOrder,
-  ApiServiceOrderStage,
   ApiPartnerApplication,
   ApiGradingService,
   ApiProposedPackage,
@@ -421,33 +417,65 @@ export const pregradeApi = {
 
 export const servicesApi = {
   getProviders: (category?: 'PREGRADE' | 'GRADE') =>
-    apiGet<{ providers: ApiServiceProvider[] }>('services/providers', {
+    apiGet<{ providers: import('@/types').ServiceProvider[] }>('services/providers', {
       searchParams: category ? { category } : undefined,
     }),
-  getProvider: (id: string) => apiGet<{ provider: ApiServiceProvider }>(`services/providers/${id}`),
+  getProvider: (id: string) =>
+    apiGet<{ provider: import('@/types').ServiceProvider; packages: import('@/types').ServicePackage[] }>(`services/providers/${id}`),
+
+  // Owner: provider profile
+  becomeProvider: (data: {
+    category: 'PREGRADE' | 'GRADE';
+    serviceTypes?: string[];
+    acceptedGraders?: string[];
+    description?: string;
+    deliveryMode?: string;
+    turnaround?: string;
+    pricePerCard?: number;
+    contactLine?: string;
+    contactPhone?: string;
+    contactEmail?: string;
+  }) => apiPost<import('@/types').ServiceProvider>('services/providers', { json: data }),
+  getMyProvider: () => apiGet<{ provider: import('@/types').ServiceProvider | null }>('services/providers/me'),
+  updateProvider: (data: Partial<{
+    category: string; description: string; deliveryMode: string; turnaround: string;
+    pricePerCard: number; contactLine: string; contactPhone: string; contactEmail: string;
+    enabled: boolean; serviceTypes: string[]; acceptedGraders: string[];
+  }>) => apiPut<import('@/types').ServiceProvider>('services/providers/me', { json: data }),
+
+  // Owner: packages
+  getMyPackages: () => apiGet<{ packages: import('@/types').ServicePackage[] }>('services/providers/me/packages'),
+  addPackage: (data: {
+    grader?: string; name: string; description?: string; deliveryMode?: string;
+    turnaround?: string; pricePerCard: number; includes?: string[];
+  }) => apiPost<import('@/types').ServicePackage>('services/providers/me/packages', { json: data }),
+  updatePackage: (id: string, data: Partial<{
+    grader: string; name: string; description: string; deliveryMode: string;
+    turnaround: string; pricePerCard: number; enabled: boolean; includes: string[];
+  }>) => apiPut<import('@/types').ServicePackage>(`services/packages/${id}`, { json: data }),
 };
 
 export const servicePackagesApi = {
   getByProvider: (providerId: string) =>
-    apiGet<{ packages: ApiServicePackage[] }>(`services/providers/${providerId}/packages`),
+    apiGet<{ packages: import('@/types').ServicePackage[] }>(`services/providers/${providerId}/packages`),
 };
 
 export const serviceOrdersApi = {
   create: (data: {
-    category: ApiServiceOrder['category'];
     providerId: string;
     packageId?: string;
     cardIds: string[];
+    deliveryMode?: string;
     shippingAddress?: ApiShippingAddress;
-  }) => apiPost<{ order: ApiServiceOrder }>('service-orders', { json: data }),
-  getById: (orderId: string) => apiGet<{ order: ApiServiceOrder }>(`service-orders/${orderId}`),
+  }) => apiPost<import('@/types').ServiceOrder>('service-orders', { json: data }),
+  getAll: () => apiGet<{ orders: import('@/types').ServiceOrder[] }>('service-orders'),
+  getReceived: () => apiGet<{ orders: import('@/types').ServiceOrder[] }>('service-orders/received'),
+  getById: (orderId: string) => apiGet<import('@/types').ServiceOrder>(`service-orders/${orderId}`),
   update: (orderId: string, data: {
-    status?: ApiServiceOrder['status'];
-    stages?: ApiServiceOrderStage[];
-    lotNumber?: string;
-    labOrderNumber?: string;
+    action: 'advance' | 'cancel';
+    gradeResult?: string;
     trackingNumber?: string;
-  }) => apiPatch<{ order: ApiServiceOrder }>(`service-orders/${orderId}`, { json: data }),
+  }) => apiPatch<import('@/types').ServiceOrder>(`service-orders/${orderId}`, { json: data }),
 };
 
 export const partnersApi = {

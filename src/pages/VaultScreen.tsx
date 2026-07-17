@@ -10,6 +10,7 @@ import {
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth';
 import { StorefrontManager } from '@/components/vault/StorefrontManager';
+import { ServicesManager } from '@/components/vault/ServicesManager';
 import {
   LayoutGrid, List as ListIcon, LayoutTemplate, TrendingUp, TrendingDown,
   CheckSquare, Tag, Plus, Package, Store, EyeOff, Gift, Truck, Clock, Wallet, Trash2, RefreshCw,
@@ -52,6 +53,7 @@ export function VaultScreen() {
   const [selecting, setSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [vaultViewMode, setVaultViewMode] = useState<'vault' | 'store'>('vault');
+  const [storeTab, setStoreTab] = useState<'storefront' | 'services'>('storefront');
   const [confirmUnlistOpen, setConfirmUnlistOpen] = useState(false);
   const [confirmSingleUnlistItem, setConfirmSingleUnlistItem] = useState<VaultItem | null>(null);
   const [listModalOpen, setListModalOpen] = useState(false);
@@ -620,34 +622,56 @@ export function VaultScreen() {
                   ))}
                 </div>
               )
+            ) : vaultViewMode === 'store' ? (
+              <div className="space-y-4">
+                {/* Store area sub-tabs */}
+                <div className="inline-flex items-center rounded-xl surface-card p-1">
+                  <button
+                    onClick={() => setStoreTab('storefront')}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+                      storeTab === 'storefront'
+                        ? 'bg-surface text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <Store className="w-4 h-4" />
+                    Storefront
+                  </button>
+                  <button
+                    onClick={() => setStoreTab('services')}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+                      storeTab === 'services'
+                        ? 'bg-surface text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Services
+                  </button>
+                </div>
+
+                {storeTab === 'storefront' ? (
+                  <StorefrontManager userId={userId} items={filteredCards} listingsMap={listingsMap} />
+                ) : (
+                  <ServicesManager />
+                )}
+              </div>
             ) : filteredCards.length === 0 ? (
               <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
                 <EmptyMedia variant="icon">
                   <Package className="w-8 h-8 text-brand" />
                 </EmptyMedia>
                 <EmptyHeader>
-                  <EmptyTitle>{vaultViewMode === 'store' ? 'Your store is empty' : 'No items found'}</EmptyTitle>
-                  <EmptyDescription>
-                    {vaultViewMode === 'store'
-                      ? 'List items from your vault to start selling'
-                      : 'Add cards to your vault to start tracking'}
-                  </EmptyDescription>
+                  <EmptyTitle>No items found</EmptyTitle>
+                  <EmptyDescription>Add cards to your vault to start tracking</EmptyDescription>
                 </EmptyHeader>
-                {vaultViewMode === 'vault' && (
-                  <Button className="bg-brand hover:bg-brand-light gap-2 rounded-xl" onClick={() => setRegisterModalOpen(true)}>
-                    <Package className="w-4 h-4" />
-                    Add Item
-                  </Button>
-                )}
-                {vaultViewMode === 'store' && (
-                  <Button className="bg-brand hover:bg-brand-light gap-2 rounded-xl" onClick={() => { setVaultViewMode('vault'); }}>
-                    <Package className="w-4 h-4" />
-                    Go to Vault
-                  </Button>
-                )}
+                <Button className="bg-brand hover:bg-brand-light gap-2 rounded-xl" onClick={() => setRegisterModalOpen(true)}>
+                  <Package className="w-4 h-4" />
+                  Add Item
+                </Button>
               </Empty>
-            ) : vaultViewMode === 'store' ? (
-              <StorefrontManager userId={userId} items={filteredCards} listingsMap={listingsMap} />
             ) : activeTab === 'offers' ? (
               <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
                 <EmptyMedia variant="icon">

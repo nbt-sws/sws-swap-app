@@ -173,6 +173,7 @@ export interface ServiceOrderStage {
 
 export interface ServiceOrder {
   id: string;
+  orderNo?: string;
   userId: string;
   category: ServiceCategory;
   providerId: string;
@@ -188,6 +189,8 @@ export interface ServiceOrder {
   currency: string;
   shippingAddress?: ShippingAddress;
   trackingNumber?: string;
+  gradeResult?: string;
+  customerName?: string;
   lotNumber?: string;
   labOrderNumber?: string;
   createdAt: string;
