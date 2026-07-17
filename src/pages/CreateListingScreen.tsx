@@ -21,6 +21,10 @@ import type { Card as CardType, MarketListing } from '@/types';
 const GAMES: { value: CardType['game']; label: string }[] = [
   { value: 'one-piece', label: 'One Piece' },
   { value: 'yu-gi-oh', label: 'Yu-Gi-Oh!' },
+  { value: 'pokemon', label: 'Pokémon' },
+  { value: 'lorcana', label: 'Lorcana' },
+  { value: 'conan', label: 'Conan' },
+  { value: 'others', label: 'Others' },
 ];
 
 const CONDITIONS: CardType['condition'][] = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5', 'RAWLITY 9.5', 'RAWLITY 9', 'BLACKLENS 92', 'BLACKLENS 85'];

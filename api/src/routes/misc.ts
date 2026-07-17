@@ -71,8 +71,23 @@ miscRoutes.get('/wishlist', authMiddleware, async (c) => {
   const tenantId = c.get('tenantId');
   const userId = c.get('userId');
   const items = await withTenant(c.env, tenantId, async (client) => {
-    const { rows } = await client.query('SELECT * FROM wishlist WHERE buyer_id = $1 ORDER BY created_at DESC', [userId]);
-    return rows.map(mapWishlistItem);
+    const { rows } = await client.query(
+      `SELECT w.*, l.title as listing_title, l.price as listing_price, l.image_url as listing_image_url,
+              v.sku as item_sku, v.image_url as item_image_url
+       FROM wishlist w
+       LEFT JOIN listings l ON w.listing_id = l.listing_id
+       LEFT JOIN vault_items v ON l.item_id = v.id
+       WHERE w.buyer_id = $1
+       ORDER BY w.created_at DESC`,
+      [userId]
+    );
+    return rows.map((r: any) => ({
+      ...mapWishlistItem(r),
+      listingTitle: r.listing_title ?? undefined,
+      listingPrice: r.listing_price ?? undefined,
+      listingImageUrl: r.listing_image_url ?? r.item_image_url ?? undefined,
+      itemSku: r.item_sku ?? undefined,
+    }));
   });
   return c.json({ items });
 });

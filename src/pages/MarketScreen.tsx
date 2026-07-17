@@ -32,6 +32,10 @@ const SHELVES: { id: string; key: string }[] = [
 const GAMES: { id: string; key: string }[] = [
   { id: 'one-piece', key: 'market.games.onePiece' },
   { id: 'yu-gi-oh', key: 'market.games.yugioh' },
+  { id: 'pokemon', key: 'market.games.pokemon' },
+  { id: 'lorcana', key: 'market.games.lorcana' },
+  { id: 'conan', key: 'market.games.conan' },
+  { id: 'others', key: 'market.games.others' },
 ];
 const LISTING_TYPES: { id: string; key: string }[] = [
   { id: 'SALE', key: 'market.listingTypes.sale' },

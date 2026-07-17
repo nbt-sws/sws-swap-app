@@ -266,7 +266,11 @@
     },
     "games": {
       "onePiece": "One Piece",
-      "yugioh": "Yu-Gi-Oh!"
+      "yugioh": "Yu-Gi-Oh!",
+      "pokemon": "Pokémon",
+      "lorcana": "Lorcana",
+      "conan": "Conan",
+      "others": "อื่น ๆ"
     },
     "listingTypes": {
       "sale": "ขาย",

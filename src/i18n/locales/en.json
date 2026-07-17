@@ -266,7 +266,11 @@
     },
     "games": {
       "onePiece": "One Piece",
-      "yugioh": "Yu-Gi-Oh!"
+      "yugioh": "Yu-Gi-Oh!",
+      "pokemon": "Pokémon",
+      "lorcana": "Lorcana",
+      "conan": "Conan",
+      "others": "Others"
     },
     "listingTypes": {
       "sale": "For sale",

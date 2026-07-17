@@ -33,9 +33,35 @@ interface RegisterItemModalProps {
 const GAMES = [
   { value: 'one-piece', label: 'One Piece' },
   { value: 'yu-gi-oh', label: 'Yu-Gi-Oh!' },
+  { value: 'pokemon', label: 'Pokémon' },
+  { value: 'lorcana', label: 'Lorcana' },
+  { value: 'conan', label: 'Conan' },
+  { value: 'others', label: 'Others' },
+] as const;
+
+type GameValue = typeof GAMES[number]['value'];
+
+// Grading companies with selectable grade levels
+const GRADE_COMPANIES: { id: string; levels: string[] }[] = [
+  { id: 'Raw', levels: [] },
+  { id: 'PSA', levels: ['10', '9', '8', '7'] },
+  { id: 'BGS', levels: ['10', '9.5', '9', '8.5', '8'] },
+  { id: 'CGC', levels: ['10', '9.5', '9', '8.5', '8'] },
+  { id: 'TAG', levels: ['10', '9', '8', '7'] },
+  { id: 'ARS', levels: ['10', '9', '8', '7'] },
+  { id: 'RAWLITY', levels: ['9.5', '9', '8.5'] },
+  { id: 'BLACKLENS', levels: ['95', '92', '90', '85'] },
 ];
 
-const CONDITIONS = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5', 'RAWLITY 9.5', 'RAWLITY 9', 'BLACKLENS 92', 'BLACKLENS 85'] as const;
+function parseCondition(condition: string): { company: string; level: string } {
+  const hit = GRADE_COMPANIES.find((c) => c.id !== 'Raw' && condition.startsWith(c.id + ' '));
+  if (hit) return { company: hit.id, level: condition.slice(hit.id.length + 1) };
+  return { company: 'Raw', level: '' };
+}
+
+function buildCondition(company: string, level: string): string {
+  return company === 'Raw' ? 'Raw' : `${company} ${level}`;
+}
 
 const MAX_IMAGES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -48,8 +74,9 @@ const INITIAL_FORM = {
   rarity: '',
   type: '',
   language: 'JP',
-  game: 'one-piece' as 'one-piece' | 'yu-gi-oh',
-  condition: 'Raw' as typeof CONDITIONS[number],
+  game: 'one-piece' as GameValue,
+  conditionCompany: 'Raw',
+  conditionLevel: '',
   paidPrice: '',
   source: '',
   dateAcquired: new Date().toISOString().split('T')[0],
@@ -79,10 +106,8 @@ export function RegisterItemModal({ isOpen, onClose, item }: RegisterItemModalPr
         rarity: item.card.rarity,
         type: item.card.type,
         language: item.card.language || 'JP',
-        game: (item.card.game as 'one-piece' | 'yu-gi-oh') || 'one-piece',
-        condition: (CONDITIONS.includes(item.condition as typeof CONDITIONS[number])
-          ? item.condition
-          : 'Raw') as typeof CONDITIONS[number],
+        game: (GAMES.some((g) => g.value === item.card.game) ? item.card.game : 'one-piece') as GameValue,
+        ...(() => { const c = parseCondition(item.condition); return { conditionCompany: c.company, conditionLevel: c.level }; })(),
         paidPrice: item.paidPrice > 0 ? String(item.paidPrice) : '',
         source: item.source === 'Manual entry' ? '' : item.source,
         dateAcquired: item.dateAcquired?.split('T')[0] || new Date().toISOString().split('T')[0],
@@ -167,7 +192,7 @@ export function RegisterItemModal({ isOpen, onClose, item }: RegisterItemModalPr
             category: form.game,
             subCategory: form.rarity.trim() || undefined,
             itemFormat: form.language,
-            condition: form.condition,
+            condition: buildCondition(form.conditionCompany, form.conditionLevel),
             images,
             paidPrice: form.paidPrice ? Number(form.paidPrice) : 0,
             dateAcquired: form.dateAcquired,
@@ -193,7 +218,7 @@ export function RegisterItemModal({ isOpen, onClose, item }: RegisterItemModalPr
         category: form.game,
         subCategory: form.rarity.trim() || undefined,
         itemFormat: form.language,
-        condition: form.condition,
+        condition: buildCondition(form.conditionCompany, form.conditionLevel),
         images,
         metadata: {
           paidPrice: form.paidPrice ? Number(form.paidPrice) : 0,
@@ -380,18 +405,40 @@ export function RegisterItemModal({ isOpen, onClose, item }: RegisterItemModalPr
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Condition</label>
-                <Select value={form.condition} onValueChange={(v) => update('condition', v)}>
+                <label className="text-xs font-medium text-muted-foreground">Grading company</label>
+                <Select
+                  value={form.conditionCompany}
+                  onValueChange={(v) => {
+                    update('conditionCompany', v);
+                    const levels = GRADE_COMPANIES.find((c) => c.id === v)?.levels ?? [];
+                    update('conditionLevel', levels[0] ?? '');
+                  }}
+                >
                   <SelectTrigger className="w-full bg-surface border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-surface-light border-border">
-                    {CONDITIONS.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    {GRADE_COMPANIES.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.id}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">Grade</label>
+                <Select value={form.conditionLevel} onValueChange={(v) => update('conditionLevel', v)} disabled={form.conditionCompany === 'Raw'}>
+                  <SelectTrigger className="w-full bg-surface border-border">
+                    <SelectValue placeholder={form.conditionCompany === 'Raw' ? '—' : undefined} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-surface-light border-border">
+                    {(GRADE_COMPANIES.find((c) => c.id === form.conditionCompany)?.levels ?? []).map((l) => (
+                      <SelectItem key={l} value={l}>{l}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">Rarity</label>
                 <Input

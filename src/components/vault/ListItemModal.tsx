@@ -29,8 +29,8 @@ interface ListItemModalProps {
 }
 
 function getShelf(condition: string): 'RAW' | 'PRE-GRADED' | 'GRADED' | 'SEALED-BOX' {
-  if (condition.includes('PSA') || condition.includes('BGS') || condition.includes('CGC')) return 'GRADED';
-  if (condition.includes('RAWLITY')) return 'PRE-GRADED';
+  if (['PSA', 'BGS', 'CGC', 'TAG', 'ARS'].some((g) => condition.startsWith(g))) return 'GRADED';
+  if (['RAWLITY', 'BLACKLENS'].some((g) => condition.startsWith(g))) return 'PRE-GRADED';
   return 'RAW';
 }
 

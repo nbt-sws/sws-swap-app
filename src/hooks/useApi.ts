@@ -309,14 +309,9 @@ export function useWishlist() {
   return useQuery({
     queryKey: ['wishlist'],
     queryFn: async () => {
-      const [items, listingsRes] = await Promise.all([
-        fetchRawWishlistItems(),
-        listingsApi.getAll({ limit: 1000 }),
-      ]);
-      const listings = listingsRes.results;
-      return items.map((i) =>
-        mapApiWishlistItemToWishlistItem(i, listings.find((l) => l.listingId === i.listingId))
-      );
+      // Backend enriches each item with listing title/price/image + item sku
+      const items = await fetchRawWishlistItems();
+      return items.map(mapApiWishlistItemToWishlistItem);
     },
     staleTime: 1000 * 60 * 5,
     enabled: isAuthenticated,

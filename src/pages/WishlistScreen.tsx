@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { Heart, Search, X } from 'lucide-react';
-import { cn, getCardImageUrl } from '@/lib/utils';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 export function WishlistScreen() {
   const { t } = useTranslation();
@@ -66,27 +66,28 @@ export function WishlistScreen() {
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <Link to="/market">
-                  <div className={cn(
-                    'aspect-[3/4] flex items-center justify-center text-4xl overflow-hidden',
-                    item.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
-                  )}>
-                    <img
-                      src={getCardImageUrl({ code: item.cardCode, nameEn: item.cardName, game: item.game ?? 'one-piece' } as import('@/types').Card)}
+                <Link to="/market/$listingId" params={{ listingId: item.listingId }}>
+                  <div className="aspect-[3/4] overflow-hidden bg-surface-lighter">
+                    <ImageWithFallback
+                      src={item.imageUrl ?? ''}
                       alt={item.cardName}
                       className="w-full h-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
                     />
                   </div>
                 </Link>
                 <div className="p-3">
-                  <p className="text-xs font-mono text-muted-foreground truncate">{item.cardCode}</p>
+                  {item.cardCode && (
+                    <p className="text-xs font-mono text-muted-foreground truncate">{item.cardCode}</p>
+                  )}
                   <p className="font-medium text-sm truncate">{item.cardName}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Added {item.addedAt ? new Date(item.addedAt).toLocaleDateString() : 'recently'}
-                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    {item.currentPrice > 0 ? (
+                      <p className="text-sm font-bold font-mono text-brand">฿{item.currentPrice.toLocaleString()}</p>
+                    ) : <span />}
+                    <p className="text-xs text-muted-foreground">
+                      {item.addedAt ? new Date(item.addedAt).toLocaleDateString() : ''}
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

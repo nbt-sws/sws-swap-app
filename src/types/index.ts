@@ -1,3 +1,5 @@
+export type CardGame = 'one-piece' | 'yu-gi-oh' | 'pokemon' | 'lorcana' | 'conan' | 'others';
+
 export interface Card {
   id: string;
   code: string;
@@ -6,9 +8,9 @@ export interface Card {
   rarity: string;
   type: string;
   language: string;
-  game: 'one-piece' | 'yu-gi-oh';
+  game: CardGame;
   imageUrl?: string;
-  condition: 'Raw' | 'PSA 10' | 'PSA 9' | 'BGS 9.5' | 'CGC 9.5' | 'RAWLITY 9.5' | 'RAWLITY 9' | 'BLACKLENS 92' | 'BLACKLENS 85';
+  condition: string;
 }
 
 export interface VaultItem {
@@ -319,7 +321,8 @@ export interface WishlistItem {
   listingId: string;
   cardName: string;
   cardCode: string;
-  game?: 'one-piece' | 'yu-gi-oh';
+  imageUrl?: string;
+  game?: CardGame;
   targetPrice: number;
   currentPrice: number;
   currency: string;

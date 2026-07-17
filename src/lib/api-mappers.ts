@@ -227,19 +227,16 @@ export function mapApiOfferToOffer(apiOffer: ApiOffer, currentUserId?: string): 
   };
 }
 
-export function mapApiWishlistItemToWishlistItem(
-  apiItem: ApiWishlistItem,
-  listing?: ApiListing
-): WishlistItem {
+export function mapApiWishlistItemToWishlistItem(apiItem: ApiWishlistItem): WishlistItem {
   return {
     id: apiItem.id,
     listingId: apiItem.listingId,
-    cardName: listing ? listing.title : `Listing ${apiItem.listingId.slice(0, 6)}`,
-    cardCode: listing?.itemId ?? apiItem.listingId,
-    game: 'one-piece',
+    cardName: apiItem.listingTitle ?? `Listing ${apiItem.listingId.slice(0, 6)}`,
+    cardCode: apiItem.itemSku ?? '',
+    imageUrl: apiItem.listingImageUrl,
     targetPrice: apiItem.offerPrice ?? 0,
-    currentPrice: listing?.price ?? 0,
-    currency: listing?.currency ?? 'THB',
+    currentPrice: apiItem.listingPrice ?? 0,
+    currency: 'THB',
     alertEnabled: false,
     addedAt: apiItem.createdAt,
   };

@@ -190,11 +190,16 @@ export interface ApiWishlistItem {
   id: string;
   listingId: string;
   buyerId: string;
-  sellerId: string;
+  sellerId?: string;
   offerPrice?: number;
   status?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  // Enriched via listing/item join
+  listingTitle?: string;
+  listingPrice?: number;
+  listingImageUrl?: string;
+  itemSku?: string;
 }
 
 export interface ApiRedemption {
