@@ -409,6 +409,8 @@
     "sections": {
       "account": "Account",
       "preferences": "Preferences",
+      "notifications": "Notifications",
+      "security": "Security",
       "support": "Support",
       "danger": "Danger Zone"
     },
@@ -426,7 +428,37 @@
       "dataSources": "Data sources",
       "help": "Help & support",
       "deleteAccount": "Delete my account",
-      "signOut": "Sign Out"
+      "signOut": "Sign Out",
+      "changePassword": "Change password",
+      "push": "Push notifications",
+      "email": "Email notifications",
+      "line": "LINE notifications",
+      "sms": "SMS notifications",
+      "preferredGrader": "Preferred grader",
+      "preferredPreGrader": "Preferred pre-grader"
+    },
+    "dialogs": {
+      "changePasswordTitle": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password (min 6 chars)",
+      "confirmPassword": "Confirm new password",
+      "passwordMismatch": "Passwords do not match",
+      "submit": "Update password",
+      "deleteTitle": "Delete account permanently?",
+      "deleteDesc": "This removes your vault items, listings, orders and store data. This cannot be undone. Enter your password to confirm.",
+      "deleteSubmit": "Delete permanently"
+    },
+    "toasts": {
+      "prefsSaved": "Preferences saved",
+      "passwordChanged": "Password changed",
+      "passwordWrong": "Current password is incorrect",
+      "deleteFailed": "Could not delete account. Check your password.",
+      "terms": "Terms of service coming soon",
+      "privacy": "Privacy policy coming soon",
+      "dataSources": "Data sources: eBay, Yahoo! JP, domestic Thai marketplaces",
+      "help": "Support contact coming soon",
+      "deleteConfirm": "This is a demo. Account deletion is not implemented.",
+      "deleteRequested": "Account deletion request received (demo)"
     },
     "kycStatus": {
       "verified": "Verified",
@@ -446,14 +478,6 @@
       "dark": "Dark",
       "system": "System"
     },
-    "memberSince": "Member since {{date}}",
-    "toasts": {
-      "terms": "Terms of service coming soon",
-      "privacy": "Privacy policy coming soon",
-      "dataSources": "Data sources: eBay, Yahoo! JP, domestic Thai marketplaces",
-      "help": "Support contact coming soon",
-      "deleteConfirm": "This is a demo. Account deletion is not implemented.",
-      "deleteRequested": "Account deletion request received (demo)"
-    }
+    "memberSince": "Member since {{date}}"
   }
 }

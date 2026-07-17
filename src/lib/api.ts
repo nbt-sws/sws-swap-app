@@ -161,6 +161,16 @@ export const authApi = {
 
 export const userApi = {
   me: () => apiGet<ApiUser>('auth/user'),
+  updatePreferences: (data: {
+    currency?: string;
+    notifications?: { push: boolean; email: boolean; line: boolean; sms: boolean };
+    preferredGrader?: string;
+    preferredPreGrader?: string;
+  }) => apiPatch<ApiUser>('auth/preferences', { json: data }),
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    apiPost<{ status: string }>('auth/change-password', { json: data }),
+  deleteAccount: (data: { password: string }) =>
+    api.delete('auth/account', { json: data, headers: getAuthHeaders() }).json<{ status: string }>(),
 };
 
 export const listingsApi = {

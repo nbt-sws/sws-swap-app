@@ -248,6 +248,38 @@ export function useAuthRegister() {
   });
 }
 
+export function useUpdatePreferences() {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((s) => s.setUser);
+  return useMutation({
+    mutationFn: userApi.updatePreferences,
+    onSuccess: (res) => {
+      const mapped = mapApiUserToAuthUser(res);
+      setUser(mapped);
+      queryClient.setQueryData(['user'], mapped);
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: userApi.changePassword,
+  });
+}
+
+export function useDeleteAccount() {
+  const logout = useAuthStore((s) => s.logout);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: userApi.deleteAccount,
+    onSuccess: () => {
+      queryClient.clear();
+      logout();
+    },
+  });
+}
+
 // ─── Wishlist hooks ─────────────────────────────────────────────────
 
 // Raw wishlist items (light) — shared by useWishlist and useWishlistIds
