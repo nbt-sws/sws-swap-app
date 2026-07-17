@@ -23,7 +23,9 @@ marketRoutes.use('*', optionalAuth);
 // Join listings -> vault_items -> cards to enrich with real card catalog data
 const LISTING_SELECT = `
   SELECT l.*, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
-         c.rarity, c.type as card_type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
+         c.rarity, c.type as card_type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition,
+         COALESCE(l.image_url, v.image_url) as resolved_image_url,
+         COALESCE(l.condition, v.condition) as resolved_condition
   FROM listings l
   LEFT JOIN vault_items v ON l.item_id = v.id
   LEFT JOIN cards c ON v.card_id = c.id`;
@@ -40,8 +42,8 @@ const mapListingRow = (l: any) => ({
   category: l.category,
   subCategory: l.sub_category,
   itemFormat: l.item_format,
-  condition: l.condition,
-  imageUrl: l.image_url,
+  condition: l.resolved_condition ?? undefined,
+  imageUrl: l.resolved_image_url ?? undefined,
   sellerDisplayName: l.seller_display_name,
   sellerAvatarUrl: l.seller_avatar_url,
   sellerBio: l.seller_bio,
@@ -170,10 +172,14 @@ marketRoutes.post('/listings', async (c) => {
 
   const data = parsed.data;
 
+  // Denormalize cover image + condition from the vault item when not provided
+  let itemImageUrl: string | null = null;
+  let itemCondition: string | null = null;
+
   if (data.itemId) {
     const items = await withTenant(c.env, tenantId, async (client) => {
       const { rows } = await client.query(
-        'SELECT id, status FROM vault_items WHERE id = $1 AND owner_id = $2',
+        'SELECT id, status, image_url, condition FROM vault_items WHERE id = $1 AND owner_id = $2',
         [data.itemId, userId]
       );
       return rows;
@@ -182,6 +188,9 @@ marketRoutes.post('/listings', async (c) => {
     if (!items.length) {
       return c.json({ error: 'Vault item not found or not owned by user' }, 404);
     }
+
+    itemImageUrl = items[0].image_url ?? null;
+    itemCondition = items[0].condition ?? null;
 
     await withTenant(c.env, tenantId, async (client) => {
       await client.query("UPDATE vault_items SET status = 'LISTING' WHERE id = $1", [data.itemId]);
@@ -196,7 +205,7 @@ marketRoutes.post('/listings', async (c) => {
       `INSERT INTO listings (item_id, seller_id, title, description, price, currency, status, category, item_format, condition, image_url, seller_display_name, seller_tier, owner_id, holder_id)
        VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', $7, $8, $9, $10, $11, $12, $13, $14)
        RETURNING *`,
-      [data.itemId || null, userId, data.title, data.description || null, data.price, data.currency, data.category || null, data.itemFormat || null, data.condition || null, data.imageUrl || null, user?.name || null, user?.tier || null, userId, userId]
+      [data.itemId || null, userId, data.title, data.description || null, data.price, data.currency, data.category || null, data.itemFormat || null, data.condition || itemCondition, data.imageUrl || itemImageUrl, user?.name || null, user?.tier || null, userId, userId]
     );
     return rows;
   });
