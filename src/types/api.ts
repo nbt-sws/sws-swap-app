@@ -144,6 +144,22 @@ export interface ApiOrder {
   cancelReason?: string;
   createdAt: string;
   updatedAt: string;
+  // Enriched item/card info (present on list + detail endpoints)
+  cardCode?: string;
+  cardNameEn?: string;
+  itemName?: string;
+  itemImageUrl?: string;
+  itemSku?: string;
+  listing?: {
+    listingId: string;
+    title: string;
+    price: number;
+    currency?: string;
+    imageUrl?: string;
+    condition?: string;
+    sellerDisplayName?: string;
+    sellerId?: string;
+  } | null;
 }
 
 export type ApiOfferStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED' | 'CANCELLED';

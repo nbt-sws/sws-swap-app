@@ -39,7 +39,8 @@ orderRoutes.get('/', async (c) => {
              l.title as listing_title, l.price as listing_price, l.currency as listing_currency,
              l.image_url as listing_image_url, l.condition as listing_condition,
              l.seller_display_name, l.seller_id as listing_seller_id,
-             c.code as card_code, c.name_en as card_name_en
+             c.code as card_code, c.name_en as card_name_en,
+             v.name as item_name, v.image_url as item_image_url, v.sku as item_sku
       FROM orders o
       LEFT JOIN listings l ON o.listing_id = l.listing_id
       LEFT JOIN vault_items v ON o.item_id = v.id
@@ -93,6 +94,11 @@ orderRoutes.get('/', async (c) => {
       cancelReason: o.cancel_reason,
       createdAt: o.created_at,
       updatedAt: o.updated_at,
+      cardCode: o.card_code ?? undefined,
+      cardNameEn: o.card_name_en ?? undefined,
+      itemName: o.item_name ?? undefined,
+      itemImageUrl: o.item_image_url ?? undefined,
+      itemSku: o.item_sku ?? undefined,
       listing: o.listing_title ? {
         listingId: o.listing_id,
         title: o.listing_title,
@@ -123,7 +129,8 @@ orderRoutes.get('/:id', async (c) => {
               l.title as listing_title, l.price as listing_price, l.currency as listing_currency,
               l.image_url as listing_image_url, l.condition as listing_condition,
               l.seller_display_name, l.seller_id as listing_seller_id,
-              c.code as card_code, c.name_en as card_name_en
+              c.code as card_code, c.name_en as card_name_en,
+              v.name as item_name, v.image_url as item_image_url, v.sku as item_sku
        FROM orders o
        LEFT JOIN listings l ON o.listing_id = l.listing_id
        LEFT JOIN vault_items v ON o.item_id = v.id
@@ -156,6 +163,11 @@ orderRoutes.get('/:id', async (c) => {
     cancelReason: order.cancel_reason,
     createdAt: order.created_at,
     updatedAt: order.updated_at,
+    cardCode: order.card_code ?? undefined,
+    cardNameEn: order.card_name_en ?? undefined,
+    itemName: order.item_name ?? undefined,
+    itemImageUrl: order.item_image_url ?? undefined,
+    itemSku: order.item_sku ?? undefined,
     listing: order.listing_title ? {
       listingId: order.listing_id,
       title: order.listing_title,

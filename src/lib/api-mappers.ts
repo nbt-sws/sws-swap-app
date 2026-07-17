@@ -164,6 +164,7 @@ export function mapApiOrderToOrder(apiOrder: ApiOrder): Order {
   const shipping = apiOrder.deliveryPreference === 'SHIP' ? 120 : 0;
   const fee = Math.round(apiOrder.price * 0.05);
 
+  const apiListing = apiOrder.listing;
   return {
     id: apiOrder.id,
     buyerId: apiOrder.buyerId,
@@ -172,11 +173,16 @@ export function mapApiOrderToOrder(apiOrder: ApiOrder): Order {
       listingId: apiOrder.listingId,
       itemId: apiOrder.itemId,
       sellerId: apiOrder.sellerId,
-      title: 'Unknown item',
-      price: apiOrder.price,
-      currency: 'THB',
+      // Fallback chain: live listing row -> catalog card -> vault item -> placeholder
+      title: apiListing?.title ?? apiOrder.cardNameEn ?? apiOrder.itemName ?? 'Unknown item',
+      price: apiListing?.price ?? apiOrder.price,
+      currency: apiListing?.currency ?? 'THB',
       status: 'ACTIVE',
       createdAt: apiOrder.createdAt,
+      imageUrl: apiListing?.imageUrl ?? apiOrder.itemImageUrl,
+      condition: apiListing?.condition,
+      cardCode: apiOrder.cardCode ?? apiOrder.itemSku,
+      sellerDisplayName: apiListing?.sellerDisplayName,
     }),
     subtotal: apiOrder.price,
     fee,
