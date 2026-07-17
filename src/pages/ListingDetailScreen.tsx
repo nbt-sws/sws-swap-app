@@ -23,6 +23,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { ImageZoomDialog } from '@/components/ui/ImageZoomDialog';
 import {
   Heart, Share2, Star, ArrowRightLeft, Clock, Package,
 } from 'lucide-react';
@@ -65,6 +66,8 @@ export function ListingDetailScreen() {
   const [selectedTradeCards, setSelectedTradeCards] = useState<string[]>([]);
   const [delivery, setDelivery] = useState<'SHIP' | 'VAULT_STORE'>('SHIP');
   const [period, setPeriod] = useState<string>('30d');
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [zoomIndex, setZoomIndex] = useState(0);
 
   const isWishlisted = listing ? (wishlistIds?.has(listing.id) ?? false) : false;
 
@@ -157,14 +160,21 @@ export function ListingDetailScreen() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Image */}
+        {/* Image — click to zoom */}
         <Card className="bg-surface-light border-border overflow-hidden">
           <CardContent className="p-0 aspect-[4/5] flex items-center justify-center relative">
-            <ImageWithFallback
-              src={getCardImageUrl(listing.card)}
-              alt={listing.card.nameEn}
-              className="absolute inset-0"
-            />
+            <button
+              type="button"
+              onClick={() => setZoomOpen(true)}
+              className="absolute inset-0 cursor-zoom-in"
+              aria-label="View photo full size"
+            >
+              <ImageWithFallback
+                src={getCardImageUrl(listing.card)}
+                alt={listing.card.nameEn}
+                className="absolute inset-0"
+              />
+            </button>
             <div className={cn(
               'absolute inset-0 flex items-center justify-center -z-10',
               listing.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
@@ -448,6 +458,15 @@ export function ListingDetailScreen() {
           )}
         </div>
       )}
+
+      <ImageZoomDialog
+        images={[getCardImageUrl(listing.card)]}
+        index={zoomIndex}
+        open={zoomOpen}
+        onClose={() => setZoomOpen(false)}
+        onIndexChange={setZoomIndex}
+        alt={listing.card.nameEn}
+      />
     </PageContainer>
   );
 }

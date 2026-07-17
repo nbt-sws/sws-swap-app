@@ -73,7 +73,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           <ImageWithFallback
             src={getCardImageUrl(listing.card)}
             alt={listing.card.nameEn}
-            className="h-full w-full transition-transform duration-500 group-hover:scale-110"
+            className="h-full w-full"
           />
 
           {/* Gradient overlay */}

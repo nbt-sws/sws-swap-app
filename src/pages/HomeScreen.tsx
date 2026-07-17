@@ -250,7 +250,7 @@ function QuickActions({ t }: { t: (k: string, o?: Record<string, unknown>) => st
                   a.className
                 )}
               >
-                <Icon className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
+                <Icon className="h-6 w-6" />
               </div>
               <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center">
                 {t(`home.quickActions.${a.key}`)}
@@ -312,7 +312,7 @@ function VaultSnapshot({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
                   <ImageWithFallback
                     src={getCardImageUrl(item.card)}
                     alt={item.card.nameEn}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="h-full w-full object-cover"
                   />
                   {/* Subtle gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -377,7 +377,7 @@ function MarketPulse({ listings, loading, t }: { listings?: MarketListing[]; loa
                 <ImageWithFallback
                   src={getCardImageUrl(listing.card)}
                   alt={listing.card.nameEn}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="h-full w-full object-cover"
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
@@ -422,7 +422,7 @@ function ActivitySummary({ orders, offers, loading, t }: { orders?: Order[]; off
         <CardContent className="p-4 sm:p-5">
           <div className="grid grid-cols-2 divide-x divide-border/40">
             <Link to="/orders" className="group flex items-center gap-3 pr-3 sm:pr-4 transition-colors">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand transition-transform duration-200 group-hover:scale-105">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
                 <ClipboardList className="h-5 w-5" />
               </div>
               <div className="min-w-0">
@@ -431,7 +431,7 @@ function ActivitySummary({ orders, offers, loading, t }: { orders?: Order[]; off
               </div>
             </Link>
             <Link to="/offers" className="group flex items-center gap-3 pl-3 sm:pl-4 transition-colors">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-periwinkle/10 text-periwinkle transition-transform duration-200 group-hover:scale-105">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-periwinkle/10 text-periwinkle">
                 <Handshake className="h-5 w-5" />
               </div>
               <div className="min-w-0">

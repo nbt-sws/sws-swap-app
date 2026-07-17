@@ -107,7 +107,7 @@ export function VaultCard({
         <ImageWithFallback
           src={getCardImageUrl(item.card)}
           alt={item.card.nameEn}
-          className="h-full w-full transition-transform duration-300 group-hover:scale-105"
+          className="h-full w-full"
         />
 
         {/* Subtle gradient overlay */}

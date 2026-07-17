@@ -20,6 +20,7 @@ import {
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { ListItemModal } from '@/components/vault/ListItemModal';
 import { RegisterItemModal } from '@/components/vault/RegisterItemModal';
+import { ImageZoomDialog } from '@/components/ui/ImageZoomDialog';
 import { ShippingAddressModal } from '@/components/domain/ShippingAddressModal';
 import { toast } from 'sonner';
 import type { AuditRecord } from '@/types';
@@ -39,6 +40,7 @@ export function VaultItemDetailScreen() {
   const createRedemption = useCreateRedemption();
   const itemAudit = useItemAuditHistory(itemId);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addressModalMode, setAddressModalMode] = useState<'delivery' | 'redemption' | null>(null);
@@ -144,15 +146,22 @@ export function VaultItemDetailScreen() {
           <div className="space-y-2">
             <Card className="bg-surface-light border-border overflow-hidden">
               <CardContent className="p-0 aspect-[4/5] relative flex items-center justify-center">
-                <img
-                  key={activeImage ?? 'placeholder'}
-                  src={activeImage ?? getCardImageUrl(item.card)}
-                  alt={item.card.nameEn}
-                  className="w-full h-full object-cover animate-fade-in"
-                  loading="lazy"
-                  decoding="async"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
+                <button
+                  type="button"
+                  onClick={() => gallery.length > 0 && setZoomOpen(true)}
+                  className={cn('w-full h-full', gallery.length > 0 && 'cursor-zoom-in')}
+                  aria-label="View photo full size"
+                >
+                  <img
+                    key={activeImage ?? 'placeholder'}
+                    src={activeImage ?? getCardImageUrl(item.card)}
+                    alt={item.card.nameEn}
+                    className="w-full h-full object-cover animate-fade-in"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </button>
                 <div className={cn(
                   'absolute inset-0 flex items-center justify-center -z-10',
                   item.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
@@ -493,6 +502,14 @@ export function VaultItemDetailScreen() {
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         item={item}
+      />
+      <ImageZoomDialog
+        images={gallery}
+        index={activeImageIndex}
+        open={zoomOpen}
+        onClose={() => setZoomOpen(false)}
+        onIndexChange={setActiveImageIndex}
+        alt={item.card.nameEn}
       />
     </PageContainer>
   );

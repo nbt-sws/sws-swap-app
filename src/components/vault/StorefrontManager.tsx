@@ -476,7 +476,7 @@ function StorefrontPreview({
                     <img
                       src={getCardImageUrl(item.card)}
                       alt={item.card.nameEn}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"
                       onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -612,7 +612,7 @@ function DraggableItem({
         <img
           src={getCardImageUrl(item.card)}
           alt={item.card.nameEn}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
           draggable={false}

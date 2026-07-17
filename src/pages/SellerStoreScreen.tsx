@@ -301,7 +301,7 @@ export function SellerStoreScreen() {
                   <img
                     src={getCardImageUrl(listing.card)}
                     alt={listing.card.nameEn}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                   />
                 </div>
@@ -619,7 +619,7 @@ function ListingGrid({ listings }: { listings: MarketListing[] }) {
             <img
               src={getCardImageUrl(listing.card)}
               alt={listing.card.nameEn}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-cover"
               loading="lazy"
               decoding="async"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
