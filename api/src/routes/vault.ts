@@ -212,17 +212,45 @@ vaultRoutes.patch('/items/:id', async (c) => {
   }
 
   const body = await c.req.json();
-  const allowedUpdates = ['status', 'paid_price', 'current_price', 'condition', 'image_url', 'description'];
+
+  // camelCase field -> column mapping
+  const fieldMap: Record<string, string> = {
+    name: 'name',
+    sku: 'sku',
+    status: 'status',
+    category: 'category',
+    subCategory: 'sub_category',
+    itemFormat: 'item_format',
+    condition: 'condition',
+    description: 'description',
+    imageUrl: 'image_url',
+    paidPrice: 'paid_price',
+    currentPrice: 'current_price',
+    dateAcquired: 'date_acquired',
+    source: 'source',
+  };
+
   const updates: string[] = [];
-  const values: (string | number)[] = [];
+  const values: unknown[] = [];
   let paramIndex = 1;
 
-  for (const key of allowedUpdates) {
-    if (body[key] !== undefined) {
-      updates.push(`${key} = $${paramIndex}`);
-      values.push(body[key]);
+  for (const [field, column] of Object.entries(fieldMap)) {
+    if (body[field] !== undefined) {
+      updates.push(`${column} = $${paramIndex}`);
+      values.push(body[field]);
       paramIndex++;
     }
+  }
+
+  // Images: first is always the cover; merge into metadata JSONB
+  if (Array.isArray(body.images)) {
+    const images = body.images.slice(0, 10) as string[];
+    updates.push(`image_url = $${paramIndex}`);
+    values.push(images[0] ?? null);
+    paramIndex++;
+    updates.push(`metadata = COALESCE(metadata, '{}'::jsonb) || $${paramIndex}::jsonb`);
+    values.push(JSON.stringify({ images }));
+    paramIndex++;
   }
 
   if (updates.length === 0) {
@@ -235,7 +263,7 @@ vaultRoutes.patch('/items/:id', async (c) => {
   const items = await withTenant(c.env, tenantId, async (client) => {
     const { rows } = await client.query(
       `UPDATE vault_items SET ${updates.join(', ')} WHERE id = $${paramIndex} AND owner_id = $${paramIndex + 1} RETURNING *`,
-      values
+      values as (string | number)[]
     );
     return rows;
   });

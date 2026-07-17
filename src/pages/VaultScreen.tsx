@@ -781,7 +781,12 @@ export function VaultScreen() {
       </div>
 
       {/* Modals */}
-      <ListItemModal open={listModalOpen} onClose={closeListModal} item={selectedItem} />
+      <ListItemModal
+        open={listModalOpen}
+        onClose={closeListModal}
+        item={selectedItem}
+        listing={selectedItem ? listingsMap.get(selectedItem.id) ?? null : null}
+      />
       <BulkListModal open={bulkListModalOpen} onClose={() => setBulkListModalOpen(false)} items={selectedItems} />
       <RegisterItemModal isOpen={registerModalOpen} onClose={() => setRegisterModalOpen(false)} />
       <VaultHistoryDialog open={historyOpen} onClose={() => setHistoryOpen(false)} userId={userId} />

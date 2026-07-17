@@ -200,6 +200,9 @@ export const listingsApi = {
 
   activate: (id: string) => apiPost<{ listingId: string; status: string }>(`market/listings/${id}/activate`),
 
+  update: (id: string, data: { price?: number; title?: string; description?: string; image_url?: string }) =>
+    apiPatch<{ listingId: string; message: string }>(`market/listings/${id}`, { json: data }),
+
   delist: (id: string) => apiDelete<{ listingId: string; status: string }>(`market/listings/${id}`),
 };
 
@@ -282,6 +285,22 @@ export const vaultApi = {
     images?: string[];
     metadata?: Record<string, unknown>;
   }) => apiPost<ApiItem>('vault/items', { json: data }),
+
+  updateItem: (id: string, data: {
+    name?: string;
+    sku?: string;
+    category?: string;
+    subCategory?: string;
+    itemFormat?: string;
+    condition?: string;
+    description?: string;
+    imageUrl?: string;
+    images?: string[];
+    paidPrice?: number;
+    currentPrice?: number;
+    dateAcquired?: string;
+    source?: string;
+  }) => apiPatch<{ id: string; message: string }>(`vault/items/${id}`, { json: data }),
 
   deleteItem: (id: string) => apiDelete<void>(`vault/items/${id}`),
 

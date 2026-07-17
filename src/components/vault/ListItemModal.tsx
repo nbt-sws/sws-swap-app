@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useCreateListing } from '@/hooks/useApi';
+import { useState, useMemo, useEffect } from 'react';
+import { useCreateListing, useUpdateListing } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -23,6 +23,8 @@ interface ListItemModalProps {
   open: boolean;
   onClose: () => void;
   item: VaultItem | null;
+  /** Active listing for this item — when present the modal edits instead of creating */
+  listing?: { listingId: string; price: number } | null;
 }
 
 function getShelf(condition: string): 'RAW' | 'PRE-GRADED' | 'GRADED' | 'SEALED-BOX' {
@@ -31,14 +33,39 @@ function getShelf(condition: string): 'RAW' | 'PRE-GRADED' | 'GRADED' | 'SEALED-
   return 'RAW';
 }
 
-export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
+export function ListItemModal({ open, onClose, item, listing }: ListItemModalProps) {
   const createListing = useCreateListing();
+  const updateListing = useUpdateListing();
   const [price, setPrice] = useState('');
   const [listingType, setListingType] = useState<'SALE' | 'TRADE'>('SALE');
   const shelf = useMemo(() => (item ? getShelf(item.condition) : 'RAW'), [item]);
+  const isEditMode = !!listing;
+
+  // Prefill current price when editing an active listing
+  useEffect(() => {
+    if (open && listing) setPrice(String(listing.price));
+    if (open && !listing) setPrice('');
+  }, [open, listing]);
 
   const handleSubmit = () => {
     if (!item) return;
+
+    if (isEditMode && listing) {
+      const priceNum = Number(price) || 0;
+      updateListing.mutate(
+        { listingId: listing.listingId, data: { price: priceNum } },
+        {
+          onSuccess: () => {
+            toast.success('Listing updated');
+            setPrice('');
+            onClose();
+          },
+          onError: () => toast.error('Failed to update listing'),
+        }
+      );
+      return;
+    }
+
     const priceNum = listingType === 'SALE' ? Number(price) || 0 : 0;
     createListing.mutate(
       {
@@ -64,11 +91,13 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
 
   if (!item) return null;
 
+  const isBusy = createListing.isPending || updateListing.isPending;
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="bg-surface-light border-border max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-lg">List item for sale</DialogTitle>
+          <DialogTitle className="text-lg">{isEditMode ? 'Edit listing' : 'List item for sale'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           {/* Item preview */}
@@ -83,7 +112,8 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
             </div>
           </div>
 
-          {/* Listing type */}
+          {/* Listing type — fixed when editing (backend only supports price updates) */}
+          {!isEditMode && (
           <div className="space-y-2">
             <label className="text-sm font-medium">Listing type</label>
             <div className="grid grid-cols-2 gap-2">
@@ -104,9 +134,10 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
               ))}
             </div>
           </div>
+          )}
 
           {/* Price (only for sale) */}
-          {listingType === 'SALE' && (
+          {(isEditMode || listingType === 'SALE') && (
             <div className="space-y-2">
               <label className="text-sm font-medium">Price (฿)</label>
               <Input
@@ -141,18 +172,20 @@ export function ListItemModal({ open, onClose, item }: ListItemModalProps) {
           <Button
             className="w-full bg-brand hover:bg-brand-light h-11"
             onClick={handleSubmit}
-            disabled={createListing.isPending || (listingType === 'SALE' && !price)}
+            disabled={isBusy || (!isEditMode && listingType === 'SALE' && !price)}
           >
-            {createListing.isPending ? (
+            {isBusy ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Creating listing...
+                {isEditMode ? 'Saving...' : 'Creating listing...'}
               </span>
+            ) : isEditMode ? (
+              'Save changes'
             ) : (
               'Publish listing'
             )}
           </Button>
-          {createListing.isError && (
+          {createListing.isError && !isEditMode && (
             <p className="text-xs text-center text-red-500 mt-2">
               Error: {createListing.error instanceof Error ? createListing.error.message : 'Failed to create listing'}
             </p>

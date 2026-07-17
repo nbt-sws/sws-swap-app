@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { useAddToVault, useUploadItemImage } from '@/hooks/useApi';
+import { useEffect, useRef, useState } from 'react';
+import { useAddToVault, useUpdateVaultItem, useUploadItemImage } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import type { VaultItem } from '@/types';
 import {
   Package, ImagePlus, X, ChevronLeft, ChevronRight, ChevronDown, Loader2, Star,
 } from 'lucide-react';
@@ -24,6 +25,8 @@ import {
 interface RegisterItemModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** When provided, the modal edits this item instead of creating a new one */
+  item?: VaultItem | null;
 }
 
 const GAMES = [
@@ -51,16 +54,46 @@ const INITIAL_FORM = {
   dateAcquired: new Date().toISOString().split('T')[0],
 };
 
-export function RegisterItemModal({ isOpen, onClose }: RegisterItemModalProps) {
+export function RegisterItemModal({ isOpen, onClose, item }: RegisterItemModalProps) {
   const addToVault = useAddToVault();
+  const updateVaultItem = useUpdateVaultItem();
   const uploadImage = useUploadItemImage();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isEditMode = !!item;
 
   const [form, setForm] = useState(INITIAL_FORM);
   const [images, setImages] = useState<string[]>([]);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [showAcquisition, setShowAcquisition] = useState(false);
+
+  // Prefill when editing (or reset for create) each time the modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+    if (item) {
+      setForm({
+        code: item.card.code,
+        nameEn: item.card.nameEn,
+        nameJp: item.card.nameJp,
+        rarity: item.card.rarity,
+        type: item.card.type,
+        language: item.card.language || 'JP',
+        game: (item.card.game as 'one-piece' | 'yu-gi-oh') || 'one-piece',
+        condition: (CONDITIONS.includes(item.condition as typeof CONDITIONS[number])
+          ? item.condition
+          : 'Raw') as typeof CONDITIONS[number],
+        paidPrice: item.paidPrice > 0 ? String(item.paidPrice) : '',
+        source: item.source === 'Manual entry' ? '' : item.source,
+        dateAcquired: item.dateAcquired?.split('T')[0] || new Date().toISOString().split('T')[0],
+      });
+      setImages(item.images ?? []);
+      setShowDetails(false);
+      setShowAcquisition(false);
+    } else {
+      reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, item]);
 
   const update = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -116,11 +149,40 @@ export function RegisterItemModal({ isOpen, onClose }: RegisterItemModalProps) {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const isBusy = addToVault.isPending || uploadingCount > 0;
+  const isBusy = addToVault.isPending || updateVaultItem.isPending || uploadingCount > 0;
   const canSubmit = !!form.nameEn.trim() && !isBusy;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+
+    if (isEditMode && item) {
+      updateVaultItem.mutate(
+        {
+          itemId: item.id,
+          data: {
+            name: form.nameEn.trim(),
+            sku: form.code.trim() || item.card.code,
+            category: form.game,
+            subCategory: form.rarity.trim() || undefined,
+            itemFormat: form.language,
+            condition: form.condition,
+            images,
+            paidPrice: form.paidPrice ? Number(form.paidPrice) : 0,
+            dateAcquired: form.dateAcquired,
+            source: form.source.trim() || 'Manual entry',
+          },
+        },
+        {
+          onSuccess: () => {
+            toast.success('Item updated');
+            reset();
+            onClose();
+          },
+          onError: () => toast.error('Failed to update item. Please try again.'),
+        }
+      );
+      return;
+    }
 
     addToVault.mutate(
       {
@@ -155,7 +217,7 @@ export function RegisterItemModal({ isOpen, onClose }: RegisterItemModalProps) {
         <DialogHeader>
           <DialogTitle className="text-lg flex items-center gap-2">
             <Package className="w-5 h-5 text-brand" />
-            Add item to vault
+            {isEditMode ? 'Edit item' : 'Add item to vault'}
           </DialogTitle>
         </DialogHeader>
 
@@ -405,10 +467,14 @@ export function RegisterItemModal({ isOpen, onClose }: RegisterItemModalProps) {
             onClick={handleSubmit}
             disabled={!canSubmit}
           >
-            {addToVault.isPending
-              ? 'Adding...'
-              : uploadingCount > 0
+            {isBusy
+              ? uploadingCount > 0
                 ? `Uploading ${uploadingCount} photo(s)...`
+                : isEditMode
+                  ? 'Saving...'
+                  : 'Adding...'
+              : isEditMode
+                ? 'Save changes'
                 : 'Add to vault'}
           </Button>
         </div>

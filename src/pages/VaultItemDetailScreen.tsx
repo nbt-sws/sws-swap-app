@@ -15,10 +15,11 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/
 import {
   TrendingUp, TrendingDown, Tag, Award,
   Package, Clock, Truck, ListChecks, User, Shield,
-  Calendar, ShoppingBag, ClipboardList,
+  Calendar, ShoppingBag, ClipboardList, Pencil,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { ListItemModal } from '@/components/vault/ListItemModal';
+import { RegisterItemModal } from '@/components/vault/RegisterItemModal';
 import { ShippingAddressModal } from '@/components/domain/ShippingAddressModal';
 import { toast } from 'sonner';
 import type { AuditRecord } from '@/types';
@@ -39,6 +40,7 @@ export function VaultItemDetailScreen() {
   const itemAudit = useItemAuditHistory(itemId);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [listModalOpen, setListModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [addressModalMode, setAddressModalMode] = useState<'delivery' | 'redemption' | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'history'>('details');
 
@@ -380,6 +382,17 @@ export function VaultItemDetailScreen() {
                 <Award className="w-4 h-4 mr-2" />
                 {t('common.grade')}
               </Button>
+              {isOwner && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-border h-12 w-12 shrink-0"
+                  onClick={() => setEditModalOpen(true)}
+                  aria-label={t('common.edit', { defaultValue: 'Edit' })}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              )}
             </div>
 
             {/* Deposit to SWS Vault - REMOVED per user request */}
@@ -473,6 +486,12 @@ export function VaultItemDetailScreen() {
       <ListItemModal
         open={listModalOpen}
         onClose={() => setListModalOpen(false)}
+        item={item}
+        listing={listing ? { listingId: listing.id, price: listing.price } : null}
+      />
+      <RegisterItemModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
         item={item}
       />
     </PageContainer>

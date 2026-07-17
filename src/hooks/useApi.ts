@@ -92,6 +92,33 @@ export function useUploadItemImage() {
   });
 }
 
+export function useUpdateVaultItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ itemId, data }: { itemId: string; data: Parameters<typeof vaultApi.updateItem>[1] }) =>
+      vaultApi.updateItem(itemId, data),
+    onSuccess: (_res, { itemId }) => {
+      queryClient.invalidateQueries({ queryKey: ['vault'] });
+      queryClient.invalidateQueries({ queryKey: ['vault', itemId] });
+    },
+  });
+}
+
+export function useUpdateListing() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ listingId, data }: { listingId: string; data: Parameters<typeof listingsApi.update>[1] }) =>
+      listingsApi.update(listingId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myListings'] });
+      queryClient.invalidateQueries({ queryKey: ['market'] });
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listingsBySeller'] });
+      queryClient.invalidateQueries({ queryKey: ['listing'] });
+    },
+  });
+}
+
 // ─── Market hooks ───────────────────────────────────────────────────
 
 export function useMarketListings(shelf?: string) {
