@@ -8,7 +8,7 @@ import {
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { PageLoader } from '@/components/ui/page-loader';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { DeliveryPreferenceSelector } from '@/components/domain/DeliveryPreferenceSelector';
 import { Button } from '@/components/ui/button';
@@ -75,9 +75,27 @@ export function ListingDetailScreen() {
   const isWishlisted = listing ? (wishlistIds?.has(listing.id) ?? false) : false;
 
   if (isLoading) {
+    // Layout-matched skeleton — no full-page spinner flash
     return (
       <PageContainer className="py-6">
-        <PageLoader />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="aspect-[4/5] w-full rounded-xl shimmer" />
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-24 shimmer" />
+              <Skeleton className="h-8 w-3/4 shimmer" />
+              <Skeleton className="h-4 w-1/3 shimmer" />
+            </div>
+            <Skeleton className="h-16 w-full rounded-xl shimmer" />
+            <Skeleton className="h-32 w-full rounded-xl shimmer" />
+            <Skeleton className="h-10 w-40 shimmer" />
+            <Skeleton className="h-24 w-full rounded-xl shimmer" />
+            <div className="flex gap-3">
+              <Skeleton className="h-12 flex-1 rounded-xl shimmer" />
+              <Skeleton className="h-12 flex-1 rounded-xl shimmer" />
+            </div>
+          </div>
+        </div>
       </PageContainer>
     );
   }
@@ -191,9 +209,10 @@ export function ListingDetailScreen() {
           <div>
             <p className="text-xs font-mono text-muted-foreground mb-1">{listing.card.code}</p>
             <h1 className="text-2xl font-bold mb-2">{listing.card.nameEn}</h1>
-            {[listing.card.rarity, listing.card.condition, listing.card.language].filter(Boolean).length > 0 && (
+            {/* Condition already has its own row in the details panel — don't repeat it */}
+            {[listing.card.rarity, listing.card.language].filter(Boolean).length > 0 && (
               <p className="text-sm text-muted-foreground">
-                {[listing.card.rarity, listing.card.condition, listing.card.language].filter(Boolean).join(' · ')}
+                {[listing.card.rarity, listing.card.language].filter(Boolean).join(' · ')}
               </p>
             )}
           </div>
@@ -216,13 +235,17 @@ export function ListingDetailScreen() {
                     {listing.seller.rating}
                   </span>
                 )}
-                {sellerProfile && sellerProfile.sales > 0 && (
-                  <span>{t('listing.sellerSales', { count: sellerProfile.sales })}</span>
+                {sellerProfile && sellerProfile.sales > 0 ? (
+                  <>
+                    <span>{t('listing.sellerSales', { count: sellerProfile.sales })}</span>
+                    <span className="inline-flex items-center gap-0.5 text-success">
+                      <ShieldCheck className="w-3 h-3" />
+                      {t('common.verifiedSeller')}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">{t('listing.newSeller')}</span>
                 )}
-                <span className="inline-flex items-center gap-0.5 text-success">
-                  <ShieldCheck className="w-3 h-3" />
-                  {t('common.verifiedSeller')}
-                </span>
               </div>
             </div>
           </Link>
@@ -263,15 +286,18 @@ export function ListingDetailScreen() {
             )}
           </div>
 
-          {listing.vaultVerified && (
-            <div className="flex items-start gap-2.5 rounded-xl bg-success/5 border border-success/20 px-3 py-2.5">
-              <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs font-semibold text-success">{t('listing.trust.verified')}</p>
-                <p className="text-xs text-muted-foreground">{t('listing.trust.protection')}</p>
-              </div>
+          {/* Buyer protection — always visible; vault-verified adds the locked-item note */}
+          <div className="flex items-start gap-2.5 rounded-xl bg-success/5 border border-success/20 px-3 py-2.5">
+            <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-semibold text-success">
+                {listing.vaultVerified ? t('listing.trust.verified') : t('listing.trust.protected')}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {listing.vaultVerified ? t('listing.trust.protection') : t('listing.trust.protectionGeneric')}
+              </p>
             </div>
-          )}
+          </div>
 
           {/* Delivery options — only relevant when purchasing */}
           {!isOwnListing && (

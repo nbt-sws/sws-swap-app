@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { downscaleImage } from '@/lib/image';
 import { toast } from 'sonner';
 import type { VaultItem } from '@/types';
 import {
@@ -123,7 +124,8 @@ export function RegisterItemModal({ isOpen, onClose, item }: RegisterItemModalPr
       }
       setUploadingCount((n) => n + 1);
       try {
-        const url = await uploadImage.mutateAsync(file);
+        const prepared = await downscaleImage(file);
+        const url = await uploadImage.mutateAsync(prepared);
         setImages((prev) => [...prev, url]);
       } catch {
         toast.error(`${file.name}: upload failed`);

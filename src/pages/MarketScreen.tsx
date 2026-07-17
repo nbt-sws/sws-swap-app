@@ -573,7 +573,9 @@ function MarketListRow({
         </div>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-sm font-bold font-mono">{listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}</p>
+        <p className={cn('text-sm font-bold font-mono', listing.listingType === 'TRADE' ? 'text-cyan' : 'text-brand')}>
+          {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
+        </p>
         <p className="text-xs text-muted-foreground">{listing.seller.name}</p>
       </div>
     </div>

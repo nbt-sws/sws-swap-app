@@ -72,7 +72,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
             />
             <div className="absolute top-3 left-3">
               <Badge className={listing.listingType === 'SALE' ? 'bg-brand/20 text-brand' : 'bg-cyan/20 text-cyan'}>
-                {listing.listingType}
+                {listing.listingType === 'TRADE' ? t('common.tradeOnly').toUpperCase() : t('market.listingTypes.sale').toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -84,10 +84,10 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
             <p className="text-sm text-muted-foreground font-mono">{listing.card.nameJp}</p>
 
             <div className="flex flex-wrap gap-2 mt-3">
-              <Badge variant="outline">{listing.card.rarity}</Badge>
-              <Badge variant="outline">{listing.card.condition}</Badge>
+              {listing.card.rarity && <Badge variant="outline">{listing.card.rarity}</Badge>}
+              {listing.card.condition && <Badge variant="outline">{listing.card.condition}</Badge>}
               <Badge variant="outline">{listing.shelf}</Badge>
-              <Badge variant="outline">{listing.card.language}</Badge>
+              {listing.card.language && <Badge variant="outline">{listing.card.language}</Badge>}
             </div>
 
             <div className="mt-5">
@@ -107,9 +107,11 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
               <div className="w-10 h-10 rounded-full bg-surface-lighter flex items-center justify-center font-bold">
                 {listing.seller.name.charAt(0)}
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">@{listing.seller.name}</p>
-                <p className="text-xs text-muted-foreground">{t('market.sellerRating', { rating: listing.seller.rating })}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">@{listing.seller.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {listing.seller.rating > 0 ? t('market.sellerRating', { rating: listing.seller.rating }) : t('listing.newSeller')}
+                </p>
               </div>
             </Link>
 

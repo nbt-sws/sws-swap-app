@@ -309,8 +309,11 @@
     "sellerSales_other": "{{count}} sales",
     "trust": {
       "verified": "Vault-verified item",
-      "protection": "This card stays locked in the SWS vault until your order completes — no shipping scams."
+      "protection": "This card stays locked in the SWS vault until your order completes — no shipping scams.",
+      "protected": "Buyer protection",
+      "protectionGeneric": "Your order is tracked end-to-end — the item transfers to your vault only after completion."
     },
+    "newSeller": "New seller",
     "status": {
       "active": "Active",
       "draft": "Draft",

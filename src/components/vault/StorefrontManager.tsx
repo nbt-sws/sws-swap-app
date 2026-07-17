@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn, getCardImageUrl } from '@/lib/utils';
+import { downscaleImage } from '@/lib/image';
 import type { VaultItem, StoreGroup } from '@/types';
 import {
   Edit3, ImagePlus, Package, Plus, Trash2, MapPin, Loader2, GripVertical, FolderOpen, Eye, Star,
@@ -76,7 +77,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
 
   const handleAvatarSelect = async (file: File) => {
     try {
-      const url = await uploadAvatar.mutateAsync(file);
+      const url = await uploadAvatar.mutateAsync(await downscaleImage(file));
       setDraftAvatar(url);
     } catch {
       // ignore
@@ -85,7 +86,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
 
   const handleBannerSelect = async (file: File) => {
     try {
-      const url = await uploadBanner.mutateAsync(file);
+      const url = await uploadBanner.mutateAsync(await downscaleImage(file));
       setDraftBanner(url);
     } catch {
       // ignore
