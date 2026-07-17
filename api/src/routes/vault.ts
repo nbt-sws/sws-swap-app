@@ -47,9 +47,11 @@ vaultRoutes.get('/items', async (c) => {
     const params: (string | number)[] = [ownerId];
     let sql = `
       SELECT v.*, v.card_id, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
-             c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
+             c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition,
+             so.status as service_order_status, so.order_no as service_order_no
       FROM vault_items v
       LEFT JOIN cards c ON v.card_id = c.id
+      LEFT JOIN service_orders so ON v.service_order_id = so.id
       WHERE v.owner_id = $1
     `;
 
@@ -84,6 +86,9 @@ vaultRoutes.get('/items', async (c) => {
         source: item.source,
         images: item.metadata?.images ?? [],
       },
+      serviceOrderId: item.service_order_id ?? undefined,
+      serviceOrderStatus: item.service_order_status ?? undefined,
+      serviceOrderNo: item.service_order_no ?? undefined,
       createdAt: item.created_at,
       updatedAt: item.updated_at,
       card: item.card_code ? {
@@ -110,9 +115,11 @@ vaultRoutes.get('/items/:id', async (c) => {
   const items = await withTenant(c.env, tenantId, async (client) => {
     const { rows } = await client.query(
       `SELECT v.*, v.card_id, c.code as card_code, c.name_en as card_name_en, c.name_jp as card_name_jp,
-              c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition
+              c.rarity, c.type, c.language, c.game, c.image_url as card_image_url, c.condition as card_condition,
+              so.status as service_order_status, so.order_no as service_order_no
        FROM vault_items v
        LEFT JOIN cards c ON v.card_id = c.id
+       LEFT JOIN service_orders so ON v.service_order_id = so.id
        WHERE v.id = $1`,
       [itemId]
     );
@@ -143,6 +150,9 @@ vaultRoutes.get('/items/:id', async (c) => {
       source: item.source,
       images: item.metadata?.images ?? [],
     },
+    serviceOrderId: item.service_order_id ?? undefined,
+    serviceOrderStatus: item.service_order_status ?? undefined,
+    serviceOrderNo: item.service_order_no ?? undefined,
     createdAt: item.created_at,
     updatedAt: item.updated_at,
     card: item.card_code ? {

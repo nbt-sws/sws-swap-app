@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { withTenant } from '../db';
+import { withTenant, notify } from '../db';
 import type { Env } from '../db';
 import { authMiddleware } from '../middleware/auth';
 
@@ -122,6 +122,15 @@ offerRoutes.post('/', async (c) => {
        RETURNING *`,
       [data.listingId, userId, listing.seller_id, data.offerPrice, expiresAt.toISOString()]
     );
+
+    await notify(
+      client,
+      listing.seller_id,
+      'New offer received',
+      `฿${data.offerPrice.toLocaleString()} for "${listing.title}"`,
+      'OFFER_RECEIVED'
+    );
+
     return rows;
   });
 
@@ -347,6 +356,14 @@ offerRoutes.post('/:id/accept', async (c) => {
       [current.offer_price, 'INACTIVE', current.listing_id]
     );
 
+    await notify(
+      client,
+      current.buyer_id,
+      'Offer accepted',
+      `Your offer of ฿${current.offer_price.toLocaleString()} was accepted`,
+      'OFFER_ACCEPTED'
+    );
+
     return rows;
   });
 
@@ -384,6 +401,15 @@ offerRoutes.post('/:id/decline', async (c) => {
       "UPDATE offers SET status = 'DECLINED' WHERE id = $1 RETURNING *",
       [offerId]
     );
+
+    await notify(
+      client,
+      current.buyer_id,
+      'Offer declined',
+      `Your offer of ฿${current.offer_price.toLocaleString()} was declined`,
+      'OFFER_DECLINED'
+    );
+
     return rows;
   });
 

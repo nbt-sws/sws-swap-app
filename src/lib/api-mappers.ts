@@ -107,6 +107,8 @@ export function mapApiItemToVaultItem(apiItem: ApiItem): VaultItem {
     plAmount: 0,
     plPercent: 0,
     images: Array.isArray(metadata.images) ? (metadata.images as string[]) : [],
+    serviceOrderId: apiItem.serviceOrderId,
+    serviceOrderStatus: apiItem.serviceOrderStatus,
   };
 }
 

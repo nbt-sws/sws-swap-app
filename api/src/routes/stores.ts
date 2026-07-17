@@ -108,12 +108,23 @@ storeRoutes.post('/stores/:storeId/reviews', authMiddleware, async (c) => {
   const comment = typeof body.comment === 'string' ? body.comment.slice(0, 1000) : '';
 
   const review = await withTenant(c.env, tenantId, async (client) => {
-    // Trust gate: reviewer must have a completed order from this store
+    // Trust gate: reviewer must have a completed marketplace order OR a completed
+    // service order with this store
     const { rows: orderRows } = await client.query(
       "SELECT 1 FROM orders WHERE buyer_id = $1 AND seller_id = $2 AND status = 'COMPLETED' LIMIT 1",
       [userId, storeId]
     );
-    if (!orderRows.length) {
+    let eligible = orderRows.length > 0;
+    if (!eligible) {
+      const { rows: svcRows } = await client.query(
+        `SELECT 1 FROM service_orders so
+         JOIN service_providers p ON so.provider_id = p.id
+         WHERE so.user_id = $1 AND p.user_id = $2 AND so.status = 'COMPLETED' LIMIT 1`,
+        [userId, storeId]
+      );
+      eligible = svcRows.length > 0;
+    }
+    if (!eligible) {
       return { error: 'You can review a store after completing an order with them' as const };
     }
 

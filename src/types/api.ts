@@ -52,6 +52,9 @@ export interface ApiItem {
   condition?: string;
   imageUrl?: string;
   metadata?: Record<string, unknown>;
+  serviceOrderId?: string;
+  serviceOrderStatus?: string;
+  serviceOrderNo?: string;
   createdAt: string;
   updatedAt: string;
   card?: {

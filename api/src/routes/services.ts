@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { withTenant } from '../db';
+import { withTenant, notify } from '../db';
 import type { Env } from '../db';
 import { authMiddleware, optionalAuth } from '../middleware/auth';
 
@@ -433,8 +433,20 @@ serviceRoutes.post('/service-orders', authMiddleware, async (c) => {
       ]
     );
 
-    // Lock the cards
-    await client.query("UPDATE vault_items SET status = 'LOCKED' WHERE id = ANY($1::uuid[])", [data.cardIds]);
+    // Lock the cards and link them to this order
+    await client.query(
+      "UPDATE vault_items SET status = 'LOCKED', service_order_id = $2 WHERE id = ANY($1::uuid[])",
+      [data.cardIds, rows[0].id]
+    );
+
+    // Notify the provider about the new order
+    await notify(
+      client,
+      provider.user_id,
+      'New service order',
+      `${orderNo} · ${data.cardIds.length} card(s) · ฿${total.toLocaleString()}`,
+      'SERVICE_ORDER_CREATED'
+    );
 
     return { row: rows[0] };
   });
@@ -513,7 +525,14 @@ serviceRoutes.patch('/service-orders/:id', authMiddleware, async (c) => {
       if (!isBuyer) return { error: 'Only the customer can cancel' as const, status: 403 as const };
       if (order.status !== 'PENDING') return { error: 'Order can no longer be cancelled' as const, status: 400 as const };
       await client.query("UPDATE service_orders SET status = 'CANCELLED', updated_at = NOW() WHERE id = $1", [id]);
-      await client.query("UPDATE vault_items SET status = 'AVAILABLE' WHERE id = ANY($1::uuid[])", [order.card_ids]);
+      await client.query("UPDATE vault_items SET status = 'AVAILABLE', service_order_id = NULL WHERE id = ANY($1::uuid[])", [order.card_ids]);
+      await notify(
+        client,
+        order.provider_user_id,
+        'Service order cancelled',
+        `${order.order_no} was cancelled by the customer`,
+        'SERVICE_ORDER_CANCELLED'
+      );
       const { rows: updated } = await client.query(`${ORDER_SELECT} WHERE o.id = $1`, [id]);
       return { row: updated[0] };
     }
@@ -551,13 +570,24 @@ serviceRoutes.patch('/service-orders/:id', authMiddleware, async (c) => {
         // Return cards to the buyer's vault, stamped with the grade result when provided
         if (gradeResult) {
           await client.query(
-            "UPDATE vault_items SET status = 'AVAILABLE', condition = $2 WHERE id = ANY($1::uuid[])",
+            "UPDATE vault_items SET status = 'AVAILABLE', condition = $2, service_order_id = NULL WHERE id = ANY($1::uuid[])",
             [order.card_ids, gradeResult]
           );
         } else {
-          await client.query("UPDATE vault_items SET status = 'AVAILABLE' WHERE id = ANY($1::uuid[])", [order.card_ids]);
+          await client.query("UPDATE vault_items SET status = 'AVAILABLE', service_order_id = NULL WHERE id = ANY($1::uuid[])", [order.card_ids]);
         }
       }
+
+      // Notify the customer about progress
+      await notify(
+        client,
+        order.user_id,
+        isLast ? 'Service order completed' : 'Service order update',
+        isLast
+          ? `${order.order_no} is complete${gradeResult ? ` — result: ${gradeResult}` : ''}. Cards are back in your vault.`
+          : `${order.order_no} → ${stages[nextIdx].label}`,
+        isLast ? 'SERVICE_ORDER_COMPLETED' : 'SERVICE_ORDER_STAGE'
+      );
 
       const { rows: updated } = await client.query(`${ORDER_SELECT} WHERE o.id = $1`, [id]);
       return { row: updated[0] };

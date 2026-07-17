@@ -285,10 +285,18 @@ miscRoutes.get('/market/:sku/history', async (c) => {
   const tenantId = c.get('tenantId');
   const sku = c.req.param('sku');
   const period = c.req.query('period');
+  // Filter by trade recency instead of a label column: 7d/30d/90d/1y
+  const intervalMap: Record<string, string> = {
+    '7d': '7 days',
+    '30d': '30 days',
+    '90d': '90 days',
+    '1y': '1 year',
+  };
+  const interval = period ? intervalMap[period] ?? null : null;
   const trades = await withTenant(c.env, tenantId, async (client) => {
     const { rows } = await client.query(
-      'SELECT price, traded_at FROM price_history WHERE sku = $1 AND ($2::text IS NULL OR period = $2) ORDER BY traded_at DESC',
-      [sku, period || null]
+      'SELECT price, traded_at FROM price_history WHERE sku = $1 AND ($2::text IS NULL OR traded_at > NOW() - $2::interval) ORDER BY traded_at DESC',
+      [sku, interval]
     );
     return rows.map((r: any) => ({ time: r.traded_at, price: r.price }));
   });

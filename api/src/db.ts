@@ -6,6 +6,22 @@ export interface Env {
   IMAGES: R2Bucket;
 }
 
+type DbClient = InstanceType<typeof Pool.prototype.connect>;
+
+/** Insert an in-app notification for a user (fire-and-forget within the request txn). */
+export async function notify(
+  client: DbClient,
+  userId: string,
+  title: string,
+  body: string,
+  eventType: string
+): Promise<void> {
+  await client.query(
+    "INSERT INTO notifications (user_id, title, body, channel, event_type) VALUES ($1, $2, $3, 'IN_APP', $4)",
+    [userId, title, body, eventType]
+  );
+}
+
 export async function withTenant<T>(
   env: Env,
   tenantId: string,

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { withTenant } from '../db';
+import { withTenant, notify } from '../db';
 import type { Env } from '../db';
 import { authMiddleware } from '../middleware/auth';
 
@@ -212,6 +212,15 @@ orderRoutes.post('/', async (c) => {
        RETURNING *`,
       [userId, listing.seller_id, data.listingId, listing.item_id || data.itemId, data.price, data.deliveryPreference, data.shippingAddress ? JSON.stringify(data.shippingAddress) : null]
     );
+
+    await notify(
+      client,
+      listing.seller_id,
+      'New order',
+      `"${listing.title}" sold for ฿${data.price.toLocaleString()}`,
+      'ORDER_CREATED'
+    );
+
     return rows;
   });
 
@@ -287,6 +296,16 @@ orderRoutes.patch('/:id', async (c) => {
           [current.buyer_id, 'AVAILABLE', current.item_id]
         );
       }
+      // Record the trade for market price history (sku from the vault item)
+      if (current.item_id) {
+        const { rows: itemRows } = await client.query('SELECT sku FROM vault_items WHERE id = $1', [current.item_id]);
+        if (itemRows[0]?.sku) {
+          await client.query(
+            'INSERT INTO price_history (sku, price, traded_at) VALUES ($1, $2, NOW())',
+            [itemRows[0].sku, current.price]
+          );
+        }
+      }
     }
     if (status === 'CANCELLED') {
       updates.push(`cancelled_at = NOW()`);
@@ -307,6 +326,23 @@ orderRoutes.patch('/:id', async (c) => {
       `UPDATE orders SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
       values
     );
+
+    // Notify the buyer about the status change (skip plain cancels by seller, covered below)
+    const statusLabels: Record<string, string> = {
+      PAYMENT_PENDING: 'pending payment',
+      PAYMENT_CONFIRMED: 'payment confirmed',
+      SHIPPING_ARRANGED: 'shipping arranged',
+      COMPLETED: 'completed — the card is now in your vault',
+      CANCELLED: 'cancelled',
+    };
+    await notify(
+      client,
+      current.buyer_id,
+      'Order update',
+      `Order ${orderId.slice(0, 8)}… is now ${statusLabels[status] ?? status.toLowerCase()}`,
+      status === 'COMPLETED' ? 'ORDER_COMPLETED' : 'ORDER_STATUS'
+    );
+
     return rows;
   });
 
