@@ -121,8 +121,10 @@
     "all": "All",
     "available": "Available",
     "held": "Vault held",
+    "vault_held": "Vault held",
     "listed": "Listed",
     "inTransit": "In transit",
+    "in_transit": "In transit",
     "redeeming": "Redeeming",
     "completed": "Completed",
     "locked": "Locked"
@@ -314,6 +316,8 @@
       "protectionGeneric": "Your order is tracked end-to-end — the item transfers to your vault only after completion."
     },
     "newSeller": "New seller",
+    "loadError": "Couldn't load your vault",
+    "loadErrorDesc": "Check your connection and try again.",
     "status": {
       "active": "Active",
       "draft": "Draft",

@@ -30,7 +30,7 @@ import type { ShippingAddress } from '@/types';
 
 
 export function VaultItemDetailScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { itemId } = useParams({ from: '/vault/items/$itemId' });
   const navigate = useNavigate();
   const { data: vault, isLoading: isVaultLoading } = useVault();
@@ -340,7 +340,9 @@ export function VaultItemDetailScreen() {
                   <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div>
                     <dt className="text-muted-foreground text-xs">{t('common.acquired')}</dt>
-                    <dd className="font-medium">{item.dateAcquired}</dd>
+                    <dd className="font-medium">
+                      {item.dateAcquired ? new Date(item.dateAcquired).toLocaleDateString(i18n.language === 'th' ? 'th-TH' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                    </dd>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

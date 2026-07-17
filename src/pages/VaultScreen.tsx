@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { Route } from '@/routes/vault.index';
 import {
   useVault, useListingsBySeller, useDelistListing, useStoreProfile,
@@ -40,9 +40,10 @@ const VIEWS = [
 export function VaultScreen() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const userId = user?.id ?? '';
-  const { data: vault, isLoading, isFetching, refetch: refetchVault } = useVault();
+  const { data: vault, isLoading, isFetching, isError: isVaultError, refetch: refetchVault } = useVault();
   const { data: listings, refetch: refetchListings } = useListingsBySeller(userId);
   const delistListing = useDelistListing();
   const deleteVaultItem = useDeleteVaultItem();
@@ -217,10 +218,9 @@ export function VaultScreen() {
   }, [deleteVaultItem, t]);
 
   const handleRedeemItem = useCallback((item: VaultItem) => {
-    // TODO: Implement redeem API call
-    console.log('[VaultScreen] Redeem item:', item.id);
-    alert('Redeem functionality will be implemented soon');
-  }, []);
+    // Redemption/delivery flows live on the item detail page (address modal included)
+    navigate({ to: '/vault/items/$itemId', params: { itemId: item.id } });
+  }, [navigate]);
 
   const closeListModal = useCallback(() => {
     setListModalOpen(false);
@@ -309,7 +309,7 @@ export function VaultScreen() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className="surface-card rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-6 h-6 rounded-md bg-brand/10 flex items-center justify-center">
@@ -419,24 +419,6 @@ export function VaultScreen() {
               </div>
             </div>
 
-            {/* Quick Stats Sidebar */}
-            <div className="surface-card rounded-xl p-3.5 space-y-2.5">
-              <div className="text-sm font-semibold text-foreground">Summary</div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">{t('vault.stats.listed')}</span>
-                  <span className="font-mono font-semibold">{counts.LISTED}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">{t('vault.stats.available')}</span>
-                  <span className="font-mono font-semibold text-success">{counts.AVAILABLE}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">{t('vault.stats.inTransit')}</span>
-                  <span className="font-mono font-semibold text-warning">{counts.IN_TRANSIT}</span>
-                </div>
-              </div>
-            </div>
           </aside>
 
           {/* Mobile filter toggle */}
@@ -622,6 +604,20 @@ export function VaultScreen() {
                   ))}
                 </div>
               )
+            ) : isVaultError ? (
+              <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
+                <EmptyMedia variant="icon">
+                  <Package className="w-8 h-8 text-brand" />
+                </EmptyMedia>
+                <EmptyHeader>
+                  <EmptyTitle>{t('vault.loadError', { defaultValue: "Couldn't load your vault" })}</EmptyTitle>
+                  <EmptyDescription>{t('vault.loadErrorDesc', { defaultValue: 'Check your connection and try again.' })}</EmptyDescription>
+                </EmptyHeader>
+                <Button className="bg-brand hover:bg-brand-light gap-2 rounded-xl" onClick={() => refetchVault()}>
+                  <RefreshCw className="w-4 h-4" />
+                  {t('common.retry')}
+                </Button>
+              </Empty>
             ) : vaultViewMode === 'store' ? (
               <div className="space-y-4">
                 {/* Store area sub-tabs */}
@@ -746,8 +742,9 @@ export function VaultScreen() {
             )}
           </main>
 
-          {/* Right Sidebar — Activity */}
-          <aside className="hidden xl:block w-52 shrink-0 space-y-3">
+          {/* Right Sidebar — Activity (only on very wide screens; otherwise it
+              overlaps the toolbar and squeezes the grid — verified via rect measurement) */}
+          <aside className="hidden 2xl:block w-52 shrink-0 space-y-3">
             <div className="surface-card rounded-xl p-3.5 space-y-2.5">
               <div className="text-sm font-semibold text-foreground">Recent</div>
               <div className="space-y-2.5">

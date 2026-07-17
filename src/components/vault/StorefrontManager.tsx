@@ -159,7 +159,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
         <div
           className={cn(
             'h-40 sm:h-48 bg-cover bg-center relative',
-            !bannerUrl && 'bg-gradient-to-br from-brand to-periwinkle'
+            !bannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-brand/20'
           )}
           style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
         >

@@ -146,8 +146,7 @@ export function VaultCard({
             <span
               className={cn(
                 'text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border inline-flex items-center gap-1 shadow-lg backdrop-blur-sm',
-                statusConfig.color,
-                isListing && 'animate-pulse'
+                statusConfig.color
               )}
             >
               {StatusIcon && <StatusIcon className="w-3 h-3" />}
