@@ -8,6 +8,7 @@ import {
   useUploadStoreBanner,
   useStoreGroups,
   useUpdateStoreGroups,
+  useUpdateListing,
 } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,14 +19,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import type { VaultItem, StoreGroup } from '@/types';
 import {
-  Edit3, ImagePlus, Package, Plus, Trash2, MapPin, Loader2, GripVertical, FolderOpen, Eye,
+  Edit3, ImagePlus, Package, Plus, Trash2, MapPin, Loader2, GripVertical, FolderOpen, Eye, Star,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface StorefrontManagerProps {
   userId: string;
   items: VaultItem[];
-  listingsMap: Map<string, { listingId: string; price: number }>;
+  listingsMap: Map<string, { listingId: string; price: number; isFeatured: boolean }>;
 }
+
+type ListingMapEntry = { listingId: string; price: number; isFeatured: boolean };
 
 export function StorefrontManager({ userId, items, listingsMap }: StorefrontManagerProps) {
   const { data: profile, isLoading: profileLoading } = useStoreProfile(userId);
@@ -431,10 +435,11 @@ function StorefrontPreview({
   listingsMap,
 }: {
   items: VaultItem[];
-  listingsMap: Map<string, { listingId: string; price: number }>;
+  listingsMap: Map<string, ListingMapEntry>;
 }) {
+  const updateListing = useUpdateListing();
   const listedItems = useMemo(
-    () => items.filter((i) => listingsMap.has(i.card.code)),
+    () => items.filter((i) => listingsMap.has(i.id)),
     [items, listingsMap]
   );
 
@@ -459,32 +464,60 @@ function StorefrontPreview({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {listedItems.map((item) => {
-            const listing = listingsMap.get(item.card.code);
+            const listing = listingsMap.get(item.id);
             return (
-              <Link
-                key={item.id}
-                to={listing ? '/market/$listingId' : '/vault/items/$itemId'}
-                params={{ listingId: listing?.listingId ?? '', itemId: item.id }}
-                className="group block bg-surface-light rounded-xl overflow-hidden border border-border hover:border-brand/40 transition"
-              >
-                <div className="aspect-[5/7] overflow-hidden relative">
-                  <img
-                    src={getCardImageUrl(item.card)}
-                    alt={item.card.nameEn}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                </div>
-                <div className="p-2">
-                  <p className="text-xs font-mono text-text-tertiary">{item.card.code}</p>
-                  <p className="text-xs font-semibold line-clamp-1 group-hover:text-brand transition">{item.card.nameEn}</p>
-                  <p className="text-brand font-bold text-xs mt-1">
-                    {listing ? `฿${listing.price.toLocaleString()}` : '—'}
-                  </p>
-                </div>
-              </Link>
+              <div key={item.id} className="relative group">
+                <Link
+                  to={listing ? '/market/$listingId' : '/vault/items/$itemId'}
+                  params={{ listingId: listing?.listingId ?? '', itemId: item.id }}
+                  className="group block bg-surface-light rounded-xl overflow-hidden border border-border hover:border-brand/40 transition"
+                >
+                  <div className="aspect-[5/7] overflow-hidden relative">
+                    <img
+                      src={getCardImageUrl(item.card)}
+                      alt={item.card.nameEn}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs font-mono text-text-tertiary">{item.card.code}</p>
+                    <p className="text-xs font-semibold line-clamp-1 group-hover:text-brand transition">{item.card.nameEn}</p>
+                    <p className="text-brand font-bold text-xs mt-1">
+                      {listing ? `฿${listing.price.toLocaleString()}` : '—'}
+                    </p>
+                  </div>
+                </Link>
+                {/* Featured toggle (owner) */}
+                {listing && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      updateListing.mutate(
+                        { listingId: listing.listingId, data: { is_featured: !listing.isFeatured } },
+                        {
+                          onSuccess: () => toast.success(listing.isFeatured ? 'Removed from featured' : 'Added to featured'),
+                          onError: () => toast.error('Failed to update featured'),
+                        }
+                      );
+                    }}
+                    aria-label={listing.isFeatured ? 'Unfeature' : 'Feature'}
+                    title={listing.isFeatured ? 'Remove from featured' : 'Mark as featured'}
+                    className={cn(
+                      'absolute top-1.5 right-1.5 z-10 rounded-full p-1.5 backdrop-blur-sm transition-all',
+                      listing.isFeatured
+                        ? 'bg-pregrade/90 text-surface-dark shadow'
+                        : 'bg-black/50 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-black/70 hover:text-pregrade'
+                    )}
+                  >
+                    <Star className={cn('w-3.5 h-3.5', listing.isFeatured && 'fill-current')} />
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>
@@ -510,7 +543,7 @@ function DropGroup({
   onDragLeave: () => void;
   onDrop: (cardCode: string) => void;
   onDelete: () => void;
-  listingsMap: Map<string, { listingId: string; price: number }>;
+  listingsMap: Map<string, ListingMapEntry>;
 }) {
   return (
     <div
@@ -561,9 +594,9 @@ function DraggableItem({
   listingsMap,
 }: {
   item: VaultItem;
-  listingsMap: Map<string, { listingId: string; price: number }>;
+  listingsMap: Map<string, ListingMapEntry>;
 }) {
-  const listing = listingsMap.get(item.card.code);
+  const listing = listingsMap.get(item.id);
   return (
     <Link
       to="/vault/items/$itemId"

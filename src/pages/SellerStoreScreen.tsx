@@ -1,20 +1,23 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from '@tanstack/react-router';
+import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import {
-  useMarketListings,
+  usePublicSellerListings,
   useFollowedSellers,
   useFollowSeller,
   useUnfollowSeller,
   useStoreProfile,
   useStoreGroups,
   useStoreReviews,
+  useSubmitStoreReview,
 } from '@/hooks/useApi';
+import { toast } from 'sonner';
 import { useServiceProviders } from '@/hooks/useServices';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -28,7 +31,7 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Star, Package, Heart, MapPin, Store, FolderOpen, Search, ShieldCheck, SlidersHorizontal,
-  Award, ArrowLeft, Calendar, Link as LinkIcon, ExternalLink, Clock, Sparkles,
+  Award, ArrowLeft, Calendar, Link as LinkIcon, ExternalLink, Clock, Sparkles, Share2,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
@@ -44,8 +47,9 @@ const SOCIAL_ICONS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
 export function SellerStoreScreen() {
   const { t } = useTranslation();
   const { sellerId } = useParams({ from: '/seller/$sellerId' });
+  const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { data: listings, isLoading: listingsLoading } = useMarketListings();
+  const { data: listings, isLoading: listingsLoading } = usePublicSellerListings(sellerId);
   const { data: profile, isLoading: profileLoading } = useStoreProfile(sellerId);
   const { data: groups } = useStoreGroups(sellerId);
   const { data: followedIds } = useFollowedSellers();
@@ -94,13 +98,12 @@ export function SellerStoreScreen() {
   const handle = `@${displayName}`;
   const isFollowing = followedIds?.includes(sellerId) || justFollowed;
 
-  const seed = hashStringToInt(sellerId);
-  const sales = profile?.sales ?? seed % 50;
-  const followers = profile?.followers ?? (seed * 7) % 200;
-  const rating = profile?.rating ?? storeSeller?.rating ?? 0;
+  // Real stats from the collectors endpoint (no fake numbers)
+  const sales = profile?.sales ?? 0;
+  const followers = profile?.followers ?? 0;
   const memberSince = useMemo(() => {
-    const d = profile?.createdAt ? new Date(profile.createdAt) : new Date('2024-01-01');
-    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    if (!profile?.createdAt) return null;
+    return new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   }, [profile]);
 
   const { data: providers } = useServiceProviders();
@@ -111,7 +114,16 @@ export function SellerStoreScreen() {
   const reviewCount = reviews?.length ?? 0;
   const averageReview = reviewCount > 0
     ? reviews!.reduce((sum, r) => sum + r.rating, 0) / reviewCount
-    : rating;
+    : 0;
+
+  const handleShare = () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (navigator.share) {
+      navigator.share({ title: displayName, url }).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => toast.success('Store link copied')).catch(() => {});
+    }
+  };
 
   const [userTab, setUserTab] = useState<'listings' | 'services' | 'reviews' | 'about' | null>(null);
   const tabValue = userTab ?? (storeProviders.length > 0 ? 'services' : 'listings');
@@ -149,6 +161,10 @@ export function SellerStoreScreen() {
   }
 
   const toggleFollow = () => {
+    if (!user) {
+      navigate({ to: '/login' });
+      return;
+    }
     if (isFollowing) {
       unfollow.mutate(sellerId);
       setJustFollowed(false);
@@ -196,19 +212,25 @@ export function SellerStoreScreen() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3 mt-2 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <Star className="w-4 h-4 text-pregrade fill-pregrade" />
-              <span className="font-medium text-foreground">{averageReview.toFixed(1)}</span>
-              {reviewCount > 0 ? `(${reviewCount} reviews)` : 'rating'}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
-              {profile?.location || 'Bangkok, Thailand'}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              Since {memberSince}
-            </span>
+            {reviewCount > 0 && (
+              <span className="inline-flex items-center gap-1">
+                <Star className="w-4 h-4 text-pregrade fill-pregrade" />
+                <span className="font-medium text-foreground">{averageReview.toFixed(1)}</span>
+                ({reviewCount} reviews)
+              </span>
+            )}
+            {profile?.location && (
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" />
+                {profile.location}
+              </span>
+            )}
+            {memberSince && (
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
+                Since {memberSince}
+              </span>
+            )}
           </div>
 
           {profile?.bio && (
@@ -236,6 +258,15 @@ export function SellerStoreScreen() {
                 {isFollowing ? 'Following' : 'Follow'}
               </Button>
             )}
+            <Button
+              variant="secondary"
+              size="icon"
+              className="bg-surface-light border border-border hover:bg-surface-lighter"
+              onClick={handleShare}
+              aria-label="Share store"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
             <Button variant="secondary" className="bg-surface-light border border-border hover:bg-surface-lighter" asChild>
               <Link to="/market">Browse market</Link>
             </Button>
@@ -248,7 +279,7 @@ export function SellerStoreScreen() {
         <StatCard value={activeListings.length} label="Listings" icon={<Package className="w-4 h-4 text-brand" />} />
         <StatCard value={sales} label="Sales" icon={<Star className="w-4 h-4 text-pregrade" />} />
         <StatCard value={followers} label="Followers" icon={<Heart className="w-4 h-4 text-periwinkle" />} />
-        <StatCard value={averageReview.toFixed(1)} label={reviewCount > 0 ? 'Avg. review' : 'Rating'} icon={<ShieldCheck className="w-4 h-4 text-cyan" />} />
+        <StatCard value={reviewCount > 0 ? averageReview.toFixed(1) : '—'} label="Avg. review" icon={<ShieldCheck className="w-4 h-4 text-cyan" />} />
       </div>
 
       {/* Highlights */}
@@ -294,7 +325,7 @@ export function SellerStoreScreen() {
           <TabsTrigger value="services" disabled={storeProviders.length === 0}>
             Services
           </TabsTrigger>
-          <TabsTrigger value="reviews" disabled={reviewCount === 0}>
+          <TabsTrigger value="reviews">
             Reviews
           </TabsTrigger>
           <TabsTrigger value="about">About</TabsTrigger>
@@ -395,6 +426,9 @@ export function SellerStoreScreen() {
         </TabsContent>
 
         <TabsContent value="reviews" className="mt-0 space-y-4">
+          {user && !isOwner && <ReviewForm storeId={sellerId} />}
+
+          {reviewCount > 0 && (
           <Card className="bg-surface-light border-border">
             <CardContent className="p-5 flex items-center gap-4">
               <div className="text-center">
@@ -418,6 +452,15 @@ export function SellerStoreScreen() {
               </p>
             </CardContent>
           </Card>
+          )}
+
+          {reviewCount === 0 && (
+            <Card className="bg-surface-light border-border">
+              <CardContent className="py-10 text-center text-sm text-muted-foreground">
+                No reviews yet — be the first after completing an order.
+              </CardContent>
+            </Card>
+          )}
 
           {reviews?.map((review) => (
             <Card key={review.id} className="bg-surface-light border-border">
@@ -617,13 +660,74 @@ function EmptyState({ icon, title, description }: { icon: React.ReactNode; title
   );
 }
 
-function hashStringToInt(str: string) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
+/* ─── Review form ─── */
+
+function ReviewForm({ storeId }: { storeId: string }) {
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const submitReview = useSubmitStoreReview();
+
+  const canSubmit = rating > 0 && !submitReview.isPending;
+
+  const handleSubmit = () => {
+    if (!canSubmit) return;
+    submitReview.mutate(
+      { storeId, data: { rating, comment: comment.trim() || undefined } },
+      {
+        onSuccess: () => {
+          toast.success('Review submitted');
+          setRating(0);
+          setComment('');
+        },
+        onError: () => {
+          toast.error('You can review a store after completing an order with them');
+        },
+      }
+    );
+  };
+
+  return (
+    <Card className="bg-surface-light border-brand/30">
+      <CardContent className="p-4 space-y-3">
+        <h3 className="text-sm font-semibold">Write a review</h3>
+        <div className="flex items-center gap-1" role="radiogroup" aria-label="Rating">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setRating(n)}
+              aria-label={`${n} star${n > 1 ? 's' : ''}`}
+              className="rounded p-0.5 transition-transform hover:scale-110"
+            >
+              <Star
+                className={cn(
+                  'w-5 h-5 transition-colors',
+                  n <= rating ? 'text-pregrade fill-pregrade' : 'text-muted-foreground hover:text-pregrade'
+                )}
+              />
+            </button>
+          ))}
+        </div>
+        <Textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Share your experience with this store (optional)"
+          className="bg-surface border-border min-h-[70px] text-sm"
+          maxLength={1000}
+        />
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            className="bg-brand hover:bg-brand-light"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+          >
+            {submitReview.isPending ? 'Submitting...' : 'Submit review'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 // Simple icon helpers

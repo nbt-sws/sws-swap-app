@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { requireAuth } from '@/lib/route-guards';
 
+// Public layout: /seller/$sellerId (store page) is guest-accessible.
+// Owner-only children (index, new, orders) guard themselves.
 export const Route = createFileRoute('/seller')({
   component: () => <Outlet />,
-  beforeLoad: requireAuth,
 });

@@ -90,6 +90,7 @@ export interface ApiListing {
   sellerTier?: string;
   ownerId?: string;
   holderId?: string;
+  isFeatured?: boolean;
   createdAt: string;
   // Enriched from the cards catalog (via vault_items.card_id)
   cardCode?: string;

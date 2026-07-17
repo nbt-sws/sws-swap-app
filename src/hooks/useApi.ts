@@ -828,9 +828,9 @@ export function useUploadStoreAvatar() {
   return useMutation<string, Error, File>({
     mutationFn: async (file) => {
       const formData = new FormData();
-      formData.append('avatar', file);
-      const res = await collectorApi.uploadAvatar(formData);
-      return res.avatarUrl;
+      formData.append('file', file);
+      const res = await uploadsApi.upload(formData);
+      return res.url;
     },
   });
 }
@@ -839,9 +839,9 @@ export function useUploadStoreBanner() {
   return useMutation<string, Error, File>({
     mutationFn: async (file) => {
       const formData = new FormData();
-      formData.append('banner', file);
-      const res = await collectorApi.uploadBanner(formData);
-      return res.bannerUrl;
+      formData.append('file', file);
+      const res = await uploadsApi.upload(formData);
+      return res.url;
     },
   });
 }
@@ -850,7 +850,8 @@ export function useStoreGroups(userId: string) {
   return useQuery<StoreGroup[]>({
     queryKey: ['storeGroups', userId],
     queryFn: async () => {
-      return [];
+      const res = await storesApi.getGroups(userId);
+      return res.groups;
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 2,
@@ -861,7 +862,8 @@ export function useStoreReviews(storeId: string) {
   return useQuery<StoreReview[]>({
     queryKey: ['storeReviews', storeId],
     queryFn: async () => {
-      return [] as StoreReview[];
+      const res = await storesApi.getReviews(storeId);
+      return res.reviews;
     },
     enabled: !!storeId,
     staleTime: 1000 * 60 * 2,
@@ -871,9 +873,24 @@ export function useStoreReviews(storeId: string) {
 export function useUpdateStoreGroups() {
   const queryClient = useQueryClient();
   return useMutation<StoreGroup[], Error, { userId: string; groups: StoreGroup[] }>({
-    mutationFn: async ({ userId: _userId, groups }) => groups,
+    mutationFn: async ({ groups }) => {
+      const res = await storesApi.updateGroups(groups);
+      return res.groups;
+    },
     onSuccess: (_, { userId }) => {
       queryClient.invalidateQueries({ queryKey: ['storeGroups', userId] });
+    },
+  });
+}
+
+export function useSubmitStoreReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ storeId, data }: { storeId: string; data: { rating: number; comment?: string } }) =>
+      storesApi.submitReview(storeId, data),
+    onSuccess: (_res, { storeId }) => {
+      queryClient.invalidateQueries({ queryKey: ['storeReviews', storeId] });
+      queryClient.invalidateQueries({ queryKey: ['storeProfile', storeId] });
     },
   });
 }
@@ -927,6 +944,7 @@ export function useMarkAllNotificationsRead() {
 // ─── Follow hooks ───────────────────────────────────────────────────
 
 export function useFollowedSellers() {
+  const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: ['followedSellers'],
     queryFn: async () => {
@@ -934,6 +952,7 @@ export function useFollowedSellers() {
       return res.follows.map((f) => f.followingId);
     },
     staleTime: 1000 * 60,
+    enabled: isAuthenticated,
   });
 }
 
@@ -965,6 +984,21 @@ export function useListingsBySeller(sellerId?: string) {
       return res.results.map(mapApiListingToMarketListing);
     },
     enabled: !!sellerId && isAuthenticated,
+    staleTime: 1000 * 30,
+    placeholderData: keepPreviousData,
+  });
+}
+
+// Public variant for guest-facing pages (e.g. the public store page) — no auth gate
+export function usePublicSellerListings(sellerId?: string) {
+  return useQuery({
+    queryKey: ['sellerListings', sellerId],
+    queryFn: async () => {
+      if (!sellerId) return [];
+      const res = await listingsApi.getBySeller(sellerId);
+      return res.results.map(mapApiListingToMarketListing);
+    },
+    enabled: !!sellerId,
     staleTime: 1000 * 30,
     placeholderData: keepPreviousData,
   });

@@ -11,6 +11,7 @@ import { orderRoutes } from './routes/orders';
 import { offerRoutes } from './routes/offers';
 import { miscRoutes } from './routes/misc';
 import { uploadRoutes } from './routes/uploads';
+import { storeRoutes } from './routes/stores';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -37,6 +38,7 @@ app.route('/api/v1/orders', orderRoutes);
 app.route('/api/v1/offers', offerRoutes);
 app.route('/api/v1', miscRoutes);
 app.route('/api/v1', uploadRoutes);
+app.route('/api/v1', storeRoutes);
 
 // 404 handler
 app.notFound((c) => c.json({ error: 'Not found' }, 404));

@@ -200,7 +200,7 @@ export const listingsApi = {
 
   activate: (id: string) => apiPost<{ listingId: string; status: string }>(`market/listings/${id}/activate`),
 
-  update: (id: string, data: { price?: number; title?: string; description?: string; image_url?: string }) =>
+  update: (id: string, data: { price?: number; title?: string; description?: string; image_url?: string; is_featured?: boolean }) =>
     apiPatch<{ listingId: string; message: string }>(`market/listings/${id}`, { json: data }),
 
   delist: (id: string) => apiDelete<{ listingId: string; status: string }>(`market/listings/${id}`),
@@ -241,6 +241,18 @@ export const notificationsApi = {
 export const storesApi = {
   getAll: (params?: { tier?: string; search?: string; page?: number; limit?: number }) =>
     apiGet<{ sellers: ApiCollectorProfile[] }>('collectors', { searchParams: params }),
+
+  getGroups: (userId: string) =>
+    apiGet<{ groups: { id: string; name: string; cardCodes: string[] }[] }>(`stores/${userId}/groups`),
+
+  updateGroups: (groups: { id?: string; name: string; cardCodes: string[] }[]) =>
+    apiPut<{ groups: { id: string; name: string; cardCodes: string[] }[] }>('stores/me/groups', { json: { groups } }),
+
+  getReviews: (storeId: string) =>
+    apiGet<{ reviews: { id: string; storeId: string; reviewerName: string; rating: number; comment: string; createdAt: string }[]; count: number; average: number | null }>(`stores/${storeId}/reviews`),
+
+  submitReview: (storeId: string, data: { rating: number; comment?: string }) =>
+    apiPost<{ id: string }>(`stores/${storeId}/reviews`, { json: data }),
 };
 
 export const collectorApi = {

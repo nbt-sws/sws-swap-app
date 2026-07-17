@@ -63,10 +63,10 @@ export function VaultScreen() {
   const [showFilters, setShowFilters] = useState(false);
 
   const listingsMap = useMemo(() => {
-    const map = new Map<string, { listingId: string; price: number }>();
+    const map = new Map<string, { listingId: string; price: number; isFeatured: boolean }>();
     listings?.forEach((l) => {
       if (l.status === 'active' || l.status === 'paused') {
-        map.set(l.itemId!, { listingId: l.id, price: l.price });
+        map.set(l.itemId!, { listingId: l.id, price: l.price, isFeatured: l.isFeatured ?? false });
       }
     });
     return map;
@@ -232,7 +232,7 @@ export function VaultScreen() {
   const confirmBulkDelist = useCallback(async () => {
     const targets = selectedItems
       .map((item) => listingsMap.get(item.id))
-      .filter((l): l is { listingId: string; price: number } => !!l);
+      .filter((l): l is { listingId: string; price: number; isFeatured: boolean } => !!l);
     setConfirmUnlistOpen(false);
     clearSelection();
     if (targets.length === 0) return;

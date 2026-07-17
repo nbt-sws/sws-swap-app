@@ -62,6 +62,7 @@ async function main() {
   await runMigration('001_initial.sql', SCHEMA_NAME);
   await runPublicMigration('002_seed_cards.sql');
   await runMigration('003_misc_tables.sql', SCHEMA_NAME);
+  await runMigration('004_store_tables.sql', SCHEMA_NAME);
   console.log('All migrations completed successfully');
 }
 

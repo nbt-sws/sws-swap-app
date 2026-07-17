@@ -144,6 +144,7 @@ export function mapApiListingToMarketListing(apiListing: ApiListing): MarketList
     status: apiListing.status.toLowerCase() as MarketListing['status'],
     views: 0,
     watchers: 0,
+    isFeatured: apiListing.isFeatured ?? false,
   };
 }
 

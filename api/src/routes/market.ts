@@ -225,7 +225,7 @@ marketRoutes.patch('/listings/:id', async (c) => {
   }
 
   const body = await c.req.json();
-  const allowedUpdates = ['status', 'price', 'title', 'description', 'image_url'];
+  const allowedUpdates = ['status', 'price', 'title', 'description', 'image_url', 'is_featured'];
   const updates: string[] = [];
   const values: (string | number)[] = [];
   let paramIndex = 1;
