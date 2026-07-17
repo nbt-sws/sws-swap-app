@@ -20,8 +20,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
-import { useServiceOrder } from '@/hooks/useServices';
+import { useServiceOrder, useUpdateServiceOrder } from '@/hooks/useServices';
 import { useVault } from '@/hooks/useApi';
+import { toast } from 'sonner';
 import { GRADER_STYLES } from '@/lib/graderAssets';
 import type { ServiceOrder } from '@/types';
 
@@ -37,6 +38,7 @@ export function ServiceOrderDetailScreen() {
   const { orderId } = useParams({ from: '/service-orders/$orderId' });
   const { data: order, isLoading: orderLoading } = useServiceOrder(orderId);
   const { data: vault, isLoading: vaultLoading } = useVault();
+  const updateOrder = useUpdateServiceOrder();
 
   if (orderLoading) {
     return (
@@ -69,7 +71,8 @@ export function ServiceOrderDetailScreen() {
     );
   }
 
-  const linkedCards = (vault ?? []).filter((item) => item.serviceOrderId === order.id);
+  // Cards are matched by the order's cardIds (vault item ids)
+  const linkedCards = (vault ?? []).filter((item) => order.cardIds.includes(item.id));
   const stages = order.stages ?? [];
 
   return (
@@ -89,11 +92,42 @@ export function ServiceOrderDetailScreen() {
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-mono text-muted-foreground mb-1">{order.id}</p>
+            <p className="text-xs font-mono text-muted-foreground mb-1">{order.orderNo ?? order.id}</p>
             <h1 className="text-xl font-bold">{order.packageName ?? (order.category === 'PREGRADE' ? 'Pre-grade' : 'Grade')} order</h1>
           </div>
           <Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>
         </div>
+
+        {order.gradeResult && (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-cyan/10 border border-cyan/30 px-3 py-2">
+            <Award className="w-4 h-4 text-cyan" />
+            <span className="text-sm font-semibold text-cyan">Result: {order.gradeResult}</span>
+          </div>
+        )}
+
+        {order.status === 'PENDING' && (
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-pldown/40 text-pldown hover:bg-pldown/10"
+              onClick={() => {
+                if (confirm('Cancel this order? Your cards will be released back to your vault.')) {
+                  updateOrder.mutate(
+                    { orderId: order.id, action: 'cancel' },
+                    {
+                      onSuccess: () => toast.success('Order cancelled — cards released'),
+                      onError: () => toast.error('Failed to cancel order'),
+                    }
+                  );
+                }
+              }}
+              disabled={updateOrder.isPending}
+            >
+              Cancel order
+            </Button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
           <div className="flex items-center gap-3 rounded-xl bg-background p-3">

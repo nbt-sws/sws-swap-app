@@ -69,7 +69,7 @@ export function ServiceOrdersScreen() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-xs font-mono text-muted-foreground">{order.id}</span>
+                        <span className="text-xs font-mono text-muted-foreground">{order.orderNo ?? order.id}</span>
                         <Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>
                         {order.grader && (
                           <span className={cn('text-xs px-1.5 py-0.5 rounded border', GRADER_STYLES[order.grader])}>

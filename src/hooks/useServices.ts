@@ -19,7 +19,8 @@ export function useServiceProvider(providerId: string) {
     queryKey: ['serviceProvider', providerId],
     queryFn: async () => {
       const res = await servicesApi.getProvider(providerId);
-      return res.provider as ServiceProvider;
+      // Backend returns provider and packages separately — merge for consumers
+      return { ...res.provider, packages: res.packages } as ServiceProvider;
     },
     enabled: !!providerId,
     staleTime: 1000 * 60 * 2,

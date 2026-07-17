@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useVault } from '@/hooks/useApi';
-import { useServiceProviders, useCreateServiceOrder } from '@/hooks/useServices';
+import { useServiceProviders, useServiceProvider, useCreateServiceOrder } from '@/hooks/useServices';
 import { motion } from 'framer-motion';
 import { ScrollablePage } from '@/components/layout/ScrollablePage';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Check, Clock, Package, Store, Upload, FlaskConical } from 'lucide-react';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { ServiceCategory, ServiceProvider } from '@/types';
 import { GRADER_STYLES } from '@/lib/graderAssets';
 
@@ -53,11 +54,14 @@ export function PregradeOrderScreen() {
     return byPreference ?? filteredProviders[0];
   }, [filteredProviders, selectedProviderId, preferredProviderId]);
 
+  // The providers list has no packages — fetch the selected provider's detail
+  const { data: providerDetail } = useServiceProvider(provider?.id ?? '');
+
   const [selectedPackageId, setSelectedPackageId] = useState<string>(preferredPackageId ?? '');
 
   const packages = useMemo(
-    () => provider?.packages.filter((p) => p.enabled) ?? [],
-    [provider]
+    () => providerDetail?.packages.filter((p) => p.enabled) ?? [],
+    [providerDetail]
   );
 
   const selectedPackage = useMemo(() => {
@@ -70,8 +74,9 @@ export function PregradeOrderScreen() {
   );
   const [selectedCourier, setSelectedCourier] = useState('Kerry');
 
+  // Only raw, AVAILABLE cards can be submitted (listed/locked/in-service cards are excluded)
   const heldCards = useMemo(
-    () => vault?.filter((v) => v.status === 'held' && v.condition === 'Raw') || [],
+    () => vault?.filter((v) => v.itemStatus === 'AVAILABLE' && v.condition === 'Raw') || [],
     [vault]
   );
   const cardCount = selectedCards.size;
@@ -98,9 +103,18 @@ export function PregradeOrderScreen() {
         providerId: provider.id,
         packageId: selectedPackage?.id,
         cardIds: Array.from(selectedCards),
+        deliveryMode: activeDeliveryMode,
       },
       {
-        onSuccess: () => navigate({ to: '/status' }),
+        onSuccess: (order) => {
+          toast.success('Order created — your cards are now locked for this service');
+          if (order?.id) {
+            navigate({ to: '/service-orders/$orderId', params: { orderId: order.id } });
+          } else {
+            navigate({ to: '/service-orders' });
+          }
+        },
+        onError: () => toast.error('Failed to create order. Please try again.'),
       }
     );
   };
@@ -318,8 +332,8 @@ export function PregradeOrderScreen() {
                   <Package className="w-8 h-8 text-brand" />
                 </EmptyMedia>
                 <EmptyHeader>
-                  <EmptyTitle>No raw cards</EmptyTitle>
-                  <EmptyDescription>Your vault has no held cards available for grading.</EmptyDescription>
+                  <EmptyTitle>No raw cards available</EmptyTitle>
+                  <EmptyDescription>Only raw cards with AVAILABLE status can be submitted. Add cards to your vault first.</EmptyDescription>
                 </EmptyHeader>
               </Empty>
             )}
