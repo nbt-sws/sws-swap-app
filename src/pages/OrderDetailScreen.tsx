@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Package, Truck, CheckCircle2, XCircle, Clock, MapPin } from 'lucide-react';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
+import { GameMark } from '@/components/domain/GameMark';
 import { useAuthStore } from '@/stores/auth';
 import type { Order } from '@/types';
 
@@ -182,7 +183,7 @@ export function OrderDetailScreen() {
                     order.listing.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
                   )}
                 >
-                  {order.listing.card.game === 'one-piece' ? '⚓' : '⚔'}
+                  <GameMark game={order.listing.card.game} />
                 </div>
                 <div>
                   <p className="text-xs font-mono text-muted-foreground">{order.listing.card.code}</p>

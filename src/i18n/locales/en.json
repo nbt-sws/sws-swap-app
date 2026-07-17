@@ -263,8 +263,8 @@
       "sealedBox": "Sealed box"
     },
     "games": {
-      "onePiece": "⚓ One Piece",
-      "yugioh": "⚔ Yu-Gi-Oh!"
+      "onePiece": "One Piece",
+      "yugioh": "Yu-Gi-Oh!"
     },
     "listingTypes": {
       "sale": "For sale",
@@ -286,12 +286,16 @@
     },
     "verified": "VERIFIED",
     "sellerRating": "Rating {{rating}}",
-    "resultsCount": "{{count}} listings",
+    "resultsCount_one": "{{count}} listing",
+    "resultsCount_other": "{{count}} listings",
     "stats": {
-      "live": "{{count}} live",
+      "live_one": "{{count}} live",
+      "live_other": "{{count}} live",
       "floor": "Floor ฿{{price}}",
-      "sellers": "{{count}} sellers",
-      "forTrade": "{{count}} for trade"
+      "sellers_one": "{{count}} seller",
+      "sellers_other": "{{count}} sellers",
+      "forTrade_one": "{{count}} for trade",
+      "forTrade_other": "{{count}} for trade"
     }
   },
   "listing": {
@@ -301,6 +305,12 @@
     "yourListing": "This is your listing",
     "yourListingDesc": "You can't buy or make offers on your own item.",
     "manageInVault": "Manage in Vault",
+    "sellerSales_one": "{{count}} sale",
+    "sellerSales_other": "{{count}} sales",
+    "trust": {
+      "verified": "Vault-verified item",
+      "protection": "This card stays locked in the SWS vault until your order completes — no shipping scams."
+    },
     "status": {
       "active": "Active",
       "draft": "Draft",

@@ -2,18 +2,17 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Check } from 'lucide-react';
+import { GameMark } from '@/components/domain/GameMark';
 
 const GAMES = [
   {
-    id: 'one-piece',
+    id: 'one-piece' as const,
     name: 'One Piece TCG',
-    icon: '⚓',
     languages: ['JP · EN · DON!! · Promo'],
   },
   {
-    id: 'yu-gi-oh',
+    id: 'yu-gi-oh' as const,
     name: 'Yu-Gi-Oh!',
-    icon: '⚔',
     languages: ['JP (OCG) · Asian-English · Promo'],
   },
 ];
@@ -106,7 +105,7 @@ export function PickerScreen() {
                       : 'bg-surface-light border-border hover:border-muted-foreground/30'
                   }`}
                 >
-                  <span className="text-2xl">{game.icon}</span>
+                  <GameMark game={game.id} size="lg" />
                   <div className="flex-1">
                     <p className="font-semibold">{game.name}</p>
                     <p className={`text-xs mt-0.5 ${

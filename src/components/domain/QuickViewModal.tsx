@@ -138,7 +138,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
               <Button
                 variant="outline"
                 size="icon"
-                className={cn('rounded-full border-border', isWishlisted && 'bg-brand text-brand border-brand')}
+                className={cn('rounded-full border-border', isWishlisted && 'bg-brand text-white border-brand')}
                 onClick={toggleWishlist}
               >
                 <Heart className={cn('w-4 h-4', isWishlisted && 'fill-current')} />

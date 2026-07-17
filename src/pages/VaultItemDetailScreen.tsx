@@ -18,6 +18,7 @@ import {
   Calendar, ShoppingBag, ClipboardList, Pencil,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
+import { GameMark } from '@/components/domain/GameMark';
 import { ListItemModal } from '@/components/vault/ListItemModal';
 import { RegisterItemModal } from '@/components/vault/RegisterItemModal';
 import { ImageZoomDialog } from '@/components/ui/ImageZoomDialog';
@@ -162,11 +163,8 @@ export function VaultItemDetailScreen() {
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                 </button>
-                <div className={cn(
-                  'absolute inset-0 flex items-center justify-center -z-10',
-                  item.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
-                )}>
-                  <span className="text-6xl">{item.card.game === 'one-piece' ? '⚓' : '⚔'}</span>
+                <div className="absolute inset-0 flex items-center justify-center -z-10">
+                  <GameMark game={item.card.game} size="xl" />
                 </div>
               </CardContent>
             </Card>

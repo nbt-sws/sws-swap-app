@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { VaultItem } from '@/types';
+import { GameMark } from '@/components/domain/GameMark';
 import { Tag, ArrowRightLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -103,7 +104,7 @@ export function ListItemModal({ open, onClose, item, listing }: ListItemModalPro
           {/* Item preview */}
           <div className="flex items-center gap-3 p-3 rounded-xl bg-surface border border-border">
             <div className="w-12 h-16 rounded-lg bg-surface-lighter flex items-center justify-center text-sm font-bold">
-              {item.card.game === 'one-piece' ? '⚓' : '⚔'}
+              <GameMark game={item.card.game} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>

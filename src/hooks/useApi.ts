@@ -156,6 +156,8 @@ export function useListing(listingId: string) {
     },
     enabled: !!listingId,
     staleTime: 1000 * 60,
+    // Keep the previous detail visible while the next one loads — no full-page spinner flash
+    placeholderData: keepPreviousData,
   });
 }
 

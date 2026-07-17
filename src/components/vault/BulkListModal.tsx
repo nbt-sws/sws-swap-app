@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import type { VaultItem } from '@/types';
+import { GameMark } from '@/components/domain/GameMark';
 import { Tag, ArrowRightLeft } from 'lucide-react';
 
 interface BulkListModalProps {
@@ -75,7 +76,7 @@ export function BulkListModal({ open, onClose, items }: BulkListModalProps) {
             {items.map((item) => (
               <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg bg-surface border border-border">
                 <div className="w-8 h-10 rounded-md bg-surface-lighter flex items-center justify-center text-xs font-bold">
-                  {item.card.game === 'one-piece' ? '⚓' : '⚔'}
+                  <GameMark game={item.card.game} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>

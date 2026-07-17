@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import {
   useListing, useCardPrice, useAddToWishlist, useRemoveFromWishlist, useWishlistIds,
   useCreateOffer, useVault, useCreateTradeOffer, useMarketStats, useMarketHistory,
+  useStoreProfile,
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -25,9 +26,10 @@ import {
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { ImageZoomDialog } from '@/components/ui/ImageZoomDialog';
 import {
-  Heart, Share2, Star, ArrowRightLeft, Clock, Package,
+  Heart, Share2, Star, ArrowRightLeft, Clock, Package, ShieldCheck,
 } from 'lucide-react';
 import { cn, getCardImageUrl, formatTimeAgo } from '@/lib/utils';
+import { GameMark } from '@/components/domain/GameMark';
 import { PriceChart } from '@/components/domain/PriceChart';
 import { MarketStatsCards } from '@/components/domain/MarketStatsCards';
 import { useAuthStore, isMember } from '@/stores/auth';
@@ -50,6 +52,7 @@ export function ListingDetailScreen() {
   const isListingMember = isMember(user);
 
   const { data: listing, isLoading } = useListing(listingId);
+  const { data: sellerProfile } = useStoreProfile(listing?.seller.id ?? '');
   const { data: priceData } = useCardPrice(listing?.card.code ?? '');
   const { data: marketStats } = useMarketStats(listing?.card.code ?? '');
   const { data: marketHistory } = useMarketHistory(listing?.card.code ?? '', '30d');
@@ -153,7 +156,7 @@ export function ListingDetailScreen() {
   const isOwnListing = !!user && user.id === listing.seller.id;
 
   return (
-    <PageContainer className="py-6">
+    <PageContainer className="py-6 pb-28 md:pb-6">
       <PageHeader
         title={t('listing.title')}
         back={{ to: '/market' }}
@@ -175,12 +178,6 @@ export function ListingDetailScreen() {
                 className="absolute inset-0"
               />
             </button>
-            <div className={cn(
-              'absolute inset-0 flex items-center justify-center -z-10',
-              listing.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
-            )}>
-              <span className="text-6xl">{listing.card.game === 'one-piece' ? '⚓' : '⚔'}</span>
-            </div>
             <div className="absolute top-4 left-4 flex gap-2">
               <Badge className={status.className}>{t(status.labelKey)}</Badge>
               <Badge className="bg-surface-lighter text-foreground">{listing.shelf}</Badge>
@@ -194,16 +191,14 @@ export function ListingDetailScreen() {
           <div>
             <p className="text-xs font-mono text-muted-foreground mb-1">{listing.card.code}</p>
             <h1 className="text-2xl font-bold mb-2">{listing.card.nameEn}</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-              <span>{listing.card.rarity}</span>
-              <span>·</span>
-              <span>{listing.card.condition}</span>
-              <span>·</span>
-              <span>{listing.card.language}</span>
-            </div>
+            {[listing.card.rarity, listing.card.condition, listing.card.language].filter(Boolean).length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                {[listing.card.rarity, listing.card.condition, listing.card.language].filter(Boolean).join(' · ')}
+              </p>
+            )}
           </div>
 
-          {/* Seller + Listing Meta */}
+          {/* Seller + trust signals */}
           <Link
             to="/seller/$sellerId"
             params={{ sellerId: listing.seller.id }}
@@ -212,12 +207,22 @@ export function ListingDetailScreen() {
             <div className="w-10 h-10 rounded-full bg-surface-lighter flex items-center justify-center font-bold">
               {listing.seller.name.charAt(0)}
             </div>
-            <div className="flex-1">
-              <p className="font-medium text-sm">@{listing.seller.name}</p>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Star className="w-3 h-3 text-pregrade fill-pregrade" />
-                <span>{listing.seller.rating}</span>
-                <span>· {t('common.verifiedSeller')}</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm truncate">@{listing.seller.name}</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                {listing.seller.rating > 0 && (
+                  <span className="inline-flex items-center gap-0.5">
+                    <Star className="w-3 h-3 text-pregrade fill-pregrade" />
+                    {listing.seller.rating}
+                  </span>
+                )}
+                {sellerProfile && sellerProfile.sales > 0 && (
+                  <span>{t('listing.sellerSales', { count: sellerProfile.sales })}</span>
+                )}
+                <span className="inline-flex items-center gap-0.5 text-success">
+                  <ShieldCheck className="w-3 h-3" />
+                  {t('common.verifiedSeller')}
+                </span>
               </div>
             </div>
           </Link>
@@ -227,14 +232,6 @@ export function ListingDetailScreen() {
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Listed</span>
               <span className="text-xs font-medium">{formatTimeAgo(listing.timestamp)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Item ID</span>
-              <span className="text-xs font-mono">{listing.itemId?.slice(0, 12)}...</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Listing ID</span>
-              <span className="text-xs font-mono">{listing.id?.slice(0, 12)}...</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Condition</span>
@@ -250,17 +247,31 @@ export function ListingDetailScreen() {
                 <Badge className="bg-cyan/10 text-cyan text-xs">Trade Only</Badge>
               </div>
             )}
+            {/* IDs demoted to a quiet footer — debug info, not purchase info */}
+            <p className="text-[10px] font-mono text-muted-foreground/50 pt-2 border-t border-border/60">
+              Item {listing.itemId?.slice(0, 8)}… · Listing {listing.id.slice(0, 8)}…
+            </p>
           </div>
 
-          {/* Price */}
+          {/* Price + trust */}
           <div>
             <p className="text-xs font-mono text-muted-foreground mb-1">{t('common.price').toUpperCase()}</p>
             {isTrade ? (
               <p className="text-3xl font-bold font-mono text-cyan">{t('common.tradeOnly')}</p>
             ) : (
-              <p className="text-3xl font-bold font-mono">฿{listing.price.toLocaleString()}</p>
+              <p className="text-3xl font-bold font-mono text-brand">฿{listing.price.toLocaleString()}</p>
             )}
           </div>
+
+          {listing.vaultVerified && (
+            <div className="flex items-start gap-2.5 rounded-xl bg-success/5 border border-success/20 px-3 py-2.5">
+              <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-semibold text-success">{t('listing.trust.verified')}</p>
+                <p className="text-xs text-muted-foreground">{t('listing.trust.protection')}</p>
+              </div>
+            </div>
+          )}
 
           {/* Delivery options — only relevant when purchasing */}
           {!isOwnListing && (
@@ -361,7 +372,7 @@ export function ListingDetailScreen() {
                                 'w-10 h-12 rounded-md flex items-center justify-center text-sm shrink-0',
                                 item.card.game === 'one-piece' ? 'bg-brand/10' : 'bg-periwinkle/10'
                               )}>
-                                {item.card.game === 'one-piece' ? '⚓' : '⚔'}
+                                <GameMark game={item.card.game} />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>
@@ -456,6 +467,35 @@ export function ListingDetailScreen() {
               </CardContent>
             </Card>
           )}
+        </div>
+      )}
+
+      {/* Sticky buy bar — mobile thumb zone (desktop keeps the inline buttons) */}
+      {!isOwnListing && (
+        <div className="fixed bottom-20 inset-x-0 z-40 px-3 md:hidden">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-light/95 backdrop-blur px-3.5 py-3 shadow-xl">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-mono uppercase text-muted-foreground">{isTrade ? 'Trade' : t('common.price')}</p>
+              <p className={cn('text-base font-bold font-mono truncate', isTrade ? 'text-cyan' : 'text-brand')}>
+                {isTrade ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
+              </p>
+            </div>
+            {!isTrade ? (
+              <Button
+                className="bg-brand hover:bg-brand-light h-11 px-5 shrink-0"
+                onClick={() => navigate({ to: '/checkout/$listingId', params: { listingId: listing.id }, search: { delivery } })}
+              >
+                {t('common.buyNow')}
+              </Button>
+            ) : (
+              <Button
+                className="bg-cyan hover:bg-cyan/90 text-surface-dark h-11 px-5 shrink-0"
+                onClick={() => setTradeOpen(true)}
+              >
+                {t('listing.dialog.proposeTrade')}
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

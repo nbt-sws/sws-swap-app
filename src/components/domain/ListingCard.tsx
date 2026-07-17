@@ -82,12 +82,12 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
             {listing.listingType === 'TRADE' ? (
-              <Badge className="bg-cyan/20 text-cyan border border-cyan/30 shadow-lg backdrop-blur-sm">{t('common.tradeOnly').toUpperCase()}</Badge>
+              <Badge className="bg-cyan/20 text-cyan border border-cyan/30">{t('common.tradeOnly').toUpperCase()}</Badge>
             ) : (
-              <Badge className="bg-brand/20 text-brand border border-brand/30 shadow-lg backdrop-blur-sm">{t('market.listingTypes.sale').toUpperCase()}</Badge>
+              <Badge className="bg-brand/20 text-brand border border-brand/30">{t('market.listingTypes.sale').toUpperCase()}</Badge>
             )}
             {isNew && (
-              <Badge className="bg-success/20 text-success border border-success/30 shadow-lg backdrop-blur-sm">{t('common.new')}</Badge>
+              <Badge className="bg-success/20 text-success border border-success/30">{t('common.new')}</Badge>
             )}
           </div>
 
@@ -163,7 +163,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           >
             {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
           </span>
-          <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[80px] bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">
+          <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[120px] bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40" title={`@${listing.seller.name}`}>
             @{listing.seller.name}
           </span>
         </div>

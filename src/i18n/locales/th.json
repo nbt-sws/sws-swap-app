@@ -263,8 +263,8 @@
       "sealedBox": "Sealed box"
     },
     "games": {
-      "onePiece": "⚓ One Piece",
-      "yugioh": "⚔ Yu-Gi-Oh!"
+      "onePiece": "One Piece",
+      "yugioh": "Yu-Gi-Oh!"
     },
     "listingTypes": {
       "sale": "ขาย",
@@ -286,12 +286,16 @@
     },
     "verified": "ยืนยันแล้ว",
     "sellerRating": "คะแนน {{rating}}",
-    "resultsCount": "{{count}} รายการ",
+    "resultsCount_one": "{{count}} รายการ",
+    "resultsCount_other": "{{count}} รายการ",
     "stats": {
-      "live": "ลงขายอยู่ {{count}}",
+      "live_one": "ลงขายอยู่ {{count}}",
+      "live_other": "ลงขายอยู่ {{count}}",
       "floor": "ต่ำสุด ฿{{price}}",
-      "sellers": "ผู้ขาย {{count}} คน",
-      "forTrade": "เทรด {{count}} รายการ"
+      "sellers_one": "ผู้ขาย {{count}} คน",
+      "sellers_other": "ผู้ขาย {{count}} คน",
+      "forTrade_one": "เทรด {{count}} รายการ",
+      "forTrade_other": "เทรด {{count}} รายการ"
     }
   },
   "listing": {
@@ -301,6 +305,12 @@
     "yourListing": "นี่คือประกาศขายของคุณ",
     "yourListingDesc": "คุณไม่สามารถซื้อหรือเสนอราคาสินค้าของตัวเองได้",
     "manageInVault": "จัดการใน Vault",
+    "sellerSales_one": "ขายสำเร็จ {{count}} รายการ",
+    "sellerSales_other": "ขายสำเร็จ {{count}} รายการ",
+    "trust": {
+      "verified": "สินค้ายืนยันใน Vault แล้ว",
+      "protection": "การ์ดถูกล็อกใน vault ของ SWS จนกว่าออเดอร์จะสำเร็จ — หมดกังวลเรื่องโอนเงินล่วงหน้า"
+    },
     "status": {
       "active": "กำลังขาย",
       "draft": "ร่าง",

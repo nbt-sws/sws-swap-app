@@ -28,13 +28,14 @@ const SHELVES: { id: string; key: string }[] = [
   { id: 'GRADED', key: 'market.shelves.graded' },
   { id: 'SEALED-BOX', key: 'market.shelves.sealedBox' },
 ];
+// Stable ids for filtering — translations are for display only
 const GAMES: { id: string; key: string }[] = [
-  { id: '⚓ One Piece', key: 'market.games.onePiece' },
-  { id: '⚔ Yu-Gi-Oh!', key: 'market.games.yugioh' },
+  { id: 'one-piece', key: 'market.games.onePiece' },
+  { id: 'yu-gi-oh', key: 'market.games.yugioh' },
 ];
 const LISTING_TYPES: { id: string; key: string }[] = [
-  { id: 'For sale', key: 'market.listingTypes.sale' },
-  { id: 'For trade', key: 'market.listingTypes.trade' },
+  { id: 'SALE', key: 'market.listingTypes.sale' },
+  { id: 'TRADE', key: 'market.listingTypes.trade' },
 ];
 
 const SORT_OPTIONS: { id: string; key: string }[] = [
@@ -82,12 +83,10 @@ export function MarketScreen() {
     let result = [...(listings || [])];
 
     if (activeGame) {
-      const gameKey = activeGame === t('market.games.onePiece') ? 'one-piece' : 'yu-gi-oh';
-      result = result.filter((l) => l.card.game.includes(gameKey));
+      result = result.filter((l) => l.card.game.includes(activeGame));
     }
 
-    if (activeType === t('market.listingTypes.sale')) result = result.filter((l) => l.listingType === 'SALE');
-    if (activeType === t('market.listingTypes.trade')) result = result.filter((l) => l.listingType === 'TRADE');
+    if (activeType) result = result.filter((l) => l.listingType === activeType);
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -163,20 +162,20 @@ export function MarketScreen() {
         icon={<ShoppingBag className="w-6 h-6 text-brand" />}
       />
 
-      {/* Market pulse */}
-      {marketStats && (
+      {/* Market pulse — only when there's enough activity to be worth stating;
+          a sparse market shouldn't advertise its own thinness */}
+      {marketStats && marketStats.count >= 2 && (
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-y border-border py-2.5 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-2 font-medium text-foreground">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-            </span>
+            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success" />
             {t('market.stats.live', { count: marketStats.count })}
           </span>
           {marketStats.floor !== null && (
             <span className="font-mono">{t('market.stats.floor', { price: marketStats.floor.toLocaleString() })}</span>
           )}
-          <span className="font-mono">{t('market.stats.sellers', { count: marketStats.sellers })}</span>
+          {marketStats.sellers > 1 && (
+            <span className="font-mono">{t('market.stats.sellers', { count: marketStats.sellers })}</span>
+          )}
           {marketStats.trades > 0 && (
             <span className="font-mono text-cyan">{t('market.stats.forTrade', { count: marketStats.trades })}</span>
           )}
@@ -281,7 +280,7 @@ export function MarketScreen() {
 
         {/* Shelf categories + filters */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1 pr-2">
             {SHELVES.map((shelf) => (
               <button
                 key={shelf.id}
@@ -387,13 +386,13 @@ export function MarketScreen() {
             )}
             {activeGame && (
               <Badge variant="secondary" className="gap-1 px-2.5 py-1 bg-periwinkle/10 text-periwinkle border-0">
-                {activeGame}
+                {t(GAMES.find((g) => g.id === activeGame)?.key ?? '')}
                 <button onClick={() => setActiveGame(null)}><X className="w-3 h-3" /></button>
               </Badge>
             )}
             {activeType && (
               <Badge variant="secondary" className="gap-1 px-2.5 py-1 bg-cyan/10 text-cyan border-0">
-                {activeType}
+                {t(LISTING_TYPES.find((ty) => ty.id === activeType)?.key ?? '')}
                 <button onClick={() => setActiveType(null)}><X className="w-3 h-3" /></button>
               </Badge>
             )}
@@ -477,7 +476,12 @@ export function MarketScreen() {
               )}
             </Empty>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
+            <div className={cn(
+              'grid grid-cols-2 gap-6 auto-rows-fr',
+              filteredListings.length < 4
+                ? 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'
+                : 'md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+            )}>
               {filteredListings.map((listing, i) => (
                 <motion.div
                   key={listing.id}

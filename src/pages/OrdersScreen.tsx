@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useOrders } from '@/hooks/useApi';
+import { GameMark } from '@/components/domain/GameMark';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
@@ -95,7 +96,7 @@ export function OrdersScreen() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       <div className={cn('w-14 h-[72px] rounded-lg flex items-center justify-center text-2xl shrink-0', config.bg)}>
-                        {order.listing.card.game === 'one-piece' ? '⚓' : '⚔'}
+                        <GameMark game={order.listing.card.game} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
