@@ -401,6 +401,10 @@ export const shipmentsApi = {
 
 export const pricesApi = {
   getByCode: (cardCode: string) => apiGet<unknown>(`prices/${cardCode}`),
+  getMarketPrices: (params: { code?: string; name?: string }) =>
+    apiGet<MarketPrices>('prices', { searchParams: params }),
+  getVariants: (code: string) =>
+    apiGet<{ ok: boolean; variants: CardVariant[] }>('cards/variants', { searchParams: { code } }),
 };
 
 export const submissionsApi = {
@@ -538,6 +542,38 @@ export const scanApi = {
   scan: (data: { image: string; tcg: string; lang: string; force?: boolean }) =>
     apiPost<ScanResult>('scan', { json: data }),
 };
+
+export interface MarketPrices {
+  ok: boolean;
+  sws: {
+    count: number;
+    floor: number | null;
+    listings: { listingId: string; price: number; condition?: string; title: string }[];
+  };
+  ebay: {
+    count: number;
+    currency: string;
+    median?: number;
+    min?: number;
+    max?: number;
+    thb: { median: number; min: number; max: number; rate: number } | null;
+    items: { title: string; price: number; url: string; thumbnail?: string }[];
+  };
+}
+
+export interface CardVariant {
+  code: string;
+  nameEn: string;
+  nameJp?: string;
+  rarity?: string;
+  type?: string;
+  language?: string;
+  game?: string;
+  imageUrl?: string;
+  condition?: string;
+}
+
+
 
 export const uploadsApi = {
   upload: (formData: FormData) =>

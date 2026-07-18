@@ -14,6 +14,7 @@ import { uploadRoutes } from './routes/uploads';
 import { storeRoutes } from './routes/stores';
 import { serviceRoutes } from './routes/services';
 import { scanRoutes } from './routes/scan';
+import { priceRoutes } from './routes/prices';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -42,6 +43,7 @@ app.route('/api/v1', miscRoutes);
 app.route('/api/v1', uploadRoutes);
 app.route('/api/v1', storeRoutes);
 app.route('/api/v1', scanRoutes);
+app.route('/api/v1', priceRoutes);
 app.route('/api/v1', serviceRoutes);
 
 // 404 handler
