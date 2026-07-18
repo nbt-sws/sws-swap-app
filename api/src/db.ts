@@ -4,6 +4,7 @@ export interface Env {
   DATABASE_URL: string;
   JWT_SECRET: string;
   IMAGES: R2Bucket;
+  ANTHROPIC_API_KEY: string;
 }
 
 type DbClient = InstanceType<typeof Pool.prototype.connect>;

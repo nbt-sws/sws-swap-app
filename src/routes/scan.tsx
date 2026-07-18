@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { PickerScreen } from '@/pages/PickerScreen';
+import { ScanScreen } from '@/pages/ScanScreen';
 
 export const Route = createFileRoute('/scan')({
-  component: PickerScreen,
+  component: ScanScreen,
 });

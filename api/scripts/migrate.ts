@@ -65,6 +65,7 @@ async function main() {
   await runMigration('004_store_tables.sql', SCHEMA_NAME);
   await runMigration('005_services.sql', SCHEMA_NAME);
   await runMigration('006_vault_service_link.sql', SCHEMA_NAME);
+  await runMigration('007_scans.sql', SCHEMA_NAME);
   console.log('All migrations completed successfully');
 }
 

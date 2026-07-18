@@ -502,6 +502,43 @@ export const checkoutApi = {
   getDefaultAddress: () => apiGet<ApiShippingAddress>('addresses/default'),
 };
 
+export interface ScanCardResult {
+  code: string;
+  nameEn: string;
+  nameJp: string;
+  rarity: string;
+  type: string;
+  promo: boolean;
+  confidence: number;
+  lang: string;
+  reasoning: string;
+}
+
+export interface ScanResult {
+  ok: boolean;
+  cached: boolean;
+  card: ScanCardResult;
+  hash: string;
+  imageUrl: string;
+  identifiedBy: string;
+  catalog: {
+    code: string;
+    nameEn: string;
+    nameJp?: string;
+    rarity?: string;
+    type?: string;
+    language?: string;
+    game?: string;
+    imageUrl?: string;
+    condition?: string;
+  } | null;
+}
+
+export const scanApi = {
+  scan: (data: { image: string; tcg: string; lang: string; force?: boolean }) =>
+    apiPost<ScanResult>('scan', { json: data }),
+};
+
 export const uploadsApi = {
   upload: (formData: FormData) =>
     api.post('uploads', { body: formData, headers: getAuthHeaders() }).json<{ url: string; key: string }>(),
