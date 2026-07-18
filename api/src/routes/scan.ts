@@ -7,7 +7,7 @@ import { authMiddleware } from '../middleware/auth';
 export const scanRoutes = new Hono<{ Bindings: Env }>();
 
 // Bump when identification logic changes so old cached results are ignored
-const CACHE_VERSION = 'v4-candidates-tiers';
+const CACHE_VERSION = 'v5-centering';
 const ANTHROPIC_ENDPOINT = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const VISION_ENDPOINT = 'https://vision.googleapis.com/v1/images:annotate';
@@ -26,7 +26,7 @@ const TRUSTED_HOSTS = [
 const TCG_META: Record<string, { game: string; prompt: string; codeRegex: RegExp; ocrRegex: RegExp }> = {
   'one-piece': {
     game: 'One Piece TCG',
-    prompt: `You are a One Piece TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
+    prompt: `You are a One Piece TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, centering (object {"left","right","top","bottom"}: your visual estimate of border thickness distribution as percentages where left+right=100 and top+bottom=100, 50/50 = perfectly centered), and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Card code formats: OPXX-XXX, STXX-XXX, EBXX-XXX, PRB-XX, or P-XXX for promos.
 Rarities: C, UC, R, SR, SEC, L, TR, SP, MR, P, DON!!.
 Types: Leader, Character, Event, Stage, DON!!.
@@ -36,7 +36,7 @@ Detect parallel/star rarity if the rarity symbol has a star above it. If unsure 
   },
   'yu-gi-oh': {
     game: 'Yu-Gi-Oh! OCG',
-    prompt: `You are a Yu-Gi-Oh! OCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
+    prompt: `You are a Yu-Gi-Oh! OCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, centering (object {"left","right","top","bottom"}: your visual estimate of border thickness distribution as percentages where left+right=100 and top+bottom=100, 50/50 = perfectly centered), and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Card code format: SETCODE-LANG### (e.g., LEDE-JP001, MAMA-EN001).
 Rarities: N, R, SR, UR, UL, SE, HR, PSE, 20TH, QCSE, QCUR, CR, PGR, C.
 Frame colors map to types: yellow Normal, orange Effect, green Spell, pink Trap, blue Ritual, purple Fusion, white Synchro, black Xyz, half-color Pendulum, dark blue Link.`,
@@ -45,14 +45,14 @@ Frame colors map to types: yellow Normal, orange Effect, green Spell, pink Trap,
   },
   pokemon: {
     game: 'Pokémon TCG',
-    prompt: `You are a Pokémon TCG card identifier. Output valid JSON only with these fields: code (set-number/total like 025/198 or promo code), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
+    prompt: `You are a Pokémon TCG card identifier. Output valid JSON only with these fields: code (set-number/total like 025/198 or promo code), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, centering (object {"left","right","top","bottom"}: your visual estimate of border thickness distribution as percentages where left+right=100 and top+bottom=100, 50/50 = perfectly centered), and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Rarities: C, U, R, RR, SR, UR, HR, AR, SAR, ACE, PR.`,
     codeRegex: /^\d{1,3}\/\d{1,3}$|^[A-Z]{2,}\d{1,3}$|^S-P\d+$|^SM-P\d+$/i,
     ocrRegex: /\b(\d{1,3}\/\d{1,3}|S-P\d+|SM-P\d+)\b/i,
   },
   lorcana: {
     game: 'Disney Lorcana TCG',
-    prompt: `You are a Disney Lorcana card identifier. Output valid JSON only with these fields: code (e.g., 1/204, P1, or set format), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
+    prompt: `You are a Disney Lorcana card identifier. Output valid JSON only with these fields: code (e.g., 1/204, P1, or set format), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, centering (object {"left","right","top","bottom"}: your visual estimate of border thickness distribution as percentages where left+right=100 and top+bottom=100, 50/50 = perfectly centered), and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Rarities: Common, Uncommon, Rare, Super Rare, Legendary, Enchanted.
 Types: Character, Action, Item, Location, Song.`,
     codeRegex: /^\d{1,3}\/\d{1,3}$|^P\d+$/i,
@@ -60,13 +60,13 @@ Types: Character, Action, Item, Location, Song.`,
   },
   conan: {
     game: 'Detective Conan TCG',
-    prompt: `You are a Detective Conan TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).`,
+    prompt: `You are a Detective Conan TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, centering (object {"left","right","top","bottom"}: your visual estimate of border thickness distribution as percentages where left+right=100 and top+bottom=100, 50/50 = perfectly centered), and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).`,
     codeRegex: /^[A-Z0-9-]{3,}$/i,
     ocrRegex: /\b([A-Z0-9]{3,}-\d+)\b/i,
   },
   others: {
     game: 'trading card',
-    prompt: `You are a trading card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence). Identify the game if recognizable and include it in reasoning.`,
+    prompt: `You are a trading card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, centering (object {"left","right","top","bottom"}: your visual estimate of border thickness distribution as percentages where left+right=100 and top+bottom=100, 50/50 = perfectly centered), and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence). Identify the game if recognizable and include it in reasoning.`,
     codeRegex: /.+/,
     ocrRegex: /\b([A-Z]{2,5}-?\d{2,4})\b/i,
   },
@@ -346,6 +346,14 @@ scanRoutes.post('/scan', authMiddleware, async (c) => {
     confidence,
     lang,
     reasoning: card.reasoning ?? '',
+    // AI-estimated border distribution (centering) — honest label on the UI side
+    centering: (() => {
+      const ct = card.centering;
+      if (!ct || typeof ct !== 'object') return null;
+      const nums = [ct.left, ct.right, ct.top, ct.bottom].map((n: any) => Number(n));
+      if (nums.some((n) => !Number.isFinite(n) || n <= 0 || n >= 100)) return null;
+      return { left: nums[0], right: nums[1], top: nums[2], bottom: nums[3] };
+    })(),
   };
 
   // 8) Image options — user's photo first, then official/catalog sample images to pick as cover

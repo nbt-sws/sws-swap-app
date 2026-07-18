@@ -516,6 +516,7 @@ export interface ScanCardResult {
   confidence: number;
   lang: string;
   reasoning: string;
+  centering?: { left: number; right: number; top: number; bottom: number } | null;
 }
 
 export interface ScanCandidate {

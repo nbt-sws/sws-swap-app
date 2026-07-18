@@ -11,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GameMark } from '@/components/domain/GameMark';
 import { useAddToVault } from '@/hooks/useApi';
-import { pricesApi, describeIdentifiedBy } from '@/lib/api';
+import { pricesApi, marketApi, describeIdentifiedBy } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ScanResult, ScanCandidate } from '@/lib/api';
+import type { ApiMarketHistoryPoint } from '@/types/api';
 import type { CardGame } from '@/types';
 
 interface ScanResultSheetProps {
@@ -34,10 +35,71 @@ const TIER_TILES = [
 /** Grades without a live tier — plain chips. */
 const OTHER_GRADES = ['BGS 9.5', 'CGC 9.5'] as const;
 
+type Ccy = 'THB' | 'USD';
+
+/** SWS market price-history sparkline — adapted from the old Sparkline (cyan line + gradient fill + dots). */
+function PriceSparkline({ trades }: { trades: ApiMarketHistoryPoint[] }) {
+  const pts = [...trades].reverse(); // API returns newest-first; draw oldest → newest
+  if (pts.length < 2) return null;
+  const W = 480, H = 64, pad = 4;
+  const ys = pts.map((t) => t.price);
+  const max = Math.max(...ys);
+  const min = Math.min(...ys);
+  const range = max - min || 1;
+  const coords = pts.map((t, i) => {
+    const x = pad + (i / (pts.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((t.price - min) / range) * (H - pad * 2);
+    return { x, y };
+  });
+  const line = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  return (
+    <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="block">
+      <defs>
+        <linearGradient id="scanSparkFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#4FE0D0" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#4FE0D0" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polyline points={`${pad},${H - pad} ${line} ${W - pad},${H - pad}`} fill="url(#scanSparkFill)" stroke="none" />
+      <polyline points={line} fill="none" stroke="#4FE0D0" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      {coords.map((c, i) => (
+        <circle key={i} cx={c.x} cy={c.y} r="2.5" fill="#4FE0D0" />
+      ))}
+    </svg>
+  );
+}
+
+/** Centering estimate panel — adapted from the old QualityResult (honest "AI estimate" label). */
+function CenteringPanel({ centering }: { centering: { left: number; right: number; top: number; bottom: number } }) {
+  const rows = [
+    { a: 'Left', b: 'Right', av: centering.left, bv: centering.right },
+    { a: 'Top', b: 'Bottom', av: centering.top, bv: centering.bottom },
+  ];
+  return (
+    <div className="rounded-xl border border-border bg-surface p-3 space-y-2">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Centering · AI estimate</p>
+      {rows.map((r) => (
+        <div key={r.a} className="space-y-1">
+          <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
+            <span>{r.a} {Math.round(r.av)}%</span>
+            <span>{r.b} {Math.round(r.bv)}%</span>
+          </div>
+          <div className="flex h-1.5 rounded-full overflow-hidden bg-surface-lighter">
+            <div className="bg-cyan/70" style={{ width: `${r.av}%` }} />
+            <div className="bg-surface-lighter" style={{ width: `${r.bv}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /**
  * Post-scan flow (adapted from sws-scanner-app v1):
  * 1) Recheck — confirm/correct the card, pick a near-match if the AI missed, choose the cover image
- * 2) Market prices — per-marketplace + per-grade tiers (Raw / PSA 10 / PSA 9), then save to vault
+ * 2) Market prices — per-grade tier tiles + per-marketplace data, then save to vault
+ * 3) Saved
+ * Layout: bottom sheet on mobile, wide 2-column dialog on desktop.
  */
 export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanResultSheetProps) {
   const navigate = useNavigate();
@@ -52,6 +114,10 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
   const [grade, setGrade] = useState<string>('Raw');
   // Cover image — user's photo by default, official samples selectable
   const [coverUrl, setCoverUrl] = useState(result.imageUrl);
+  // Any manual correction marks the result "Edited" (old scanner showed an Edited pill)
+  const [edited, setEdited] = useState(false);
+  // Display currency for the prices step (old CurrencyPills)
+  const [ccy, setCcy] = useState<Ccy>(() => (localStorage.getItem('sws_scan_ccy') === 'USD' ? 'USD' : 'THB'));
 
   const confidence = Math.round(result.card.confidence);
 
@@ -73,6 +139,9 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
     ? result.imageOptions
     : [{ url: result.imageUrl, label: 'your-photo' }];
 
+  // The hero shows the *selected* cover; the local preview stands in for the user's own photo
+  const heroSrc = coverUrl === result.imageUrl ? imagePreview : coverUrl;
+
   // Catalog variants for the recheck picker (parallel rarities of the same code)
   const { data: variantsData } = useQuery({
     queryKey: ['cardVariants', code],
@@ -90,10 +159,25 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
     staleTime: 1000 * 60 * 5,
   });
 
+  // Our own market's sold history → sparkline (old TradingHistory had one for eBay)
+  const { data: history } = useQuery({
+    queryKey: ['scanPriceHistory', code],
+    queryFn: () => marketApi.getHistory(code, '1y'),
+    enabled: step === 2 && !!code,
+    staleTime: 1000 * 60 * 5,
+  });
+  const trades = history?.trades ?? [];
+
+  const pickCcy = (c: Ccy) => {
+    setCcy(c);
+    localStorage.setItem('sws_scan_ccy', c);
+  };
+
   const applyVariant = (v: { code: string; nameEn: string; rarity?: string }) => {
     setCode(v.code);
     setName(v.nameEn);
     if (v.rarity) setRarity(v.rarity);
+    setEdited(true);
   };
 
   const applyCandidate = (c: ScanCandidate) => {
@@ -102,6 +186,7 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
     if (c.rarity) setRarity(c.rarity);
     // Switch the cover to the official sample if one exists — user can switch back below
     if (c.imageUrl) setCoverUrl(c.imageUrl);
+    setEdited(true);
   };
 
   const handleSave = () => {
@@ -132,10 +217,14 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
     );
   };
 
+  // Price formatter honoring the currency toggle — eBay data arrives as paired USD/THB
+  const fmt = (usd: number, thb: number) =>
+    ccy === 'THB' ? `฿${Math.round(thb).toLocaleString()}` : `$${usd.toLocaleString()}`;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in sm:p-4" onClick={onClose}>
       <div
-        className="w-full sm:max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl bg-surface-light border border-border animate-slide-up"
+        className="w-full sm:max-w-2xl lg:max-w-3xl max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl bg-surface-light border border-border animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header + stepper */}
@@ -155,6 +244,11 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                 <span className="inline-flex items-center gap-1 rounded-full bg-cyan/15 text-cyan text-[10px] font-bold px-2 py-0.5">
                   <Zap className="w-3 h-3" />
                   Instant
+                </span>
+              )}
+              {edited && step === 1 && (
+                <span className="inline-flex items-center rounded-full bg-warning/15 text-warning text-[10px] font-bold px-2 py-0.5">
+                  Edited
                 </span>
               )}
             </div>
@@ -185,14 +279,60 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
         </div>
 
         {step === 1 && (
-          /* ─── STEP 1: Recheck — user verifies/corrects the identification ─── */
-          <div className="p-5 space-y-4">
-            <div className="flex gap-4">
-              {/* User's photo is the hero */}
-              <div className="w-28 aspect-[63/88] rounded-xl overflow-hidden bg-surface-lighter shrink-0">
-                <img src={imagePreview} alt="Your card" className="w-full h-full object-cover" />
+          /* ─── STEP 1: Recheck — 2-column on desktop, stacked on mobile ─── */
+          <div className="p-5 sm:grid sm:grid-cols-[240px,minmax(0,1fr)] sm:gap-6 space-y-4 sm:space-y-0">
+            {/* Left column — hero (selected cover), cover picker, centering */}
+            <div className="space-y-3">
+              <div className="relative w-40 sm:w-full mx-auto aspect-[63/88] rounded-xl overflow-hidden bg-surface-lighter">
+                <img src={heroSrc} alt="Card" className="w-full h-full object-cover" />
+                <span className={cn(
+                  'absolute top-2 left-2 rounded-full px-2 py-0.5 text-[9px] font-bold backdrop-blur-sm',
+                  coverUrl === result.imageUrl ? 'bg-black/60 text-white/90' : 'bg-cyan/80 text-black'
+                )}>
+                  {coverUrl === result.imageUrl ? 'Your photo' : 'Official sample'}
+                </span>
               </div>
-              <div className="flex-1 min-w-0 space-y-2">
+
+              {/* Cover image — pick the user's photo or an official sample */}
+              {imageOptions.length > 1 && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1">
+                    <ImageIcon className="w-3 h-3" />
+                    Cover image:
+                  </p>
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {imageOptions.map((opt) => {
+                      const active = coverUrl === opt.url;
+                      return (
+                        <button
+                          key={opt.url}
+                          type="button"
+                          onClick={() => setCoverUrl(opt.url)}
+                          className={cn(
+                            'relative w-14 aspect-[63/88] rounded-lg overflow-hidden shrink-0 border-2 transition-all',
+                            active ? 'border-brand' : 'border-transparent opacity-70 hover:opacity-100'
+                          )}
+                        >
+                          <img src={opt.url === result.imageUrl ? imagePreview : opt.url} alt={opt.label} className="w-full h-full object-cover" loading="lazy" />
+                          <span className={cn(
+                            'absolute bottom-0 inset-x-0 text-[8px] font-medium text-center py-0.5 backdrop-blur-sm truncate px-0.5',
+                            active ? 'bg-brand/80 text-white' : 'bg-black/60 text-white/80'
+                          )}>
+                            {opt.label === 'your-photo' ? 'Yours' : opt.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {result.card.centering && <CenteringPanel centering={result.card.centering} />}
+            </div>
+
+            {/* Right column — badges, fields, alternatives */}
+            <div className="space-y-4 min-w-0">
+              <div className="space-y-2">
                 <div className="flex items-center gap-1.5 flex-wrap text-xs">
                   <BadgeCheck className={cn('w-3.5 h-3.5', confidence >= 90 ? 'text-success' : confidence >= 70 ? 'text-warning' : 'text-pldown')} />
                   <span className={cn(confidence >= 90 ? 'text-success' : confidence >= 70 ? 'text-warning' : 'text-pldown')}>
@@ -206,192 +346,162 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                     {idInfo.label}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">Check the details below — correct anything that looks off.</p>
-                <div className="space-y-2 pt-1">
+                {/* Reasoning is only meaningful before the user edits (old scanner hid it after edits) */}
+                {result.card.reasoning && !edited && (
+                  <p className="text-xs text-muted-foreground italic leading-relaxed">{result.card.reasoning}</p>
+                )}
+                {!edited && <p className="text-xs text-muted-foreground">Check the details below — correct anything that looks off.</p>}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                   <div>
                     <label className="text-[10px] font-mono uppercase text-muted-foreground">Code</label>
-                    <Input value={code} onChange={(e) => setCode(e.target.value)} className="h-8 bg-surface border-border text-sm font-mono" />
+                    <Input value={code} onChange={(e) => { setCode(e.target.value); setEdited(true); }} className="h-8 bg-surface border-border text-sm font-mono" />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="text-[10px] font-mono uppercase text-muted-foreground">Name</label>
-                    <Input value={name} onChange={(e) => setName(e.target.value)} className="h-8 bg-surface border-border text-sm" />
+                    <Input value={name} onChange={(e) => { setName(e.target.value); setEdited(true); }} className="h-8 bg-surface border-border text-sm" />
                   </div>
                   <div>
                     <label className="text-[10px] font-mono uppercase text-muted-foreground">Rarity</label>
-                    <Input value={rarity} onChange={(e) => setRarity(e.target.value)} className="h-8 bg-surface border-border text-sm" placeholder="e.g. SR" />
+                    <Input value={rarity} onChange={(e) => { setRarity(e.target.value); setEdited(true); }} className="h-8 bg-surface border-border text-sm" placeholder="e.g. SR" />
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* AI ↔ image-search disagreement — offer the vision code as a one-tap fix */}
-            {result.crossCheck?.visionCode && !result.crossCheck?.agreed &&
-              result.crossCheck.visionCode !== result.card.code && (
-              <div className="rounded-xl border border-warning/40 bg-warning/5 p-3 space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-warning">AI and image search disagree</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Card recognition picked <span className="font-mono text-foreground">{result.card.code}</span>,
-                  but reverse-image search found <span className="font-mono text-cyan">{result.crossCheck.visionCode}</span>.
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 border-warning/40 text-warning hover:bg-warning/10"
-                  onClick={() => setCode(result.crossCheck!.visionCode!)}
-                >
-                  Use {result.crossCheck.visionCode} instead
-                </Button>
-              </div>
-            )}
-
-            {/* Not this card? — near matches from catalog + AI candidates */}
-            {alternatives.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <CircleHelp className="w-3 h-3" />
-                  Not this card? Similar matches:
-                </p>
-                <div className="space-y-1.5">
-                  {alternatives.map((c) => {
-                    const active = code.toUpperCase() === c.code.toUpperCase();
-                    return (
-                      <button
-                        key={`${c.source}-${c.code}`}
-                        type="button"
-                        onClick={() => applyCandidate(c)}
-                        className={cn(
-                          'w-full flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-left transition-all',
-                          active
-                            ? 'border-brand bg-brand/10'
-                            : 'border-border bg-surface hover:bg-surface-lighter'
-                        )}
-                      >
-                        <div className="w-8 aspect-[63/88] rounded overflow-hidden bg-surface-lighter shrink-0 flex items-center justify-center">
-                          {c.imageUrl ? (
-                            <img src={c.imageUrl} alt={c.code} className="w-full h-full object-cover" loading="lazy" />
-                          ) : (
-                            <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={cn('text-xs font-mono truncate', active ? 'text-brand' : 'text-muted-foreground')}>{c.code}</p>
-                          <p className="text-xs font-medium truncate">{c.nameEn || '—'}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          {c.rarity && <Badge variant="outline" className="text-[9px] px-1.5 py-0">{c.rarity}</Badge>}
-                          <span className={cn(
-                            'text-[9px] font-medium',
-                            c.source === 'catalog' ? 'text-cyan' : 'text-muted-foreground'
-                          )}>
-                            {c.source === 'catalog' ? 'Catalog' : c.confidence ? `AI ${Math.round(c.confidence)}%` : 'AI'}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+              {/* AI ↔ image-search disagreement — offer the vision code as a one-tap fix */}
+              {result.crossCheck?.visionCode && !result.crossCheck?.agreed &&
+                result.crossCheck.visionCode !== result.card.code && (
+                <div className="rounded-xl border border-warning/40 bg-warning/5 p-3 space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-warning">AI and image search disagree</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Card recognition picked <span className="font-mono text-foreground">{result.card.code}</span>,
+                    but reverse-image search found <span className="font-mono text-cyan">{result.crossCheck.visionCode}</span>.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 border-warning/40 text-warning hover:bg-warning/10"
+                    onClick={() => { setCode(result.crossCheck!.visionCode!); setEdited(true); }}
+                  >
+                    Use {result.crossCheck.visionCode} instead
+                  </Button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Catalog variants (same code, different parallel/rarity) — image grid like the old VariantPicker */}
-            {variants.length > 1 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <Pencil className="w-3 h-3" />
-                  {variants.length} printings in catalog — tap the one that matches your card:
-                </p>
-                {variants.some((v) => v.imageUrl) ? (
-                  <div className="grid grid-cols-3 gap-2">
-                    {variants.map((v, i) => {
-                      const active = code === v.code && rarity === v.rarity;
+              {/* Not this card? — near matches from catalog + AI candidates */}
+              {alternatives.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <CircleHelp className="w-3 h-3" />
+                    Not this card? Similar matches:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {alternatives.map((c) => {
+                      const active = code.toUpperCase() === c.code.toUpperCase();
                       return (
+                        <button
+                          key={`${c.source}-${c.code}`}
+                          type="button"
+                          onClick={() => applyCandidate(c)}
+                          className={cn(
+                            'w-full flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-left transition-all',
+                            active
+                              ? 'border-brand bg-brand/10'
+                              : 'border-border bg-surface hover:bg-surface-lighter'
+                          )}
+                        >
+                          <div className="w-8 aspect-[63/88] rounded overflow-hidden bg-surface-lighter shrink-0 flex items-center justify-center">
+                            {c.imageUrl ? (
+                              <img src={c.imageUrl} alt={c.code} className="w-full h-full object-cover" loading="lazy" />
+                            ) : (
+                              <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn('text-xs font-mono truncate', active ? 'text-brand' : 'text-muted-foreground')}>{c.code}</p>
+                            <p className="text-xs font-medium truncate">{c.nameEn || '—'}</p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            {c.rarity && <Badge variant="outline" className="text-[9px] px-1.5 py-0">{c.rarity}</Badge>}
+                            <span className={cn(
+                              'text-[9px] font-medium',
+                              c.source === 'catalog' ? 'text-cyan' : 'text-muted-foreground'
+                            )}>
+                              {c.source === 'catalog' ? 'Catalog' : c.confidence ? `AI ${Math.round(c.confidence)}%` : 'AI'}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Catalog variants (same code, different parallel/rarity) — image grid like the old VariantPicker */}
+              {variants.length > 1 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Pencil className="w-3 h-3" />
+                    {variants.length} printings in catalog — tap the one that matches your card:
+                  </p>
+                  {variants.some((v) => v.imageUrl) ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {variants.map((v, i) => {
+                        const active = code === v.code && rarity === v.rarity;
+                        return (
+                          <button
+                            key={`${v.code}-${v.rarity}-${i}`}
+                            type="button"
+                            onClick={() => applyVariant(v)}
+                            className={cn(
+                              'rounded-xl border p-1.5 transition-all flex flex-col items-center gap-1',
+                              active ? 'border-brand bg-brand/10' : 'border-border bg-surface hover:bg-surface-lighter'
+                            )}
+                          >
+                            <div className="w-full aspect-[63/88] rounded-lg overflow-hidden bg-surface-lighter flex items-center justify-center">
+                              {v.imageUrl ? (
+                                <img src={v.imageUrl} alt={v.rarity || v.code} className="w-full h-full object-contain" loading="lazy" />
+                              ) : (
+                                <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                              )}
+                            </div>
+                            <span className={cn('text-[10px] font-mono font-semibold', active ? 'text-brand' : 'text-muted-foreground')}>
+                              {v.rarity || '—'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {variants.map((v, i) => (
                         <button
                           key={`${v.code}-${v.rarity}-${i}`}
                           type="button"
                           onClick={() => applyVariant(v)}
                           className={cn(
-                            'rounded-xl border p-1.5 transition-all flex flex-col items-center gap-1',
-                            active ? 'border-brand bg-brand/10' : 'border-border bg-surface hover:bg-surface-lighter'
+                            'px-2.5 py-1.5 rounded-lg text-xs border transition-all',
+                            code === v.code && rarity === v.rarity
+                              ? 'border-brand bg-brand/10 text-brand'
+                              : 'border-border bg-surface text-muted-foreground hover:text-foreground'
                           )}
                         >
-                          <div className="w-full aspect-[63/88] rounded-lg overflow-hidden bg-surface-lighter flex items-center justify-center">
-                            {v.imageUrl ? (
-                              <img src={v.imageUrl} alt={v.rarity || v.code} className="w-full h-full object-contain" loading="lazy" />
-                            ) : (
-                              <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                            )}
-                          </div>
-                          <span className={cn('text-[10px] font-mono font-semibold', active ? 'text-brand' : 'text-muted-foreground')}>
-                            {v.rarity || '—'}
-                          </span>
+                          {v.nameEn}{v.rarity ? ` · ${v.rarity}` : ''}
                         </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {variants.map((v, i) => (
-                      <button
-                        key={`${v.code}-${v.rarity}-${i}`}
-                        type="button"
-                        onClick={() => applyVariant(v)}
-                        className={cn(
-                          'px-2.5 py-1.5 rounded-lg text-xs border transition-all',
-                          code === v.code && rarity === v.rarity
-                            ? 'border-brand bg-brand/10 text-brand'
-                            : 'border-border bg-surface text-muted-foreground hover:text-foreground'
-                        )}
-                      >
-                        {v.nameEn}{v.rarity ? ` · ${v.rarity}` : ''}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Cover image — pick the user's photo or an official sample */}
-            {imageOptions.length > 1 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <ImageIcon className="w-3 h-3" />
-                  Cover image:
-                </p>
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {imageOptions.map((opt) => {
-                    const active = coverUrl === opt.url;
-                    return (
-                      <button
-                        key={opt.url}
-                        type="button"
-                        onClick={() => setCoverUrl(opt.url)}
-                        className={cn(
-                          'relative w-16 aspect-[63/88] rounded-lg overflow-hidden shrink-0 border-2 transition-all',
-                          active ? 'border-brand' : 'border-transparent opacity-70 hover:opacity-100'
-                        )}
-                      >
-                        <img src={opt.url} alt={opt.label} className="w-full h-full object-cover" loading="lazy" />
-                        <span className={cn(
-                          'absolute bottom-0 inset-x-0 text-[8px] font-medium text-center py-0.5 backdrop-blur-sm truncate px-0.5',
-                          active ? 'bg-brand/80 text-white' : 'bg-black/60 text-white/80'
-                        )}>
-                          {opt.label === 'your-photo' ? 'Your photo' : opt.label}
-                        </span>
-                      </button>
-                    );
-                  })}
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              )}
 
-            <Button className="w-full bg-brand hover:bg-brand-light h-11" onClick={() => setStep(2)}>
-              Looks right — see prices
-            </Button>
+              <Button className="w-full bg-brand hover:bg-brand-light h-11" onClick={() => setStep(2)}>
+                Looks right — see prices
+              </Button>
+            </div>
           </div>
         )}
 
         {step === 2 && (
-          /* ─── STEP 2: Market prices per marketplace ─── */
+          /* ─── STEP 2: Market prices — tier tiles + per-marketplace cards ─── */
           <div className="p-5 space-y-4">
             {/* Confirmed identity strip */}
             <div className="flex items-center gap-3 rounded-xl bg-surface border border-border p-3">
@@ -403,14 +513,36 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               {rarity && <Badge variant="outline" className="text-[10px] shrink-0">{rarity}</Badge>}
             </div>
 
-            {/* Current value by grade — tier tiles adapted from the old CurrentValueHero */}
+            {/* Current value by grade — header + currency pills (old CurrencyPills) */}
             <div className="space-y-2">
-              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Current value · by grade</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Current value · by grade</p>
+                <div className="flex gap-1">
+                  {(['THB', 'USD'] as const).map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => pickCcy(c)}
+                      className={cn(
+                        'px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide border transition-all',
+                        ccy === c
+                          ? 'bg-brand text-white border-transparent'
+                          : 'border-border text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      {c === 'THB' ? '฿ THB' : '$ USD'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tier tiles adapted from the old CurrentValueHero */}
               <div className="grid grid-cols-3 gap-2">
                 {TIER_TILES.map((t) => {
                   const tier = prices?.tiers?.[t.key];
                   const active = grade === t.grade;
                   const thb = tier?.thb;
+                  const usd = tier?.usd;
                   return (
                     <button
                       key={t.key}
@@ -425,13 +557,13 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                       <span className="block text-[9px] font-bold tracking-wider text-muted-foreground">{t.label}</span>
                       {pricesLoading ? (
                         <span className="block h-6 w-4/5 mt-1.5 rounded shimmer bg-surface-lighter" />
-                      ) : thb ? (
+                      ) : thb && usd ? (
                         <>
                           <span className={cn('block text-base font-bold font-mono leading-tight mt-1 truncate', t.accent)}>
-                            ฿{thb.median.toLocaleString()}
+                            {fmt(usd.median, thb.median)}
                           </span>
                           <span className="block text-[9px] font-mono text-muted-foreground mt-0.5 truncate">
-                            median · {tier!.count} listings
+                            med · {tier!.count} listings
                           </span>
                           {thb.max > thb.min && (
                             <span className="block mt-2">
@@ -443,8 +575,8 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                                 />
                               </span>
                               <span className="flex justify-between mt-1 text-[8px] font-mono text-muted-foreground">
-                                <span>฿{thb.min.toLocaleString()}</span>
-                                <span>฿{thb.max.toLocaleString()}</span>
+                                <span>{fmt(usd.min, thb.min)}</span>
+                                <span>{fmt(usd.max, thb.max)}</span>
                               </span>
                             </span>
                           )}
@@ -456,6 +588,7 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                   );
                 })}
               </div>
+
               {/* Other conditions without live tier data */}
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[10px] text-muted-foreground mr-0.5">Other:</span>
@@ -478,19 +611,19 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
             </div>
 
             {pricesLoading ? (
-              <div className="space-y-2.5">
-                <Skeleton className="h-16 w-full rounded-xl shimmer" />
-                <Skeleton className="h-16 w-full rounded-xl shimmer" />
+              <div className="grid sm:grid-cols-2 gap-2.5">
+                <Skeleton className="h-32 w-full rounded-xl shimmer" />
+                <Skeleton className="h-32 w-full rounded-xl shimmer" />
               </div>
             ) : (
-              <>
+              <div className="grid sm:grid-cols-2 gap-2.5 items-start">
                 {/* SWS market */}
                 <div className="rounded-xl border border-border overflow-hidden">
                   <div className="flex items-center gap-2 px-3.5 py-2.5 bg-surface border-b border-border">
                     <Store className="w-4 h-4 text-brand" />
                     <span className="text-xs font-semibold">SwibSwap Market</span>
                   </div>
-                  <div className="px-3.5 py-3">
+                  <div className="px-3.5 py-3 space-y-2.5">
                     {prices?.sws.count ? (
                       <div className="flex items-baseline justify-between">
                         <span className="text-xs text-muted-foreground">{prices.sws.count} live listing{prices.sws.count > 1 ? 's' : ''}</span>
@@ -498,6 +631,16 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                       </div>
                     ) : (
                       <p className="text-xs text-muted-foreground">No listings on our market yet — yours could be the first.</p>
+                    )}
+                    {/* Sold-history sparkline — only when our market has real trades */}
+                    {trades.length >= 2 && (
+                      <div className="pt-2 border-t border-border/50 space-y-1">
+                        <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
+                          <span>SWS price history · 1y</span>
+                          <span>last ฿{trades[0].price.toLocaleString()}</span>
+                        </div>
+                        <PriceSparkline trades={trades} />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -515,15 +658,15 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                         <div className="grid grid-cols-3 gap-2 text-center">
                           <div>
                             <p className="text-[10px] text-muted-foreground uppercase">Low</p>
-                            <p className="text-sm font-bold font-mono">฿{prices.ebay.thb.min.toLocaleString()}</p>
+                            <p className="text-sm font-bold font-mono">{fmt(prices.ebay.min ?? 0, prices.ebay.thb.min)}</p>
                           </div>
                           <div>
                             <p className="text-[10px] text-muted-foreground uppercase">Median</p>
-                            <p className="text-sm font-bold font-mono text-brand">฿{prices.ebay.thb.median.toLocaleString()}</p>
+                            <p className="text-sm font-bold font-mono text-brand">{fmt(prices.ebay.median ?? 0, prices.ebay.thb.median)}</p>
                           </div>
                           <div>
                             <p className="text-[10px] text-muted-foreground uppercase">High</p>
-                            <p className="text-sm font-bold font-mono">฿{prices.ebay.thb.max.toLocaleString()}</p>
+                            <p className="text-sm font-bold font-mono">{fmt(prices.ebay.max ?? 0, prices.ebay.thb.max)}</p>
                           </div>
                         </div>
                         {prices.ebay.items.length > 0 && (
@@ -572,7 +715,7 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                     )}
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
             <div className="flex gap-2.5 pt-1">
