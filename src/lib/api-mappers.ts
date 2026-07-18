@@ -189,6 +189,7 @@ export function mapApiOrderToOrder(apiOrder: ApiOrder): Order {
     shipping,
     total: apiOrder.price + fee + shipping,
     status: statusMap[apiOrder.status],
+    rawStatus: apiOrder.status,
     deliveryPreference: apiOrder.deliveryPreference,
     shippingAddress: apiOrder.shippingAddress
       ? `${apiOrder.shippingAddress.name}, ${apiOrder.shippingAddress.address}${apiOrder.shippingAddress.district ? `, ${apiOrder.shippingAddress.district}` : ''}, ${apiOrder.shippingAddress.province} ${apiOrder.shippingAddress.postalCode} — ${apiOrder.shippingAddress.phone}`

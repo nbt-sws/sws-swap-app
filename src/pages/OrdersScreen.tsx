@@ -16,6 +16,10 @@ import {
   ChevronRight, Warehouse,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getOrderAction } from '@/lib/orderFlow';
+import { useUpdateOrderStatus } from '@/hooks/useApi';
+import { useAuthStore } from '@/stores/auth';
+import { toast } from 'sonner';
 import type { Order } from '@/types';
 
 export function OrdersScreen() {
@@ -82,45 +86,9 @@ export function OrdersScreen() {
         )}
 
         <div className="space-y-4">
-          {filtered?.map((order) => {
-            const config = statusConfig[order.status];
-            const Icon = config.icon;
-            return (
-              <Link
-                key={order.id}
-                to="/orders/$orderId"
-                params={{ orderId: order.id }}
-                className="block group"
-              >
-                <Card className="bg-surface-light border-border hover:border-brand/40 hover:bg-surface-lighter transition cursor-pointer overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className={cn('w-14 h-[72px] rounded-lg flex items-center justify-center text-2xl shrink-0', config.bg)}>
-                        <GameMark game={order.listing.card.game} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="text-xs font-mono text-muted-foreground">{order.id.slice(0, 8)}</p>
-                          <Badge className={cn('text-xs border-0', config.badge)}>
-                            <Icon className="w-3 h-3 mr-1" />
-                            {config.label}
-                          </Badge>
-                          <DeliveryBadge delivery={order.deliveryPreference} />
-                        </div>
-                        <p className="font-semibold truncate">{order.listing.card.nameEn}</p>
-                        <p className="text-sm text-muted-foreground">{order.listing.card.rarity} · {order.listing.card.condition}</p>
-                        <OrderProgress status={order.status} />
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="font-mono font-semibold">฿{order.total.toLocaleString()}</p>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground inline-block mt-1 group-hover:text-brand transition-colors" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+          {filtered?.map((order) => (
+            <OrderCard key={order.id} order={order} config={statusConfig[order.status]} />
+          ))}
         </div>
       </div>
     </PageContainer>
@@ -168,6 +136,77 @@ function getStatusConfig(t: (key: string) => string) {
   } as Record<Order['status'], { label: string; icon: typeof Clock; badge: string; bg: string }>;
 }
 
+function OrderCard({
+  order,
+  config,
+}: {
+  order: Order;
+  config: { label: string; icon: typeof Clock; badge: string; bg: string };
+}) {
+  const { user } = useAuthStore();
+  const updateStatus = useUpdateOrderStatus();
+  const Icon = config.icon;
+
+  const isBuyer = user?.id === order.buyerId;
+  const isSeller = user?.id === order.sellerId;
+  const action = getOrderAction(order.rawStatus, isBuyer, isSeller);
+
+  return (
+    <Link
+      to="/orders/$orderId"
+      params={{ orderId: order.id }}
+      className="block group"
+    >
+      <Card className="bg-surface-light border-border hover:border-brand/40 hover:bg-surface-lighter transition cursor-pointer overflow-hidden">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <div className={cn('w-14 h-[72px] rounded-lg flex items-center justify-center text-2xl shrink-0', config.bg)}>
+              <GameMark game={order.listing.card.game} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <p className="text-xs font-mono text-muted-foreground">{order.id.slice(0, 8)}</p>
+                <Badge className={cn('text-xs border-0', config.badge)}>
+                  <Icon className="w-3 h-3 mr-1" />
+                  {config.label}
+                </Badge>
+                <DeliveryBadge delivery={order.deliveryPreference} />
+              </div>
+              <p className="font-semibold truncate">{order.listing.card.nameEn}</p>
+              <p className="text-sm text-muted-foreground">{order.listing.card.rarity} · {order.listing.card.condition}</p>
+              <OrderProgress status={order.status} />
+            </div>
+            <div className="text-right shrink-0 space-y-2">
+              <p className="font-mono font-semibold">฿{order.total.toLocaleString()}</p>
+              {action && (
+                <Button
+                  size="sm"
+                  className="bg-brand hover:bg-brand-light h-8 text-xs"
+                  disabled={updateStatus.isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateStatus.mutate(
+                      { orderId: order.id, status: action.next },
+                      {
+                        onSuccess: () => toast.success('Order updated'),
+                        onError: () => toast.error('Failed to update order'),
+                      }
+                    );
+                  }}
+                >
+                  {action.label}
+                </Button>
+              )}
+              {!action && <ChevronRight className="w-4 h-4 text-muted-foreground inline-block group-hover:text-brand transition-colors" />}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 function DeliveryBadge({ delivery }: { delivery?: 'SHIP' | 'VAULT_STORE' }) {
   if (delivery === 'SHIP') {
     return (
@@ -184,7 +223,7 @@ function DeliveryBadge({ delivery }: { delivery?: 'SHIP' | 'VAULT_STORE' }) {
 }
 
 function OrderProgress({ status }: { status: Order['status'] }) {
-  const steps = ['PENDING_PAYMENT', 'PAID', 'SHIPPED', 'DELIVERED', 'COMPLETED'];
+  const steps = ['PENDING_PAYMENT', 'PAID', 'SHIPPED', 'COMPLETED'];
   const index = steps.indexOf(status);
   if (status === 'CANCELLED') return null;
 

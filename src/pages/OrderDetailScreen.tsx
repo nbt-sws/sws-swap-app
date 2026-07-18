@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Package, Truck, CheckCircle2, XCircle, Clock, MapPin } from 'lucide-react';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { cn } from '@/lib/utils';
+
 import { GameMark } from '@/components/domain/GameMark';
 import { useAuthStore } from '@/stores/auth';
 import type { Order } from '@/types';
@@ -23,34 +24,7 @@ const statusConfig: Record<Order['status'], { label: string; icon: typeof Clock;
   CANCELLED: { label: 'Cancelled', icon: XCircle, color: 'text-pldown bg-pldown/10', step: 0 },
 };
 
-const steps = ['Pending', 'Paid', 'Shipped', 'Delivered', 'Completed'];
-
-const buyerAction: Record<Order['status'], { label: string; next: Order['status'] } | null> = {
-  PENDING_PAYMENT: { label: 'Pay now', next: 'PAID' },
-  PAID: null,
-  SHIPPED: null,
-  DELIVERED: { label: 'Mark as received', next: 'COMPLETED' },
-  COMPLETED: null,
-  CANCELLED: null,
-};
-
-const sellerAction: Record<Order['status'], { label: string; next: Order['status'] } | null> = {
-  PENDING_PAYMENT: null,
-  PAID: { label: 'Mark as shipped', next: 'SHIPPED' },
-  SHIPPED: { label: 'Mark as delivered', next: 'DELIVERED' },
-  DELIVERED: null,
-  COMPLETED: null,
-  CANCELLED: null,
-};
-
-const nextMap: Record<Order['status'], Order['status'] | null> = {
-  PENDING_PAYMENT: 'PAID',
-  PAID: 'SHIPPED',
-  SHIPPED: 'DELIVERED',
-  DELIVERED: 'COMPLETED',
-  COMPLETED: null,
-  CANCELLED: null,
-};
+import { ORDER_STEPS, orderStepIndex, getOrderAction, canCancelOrder, waitingHint } from '@/lib/orderFlow';
 
 export function OrderDetailScreen() {
   const { orderId } = useParams({ from: '/orders/$orderId' });
@@ -93,15 +67,10 @@ export function OrderDetailScreen() {
   const isBuyer = user?.id === order.buyerId;
   const isSeller = user?.id === order.sellerId;
 
-  const primaryAction = isBuyer
-    ? buyerAction[order.status]
-    : isSeller
-      ? sellerAction[order.status]
-      : nextMap[order.status]
-        ? { label: `Mark as ${statusConfig[nextMap[order.status]!].label}`, next: nextMap[order.status]! }
-        : null;
-
-  const canCancel = isBuyer && ['PENDING_PAYMENT', 'PAID'].includes(order.status);
+  // Flow is driven by the raw backend status (display status is lossy)
+  const primaryAction = getOrderAction(order.rawStatus, isBuyer, isSeller);
+  const canCancel = canCancelOrder(order.rawStatus, isBuyer);
+  const hint = waitingHint(order.rawStatus, isBuyer);
 
   const handlePrimary = () => {
     if (!primaryAction) return;
@@ -134,33 +103,33 @@ export function OrderDetailScreen() {
       />
 
       <div className="space-y-6">
-        {/* Progress */}
+        {/* Progress — driven by the raw backend status */}
         {order.status !== 'CANCELLED' && (
           <Card className="bg-surface-light border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                {steps.map((step, index) => {
-                  const active = index < config.step;
-                  const current = index === config.step - 1;
+                {ORDER_STEPS.map((step, index) => {
+                  const current = index === orderStepIndex(order.rawStatus);
+                  const done = index < orderStepIndex(order.rawStatus);
                   return (
-                    <div key={step} className="flex flex-col items-center gap-2 flex-1">
+                    <div key={step.key} className="flex flex-col items-center gap-2 flex-1">
                       <div
                         className={cn(
                           'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition',
-                          active || current
+                          done || current
                             ? 'bg-brand text-white'
                             : 'bg-surface-lighter text-muted-foreground'
                         )}
                       >
-                        {index + 1}
+                        {done ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
                       </div>
                       <span
                         className={cn(
-                          'text-xs hidden sm:block',
-                          active || current ? 'text-foreground' : 'text-muted-foreground'
+                          'text-xs hidden sm:block text-center',
+                          done || current ? 'text-foreground' : 'text-muted-foreground'
                         )}
                       >
-                        {step}
+                        {step.label}
                       </span>
                     </div>
                   );
@@ -251,6 +220,12 @@ export function OrderDetailScreen() {
                     >
                       {updateStatus.isPending ? 'Updating...' : primaryAction.label}
                     </Button>
+                  )}
+                  {hint && order.status !== 'CANCELLED' && !primaryAction && (
+                    <p className="text-xs text-muted-foreground text-center py-1 flex items-center justify-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {hint}
+                    </p>
                   )}
                   {canCancel && (
                     <Button

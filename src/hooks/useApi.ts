@@ -575,16 +575,18 @@ export function useCancelOrder() {
 export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: string; status: import('@/types').Order['status'] }) => {
-      // Real backend only exposes cancel for buyer-facing status transitions.
+    mutationFn: async ({ orderId, status }: { orderId: string; status: import('@/types/api').ApiOrderStatus }) => {
       if (status === 'CANCELLED') {
         await ordersApi.cancel(orderId);
+      } else {
+        await ordersApi.updateStatus(orderId, status);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_d, { orderId }) => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['vault'] });
+      queryClient.invalidateQueries({ queryKey: ['market'] });
     },
   });
 }

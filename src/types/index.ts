@@ -390,6 +390,8 @@ export interface Order {
   sellerPayout?: number;
   total: number;
   status: OrderStatus;
+  /** Raw backend status (drives the status-flow actions; `status` is display-only) */
+  rawStatus?: import('./api').ApiOrderStatus;
   deliveryPreference: 'SHIP' | 'VAULT_STORE';
   shippingAddress?: string;
   createdAt: string;

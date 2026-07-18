@@ -103,14 +103,15 @@ function OrderRow({ order }: { order: Order }) {
   const cancel = useCancelOrder();
   const config = orderStatusConfig[order.status];
 
-  const nextStatus: Order['status'] | null =
-    order.status === 'PENDING_PAYMENT'
-      ? 'PAID'
-      : order.status === 'PAID'
-        ? 'SHIPPED'
-        : order.status === 'SHIPPED'
-          ? 'DELIVERED'
-          : order.status === 'DELIVERED'
+  // Advance through the backend state machine (rawStatus, not the display status)
+  const nextStatus: import('@/types/api').ApiOrderStatus | null =
+    order.rawStatus === 'CREATED'
+      ? 'PAYMENT_PENDING'
+      : order.rawStatus === 'PAYMENT_PENDING'
+        ? 'PAYMENT_CONFIRMED'
+        : order.rawStatus === 'PAYMENT_CONFIRMED'
+          ? 'SHIPPING_ARRANGED'
+          : order.rawStatus === 'SHIPPING_ARRANGED'
             ? 'COMPLETED'
             : null;
 
@@ -130,7 +131,12 @@ function OrderRow({ order }: { order: Order }) {
             onClick={() => updateStatus.mutate({ orderId: order.id, status: nextStatus })}
             disabled={updateStatus.isPending}
           >
-            {orderStatusConfig[nextStatus].label}
+            {({
+              PAYMENT_PENDING: 'Payment sent',
+              PAYMENT_CONFIRMED: 'Payment confirmed',
+              SHIPPING_ARRANGED: 'Shipped',
+              COMPLETED: 'Completed',
+            } as Record<string, string>)[nextStatus]}
           </Button>
         )}
         {['PENDING_PAYMENT', 'PAID'].includes(order.status) && (

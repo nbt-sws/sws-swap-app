@@ -228,6 +228,8 @@ export const ordersApi = {
   }) => apiPost<{ orderId?: string; id?: string; status: string }>('orders', { json: data }),
   cancel: (id: string, data?: { reason?: string }) =>
     apiPost<{ orderId: string; status: string }>(`orders/${id}/cancel`, { json: data }),
+  updateStatus: (id: string, status: ApiOrderStatus) =>
+    apiPatch<{ id: string; status: string }>(`orders/${id}`, { json: { status } }),
 };
 
 export type ApiListingStatus = ApiListing['status'];
