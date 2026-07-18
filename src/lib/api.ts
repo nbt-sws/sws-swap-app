@@ -518,6 +518,23 @@ export interface ScanCardResult {
   reasoning: string;
 }
 
+export interface ScanCandidate {
+  code: string;
+  nameEn: string;
+  nameJp?: string;
+  rarity?: string;
+  type?: string;
+  game?: string;
+  imageUrl?: string;
+  confidence?: number;
+  source: 'ai' | 'catalog';
+}
+
+export interface ScanImageOption {
+  url: string;
+  label: string;
+}
+
 export interface ScanResult {
   ok: boolean;
   cached: boolean;
@@ -542,6 +559,9 @@ export interface ScanResult {
     imageUrl?: string;
     condition?: string;
   } | null;
+  nearMatches?: ScanCandidate[];
+  candidates?: ScanCandidate[];
+  imageOptions?: ScanImageOption[];
 }
 
 export function describeIdentifiedBy(id: string): { label: string; verified: boolean } {
@@ -562,6 +582,12 @@ export const scanApi = {
     apiPost<ScanResult>('scan', { json: data }),
 };
 
+export interface PriceTier {
+  count: number;
+  usd: { median: number; min: number; max: number };
+  thb: { median: number; min: number; max: number; rate: number } | null;
+}
+
 export interface MarketPrices {
   ok: boolean;
   sws: {
@@ -577,6 +603,11 @@ export interface MarketPrices {
     max?: number;
     thb: { median: number; min: number; max: number; rate: number } | null;
     items: { title: string; price: number; url: string; thumbnail?: string }[];
+  };
+  tiers?: {
+    raw: PriceTier | null;
+    psa10: PriceTier | null;
+    psa9: PriceTier | null;
   };
 }
 

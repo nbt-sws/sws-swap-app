@@ -55,8 +55,50 @@ async function fetchUsdToThb(): Promise<number> {
   }
 }
 
+/** One eBay search → normalized stats block. Grade suffix narrows to slab listings. */
+async function ebaySearch(token: string, q: string, fx: number): Promise<any> {
+  const empty = { count: 0, currency: 'USD', median: 0, min: 0, max: 0, thb: null, items: [] };
+  try {
+    const resp = await fetch(
+      `${EBAY_SEARCH_URL}?q=${encodeURIComponent(q)}&category_ids=${TCG_CATEGORY}&limit=20`,
+      { headers: { Authorization: `Bearer ${token}`, 'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US' } }
+    );
+    if (!resp.ok) return empty;
+    const json: any = await resp.json();
+    const summaries: any[] = json.itemSummaries ?? [];
+    let prices = summaries.map((it) => parseFloat(it.price?.value ?? '0')).filter((p) => p > 0);
+    // Outlier filter (adapted from the Go service): drop listings wildly off the median
+    // (e.g. $9,999 joke listings or $1 'read description' bait) before computing stats
+    if (prices.length >= 5) {
+      const med = median(prices);
+      const filtered = prices.filter((p) => p <= med * 5 && p >= med / 50);
+      if (filtered.length >= 3) prices = filtered;
+    }
+    if (!prices.length) return { ...empty, items: summaries.slice(0, 3).map((it) => ({ title: it.title, price: parseFloat(it.price?.value ?? '0'), url: it.itemWebUrl, thumbnail: it.thumbnailImages?.[0]?.imageUrl })) };
+    const med = median(prices);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return {
+      count: prices.length,
+      currency: 'USD',
+      median: med,
+      min,
+      max,
+      thb: { median: Math.round(med * fx), min: Math.round(min * fx), max: Math.round(max * fx), rate: fx },
+      items: summaries.slice(0, 3).map((it) => ({
+        title: it.title,
+        price: parseFloat(it.price?.value ?? '0'),
+        url: it.itemWebUrl,
+        thumbnail: it.thumbnailImages?.[0]?.imageUrl,
+      })),
+    };
+  } catch {
+    return empty;
+  }
+}
+
 // GET /api/v1/prices?code=&name=&lang=
-// Market prices per marketplace: our own SWS market + eBay (adapted from sws-scanner-service)
+// Market prices per marketplace + per-grade tiers (adapted from sws-scanner-service pricing)
 priceRoutes.get('/prices', async (c) => {
   const tenantId = c.get('tenantId');
   const code = (c.req.query('code') ?? '').trim();
@@ -64,71 +106,44 @@ priceRoutes.get('/prices', async (c) => {
   if (!code && !name) {
     return c.json({ error: 'code or name required' }, 400);
   }
+  const baseQ = [code, name].filter(Boolean).join(' ').slice(0, 100);
 
-  // ─── Our own market (SWS) ───
-  const sws = await withTenant(c.env, tenantId, async (client) => {
-    if (!code) return { count: 0, floor: null as number | null, listings: [] as any[] };
-    const { rows } = await client.query(
-      `SELECT l.listing_id, l.price, l.condition, l.title
-       FROM listings l
-       LEFT JOIN vault_items v ON l.item_id = v.id
-       WHERE l.status = 'ACTIVE' AND (UPPER(v.sku) = UPPER($1) OR UPPER(l.title) ILIKE '%' || UPPER($1) || '%')
-       ORDER BY l.price ASC
-       LIMIT 10`,
-      [code]
-    );
-    return {
-      count: rows.length,
-      floor: rows[0]?.price ?? null,
-      listings: rows.map((r: any) => ({ listingId: r.listing_id, price: r.price, condition: r.condition, title: r.title })),
-    };
-  });
-
-  // ─── eBay ───
-  let ebay: any = { count: 0, currency: 'USD', items: [] };
   const token = await getEbayToken(c.env);
-  if (token) {
-    const q = [code, name].filter(Boolean).join(' ').slice(0, 100);
-    try {
-      const resp = await fetch(
-        `${EBAY_SEARCH_URL}?q=${encodeURIComponent(q)}&category_ids=${TCG_CATEGORY}&limit=20`,
-        { headers: { Authorization: `Bearer ${token}`, 'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US' } }
-      );
-      if (resp.ok) {
-        const json: any = await resp.json();
-        const summaries: any[] = json.itemSummaries ?? [];
-        const prices = summaries
-          .map((it) => parseFloat(it.price?.value ?? '0'))
-          .filter((p) => p > 0);
-        const fx = await fetchUsdToThb();
-        ebay = {
-          count: prices.length,
-          currency: 'USD',
-          median: median(prices),
-          min: prices.length ? Math.min(...prices) : 0,
-          max: prices.length ? Math.max(...prices) : 0,
-          thb: prices.length
-            ? {
-                median: Math.round(median(prices) * fx),
-                min: Math.round(Math.min(...prices) * fx),
-                max: Math.round(Math.max(...prices) * fx),
-                rate: fx,
-              }
-            : null,
-          items: summaries.slice(0, 4).map((it) => ({
-            title: it.title,
-            price: parseFloat(it.price?.value ?? '0'),
-            url: it.itemWebUrl,
-            thumbnail: it.thumbnailImages?.[0]?.imageUrl,
-          })),
-        };
-      }
-    } catch {
-      // eBay failure is non-fatal — SWS data still returned
-    }
-  }
+  const fx = await fetchUsdToThb();
 
-  return c.json({ ok: true, query: { code, name }, sws, ebay });
+  // ─── Our own market (SWS) + eBay tier searches in parallel ───
+  const [sws, rawSearch, psa10Search, psa9Search] = await Promise.all([
+    withTenant(c.env, tenantId, async (client) => {
+      if (!code) return { count: 0, floor: null as number | null, listings: [] as any[] };
+      const { rows } = await client.query(
+        `SELECT l.listing_id, l.price, l.condition, l.title
+         FROM listings l
+         LEFT JOIN vault_items v ON l.item_id = v.id
+         WHERE l.status = 'ACTIVE' AND (UPPER(v.sku) = UPPER($1) OR UPPER(l.title) ILIKE '%' || UPPER($1) || '%')
+         ORDER BY l.price ASC
+         LIMIT 10`,
+        [code]
+      );
+      return {
+        count: rows.length,
+        floor: rows[0]?.price ?? null,
+        listings: rows.map((r: any) => ({ listingId: r.listing_id, price: r.price, condition: r.condition, title: r.title })),
+      };
+    }),
+    token ? ebaySearch(token, `${baseQ} -psa -bgs -cgc -graded`, fx) : Promise.resolve(null),
+    token ? ebaySearch(token, `${baseQ} PSA 10`, fx) : Promise.resolve(null),
+    token ? ebaySearch(token, `${baseQ} PSA 9`, fx) : Promise.resolve(null),
+  ]);
+
+  // Combined eBay view = raw search pool reclassified by title (keeps one item list, honest counts)
+  const ebay = rawSearch ?? { count: 0, currency: 'USD', items: [] };
+  const tiers = {
+    raw: rawSearch && rawSearch.count ? { count: rawSearch.count, usd: { median: rawSearch.median, min: rawSearch.min, max: rawSearch.max }, thb: rawSearch.thb } : null,
+    psa10: psa10Search && psa10Search.count ? { count: psa10Search.count, usd: { median: psa10Search.median, min: psa10Search.min, max: psa10Search.max }, thb: psa10Search.thb } : null,
+    psa9: psa9Search && psa9Search.count ? { count: psa9Search.count, usd: { median: psa9Search.median, min: psa9Search.min, max: psa9Search.max }, thb: psa9Search.thb } : null,
+  };
+
+  return c.json({ ok: true, query: { code, name }, sws, ebay, tiers });
 });
 
 // GET /api/v1/cards/variants?code= — catalog rows sharing a code (parallel/rarity variants)

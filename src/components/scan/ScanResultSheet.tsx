@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   X, Sparkles, BadgeCheck, Loader2, RotateCcw, ChevronLeft,
-  Store, Globe, ExternalLink, Pencil, CheckCircle2, ShieldCheck, Zap,
+  Store, Globe, ExternalLink, Pencil, CheckCircle2, ShieldCheck, Zap, ImageIcon, CircleHelp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,7 @@ import { useAddToVault } from '@/hooks/useApi';
 import { pricesApi, describeIdentifiedBy } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { ScanResult } from '@/lib/api';
+import type { ScanResult, ScanCandidate } from '@/lib/api';
 import type { CardGame } from '@/types';
 
 interface ScanResultSheetProps {
@@ -26,10 +26,17 @@ interface ScanResultSheetProps {
 
 const GRADES = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5'] as const;
 
+/** Map a grade chip to its eBay tier key (only tiers the backend searches). */
+const GRADE_TIER: Record<string, 'raw' | 'psa10' | 'psa9'> = {
+  Raw: 'raw',
+  'PSA 10': 'psa10',
+  'PSA 9': 'psa9',
+};
+
 /**
  * Post-scan flow (adapted from sws-scanner-app v1):
- * 1) Recheck — user confirms/corrects which card it is (their photo stays the hero)
- * 2) Market prices — per-marketplace pricing (SWS + eBay), then save to vault
+ * 1) Recheck — confirm/correct the card, pick a near-match if the AI missed, choose the cover image
+ * 2) Market prices — per-marketplace + per-grade tiers (Raw / PSA 10 / PSA 9), then save to vault
  */
 export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanResultSheetProps) {
   const navigate = useNavigate();
@@ -42,14 +49,34 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
   const [name, setName] = useState(result.catalog?.nameEn || result.card.nameEn);
   const [rarity, setRarity] = useState(result.catalog?.rarity || result.card.rarity);
   const [grade, setGrade] = useState<string>('Raw');
+  // Cover image — user's photo by default, official samples selectable
+  const [coverUrl, setCoverUrl] = useState(result.imageUrl);
 
   const confidence = Math.round(result.card.confidence);
 
+  // Alternatives when the identification looks wrong: catalog near-matches + AI candidates
+  const alternatives: ScanCandidate[] = (() => {
+    const seen = new Set<string>([String(result.card.code).toUpperCase()]);
+    const out: ScanCandidate[] = [];
+    for (const c of [...(result.nearMatches ?? []), ...(result.candidates ?? [])]) {
+      const k = String(c.code).toUpperCase();
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      out.push(c);
+    }
+    return out.slice(0, 6);
+  })();
+
+  // Cover image choices — user's photo first, then official/catalog samples
+  const imageOptions = result.imageOptions?.length
+    ? result.imageOptions
+    : [{ url: result.imageUrl, label: 'your-photo' }];
+
   // Catalog variants for the recheck picker (parallel rarities of the same code)
   const { data: variantsData } = useQuery({
-    queryKey: ['cardVariants', result.card.code],
-    queryFn: () => pricesApi.getVariants(result.card.code),
-    enabled: !!result.card.code,
+    queryKey: ['cardVariants', code],
+    queryFn: () => pricesApi.getVariants(code),
+    enabled: !!code,
     staleTime: 1000 * 60 * 10,
   });
   const variants = variantsData?.variants ?? [];
@@ -68,7 +95,16 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
     if (v.rarity) setRarity(v.rarity);
   };
 
+  const applyCandidate = (c: ScanCandidate) => {
+    setCode(c.code);
+    if (c.nameEn) setName(c.nameEn);
+    if (c.rarity) setRarity(c.rarity);
+    // Switch the cover to the official sample if one exists — user can switch back below
+    if (c.imageUrl) setCoverUrl(c.imageUrl);
+  };
+
   const handleSave = () => {
+    const images = coverUrl === result.imageUrl ? [result.imageUrl] : [coverUrl, result.imageUrl];
     addToVault.mutate(
       {
         name: name.trim() || result.card.nameEn || code,
@@ -77,13 +113,12 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
         subCategory: rarity.trim() || undefined,
         itemFormat: result.card.lang,
         condition: grade,
-        // Always the user's own photo as the cover
-        images: [result.imageUrl],
+        images,
         metadata: {
           paidPrice: 0,
           dateAcquired: new Date().toISOString().split('T')[0],
           source: `Scan (${result.identifiedBy}, ${confidence}%)`,
-          images: [result.imageUrl],
+          images,
         },
       },
       {
@@ -188,6 +223,55 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               </div>
             </div>
 
+            {/* Not this card? — near matches from catalog + AI candidates */}
+            {alternatives.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <CircleHelp className="w-3 h-3" />
+                  Not this card? Similar matches:
+                </p>
+                <div className="space-y-1.5">
+                  {alternatives.map((c) => {
+                    const active = code.toUpperCase() === c.code.toUpperCase();
+                    return (
+                      <button
+                        key={`${c.source}-${c.code}`}
+                        type="button"
+                        onClick={() => applyCandidate(c)}
+                        className={cn(
+                          'w-full flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-left transition-all',
+                          active
+                            ? 'border-brand bg-brand/10'
+                            : 'border-border bg-surface hover:bg-surface-lighter'
+                        )}
+                      >
+                        <div className="w-8 aspect-[63/88] rounded overflow-hidden bg-surface-lighter shrink-0 flex items-center justify-center">
+                          {c.imageUrl ? (
+                            <img src={c.imageUrl} alt={c.code} className="w-full h-full object-cover" loading="lazy" />
+                          ) : (
+                            <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={cn('text-xs font-mono truncate', active ? 'text-brand' : 'text-muted-foreground')}>{c.code}</p>
+                          <p className="text-xs font-medium truncate">{c.nameEn || '—'}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          {c.rarity && <Badge variant="outline" className="text-[9px] px-1.5 py-0">{c.rarity}</Badge>}
+                          <span className={cn(
+                            'text-[9px] font-medium',
+                            c.source === 'catalog' ? 'text-cyan' : 'text-muted-foreground'
+                          )}>
+                            {c.source === 'catalog' ? 'Catalog' : c.confidence ? `AI ${Math.round(c.confidence)}%` : 'AI'}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Catalog variants (same code, different parallel/rarity) */}
             {variants.length > 1 && (
               <div className="space-y-2">
@@ -211,6 +295,40 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                       {v.nameEn}{v.rarity ? ` · ${v.rarity}` : ''}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Cover image — pick the user's photo or an official sample */}
+            {imageOptions.length > 1 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <ImageIcon className="w-3 h-3" />
+                  Cover image:
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {imageOptions.map((opt) => {
+                    const active = coverUrl === opt.url;
+                    return (
+                      <button
+                        key={opt.url}
+                        type="button"
+                        onClick={() => setCoverUrl(opt.url)}
+                        className={cn(
+                          'relative w-16 aspect-[63/88] rounded-lg overflow-hidden shrink-0 border-2 transition-all',
+                          active ? 'border-brand' : 'border-transparent opacity-70 hover:opacity-100'
+                        )}
+                      >
+                        <img src={opt.url} alt={opt.label} className="w-full h-full object-cover" loading="lazy" />
+                        <span className={cn(
+                          'absolute bottom-0 inset-x-0 text-[8px] font-medium text-center py-0.5 backdrop-blur-sm truncate px-0.5',
+                          active ? 'bg-brand/80 text-white' : 'bg-black/60 text-white/80'
+                        )}>
+                          {opt.label === 'your-photo' ? 'Your photo' : opt.label}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -309,26 +427,50 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               </>
             )}
 
-            {/* Grade picker */}
+            {/* Grade picker — chips show the eBay median for that grade tier when known */}
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Condition</p>
+              <p className="text-xs font-medium text-muted-foreground">Condition — prices update per grade</p>
               <div className="flex flex-wrap gap-1.5">
-                {GRADES.map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setGrade(g)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
-                      grade === g
-                        ? 'border-brand bg-brand/10 text-brand'
-                        : 'border-border bg-surface text-muted-foreground hover:text-foreground'
-                    )}
-                  >
-                    {g}
-                  </button>
-                ))}
+                {GRADES.map((g) => {
+                  const tierKey = GRADE_TIER[g];
+                  const tier = tierKey ? prices?.tiers?.[tierKey] : undefined;
+                  const active = grade === g;
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setGrade(g)}
+                      className={cn(
+                        'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex flex-col items-center gap-0.5 min-w-[72px]',
+                        active
+                          ? 'border-brand bg-brand/10 text-brand'
+                          : 'border-border bg-surface text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      <span>{g}</span>
+                      {pricesLoading && tierKey ? (
+                        <span className="h-3 w-10 rounded shimmer bg-surface-lighter" />
+                      ) : tier?.thb ? (
+                        <span className={cn('text-[10px] font-mono', active ? 'text-brand' : 'text-muted-foreground')}>
+                          ฿{tier.thb.median.toLocaleString()}
+                        </span>
+                      ) : tierKey ? (
+                        <span className="text-[10px] text-muted-foreground/60">—</span>
+                      ) : null}
+                    </button>
+                  );
+                })}
               </div>
+              {(() => {
+                const tierKey = GRADE_TIER[grade];
+                const tier = tierKey ? prices?.tiers?.[tierKey] : undefined;
+                if (!tier?.thb) return null;
+                return (
+                  <p className="text-[11px] text-muted-foreground">
+                    eBay {grade}: ฿{tier.thb.min.toLocaleString()} – ฿{tier.thb.max.toLocaleString()} · median <span className="font-mono text-foreground">฿{tier.thb.median.toLocaleString()}</span> ({tier.count} listings)
+                  </p>
+                );
+              })()}
             </div>
 
             <div className="flex gap-2.5 pt-1">
@@ -359,7 +501,7 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               <p className="text-sm text-muted-foreground mt-0.5">is now in your vault</p>
             </div>
             <div className="w-24 aspect-[63/88] rounded-xl overflow-hidden bg-surface-lighter">
-              <img src={imagePreview} alt={name} className="w-full h-full object-cover" />
+              <img src={coverUrl} alt={name} className="w-full h-full object-cover" />
             </div>
             <div className="w-full flex gap-2.5 pt-1">
               <Button className="flex-1 bg-brand hover:bg-brand-light h-11" onClick={() => navigate({ to: '/vault' })}>

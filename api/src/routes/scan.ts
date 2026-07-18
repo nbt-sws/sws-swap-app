@@ -7,7 +7,7 @@ import { authMiddleware } from '../middleware/auth';
 export const scanRoutes = new Hono<{ Bindings: Env }>();
 
 // Bump when identification logic changes so old cached results are ignored
-const CACHE_VERSION = 'v2-haiku-vision-xcheck';
+const CACHE_VERSION = 'v4-candidates-tiers';
 const ANTHROPIC_ENDPOINT = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const VISION_ENDPOINT = 'https://vision.googleapis.com/v1/images:annotate';
@@ -26,17 +26,17 @@ const TRUSTED_HOSTS = [
 const TCG_META: Record<string, { game: string; prompt: string; codeRegex: RegExp; ocrRegex: RegExp }> = {
   'one-piece': {
     game: 'One Piece TCG',
-    prompt: `You are a One Piece TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning.
+    prompt: `You are a One Piece TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Card code formats: OPXX-XXX, STXX-XXX, EBXX-XXX, PRB-XX, or P-XXX for promos.
 Rarities: C, UC, R, SR, SEC, L, TR, SP, MR, P, DON!!.
 Types: Leader, Character, Event, Stage, DON!!.
-Detect parallel/star rarity if the rarity symbol has a star above it. If unsure, return your best guess with lower confidence.`,
+Detect parallel/star rarity if the rarity symbol has a star above it. If unsure between similar cards, put alternatives in candidates with lower confidence.`,
     codeRegex: /^(OP|ST|EB)\d{2}-\d{3}$|^PRB-\d{2}$|^P-\d{3}$/i,
     ocrRegex: /\b((?:OP|ST|EB)\d{2}-\d{3}|PRB-\d{2}|P-\d{3})\b/i,
   },
   'yu-gi-oh': {
     game: 'Yu-Gi-Oh! OCG',
-    prompt: `You are a Yu-Gi-Oh! OCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning.
+    prompt: `You are a Yu-Gi-Oh! OCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Card code format: SETCODE-LANG### (e.g., LEDE-JP001, MAMA-EN001).
 Rarities: N, R, SR, UR, UL, SE, HR, PSE, 20TH, QCSE, QCUR, CR, PGR, C.
 Frame colors map to types: yellow Normal, orange Effect, green Spell, pink Trap, blue Ritual, purple Fusion, white Synchro, black Xyz, half-color Pendulum, dark blue Link.`,
@@ -45,14 +45,14 @@ Frame colors map to types: yellow Normal, orange Effect, green Spell, pink Trap,
   },
   pokemon: {
     game: 'Pokémon TCG',
-    prompt: `You are a Pokémon TCG card identifier. Output valid JSON only with these fields: code (set-number/total like 025/198 or promo code), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning.
+    prompt: `You are a Pokémon TCG card identifier. Output valid JSON only with these fields: code (set-number/total like 025/198 or promo code), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Rarities: C, U, R, RR, SR, UR, HR, AR, SAR, ACE, PR.`,
     codeRegex: /^\d{1,3}\/\d{1,3}$|^[A-Z]{2,}\d{1,3}$|^S-P\d+$|^SM-P\d+$/i,
     ocrRegex: /\b(\d{1,3}\/\d{1,3}|S-P\d+|SM-P\d+)\b/i,
   },
   lorcana: {
     game: 'Disney Lorcana TCG',
-    prompt: `You are a Disney Lorcana card identifier. Output valid JSON only with these fields: code (e.g., 1/204, P1, or set format), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning.
+    prompt: `You are a Disney Lorcana card identifier. Output valid JSON only with these fields: code (e.g., 1/204, P1, or set format), nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).
 Rarities: Common, Uncommon, Rare, Super Rare, Legendary, Enchanted.
 Types: Character, Action, Item, Location, Song.`,
     codeRegex: /^\d{1,3}\/\d{1,3}$|^P\d+$/i,
@@ -60,13 +60,13 @@ Types: Character, Action, Item, Location, Song.`,
   },
   conan: {
     game: 'Detective Conan TCG',
-    prompt: `You are a Detective Conan TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning.`,
+    prompt: `You are a Detective Conan TCG card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence).`,
     codeRegex: /^[A-Z0-9-]{3,}$/i,
     ocrRegex: /\b([A-Z0-9]{3,}-\d+)\b/i,
   },
   others: {
     game: 'trading card',
-    prompt: `You are a trading card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning. Identify the game if recognizable and include it in reasoning.`,
+    prompt: `You are a trading card identifier. Output valid JSON only with these fields: code, nameEn, nameJp, rarity, type, promo (boolean), confidence (0-100), reasoning, and candidates (array of your top 3 guesses, best first, each with code, nameEn, rarity, confidence). Identify the game if recognizable and include it in reasoning.`,
     codeRegex: /.+/,
     ocrRegex: /\b([A-Z]{2,5}-?\d{2,4})\b/i,
   },
@@ -192,7 +192,15 @@ scanRoutes.post('/scan', authMiddleware, async (c) => {
       return rows[0];
     });
     if (cached) {
-      return c.json({ ok: true, cached: true, card: cached.card, hash, imageUrl: cached.image_url, identifiedBy: cached.identified_by });
+      const stored: any = cached.card ?? {};
+      const { _extras, ...cardOnly } = stored;
+      return c.json({
+        ok: true, cached: true, card: cardOnly, hash, imageUrl: cached.image_url, identifiedBy: cached.identified_by,
+        catalog: _extras?.catalog ?? null,
+        nearMatches: _extras?.nearMatches ?? [],
+        candidates: _extras?.candidates ?? [],
+        imageOptions: _extras?.imageOptions ?? [{ url: cached.image_url, label: 'your-photo' }],
+      });
     }
   }
 
@@ -242,17 +250,82 @@ scanRoutes.post('/scan', authMiddleware, async (c) => {
     return c.json({ ok: false, error: 'unable to identify card', card, hash, crossCheck }, 422);
   }
 
-  // 6) Catalog enrichment
+  // 6) Catalog enrichment — exact match + near matches (alternatives when the ID is wrong)
   let catalog: any = null;
-  if (codeValid) {
-    catalog = await withTenant(c.env, tenantId, async (client) => {
-      const { rows } = await client.query(
-        'SELECT code, name_en, name_jp, rarity, type, language, game, image_url, condition FROM public.cards WHERE UPPER(code) = $1 LIMIT 1',
-        [card.code]
-      );
-      const r = rows[0];
-      return r ? { code: r.code, nameEn: r.name_en, nameJp: r.name_jp, rarity: r.rarity, type: r.type, language: r.language, game: r.game, imageUrl: r.image_url, condition: r.condition } : null;
+  let nearMatches: any[] = [];
+  if (codeValid || card.nameEn) {
+    const enriched = await withTenant(c.env, tenantId, async (client) => {
+      let exact: any = null;
+      if (codeValid) {
+        const { rows } = await client.query(
+          'SELECT code, name_en, name_jp, rarity, type, language, game, image_url, condition FROM public.cards WHERE UPPER(code) = $1 LIMIT 1',
+          [card.code]
+        );
+        const r = rows[0];
+        if (r) exact = { code: r.code, nameEn: r.name_en, nameJp: r.name_jp, rarity: r.rarity, type: r.type, language: r.language, game: r.game, imageUrl: r.image_url, condition: r.condition };
+      }
+      // Near matches: same name (different set/parallel) or same code prefix (different variant)
+      const terms: string[] = [];
+      const params: string[] = [];
+      if (card.nameEn && String(card.nameEn).length >= 3) {
+        params.push(`%${String(card.nameEn).trim()}%`);
+        terms.push(`name_en ILIKE $${params.length}`);
+      }
+      const prefix = String(card.code ?? '').match(/^([A-Z]{2,})/i)?.[1];
+      if (prefix && prefix.length >= 2) {
+        params.push(`${prefix.toUpperCase()}%`);
+        terms.push(`UPPER(code) LIKE $${params.length}`);
+      }
+      let near: any[] = [];
+      if (terms.length) {
+        const { rows } = await client.query(
+          `SELECT code, name_en, name_jp, rarity, type, game, image_url FROM public.cards WHERE (${terms.join(' OR ')}) AND UPPER(code) <> $${params.length + 1} LIMIT 6`,
+          [...params, String(card.code ?? '').toUpperCase()]
+        );
+        near = rows.map((r: any) => ({ code: r.code, nameEn: r.name_en, nameJp: r.name_jp, rarity: r.rarity, type: r.type, game: r.game, imageUrl: r.image_url, source: 'catalog' }));
+      }
+      return { exact, near };
     });
+    catalog = enriched.exact;
+    nearMatches = enriched.near;
+  }
+
+  // 7) AI candidates — Haiku's top-3 guesses, deduped, enriched with catalog data when possible
+  const seenCodes = new Set<string>([String(card.code ?? '').toUpperCase(), ...nearMatches.map((m) => String(m.code).toUpperCase())]);
+  const candidates: any[] = [];
+  for (const cand of Array.isArray(card.candidates) ? card.candidates : []) {
+    if (candidates.length >= 3) break;
+    const code = String(cand?.code ?? '').replace(/\s+/g, '').toUpperCase();
+    if (!code || seenCodes.has(code)) continue;
+    seenCodes.add(code);
+    candidates.push({
+      code,
+      nameEn: String(cand?.nameEn ?? ''),
+      rarity: String(cand?.rarity ?? ''),
+      confidence: Math.max(0, Math.min(100, Number(cand?.confidence) || 0)),
+      source: 'ai',
+    });
+  }
+  if (candidates.length) {
+    const codes = candidates.map((cd) => cd.code);
+    const catalogRows = await withTenant(c.env, tenantId, async (client) => {
+      const { rows } = await client.query(
+        'SELECT code, name_en, name_jp, rarity, type, game, image_url FROM public.cards WHERE UPPER(code) = ANY($1)',
+        [codes]
+      );
+      return rows;
+    });
+    for (const cd of candidates) {
+      const r = catalogRows.find((row: any) => String(row.code).toUpperCase() === cd.code);
+      if (r) {
+        cd.nameEn = cd.nameEn || r.name_en;
+        cd.nameJp = r.name_jp;
+        cd.rarity = cd.rarity || r.rarity;
+        cd.type = r.type;
+        cd.game = r.game;
+        cd.imageUrl = r.image_url;
+      }
+    }
   }
 
   // 7) Persist: image to R2 + cache row
@@ -275,14 +348,25 @@ scanRoutes.post('/scan', authMiddleware, async (c) => {
     reasoning: card.reasoning ?? '',
   };
 
+  // 8) Image options — user's photo first, then official/catalog sample images to pick as cover
+  const imageOptions: { url: string; label: string }[] = [{ url: imageUrl, label: 'your-photo' }];
+  const seenImages = new Set<string>([imageUrl]);
+  for (const src of [catalog, ...nearMatches, ...candidates]) {
+    const u = src?.imageUrl;
+    if (u && !seenImages.has(u) && imageOptions.length < 6) {
+      seenImages.add(u);
+      imageOptions.push({ url: u, label: src?.code ?? 'catalog' });
+    }
+  }
+
   await withTenant(c.env, tenantId, async (client) => {
     await client.query(
       `INSERT INTO scans (hash, user_id, card, image_url, identified_by, cache_version)
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (hash) DO NOTHING`,
-      [hash, userId, JSON.stringify(cardOut), imageUrl, identifiedBy, CACHE_VERSION]
+      [hash, userId, JSON.stringify({ ...cardOut, _extras: { catalog, nearMatches, candidates, imageOptions } }), imageUrl, identifiedBy, CACHE_VERSION]
     );
   });
 
-  return c.json({ ok: true, cached: false, card: cardOut, hash, imageUrl, identifiedBy, crossCheck, catalog });
+  return c.json({ ok: true, cached: false, card: cardOut, hash, imageUrl, identifiedBy, crossCheck, catalog, nearMatches, candidates, imageOptions });
 });
