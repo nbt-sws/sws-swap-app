@@ -1,9 +1,8 @@
-import { useRef, useState, useCallback } from 'react';
-import { Camera, ImagePlus, Loader2, ScanLine, History } from 'lucide-react';
+import { useRef, useState, useCallback, useEffect } from 'react';
+import { Camera, ImagePlus, Loader2, ScanLine, History, Sparkles } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CameraCapture } from '@/components/scan/CameraCapture';
 import { ScanResultSheet } from '@/components/scan/ScanResultSheet';
 import { GameMark } from '@/components/domain/GameMark';
@@ -51,10 +50,19 @@ export function ScanScreen() {
   const [game, setGame] = useState<CardGame>('one-piece');
   const [cameraOpen, setCameraOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
-  const [langOpen, setLangOpen] = useState(false);
   const [lang, setLang] = useState<string>(() => localStorage.getItem('sws_scan_lang') ?? 'JP');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [recent, setRecent] = useState<RecentScan[]>(loadRecent);
+  const [stage, setStage] = useState(0);
+
+  // Staged progress messages while the pipeline runs (perceived performance)
+  const STAGES = ['Analyzing photo…', 'Reading card text…', 'Cross-checking sources…'];
+  useEffect(() => {
+    if (!scan.isPending) return;
+    setStage(0);
+    const timer = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), 4000);
+    return () => clearInterval(timer);
+  }, [scan.isPending]);
 
   const pushRecent = useCallback((r: ScanResult, g: CardGame) => {
     setRecent((prev) => {
@@ -78,7 +86,6 @@ export function ScanScreen() {
         reader.readAsDataURL(prepared);
       });
       setImage(dataUrl);
-      setLangOpen(true);
     } catch {
       toast.error('Could not read that image');
     }
@@ -88,7 +95,6 @@ export function ScanScreen() {
   const runScan = () => {
     if (!image) return;
     localStorage.setItem('sws_scan_lang', lang);
-    setLangOpen(false);
     scan.mutate(
       { image, tcg: game, lang },
       {
@@ -173,25 +179,37 @@ export function ScanScreen() {
           )}
         </div>
 
-        {/* Scan action */}
+        {/* Language + scan action — inline, no extra dialog */}
         {image && !result && (
-          <Button
-            className="w-full h-12 bg-brand hover:bg-brand-light text-base"
-            onClick={() => setLangOpen(true)}
-            disabled={scan.isPending}
-          >
-            {scan.isPending ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Identifying card…
-              </span>
-            ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-1.5">
+              <span className="text-xs text-muted-foreground mr-1">Language</span>
+              {LANGS.map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={cn(
+                    'px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
+                    lang === l
+                      ? 'border-brand bg-brand/10 text-brand'
+                      : 'border-border bg-surface-light text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+            <Button
+              className="w-full h-12 bg-brand hover:bg-brand-light text-base"
+              onClick={runScan}
+              disabled={scan.isPending}
+            >
               <span className="flex items-center gap-2">
                 <ScanLine className="w-5 h-5" />
                 Identify this card
               </span>
-            )}
-          </Button>
+            </Button>
+          </div>
         )}
 
         {/* Recent scans */}
@@ -233,40 +251,31 @@ export function ScanScreen() {
           onCapture={(dataUrl) => {
             setCameraOpen(false);
             setImage(dataUrl);
-            setLangOpen(true);
           }}
           onClose={() => setCameraOpen(false)}
         />
       )}
 
-      {/* Language modal */}
-      <Dialog open={langOpen} onOpenChange={setLangOpen}>
-        <DialogContent className="bg-surface-light border-border max-w-xs">
-          <DialogHeader>
-            <DialogTitle>Card language</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            {LANGS.map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={cn(
-                  'py-3 rounded-xl text-sm font-medium border transition-all',
-                  lang === l
-                    ? 'border-brand bg-brand/10 text-brand'
-                    : 'border-border bg-surface text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {l}
-              </button>
-            ))}
+      {/* Staged identification progress */}
+      {scan.isPending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-surface-light border border-border px-10 py-8 animate-scale-in">
+            <div className="relative">
+              <Loader2 className="w-10 h-10 animate-spin text-brand" />
+              <Sparkles className="w-4 h-4 text-brand absolute -top-1 -right-1" />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold">Identifying your card</p>
+              <p className="text-sm text-muted-foreground mt-1 animate-fade-in" key={stage}>{STAGES[stage]}</p>
+            </div>
+            <div className="flex gap-1.5">
+              {STAGES.map((_, i) => (
+                <div key={i} className={cn('h-1.5 w-8 rounded-full transition-colors', i <= stage ? 'bg-brand' : 'bg-surface-lighter')} />
+              ))}
+            </div>
           </div>
-          <Button className="w-full bg-brand hover:bg-brand-light mt-4" onClick={runScan} disabled={scan.isPending}>
-            {scan.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            Start identification
-          </Button>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
       {/* Result sheet */}
       {result && (

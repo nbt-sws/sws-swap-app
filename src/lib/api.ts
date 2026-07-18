@@ -525,6 +525,12 @@ export interface ScanResult {
   hash: string;
   imageUrl: string;
   identifiedBy: string;
+  crossCheck?: {
+    agreed: boolean;
+    haikuCode?: string | null;
+    visionCode?: string | null;
+    adopted?: string;
+  };
   catalog: {
     code: string;
     nameEn: string;
@@ -536,6 +542,19 @@ export interface ScanResult {
     imageUrl?: string;
     condition?: string;
   } | null;
+}
+
+export function describeIdentifiedBy(id: string): { label: string; verified: boolean } {
+  switch (id) {
+    case 'vision-cross-check':
+      return { label: 'AI + web verified', verified: true };
+    case 'ocr-extract':
+      return { label: 'Text verified', verified: true };
+    case 'haiku-confident':
+      return { label: 'AI confident', verified: false };
+    default:
+      return { label: 'AI estimate', verified: false };
+  }
 }
 
 export const scanApi = {

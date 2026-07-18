@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   X, Sparkles, BadgeCheck, Loader2, RotateCcw, ChevronLeft,
-  Store, Globe, ExternalLink, Pencil,
+  Store, Globe, ExternalLink, Pencil, CheckCircle2, ShieldCheck, Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GameMark } from '@/components/domain/GameMark';
 import { useAddToVault } from '@/hooks/useApi';
-import { pricesApi } from '@/lib/api';
+import { pricesApi, describeIdentifiedBy } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { ScanResult } from '@/lib/api';
@@ -34,7 +34,8 @@ const GRADES = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5'] as const;
 export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanResultSheetProps) {
   const navigate = useNavigate();
   const addToVault = useAddToVault();
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const idInfo = describeIdentifiedBy(result.identifiedBy);
 
   // Recheck state — prefilled from AI, user-editable
   const [code, setCode] = useState(result.catalog?.code || result.card.code);
@@ -88,7 +89,7 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
       {
         onSuccess: () => {
           toast.success('Saved to your vault');
-          navigate({ to: '/vault' });
+          setStep(3);
         },
         onError: () => toast.error('Failed to save'),
       }
@@ -101,23 +102,53 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
         className="w-full sm:max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl bg-surface-light border border-border animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between bg-surface-light/95 backdrop-blur px-5 pt-4 pb-3 border-b border-border/50">
-          <div className="flex items-center gap-2">
-            {step === 2 && (
-              <button onClick={() => setStep(1)} className="rounded-lg p-1 -ml-1 hover:bg-surface-lighter" aria-label="Back">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-            )}
-            <Sparkles className="w-4 h-4 text-brand" />
-            <h2 className="font-bold">{step === 1 ? 'Confirm the card' : 'Market prices'}</h2>
+        {/* Header + stepper */}
+        <div className="sticky top-0 z-10 bg-surface-light/95 backdrop-blur px-5 pt-4 pb-3 border-b border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {step === 2 && (
+                <button onClick={() => setStep(1)} className="rounded-lg p-1 -ml-1 hover:bg-surface-lighter" aria-label="Back">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              )}
+              <Sparkles className="w-4 h-4 text-brand" />
+              <h2 className="font-bold">
+                {step === 1 ? 'Confirm the card' : step === 2 ? 'Market prices' : 'Saved'}
+              </h2>
+              {result.cached && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-cyan/15 text-cyan text-[10px] font-bold px-2 py-0.5">
+                  <Zap className="w-3 h-3" />
+                  Instant
+                </span>
+              )}
+            </div>
+            <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-surface-lighter" aria-label="Close">
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-surface-lighter" aria-label="Close">
-            <X className="w-4 h-4" />
-          </button>
+          {/* Step indicator */}
+          <div className="flex items-center gap-1.5 mt-3">
+            {['Confirm', 'Prices', 'Saved'].map((label, i) => {
+              const n = i + 1;
+              const active = step === n;
+              const done = step > n;
+              return (
+                <div key={label} className="flex items-center gap-1.5">
+                  <span className={cn(
+                    'w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center',
+                    done ? 'bg-success text-white' : active ? 'bg-brand text-white' : 'bg-surface-lighter text-muted-foreground'
+                  )}>
+                    {done ? <CheckCircle2 className="w-3 h-3" /> : n}
+                  </span>
+                  <span className={cn('text-[10px]', active ? 'text-foreground font-medium' : 'text-muted-foreground')}>{label}</span>
+                  {n < 3 && <div className="w-4 h-px bg-border" />}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {step === 1 ? (
+        {step === 1 && (
           /* ─── STEP 1: Recheck — user verifies/corrects the identification ─── */
           <div className="p-5 space-y-4">
             <div className="flex gap-4">
@@ -126,10 +157,17 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                 <img src={imagePreview} alt="Your card" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs">
+                <div className="flex items-center gap-1.5 flex-wrap text-xs">
                   <BadgeCheck className={cn('w-3.5 h-3.5', confidence >= 90 ? 'text-success' : confidence >= 70 ? 'text-warning' : 'text-pldown')} />
                   <span className={cn(confidence >= 90 ? 'text-success' : confidence >= 70 ? 'text-warning' : 'text-pldown')}>
-                    {confidence}% confidence
+                    {confidence}%
+                  </span>
+                  <span className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium',
+                    idInfo.verified ? 'bg-success/10 text-success' : 'bg-surface-lighter text-muted-foreground'
+                  )}>
+                    {idInfo.verified && <ShieldCheck className="w-3 h-3" />}
+                    {idInfo.label}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">Check the details below — correct anything that looks off.</p>
@@ -181,7 +219,9 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               Looks right — see prices
             </Button>
           </div>
-        ) : (
+        )}
+
+        {step === 2 && (
           /* ─── STEP 2: Market prices per marketplace ─── */
           <div className="p-5 space-y-4">
             {/* Confirmed identity strip */}
@@ -303,6 +343,31 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               <Button variant="outline" className="border-border h-11" onClick={onClose}>
                 <RotateCcw className="w-4 h-4 mr-1.5" />
                 Scan again
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── STEP 3: Saved — journey completion ─── */}
+        {step === 3 && (
+          <div className="p-6 flex flex-col items-center text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-success/15 flex items-center justify-center">
+              <CheckCircle2 className="w-7 h-7 text-success" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">{name}</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">is now in your vault</p>
+            </div>
+            <div className="w-24 aspect-[63/88] rounded-xl overflow-hidden bg-surface-lighter">
+              <img src={imagePreview} alt={name} className="w-full h-full object-cover" />
+            </div>
+            <div className="w-full flex gap-2.5 pt-1">
+              <Button className="flex-1 bg-brand hover:bg-brand-light h-11" onClick={() => navigate({ to: '/vault' })}>
+                View in vault
+              </Button>
+              <Button variant="outline" className="border-border h-11" onClick={onClose}>
+                <RotateCcw className="w-4 h-4 mr-1.5" />
+                Scan next
               </Button>
             </div>
           </div>

@@ -5,6 +5,7 @@ export interface Env {
   JWT_SECRET: string;
   IMAGES: R2Bucket;
   ANTHROPIC_API_KEY: string;
+  GOOGLE_VISION_API_KEY: string;
   EBAY_APP_ID: string;
   EBAY_CERT_ID: string;
 }
