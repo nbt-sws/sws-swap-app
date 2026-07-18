@@ -24,14 +24,15 @@ interface ScanResultSheetProps {
   onClose: () => void;
 }
 
-const GRADES = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5', 'CGC 9.5'] as const;
+/** Grade tiers with live eBay data — tile accents adapted from the old CurrentValueHero. */
+const TIER_TILES = [
+  { grade: 'Raw', key: 'raw', label: 'RAW', accent: 'text-brand', bar: 'bg-brand', ring: 'border-brand' },
+  { grade: 'PSA 10', key: 'psa10', label: 'PSA 10', accent: 'text-cyan', bar: 'bg-cyan', ring: 'border-cyan' },
+  { grade: 'PSA 9', key: 'psa9', label: 'PSA 9', accent: 'text-periwinkle', bar: 'bg-periwinkle', ring: 'border-periwinkle' },
+] as const;
 
-/** Map a grade chip to its eBay tier key (only tiers the backend searches). */
-const GRADE_TIER: Record<string, 'raw' | 'psa10' | 'psa9'> = {
-  Raw: 'raw',
-  'PSA 10': 'psa10',
-  'PSA 9': 'psa9',
-};
+/** Grades without a live tier — plain chips. */
+const OTHER_GRADES = ['BGS 9.5', 'CGC 9.5'] as const;
 
 /**
  * Post-scan flow (adapted from sws-scanner-app v1):
@@ -223,6 +224,26 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               </div>
             </div>
 
+            {/* AI ↔ image-search disagreement — offer the vision code as a one-tap fix */}
+            {result.crossCheck?.visionCode && !result.crossCheck?.agreed &&
+              result.crossCheck.visionCode !== result.card.code && (
+              <div className="rounded-xl border border-warning/40 bg-warning/5 p-3 space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-warning">AI and image search disagree</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Card recognition picked <span className="font-mono text-foreground">{result.card.code}</span>,
+                  but reverse-image search found <span className="font-mono text-cyan">{result.crossCheck.visionCode}</span>.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 border-warning/40 text-warning hover:bg-warning/10"
+                  onClick={() => setCode(result.crossCheck!.visionCode!)}
+                >
+                  Use {result.crossCheck.visionCode} instead
+                </Button>
+              </div>
+            )}
+
             {/* Not this card? — near matches from catalog + AI candidates */}
             {alternatives.length > 0 && (
               <div className="space-y-2">
@@ -272,30 +293,60 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
               </div>
             )}
 
-            {/* Catalog variants (same code, different parallel/rarity) */}
+            {/* Catalog variants (same code, different parallel/rarity) — image grid like the old VariantPicker */}
             {variants.length > 1 && (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                   <Pencil className="w-3 h-3" />
-                  Variants in catalog — tap to use:
+                  {variants.length} printings in catalog — tap the one that matches your card:
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {variants.map((v, i) => (
-                    <button
-                      key={`${v.code}-${v.rarity}-${i}`}
-                      type="button"
-                      onClick={() => applyVariant(v)}
-                      className={cn(
-                        'px-2.5 py-1.5 rounded-lg text-xs border transition-all',
-                        code === v.code && rarity === v.rarity
-                          ? 'border-brand bg-brand/10 text-brand'
-                          : 'border-border bg-surface text-muted-foreground hover:text-foreground'
-                      )}
-                    >
-                      {v.nameEn}{v.rarity ? ` · ${v.rarity}` : ''}
-                    </button>
-                  ))}
-                </div>
+                {variants.some((v) => v.imageUrl) ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {variants.map((v, i) => {
+                      const active = code === v.code && rarity === v.rarity;
+                      return (
+                        <button
+                          key={`${v.code}-${v.rarity}-${i}`}
+                          type="button"
+                          onClick={() => applyVariant(v)}
+                          className={cn(
+                            'rounded-xl border p-1.5 transition-all flex flex-col items-center gap-1',
+                            active ? 'border-brand bg-brand/10' : 'border-border bg-surface hover:bg-surface-lighter'
+                          )}
+                        >
+                          <div className="w-full aspect-[63/88] rounded-lg overflow-hidden bg-surface-lighter flex items-center justify-center">
+                            {v.imageUrl ? (
+                              <img src={v.imageUrl} alt={v.rarity || v.code} className="w-full h-full object-contain" loading="lazy" />
+                            ) : (
+                              <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className={cn('text-[10px] font-mono font-semibold', active ? 'text-brand' : 'text-muted-foreground')}>
+                            {v.rarity || '—'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {variants.map((v, i) => (
+                      <button
+                        key={`${v.code}-${v.rarity}-${i}`}
+                        type="button"
+                        onClick={() => applyVariant(v)}
+                        className={cn(
+                          'px-2.5 py-1.5 rounded-lg text-xs border transition-all',
+                          code === v.code && rarity === v.rarity
+                            ? 'border-brand bg-brand/10 text-brand'
+                            : 'border-border bg-surface text-muted-foreground hover:text-foreground'
+                        )}
+                      >
+                        {v.nameEn}{v.rarity ? ` · ${v.rarity}` : ''}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -350,6 +401,80 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                 <p className="text-sm font-semibold truncate">{name}</p>
               </div>
               {rarity && <Badge variant="outline" className="text-[10px] shrink-0">{rarity}</Badge>}
+            </div>
+
+            {/* Current value by grade — tier tiles adapted from the old CurrentValueHero */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Current value · by grade</p>
+              <div className="grid grid-cols-3 gap-2">
+                {TIER_TILES.map((t) => {
+                  const tier = prices?.tiers?.[t.key];
+                  const active = grade === t.grade;
+                  const thb = tier?.thb;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setGrade(t.grade)}
+                      className={cn(
+                        'relative min-w-0 rounded-xl border bg-surface px-2.5 pb-2.5 pt-3 text-left overflow-hidden transition-all',
+                        active ? cn(t.ring, 'bg-surface-lighter') : 'border-border hover:bg-surface-lighter/60'
+                      )}
+                    >
+                      <span className={cn('absolute top-0 inset-x-0 h-0.5', t.bar)} />
+                      <span className="block text-[9px] font-bold tracking-wider text-muted-foreground">{t.label}</span>
+                      {pricesLoading ? (
+                        <span className="block h-6 w-4/5 mt-1.5 rounded shimmer bg-surface-lighter" />
+                      ) : thb ? (
+                        <>
+                          <span className={cn('block text-base font-bold font-mono leading-tight mt-1 truncate', t.accent)}>
+                            ฿{thb.median.toLocaleString()}
+                          </span>
+                          <span className="block text-[9px] font-mono text-muted-foreground mt-0.5 truncate">
+                            median · {tier!.count} listings
+                          </span>
+                          {thb.max > thb.min && (
+                            <span className="block mt-2">
+                              <span className="relative block h-1 rounded-full bg-surface-lighter">
+                                <span className={cn('absolute inset-0 rounded-full opacity-40', t.bar)} />
+                                <span
+                                  className="absolute -top-0.5 -bottom-0.5 w-0.5 rounded-full bg-foreground"
+                                  style={{ left: `${Math.min(100, Math.max(0, ((thb.median - thb.min) / (thb.max - thb.min)) * 100))}%` }}
+                                />
+                              </span>
+                              <span className="flex justify-between mt-1 text-[8px] font-mono text-muted-foreground">
+                                <span>฿{thb.min.toLocaleString()}</span>
+                                <span>฿{thb.max.toLocaleString()}</span>
+                              </span>
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="block text-[10px] text-muted-foreground mt-2 pb-1">No sales found</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Other conditions without live tier data */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] text-muted-foreground mr-0.5">Other:</span>
+                {OTHER_GRADES.map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGrade(g)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all',
+                      grade === g
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-border bg-surface text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {pricesLoading ? (
@@ -422,56 +547,33 @@ export function ScanResultSheet({ result, imagePreview, game, onClose }: ScanRes
                     ) : (
                       <p className="text-xs text-muted-foreground">No eBay listings found for this card.</p>
                     )}
+                    {/* Outbound links — same fallback links the old scanner offered */}
+                    {(code || name) && (
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <a
+                          href={`https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent([code, name].filter(Boolean).join(' '))}&LH_Sold=1&LH_Complete=1`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-2 text-[11px] font-semibold uppercase tracking-wide text-cyan hover:bg-surface-lighter transition-colors"
+                        >
+                          Sold history
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <a
+                          href={`https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent([code, name].filter(Boolean).join(' '))}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-2 text-[11px] font-semibold uppercase tracking-wide text-brand hover:bg-surface-lighter transition-colors"
+                        >
+                          Current listings
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
             )}
-
-            {/* Grade picker — chips show the eBay median for that grade tier when known */}
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Condition — prices update per grade</p>
-              <div className="flex flex-wrap gap-1.5">
-                {GRADES.map((g) => {
-                  const tierKey = GRADE_TIER[g];
-                  const tier = tierKey ? prices?.tiers?.[tierKey] : undefined;
-                  const active = grade === g;
-                  return (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setGrade(g)}
-                      className={cn(
-                        'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex flex-col items-center gap-0.5 min-w-[72px]',
-                        active
-                          ? 'border-brand bg-brand/10 text-brand'
-                          : 'border-border bg-surface text-muted-foreground hover:text-foreground'
-                      )}
-                    >
-                      <span>{g}</span>
-                      {pricesLoading && tierKey ? (
-                        <span className="h-3 w-10 rounded shimmer bg-surface-lighter" />
-                      ) : tier?.thb ? (
-                        <span className={cn('text-[10px] font-mono', active ? 'text-brand' : 'text-muted-foreground')}>
-                          ฿{tier.thb.median.toLocaleString()}
-                        </span>
-                      ) : tierKey ? (
-                        <span className="text-[10px] text-muted-foreground/60">—</span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-              {(() => {
-                const tierKey = GRADE_TIER[grade];
-                const tier = tierKey ? prices?.tiers?.[tierKey] : undefined;
-                if (!tier?.thb) return null;
-                return (
-                  <p className="text-[11px] text-muted-foreground">
-                    eBay {grade}: ฿{tier.thb.min.toLocaleString()} – ฿{tier.thb.max.toLocaleString()} · median <span className="font-mono text-foreground">฿{tier.thb.median.toLocaleString()}</span> ({tier.count} listings)
-                  </p>
-                );
-              })()}
-            </div>
 
             <div className="flex gap-2.5 pt-1">
               <Button

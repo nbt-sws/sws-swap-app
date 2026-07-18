@@ -45,6 +45,13 @@ function median(values: number[]): number {
   return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2 * 100) / 100;
 }
 
+function quartile(sorted: number[], q: number): number {
+  const pos = (sorted.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  return sorted[base + 1] !== undefined ? sorted[base] + rest * (sorted[base + 1] - sorted[base]) : sorted[base];
+}
+
 async function fetchUsdToThb(): Promise<number> {
   try {
     const resp = await fetch('https://api.frankfurter.app/latest?from=USD&to=THB');
@@ -67,11 +74,16 @@ async function ebaySearch(token: string, q: string, fx: number): Promise<any> {
     const json: any = await resp.json();
     const summaries: any[] = json.itemSummaries ?? [];
     let prices = summaries.map((it) => parseFloat(it.price?.value ?? '0')).filter((p) => p > 0);
-    // Outlier filter (adapted from the Go service): drop listings wildly off the median
-    // (e.g. $9,999 joke listings or $1 'read description' bait) before computing stats
-    if (prices.length >= 5) {
-      const med = median(prices);
-      const filtered = prices.filter((p) => p <= med * 5 && p >= med / 50);
+    // Outlier filter (IQR fence, adapted from the Go service): drop listings wildly off
+    // the pack — $9,999 joke listings, $1 'read description' bait — before computing stats
+    if (prices.length >= 6) {
+      const sorted = [...prices].sort((a, b) => a - b);
+      const q1 = quartile(sorted, 0.25);
+      const q3 = quartile(sorted, 0.75);
+      const iqr = q3 - q1;
+      const lo = Math.max(1, q1 - 1.5 * iqr);
+      const hi = q3 + 1.5 * iqr;
+      const filtered = prices.filter((p) => p >= lo && p <= hi);
       if (filtered.length >= 3) prices = filtered;
     }
     if (!prices.length) return { ...empty, items: summaries.slice(0, 3).map((it) => ({ title: it.title, price: parseFloat(it.price?.value ?? '0'), url: it.itemWebUrl, thumbnail: it.thumbnailImages?.[0]?.imageUrl })) };
