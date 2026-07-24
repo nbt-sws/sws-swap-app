@@ -87,12 +87,26 @@ function createWrappers(instance: typeof api) {
         const res = await instance.post(path, opts);
         return res.json();
       } catch (err) {
-        const error = err as { response?: { status: number } };
+        const error = err as { response?: Response };
+        let serverMessage: string | undefined;
+        if (error.response) {
+          try {
+            const body = await error.response.clone().json() as { message?: string; error?: string };
+            serverMessage = body.message || body.error;
+          } catch {
+            // Keep the original network error when the response is not JSON.
+          }
+        }
         if (error.response?.status === 401) {
           localStorage.removeItem('sws_access_token');
           window.location.href = '/login';
         }
         console.error(`[API POST Error] ${path}:`, err);
+        if (serverMessage) {
+          const enriched = new Error(serverMessage);
+          enriched.name = `ApiError${error.response?.status ? `_${error.response.status}` : ''}`;
+          throw enriched;
+        }
         throw err;
       }
     },

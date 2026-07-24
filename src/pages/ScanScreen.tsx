@@ -137,9 +137,21 @@ export function ScanScreen() {
         onError: (err: any) => {
           // User-cancelled scans abort the request — not an error worth toasting
           if (err?.name === 'AbortError') return;
-          toast.error(err?.message?.includes('unable to identify')
-            ? "We couldn't identify this card — try a clearer, well-lit photo"
-            : "The scan didn't go through — check your connection and try again.");
+          const message = String(err?.message ?? '').toLowerCase();
+          if (message.includes('unable to identify')) {
+            toast.error("We couldn't identify this card — try a clearer, well-lit photo");
+          } else if (message.includes('anthropic_api_key missing') || message.includes('not configured')) {
+            toast.error('AI scanning is not configured — the Anthropic API token is missing');
+          } else if (
+            message.includes('rate limit') || message.includes('quota') || message.includes('credit') ||
+            message.includes('insufficient') || message.includes('token') || message.includes('429')
+          ) {
+            toast.error('AI service limit reached — the AI token or quota may be exhausted');
+          } else if (err?.message && !message.includes('failed to fetch')) {
+            toast.error(`Scan failed: ${err.message}`);
+          } else {
+            toast.error("The scan didn't go through — check your connection and try again.");
+          }
         },
       }
     );

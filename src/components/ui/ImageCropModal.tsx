@@ -116,8 +116,8 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
         <div className={cropPreview ? 'relative rounded-xl border border-white/15 bg-white/5 p-2' : 'relative inline-block'}>
           <img ref={imgRef} src={cropPreview ?? src} alt={cropPreview ? 'Cropped image preview' : 'Crop preview'}
             className={cropPreview
-              ? 'block max-w-[calc(100vw-2rem)] max-h-[52dvh] sm:max-w-[min(82vw,420px)] sm:max-h-[58dvh] object-contain rounded-lg pointer-events-none select-none'
-              : 'block max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-180px)] sm:max-w-[88vw] sm:max-h-[calc(100dvh-120px)] object-contain pointer-events-none select-none'}
+              ? 'block max-w-[calc(100vw-4rem)] max-h-[40dvh] sm:max-w-[min(76vw,380px)] sm:max-h-[46dvh] object-contain rounded-lg pointer-events-none select-none'
+              : 'block max-w-[calc(100vw-4rem)] max-h-[40dvh] sm:max-w-[78vw] sm:max-h-[46dvh] object-contain pointer-events-none select-none'}
             draggable={false} />
 
           {!cropPreview && sel && sel.w > 0 && sel.h > 0 && (
