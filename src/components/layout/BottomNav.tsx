@@ -1,6 +1,6 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Home, ShoppingBag, Package, User, Scan } from 'lucide-react';
+import { Home, ShoppingBag, Package, User, Scan, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
@@ -29,6 +29,7 @@ const LEFT_TABS: NavTab[] = [
 ];
 
 const RIGHT_TABS: NavTab[] = [
+  { to: '/cards', label: 'nav.cards', icon: Layers, accent: 'cyan' },
   { to: '/vault', label: 'nav.vault', icon: Package, accent: 'peri' },
   { to: '/profile', label: 'nav.profile', icon: User, accent: 'brand' },
 ];
@@ -74,7 +75,7 @@ export function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/90 backdrop-blur-md border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
-      <div className="relative grid h-full min-w-0 grid-cols-5 items-center px-2">
+      <div className="relative grid h-full min-w-0 grid-cols-6 items-center px-2">
         {LEFT_TABS.map(renderTab)}
 
         {/* Scan FAB */}

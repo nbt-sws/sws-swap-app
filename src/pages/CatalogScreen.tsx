@@ -101,6 +101,18 @@ export function CatalogScreen() {
                 <Skeleton key={i} className="h-14 w-full rounded-none" />
               ))}
             </div>
+          ) : games.isError ? (
+            <Empty className="border border-border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Database />
+                </EmptyMedia>
+                <EmptyTitle>Unable to load catalog</EmptyTitle>
+                <EmptyDescription>
+                  The catalog backend did not respond. Check that the API server is running and your session is authenticated.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : gameRows.length === 0 ? (
             <Empty className="border border-border">
               <EmptyHeader>

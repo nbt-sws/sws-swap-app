@@ -2,10 +2,8 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { withTenant } from '../db';
 import type { Env } from '../db';
-import { authMiddleware } from '../middleware/auth';
 
 export const catalogRoutes = new Hono<{ Bindings: Env }>();
-catalogRoutes.use('*', authMiddleware);
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

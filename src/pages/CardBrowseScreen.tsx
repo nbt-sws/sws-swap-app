@@ -175,6 +175,23 @@ export function CardBrowseScreen() {
               </div>
             ))}
           </div>
+        ) : cardsQuery.isError ? (
+          <Empty className="border border-border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Search />
+              </EmptyMedia>
+              <EmptyTitle>Unable to load cards</EmptyTitle>
+              <EmptyDescription>
+                The catalog API call failed. Check that the API server is running and try refreshing.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="outline" onClick={() => cardsQuery.refetch()} className="rounded-full border-border">
+                Retry
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : cards.length === 0 ? (
           <Empty className="border border-border">
             <EmptyHeader>

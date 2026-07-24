@@ -26,7 +26,18 @@ import type {
 } from '@/types/api';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1').replace(/\/?$/, '/');
+
+function normalizeBaseUrl(url: string | undefined): string {
+  return (url ?? '').trim().replace(/\/+$/, '');
+}
+
+const API_BASE_URL = `${normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1')}/`;
+const SCANNER_API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_SCANNER_API_BASE_URL);
+const USE_DIRECT_SCANNER_API = SCANNER_API_BASE_URL.length > 0;
+const SCANNER_API_PREFIX = `${USE_DIRECT_SCANNER_API ? SCANNER_API_BASE_URL : normalizeBaseUrl(API_BASE_URL)}/`;
+const SCANNER_SERVICE_ROOT = USE_DIRECT_SCANNER_API
+  ? SCANNER_API_BASE_URL.replace(/\/v1$/i, '')
+  : '';
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('sws_access_token');
@@ -53,6 +64,7 @@ function createKy(prefix: string) {
 
 // Single API instance — all routes go through the same Worker
 export const api = createKy(API_BASE_URL);
+const scannerServiceApi = createKy(SCANNER_API_PREFIX);
 
 // ─── HTTP Wrappers ──────────────────────────────────────────────────
 
@@ -159,6 +171,7 @@ function createWrappers(instance: typeof api) {
 }
 
 export const { get: apiGet, post: apiPost, put: apiPut, delete: apiDelete, patch: apiPatch } = createWrappers(api);
+const { get: scannerGet, post: scannerPost } = createWrappers(scannerServiceApi);
 
 // ─── Domain APIs (aligned with real backend contract) ─────────────────
 
@@ -599,6 +612,96 @@ export interface ScanResult {
   imageOptions?: ScanImageOption[];
 }
 
+function toRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function toStringValue(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+function absolutizeScannerUrl(url: unknown): string | undefined {
+  const raw = toStringValue(url);
+  if (!raw) return undefined;
+  if (!USE_DIRECT_SCANNER_API || !SCANNER_SERVICE_ROOT) return raw;
+  try {
+    return new URL(raw, `${SCANNER_SERVICE_ROOT}/`).toString();
+  } catch {
+    return raw;
+  }
+}
+
+function normalizeDirectScanResult(payload: unknown): ScanResult {
+  const data = toRecord(payload) ?? {};
+  const card = toRecord(data.card);
+  const verified = toRecord(data.verified);
+  const catalogImage =
+    absolutizeScannerUrl(verified?.watermarkedSampleUrl) ??
+    absolutizeScannerUrl(verified?.sampleImageUrl) ??
+    absolutizeScannerUrl(verified?.officialImageUrl);
+
+  const imageOptions: ScanImageOption[] = [
+    ...(absolutizeScannerUrl(data.imageUrl)
+      ? [{ url: absolutizeScannerUrl(data.imageUrl) as string, label: 'your-photo' }]
+      : []),
+    ...(absolutizeScannerUrl(verified?.watermarkedSampleUrl)
+      ? [{ url: absolutizeScannerUrl(verified?.watermarkedSampleUrl) as string, label: 'official-sample' }]
+      : []),
+    ...(absolutizeScannerUrl(verified?.sampleImageUrl)
+      ? [{ url: absolutizeScannerUrl(verified?.sampleImageUrl) as string, label: 'official-sample' }]
+      : []),
+    ...(absolutizeScannerUrl(verified?.officialImageUrl)
+      ? [{ url: absolutizeScannerUrl(verified?.officialImageUrl) as string, label: 'official' }]
+      : []),
+  ].filter((option, index, arr) => arr.findIndex((item) => item.url === option.url) === index);
+
+  return {
+    ok: data.ok !== false,
+    cached: Boolean(data.cached),
+    card: {
+      code: toStringValue(card?.code) ?? '',
+      nameEn: toStringValue(card?.nameEn) ?? '',
+      nameJp: toStringValue(card?.nameJp) ?? '',
+      rarity: toStringValue(card?.rarity) ?? '',
+      type: toStringValue(card?.type) ?? '',
+      promo: Boolean(card?.promo),
+      confidence: typeof card?.confidence === 'number' ? card.confidence : 0,
+      lang: toStringValue(card?.lang) ?? '',
+      reasoning: toStringValue(card?.reasoning) ?? '',
+      centering: null,
+    },
+    hash: toStringValue(data.hash) ?? '',
+    imageUrl: absolutizeScannerUrl(data.imageUrl) ?? '',
+    identifiedBy: toStringValue(data.identifiedBy) ?? 'ai-estimate',
+    crossCheck: toRecord(data.crossCheck)
+      ? {
+          agreed: Boolean(toRecord(data.crossCheck)?.agreed),
+          haikuCode: toStringValue(toRecord(data.crossCheck)?.haikuCode) ?? null,
+          visionCode: toStringValue(toRecord(data.crossCheck)?.visionCode) ?? null,
+          adopted: toStringValue(toRecord(data.crossCheck)?.adopted),
+        }
+      : undefined,
+    catalog: verified
+      ? {
+          code: toStringValue(card?.code) ?? '',
+          nameEn: toStringValue(card?.nameEn) ?? '',
+          nameJp: toStringValue(card?.nameJp),
+          rarity: toStringValue(card?.rarity),
+          type: toStringValue(card?.type),
+          language: toStringValue(card?.lang),
+          game: undefined,
+          imageUrl: catalogImage,
+          condition: undefined,
+        }
+      : null,
+    nearMatches: [],
+    candidates: [],
+    imageOptions,
+  };
+}
+
 export function describeIdentifiedBy(id: string): { label: string; verified: boolean } {
   switch (id) {
     case 'vision-cross-check':
@@ -613,10 +716,17 @@ export function describeIdentifiedBy(id: string): { label: string; verified: boo
 }
 
 export const scanApi = {
-  scan: (data: { image: string; tcg: string; lang: string; force?: boolean }, signal?: AbortSignal) =>
-    apiPost<ScanResult>('scan', { json: data, signal }),
+  scan: async (data: { image: string; tcg: string; lang: string; force?: boolean }, signal?: AbortSignal) => {
+    if (!USE_DIRECT_SCANNER_API) {
+      return apiPost<ScanResult>('scan', { json: data, signal });
+    }
+    const response = await scannerPost<unknown>('scan', { json: data, signal });
+    return normalizeDirectScanResult(response);
+  },
   contribute: (data: { code: string; game: string; lang: string; rarity?: string; nameEn?: string; imageUrl: string }) =>
-    apiPost<{ ok: boolean; sample: { id: string } }>('scan/contribute', { json: data }),
+    USE_DIRECT_SCANNER_API
+      ? scannerPost<{ ok: boolean; sample: { id: string } }>('contribute', { json: data })
+      : apiPost<{ ok: boolean; sample: { id: string } }>('scan/contribute', { json: data }),
 };
 
 export interface PriceTier {
@@ -747,15 +857,120 @@ export interface ScannerSampleCatalogs {
   catalogs: ScannerSampleCatalog[];
 }
 
+async function getDirectScannerHealth(): Promise<ScannerHealth> {
+  try {
+    const response = await fetch(`${SCANNER_SERVICE_ROOT}/readyz`, {
+      headers: {
+        ...getAuthHeaders(),
+        'X-Tenant-ID': import.meta.env.VITE_TENANT_ID || 'default',
+      },
+    });
+    return { ok: true, scanner: { configured: true, ready: response.ok } };
+  } catch {
+    return { ok: true, scanner: { configured: true, ready: false } };
+  }
+}
+
+async function getDirectScannerOpDetails(code: string): Promise<ScannerOpDetails> {
+  const response = await scannerGet<{ ok?: boolean; details?: Record<string, unknown> | null }>('op-details', { searchParams: { code } });
+  const details = toRecord(response?.details);
+  return {
+    ok: response?.ok !== false,
+    configured: true,
+    details: details
+      ? {
+          officialImageUrl: absolutizeScannerUrl(details.officialImageUrl ?? details.imageUrl),
+          officialName: toStringValue(details.officialName),
+          officialSetName: toStringValue(details.officialSetName),
+          officialReleaseDate: toStringValue(details.officialReleaseDate),
+          sampleImageUrl: absolutizeScannerUrl(details.sampleImageUrl),
+          watermarkedSampleUrl: absolutizeScannerUrl(details.watermarkedSampleUrl),
+        }
+      : null,
+  };
+}
+
+async function getDirectScannerVariants(code: string): Promise<ScannerVariants> {
+  const response = await scannerGet<{ ok?: boolean; variants?: Array<Record<string, unknown>> }>('op-variants', { searchParams: { code } });
+  return {
+    ok: response?.ok !== false,
+    configured: true,
+    variants: (response?.variants ?? []).map((variant) => ({
+      code: toStringValue(variant.label) ?? toStringValue(variant.code) ?? '',
+      name: toStringValue(variant.label) ?? toStringValue(variant.name) ?? '',
+      rarity: toStringValue(variant.rarity) ?? '',
+      imageUrl: absolutizeScannerUrl(variant.imageUrl) ?? null,
+      source: 'scanner' as const,
+    })),
+  };
+}
+
+async function getDirectSampleCatalogs(): Promise<ScannerSampleCatalogs> {
+  const [don, cnAnniv] = await Promise.all([
+    scannerGet<{ ok?: boolean; count?: number; items?: Array<Record<string, unknown>> }>('don-cards'),
+    scannerGet<{ ok?: boolean; count?: number; items?: Array<Record<string, unknown>> }>('cn-anniv-cards'),
+  ]);
+
+  const buildCatalog = (
+    id: ScannerSampleCatalog['id'],
+    title: string,
+    payload: { count?: number; items?: Array<Record<string, unknown>> } | null | undefined,
+  ): ScannerSampleCatalog | null => {
+    const items: ScannerSampleCatalogItem[] = (payload?.items ?? [])
+      .map((item) => {
+        const imageUrl = absolutizeScannerUrl(item.imageUrl);
+        if (!imageUrl) return null;
+        return {
+          id: toStringValue(item.id) ?? '',
+          imageUrl,
+          name: toStringValue(item.name) ?? toStringValue(item.synthCode),
+          rarity: toStringValue(item.rarity),
+          variant: toStringValue(item.variant),
+          setCode: toStringValue(item.setCode) ?? null,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => !!item);
+
+    if (!items.length) return null;
+    return {
+      id,
+      title,
+      count: typeof payload?.count === 'number' ? payload.count : items.length,
+      items,
+    };
+  };
+
+  return {
+    ok: true,
+    configured: true,
+    catalogs: [
+      buildCatalog('don', 'DON!! Official Samples', don),
+      buildCatalog('cn-anniv', 'CN 1st Anniversary Samples', cnAnniv),
+    ].filter((catalog): catalog is ScannerSampleCatalog => !!catalog),
+  };
+}
+
 export const scannerApi = {
-  health: () => apiGet<ScannerHealth>('scanner/health'),
+  health: () => (USE_DIRECT_SCANNER_API ? getDirectScannerHealth() : apiGet<ScannerHealth>('scanner/health')),
   opDetails: (code: string) =>
-    apiGet<ScannerOpDetails>('scanner/op-details', { searchParams: { code } }),
+    (USE_DIRECT_SCANNER_API
+      ? getDirectScannerOpDetails(code)
+      : apiGet<ScannerOpDetails>('scanner/op-details', { searchParams: { code } })),
   opVariants: (code: string) =>
-    apiGet<ScannerVariants>('scanner/op-variants', { searchParams: { code } }),
-  sampleCatalogs: () => apiGet<ScannerSampleCatalogs>('scanner/sample-catalogs'),
-  visualMatch: (payload: { image: string; candidates: { id: string; imageUrl: string }[]; haikuConfirm?: boolean; haikuConfirmTopN?: number }) =>
-    apiPost<VisualMatchResponse>('scanner/visual-match', { json: payload }),
+    (USE_DIRECT_SCANNER_API
+      ? getDirectScannerVariants(code)
+      : apiGet<ScannerVariants>('scanner/op-variants', { searchParams: { code } })),
+  sampleCatalogs: () =>
+    (USE_DIRECT_SCANNER_API
+      ? getDirectSampleCatalogs()
+      : apiGet<ScannerSampleCatalogs>('scanner/sample-catalogs')),
+  visualMatch: async (payload: { image: string; candidates: { id: string; imageUrl: string }[]; haikuConfirm?: boolean; haikuConfirmTopN?: number }) => {
+    if (!USE_DIRECT_SCANNER_API) {
+      return apiPost<VisualMatchResponse>('scanner/visual-match', { json: payload });
+    }
+    const result = await scannerPost<VisualMatchResult>('visual-match', { json: payload });
+    return { ok: true, configured: true, result };
+  },
 };
 
 // ─── Card catalog (public.cards) ─────────────────────────────────────
