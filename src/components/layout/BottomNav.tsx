@@ -74,11 +74,11 @@ export function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/90 backdrop-blur-md border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
-      <div className="relative grid h-full grid-cols-5 items-center px-2">
+      <div className="relative grid h-full min-w-0 grid-cols-5 items-center px-2">
         {LEFT_TABS.map(renderTab)}
 
         {/* Scan FAB */}
-        <Link to="/scan" className="relative z-0 flex h-full items-center justify-center -mt-5">
+        <Link to="/scan" className="relative z-0 flex h-full w-full items-center justify-center -mt-5">
           <motion.div
             whileTap={{ scale: 0.9 }}
             className="w-12 h-12 rounded-full bg-brand-gradient flex items-center justify-center shadow-glow"
