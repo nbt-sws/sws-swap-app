@@ -142,6 +142,12 @@ export function ScanScreen() {
             toast.error("We couldn't identify this card — try a clearer, well-lit photo");
           } else if (message.includes('anthropic_api_key missing') || message.includes('not configured')) {
             toast.error('AI scanning is not configured — the Anthropic API token is missing');
+          } else if (String(err?.name ?? '').includes('ApiError_502')) {
+            const detail = String(err?.message ?? 'The upstream AI service returned an invalid response');
+            toast.error('AI identification failed (502)', {
+              description: detail,
+              duration: 8000,
+            });
           } else if (
             message.includes('rate limit') || message.includes('quota') || message.includes('credit') ||
             message.includes('insufficient') || message.includes('token') || message.includes('429')

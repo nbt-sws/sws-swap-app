@@ -92,7 +92,7 @@ function createWrappers(instance: typeof api) {
         if (error.response) {
           try {
             const body = await error.response.clone().json() as { message?: string; error?: string };
-            serverMessage = body.message || body.error;
+            serverMessage = [body.error, body.message].filter(Boolean).join(': ') || undefined;
           } catch {
             // Keep the original network error when the response is not JSON.
           }

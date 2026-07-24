@@ -93,11 +93,14 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
   const sel = selection;
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col bg-black" style={{ touchAction: 'none' }}>
+    <div
+      className="fixed inset-0 z-[70] flex flex-col bg-black sm:inset-6 sm:m-auto sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)] sm:max-h-[900px] sm:max-w-5xl sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl"
+      style={{ touchAction: 'none' }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 shrink-0 bg-black/80 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button type="button" onClick={onCancel}
-          className="fixed top-[max(0.75rem,env(safe-area-inset-top))] left-3 z-[90] flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/75 text-white shadow-lg hover:bg-white/15 transition-colors"
+          className="absolute top-[max(0.75rem,env(safe-area-inset-top))] left-3 z-[90] flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/75 text-white shadow-lg hover:bg-white/15 transition-colors"
           aria-label="Cancel crop">
           <X className="w-5 h-5" />
         </button>
@@ -154,7 +157,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Footer */}
-      <div className="fixed inset-x-0 bottom-20 sm:bottom-6 z-[80] px-3 sm:px-4 py-3 text-center bg-black/95 backdrop-blur-sm border border-white/15 shadow-[0_8px_24px_rgba(0,0,0,0.45)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="absolute inset-x-0 bottom-20 sm:bottom-0 z-[80] px-3 sm:px-4 py-3 text-center bg-black/95 backdrop-blur-sm border border-white/15 shadow-[0_8px_24px_rgba(0,0,0,0.45)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {cropPreview ? (
           <div className="mx-auto flex w-full max-w-sm items-center justify-center gap-2">
             <Button type="button" variant="outline" size="sm" className="h-10 flex-1 border-white/20 text-white hover:bg-white/10" onClick={handleRedo}>
