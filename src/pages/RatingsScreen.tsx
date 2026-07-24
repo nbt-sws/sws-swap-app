@@ -13,7 +13,7 @@ export function RatingsScreen() {
   const navigate = useNavigate();
   const { submissionId } = useSearch({ from: '/ratings' });
   const { data: order, isLoading: orderLoading } = useServiceOrder(submissionId);
-  const { data: storeReviews } = useStoreReviews(order?.storeId);
+  const { data: storeReviewsEnvelope } = useStoreReviews(order?.storeId);
   const submitReview = useSubmitStoreReview();
 
   const [score, setScore] = useState(0);
@@ -194,7 +194,7 @@ export function RatingsScreen() {
         </div>
 
         {/* Public scorecard (live store review stats) */}
-        {storeReviews && storeReviews.count > 0 && (
+        {storeReviewsEnvelope && storeReviewsEnvelope.count > 0 && (
           <div>
             <div className="bg-pregrade/5 border border-pregrade/20 rounded-xl p-4">
               <p className="text-xs font-mono text-pregrade mb-2">
@@ -202,9 +202,9 @@ export function RatingsScreen() {
               </p>
               <div className="flex items-center gap-2 mb-1">
                 <Star className="w-4 h-4 text-pregrade fill-pregrade" />
-                <span className="font-bold">{storeReviews.average?.toFixed(1)}</span>
+                <span className="font-bold">{storeReviewsEnvelope.average?.toFixed(1)}</span>
                 <span className="text-xs text-muted-foreground">
-                  · {storeReviews.count} review{storeReviews.count === 1 ? '' : 's'}
+                  · {storeReviewsEnvelope.count} review{storeReviewsEnvelope.count === 1 ? '' : 's'}
                 </span>
               </div>
             </div>

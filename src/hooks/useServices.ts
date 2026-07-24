@@ -130,16 +130,23 @@ export function useUpdateServiceOrder() {
 
 // ─── Store reviews (rating a service = reviewing the provider's store) ──
 
+type StoreReviewsEnvelope = {
+  reviews: StoreReview[];
+  count: number;
+  average: number | null;
+};
+
 export function useStoreReviews(storeId?: string) {
-  return useQuery({
+  return useQuery<StoreReviewsEnvelope>({
     queryKey: ['storeReviews', storeId],
     queryFn: async () => {
-      if (!storeId) return { reviews: [] as StoreReview[], count: 0, average: null as number | null };
+      if (!storeId) return { reviews: [], count: 0, average: null };
       const res = await storesApi.getReviews(storeId);
+      const reviews = (Array.isArray(res.reviews) ? res.reviews : []) as StoreReview[];
       return {
-        reviews: res.reviews as StoreReview[],
-        count: res.count,
-        average: res.average,
+        reviews,
+        count: typeof res.count === 'number' ? res.count : reviews.length,
+        average: typeof res.average === 'number' ? res.average : null,
       };
     },
     enabled: !!storeId,
@@ -154,6 +161,7 @@ export function useSubmitStoreReview() {
       storesApi.submitReview(storeId, { rating, comment }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['storeReviews', variables.storeId] });
+      queryClient.invalidateQueries({ queryKey: ['storeProfile', variables.storeId] });
     },
   });
 }

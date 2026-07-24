@@ -8,11 +8,10 @@ import {
   useUnfollowSeller,
   useStoreProfile,
   useStoreGroups,
-  useStoreReviews,
   useSubmitStoreReview,
 } from '@/hooks/useApi';
 import { toast } from 'sonner';
-import { useServiceProviders } from '@/hooks/useServices';
+import { useServiceProviders, useStoreReviews } from '@/hooks/useServices';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,10 +48,16 @@ export function SellerStoreScreen() {
   const { sellerId } = useParams({ from: '/seller/$sellerId' });
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { data: listings, isLoading: listingsLoading } = usePublicSellerListings(sellerId);
+  const { data: listings = [], isLoading: listingsLoading } = usePublicSellerListings(sellerId);
   const { data: profile, isLoading: profileLoading } = useStoreProfile(sellerId);
-  const { data: groups } = useStoreGroups(sellerId);
-  const { data: followedIds } = useFollowedSellers();
+  const { data: groups = [] } = useStoreGroups(sellerId);
+  const { data: followedIds = [] } = useFollowedSellers();
+  const { data: reviewsEnvelope } = useStoreReviews(sellerId);
+  const reviews = reviewsEnvelope?.reviews ?? [];
+  const reviewCount = reviewsEnvelope?.count ?? reviews.length;
+  const averageReview = reviewCount > 0 && typeof reviewsEnvelope?.average === 'number'
+    ? reviewsEnvelope.average
+    : (reviewCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount : 0);
   const follow = useFollowSeller();
   const unfollow = useUnfollowSeller();
   const [justFollowed, setJustFollowed] = useState(false);
@@ -106,15 +111,10 @@ export function SellerStoreScreen() {
     return new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   }, [profile]);
 
-  const { data: providers } = useServiceProviders();
-  const storeProviders = providers?.filter((p) => p.storeId === sellerId && p.enabled) ?? [];
+  const { data: providers = [] } = useServiceProviders();
+  const storeProviders = (providers as ServiceProvider[]).filter((p) => p.storeId === sellerId && p.enabled) ?? [];
 
-  const { data: reviews } = useStoreReviews(sellerId);
   const featuredListings = activeListings.filter((l) => l.isFeatured).slice(0, 6);
-  const reviewCount = reviews?.length ?? 0;
-  const averageReview = reviewCount > 0
-    ? reviews!.reduce((sum, r) => sum + r.rating, 0) / reviewCount
-    : 0;
 
   const handleShare = () => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -172,6 +172,11 @@ export function SellerStoreScreen() {
       follow.mutate(sellerId);
       setJustFollowed(true);
     }
+  };
+
+  const safeProviderPackages = (provider: ServiceProvider) => {
+    if (Array.isArray(provider.packages)) return provider.packages;
+    return [];
   };
 
   return (
