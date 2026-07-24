@@ -174,10 +174,10 @@ export function SellerStoreScreen() {
     }
   };
 
-  const safeProviderPackages = (provider: ServiceProvider) => {
-    if (Array.isArray(provider.packages)) return provider.packages;
-    return [];
-  };
+  // const safeProviderPackages = (provider: ServiceProvider) => {
+  //  if (Array.isArray(provider.packages)) return provider.packages;
+  //  return [];
+ // };
 
   return (
     <PageContainer className="py-6">
