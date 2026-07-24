@@ -20,14 +20,37 @@ import { catalogRoutes } from './routes/catalog';
 
 const app = new Hono<{ Bindings: Env }>();
 
+// Helper to parse CORS origins from environment variable
+function getCorsOrigins(env: Env): string | string[] {
+  const envVar = env.CORS_ALLOWED_ORIGINS;
+  
+  // Default origins (development fallbacks)
+  const defaultOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001', 'https://swibswap.app', 'https://www.swibswap.app', 'https://*.vercel.app', 'https://sws-demo-nine.vercel.app'];
+  
+  if (!envVar || envVar.trim() === '') {
+    // Empty + non-prod = allow all
+    if (env.ENVIRONMENT !== 'production') {
+      return '*';
+    }
+    // In production with empty CORS_ALLOWED_ORIGINS, use defaults
+    return defaultOrigins;
+  }
+  
+  // Parse comma-separated origins
+  return envVar.split(',').map(o => o.trim()).filter(o => o.length > 0);
+}
+
 // Global middleware
 app.use('*', logger());
-app.use('*', cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001', 'https://swibswap.app', 'https://www.swibswap.app', 'https://*.vercel.app', 'https://sws-demo-nine.vercel.app'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID'],
-  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  credentials: true,
-}));
+app.use('*', (c, next) => {
+  const origins = getCorsOrigins(c.env);
+  return cors({
+    origin: origins,
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID'],
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  })(c, next);
+});
 app.use('*', tenantMiddleware);
 
 // Health check

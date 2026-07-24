@@ -10,6 +10,8 @@ export interface Env {
   EBAY_CERT_ID: string;
   /** Base URL of the sws-scanner-service (e.g. http://localhost:8088). Optional — scanner features degrade gracefully when unset. */
   SCANNER_SERVICE_URL?: string;
+  /** Comma-separated list of allowed CORS origins. Empty + non-prod = allow all. */
+  CORS_ALLOWED_ORIGINS?: string;
 }
 
 type DbClient = InstanceType<typeof Pool.prototype.connect>;
