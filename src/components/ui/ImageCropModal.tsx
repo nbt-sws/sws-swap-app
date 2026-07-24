@@ -97,7 +97,8 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       {/* Header */}
       <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 shrink-0 bg-black/80 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button type="button" onClick={onCancel}
-          className="p-2 rounded-full text-white hover:bg-white/10 transition-colors" aria-label="Cancel crop">
+          className="fixed top-[max(0.75rem,env(safe-area-inset-top))] left-3 z-[90] flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/75 text-white shadow-lg hover:bg-white/15 transition-colors"
+          aria-label="Cancel crop">
           <X className="w-5 h-5" />
         </button>
         <p className="min-w-0 text-center text-xs sm:text-sm text-white/80 font-medium select-none truncate">
@@ -107,7 +108,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Image + selection overlay */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden select-none px-4 pb-24 sm:pb-20"
+      <div className="flex-1 flex items-center justify-center overflow-hidden select-none px-4 pb-32 sm:pb-24"
         onPointerDown={cropPreview ? undefined : onPointerDown}
         onPointerMove={cropPreview ? undefined : onPointerMove}
         onPointerUp={cropPreview ? undefined : onPointerUp}
@@ -153,7 +154,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Footer */}
-      <div className="fixed inset-x-0 bottom-0 z-20 px-3 sm:px-4 py-3 text-center bg-black/95 backdrop-blur-sm border-t border-white/10 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="fixed inset-x-0 bottom-20 sm:bottom-6 z-[80] px-3 sm:px-4 py-3 text-center bg-black/95 backdrop-blur-sm border border-white/15 shadow-[0_8px_24px_rgba(0,0,0,0.45)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {cropPreview ? (
           <div className="mx-auto flex w-full max-w-sm items-center justify-center gap-2">
             <Button type="button" variant="outline" size="sm" className="h-10 flex-1 border-white/20 text-white hover:bg-white/10" onClick={handleRedo}>
