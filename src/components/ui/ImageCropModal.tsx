@@ -107,7 +107,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Image + selection overlay */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden select-none px-4"
+      <div className="flex-1 flex items-center justify-center overflow-hidden select-none px-4 pb-24 sm:pb-20"
         onPointerDown={cropPreview ? undefined : onPointerDown}
         onPointerMove={cropPreview ? undefined : onPointerMove}
         onPointerUp={cropPreview ? undefined : onPointerUp}
@@ -153,7 +153,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 px-3 sm:px-4 py-3 shrink-0 text-center bg-black/80 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="fixed inset-x-0 bottom-0 z-20 px-3 sm:px-4 py-3 text-center bg-black/95 backdrop-blur-sm border-t border-white/10 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {cropPreview ? (
           <div className="mx-auto flex w-full max-w-sm items-center justify-center gap-2">
             <Button type="button" variant="outline" size="sm" className="h-10 flex-1 border-white/20 text-white hover:bg-white/10" onClick={handleRedo}>
