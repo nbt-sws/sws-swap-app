@@ -17,6 +17,11 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        // 8-bit status badge (DESIGN.md §7) — composes the .pxl-chip look
+        // (Silkscreen, notched corners). Add pxl-chip--brand / --cyan /
+        // --peri via className for category meaning. Always with text.
+        pixel:
+          "pxl-chip rounded-[2px] text-[10px] font-normal tracking-[0.02em] uppercase",
       },
     },
     defaultVariants: {

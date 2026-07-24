@@ -36,6 +36,16 @@ export interface VaultItem {
   images?: string[];
 }
 
+export type VaultFilter =
+  | 'ALL'
+  | 'AVAILABLE'
+  | 'VAULT_HELD'
+  | 'LISTED'
+  | 'IN_TRANSIT'
+  | 'REDEEMING'
+  | 'COMPLETED'
+  | 'LOCKED';
+
 export interface MarketListing {
   id: string;
   card: Card;

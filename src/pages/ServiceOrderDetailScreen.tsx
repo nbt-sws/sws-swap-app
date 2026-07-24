@@ -13,6 +13,7 @@ import {
   Truck,
   User,
   Hash,
+  Star,
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -254,6 +255,32 @@ export function ServiceOrderDetailScreen() {
           </div>
         )}
       </motion.div>
+
+      {order.status === 'COMPLETED' && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-surface-light border border-border rounded-xl p-5 mb-4"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-surface">
+                <Star className="w-4 h-4 text-pregrade" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">How was {order.providerName}?</p>
+                <p className="text-xs text-muted-foreground">Your rating is published on the store's public scorecard.</p>
+              </div>
+            </div>
+            <Button asChild size="sm" className="bg-brand hover:bg-brand-light shrink-0">
+              <Link to="/ratings" search={{ submissionId: order.id }}>
+                Rate this service
+              </Link>
+            </Button>
+          </div>
+        </motion.div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}

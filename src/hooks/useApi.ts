@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import {
   listingsApi, ordersApi, authApi, wishlistApi, vaultApi,
   auditApi, marketApi, offersApi, pricesApi, submissionsApi,
@@ -654,10 +656,53 @@ export function useCreateOffer() {
 
 export function useRespondOffer() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: ({ offerId, action }: { offerId: string; action: 'accept' | 'decline' }) =>
       action === 'accept' ? offersApi.accept(offerId) : offersApi.decline(offerId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['offers'] }),
+    onSuccess: (data, { action }) => {
+      queryClient.invalidateQueries({ queryKey: ['offers'] });
+      if (action === 'accept') {
+        toast.success('Offer accepted');
+        // [P0-1] Don't dead-end on accept: go to the created order when the
+        // backend returns an order id, otherwise land on the orders list.
+        // NOTE: current backend accept returns no order id, so /orders is used.
+        if (data.orderId) {
+          navigate({ to: '/orders/$orderId', params: { orderId: data.orderId } });
+        } else {
+          navigate({ to: '/orders' });
+        }
+      } else {
+        toast.success('Offer declined');
+      }
+    },
+    onError: () => toast.error('Failed to respond to offer'),
+  });
+}
+
+export function useCounterOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ offerId, offerPrice }: { offerId: string; offerPrice: number }) =>
+      offersApi.counter(offerId, offerPrice),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['offers'] });
+      toast.success('Counter offer sent');
+    },
+    onError: () => toast.error('Failed to send counter offer'),
+  });
+}
+
+export function useWithdrawOffer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (offerId: string) => offersApi.withdraw(offerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['offers'] });
+      toast.success('Offer withdrawn');
+    },
+    onError: () =>
+      toast.error('Could not withdraw offer — the server rejected the request'),
   });
 }
 

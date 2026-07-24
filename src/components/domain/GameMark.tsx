@@ -20,7 +20,10 @@ export function GameMark({ game, size = 'md' }: { game?: string; size?: 'sm' | '
         'inline-flex items-center justify-center rounded-md font-mono font-bold tracking-tight shrink-0',
         mark.className,
         size === 'sm' && 'text-[9px] px-1 py-0.5',
-        size === 'md' && 'text-[10px] px-1.5 py-0.5',
+        // md is the default, badge-like mark — it carries the 8-bit flavor
+        // via Silkscreen (10px is the pixel-font floor, see spec R7).
+        // sm stays mono (below the pixel floor); lg/xl stay mono (restraint).
+        size === 'md' && 'font-pixel text-[10px] px-1.5 py-0.5',
         size === 'lg' && 'text-sm px-2.5 py-1',
         size === 'xl' && 'text-3xl px-4 py-2 rounded-xl'
       )}

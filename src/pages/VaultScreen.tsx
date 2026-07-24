@@ -6,6 +6,7 @@ import { Route } from '@/routes/vault.index';
 import {
   useVault, useListingsBySeller, useDelistListing, useStoreProfile,
   useFollowedSellers, useFollowSeller, useUnfollowSeller, useDeleteVaultItem,
+  useOffers,
 } from '@/hooks/useApi';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth';
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { VaultCard } from '@/components/domain/VaultCard';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
@@ -25,11 +27,10 @@ import { cn, formatPriceChange } from '@/lib/utils';
 import { ListItemModal } from '@/components/vault/ListItemModal';
 import { BulkListModal } from '@/components/vault/BulkListModal';
 import { RegisterItemModal } from '@/components/vault/RegisterItemModal';
-import { type VaultFilter } from '@/components/vault/VaultFilterTabs';
 import { VaultProfileHeader, VaultProfileHeaderSkeleton } from '@/components/vault/VaultProfileHeader';
 import { VaultHistoryDialog } from '@/components/vault/VaultHistoryDialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { VaultItem, StoreProfile } from '@/types';
+import type { VaultItem, StoreProfile, VaultFilter } from '@/types';
 
 const VIEWS = [
   { id: 'grid', icon: LayoutGrid, labelKey: 'common.gridView' },
@@ -47,6 +48,12 @@ export function VaultScreen() {
   const { data: listings, refetch: refetchListings } = useListingsBySeller(userId);
   const delistListing = useDelistListing();
   const deleteVaultItem = useDeleteVaultItem();
+  // [P1-1] Real offers data for the vault "Offers" tab
+  const { data: offers, isLoading: offersLoading } = useOffers();
+  const incomingOffers = useMemo(
+    () => (offers ?? []).filter((o) => o.direction === 'INCOMING'),
+    [offers]
+  );
 
   const [activeFilter, setActiveFilter] = useState<VaultFilter>('ALL');
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -326,7 +333,7 @@ export function VaultScreen() {
               </div>
               <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Cards</p>
             </div>
-            <p className="text-sm font-bold font-mono">{cardCount}</p>
+            <p className="text-sm font-bold pxl-num">{cardCount}</p>
             <p className="text-xs text-muted-foreground">{heldCards.length} held</p>
           </div>
           <div className="surface-card rounded-xl p-3">
@@ -388,7 +395,7 @@ export function VaultScreen() {
           )}>
             <div className="surface-card rounded-xl p-3.5 space-y-2.5">
               <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Filter className="w-4 h-4 text-brand" />
+                <Filter className="w-4 h-4 text-periwinkle" />
                 Filters
               </div>
               <div className="space-y-0.5">
@@ -402,14 +409,14 @@ export function VaultScreen() {
                       className={cn(
                         'w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all',
                         active
-                          ? 'bg-brand/15 text-brand'
+                          ? 'bg-periwinkle/15 text-periwinkle'
                           : 'text-muted-foreground hover:text-foreground hover:bg-surface-lighter'
                       )}
                     >
                       <span>{t(`filters.${f.toLowerCase()}` as any)}</span>
                       <span className={cn(
-                        'min-w-[1.25rem] rounded-full px-1.5 py-0.5 text-[10px] text-center',
-                        active ? 'bg-brand/20 text-brand' : 'bg-surface-lighter text-muted-foreground'
+                        'pxl-num min-w-[1.25rem] rounded-full px-1.5 py-0.5 text-[11px] text-center',
+                        active ? 'bg-periwinkle/20 text-periwinkle' : 'bg-surface-lighter text-muted-foreground'
                       )}>
                         {count}
                       </span>
@@ -654,6 +661,64 @@ export function VaultScreen() {
                   <ServicesManager />
                 )}
               </div>
+            ) : activeTab === 'offers' ? (
+              // [P1-1] Real incoming offers on the user's listings (was a hardcoded empty state)
+              offersLoading ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ) : incomingOffers.length === 0 ? (
+                <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
+                  <EmptyMedia variant="icon">
+                    <ArrowUpRight className="w-8 h-8 text-brand" />
+                  </EmptyMedia>
+                  <EmptyHeader>
+                    <EmptyTitle>No offers yet</EmptyTitle>
+                    <EmptyDescription>Offers will appear here when someone makes a bid</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : (
+                <div className="space-y-3">
+                  {incomingOffers.slice(0, 5).map((offer) => (
+                    <Link
+                      key={offer.id}
+                      to="/offers"
+                      className="flex items-center gap-3 rounded-xl border border-border bg-surface-light p-3 hover:border-brand/40 transition"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-cyan/10 text-cyan flex items-center justify-center shrink-0">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm truncate">{offer.listing.card.nameEn}</p>
+                          <Badge
+                            className={cn(
+                              'text-xs shrink-0',
+                              offer.status === 'PENDING' && 'text-warning bg-warning/10',
+                              offer.status === 'ACCEPTED' && 'text-plup bg-plup/10',
+                              offer.status === 'DECLINED' && 'text-pldown bg-pldown/10',
+                              offer.status === 'COUNTERED' && 'text-cyan bg-cyan/10'
+                            )}
+                          >
+                            {offer.status.charAt(0) + offer.status.slice(1).toLowerCase()}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          ฿{offer.offerPrice.toLocaleString()} · From @{offer.fromUser.name}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                    </Link>
+                  ))}
+                  <Button asChild variant="outline" className="w-full border-border">
+                    <Link to="/offers">
+                      View all offers{incomingOffers.length > 5 ? ` (${incomingOffers.length})` : ''}
+                    </Link>
+                  </Button>
+                </div>
+              )
             ) : filteredCards.length === 0 ? (
               <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
                 <EmptyMedia variant="icon">
@@ -667,16 +732,6 @@ export function VaultScreen() {
                   <Package className="w-4 h-4" />
                   Add Item
                 </Button>
-              </Empty>
-            ) : activeTab === 'offers' ? (
-              <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-20">
-                <EmptyMedia variant="icon">
-                  <ArrowUpRight className="w-8 h-8 text-brand" />
-                </EmptyMedia>
-                <EmptyHeader>
-                  <EmptyTitle>No offers yet</EmptyTitle>
-                  <EmptyDescription>Offers will appear here when someone makes a bid</EmptyDescription>
-                </EmptyHeader>
               </Empty>
             ) : (
               <>
@@ -700,7 +755,7 @@ export function VaultScreen() {
                 )}
 
                 {activeView === 'list' && (
-                  <div className="space-y-3 stagger-fade-in">
+                  <div className="divide-y divide-border rounded-xl border border-border bg-surface-light overflow-hidden stagger-fade-in">
                     {filteredCards.map((item) => (
                       <VaultListRow
                         key={item.id}
@@ -759,14 +814,14 @@ export function VaultScreen() {
                       {item.card.imageUrl ? (
                         <img src={item.card.imageUrl} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[8px] font-mono text-muted-foreground">
+                        <div className="w-full h-full flex items-center justify-center text-[11px] font-mono text-muted-foreground">
                           {item.card.code}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium truncate group-hover:text-brand transition-colors">{item.card.nameEn}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">{item.card.code}</p>
+                      <p className="text-[11px] text-muted-foreground font-mono">{item.card.code}</p>
                     </div>
                     <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
                   </Link>
@@ -866,7 +921,7 @@ function VaultListRow({
     <Link
       to="/vault/items/$itemId"
       params={{ itemId: item.id }}
-      className="flex items-center gap-4 bg-surface-light rounded-xl p-3 border border-border hover:border-brand/30 transition group hover-lift"
+      className="flex items-center gap-4 p-3 transition-colors group hover:bg-surface-lighter/60"
     >
       {selecting && (
         <div onClick={(e) => { e.preventDefault(); onToggleSelect?.(item.id); }}>
@@ -884,7 +939,7 @@ function VaultListRow({
         <div className="flex items-center gap-2">
           <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>
           {isListed && (
-            <span className="text-xs font-mono bg-brand/10 text-brand px-1.5 rounded">Listed</span>
+            <Badge variant="pixel" className="pxl-chip--cyan">Listed</Badge>
           )}
         </div>
         <p className="text-sm font-semibold truncate">{item.card.nameEn}</p>

@@ -70,7 +70,7 @@ export function MarketStatsCards({ stats, className, compact, showCount }: Marke
               <Layers className="w-3.5 h-3.5 text-muted-foreground" />
             </div>
             <p className={cn('font-bold text-foreground font-mono', compact ? 'text-sm mt-0.5' : 'text-base mt-1')}>
-              {stats.count ?? 0} sales
+              <span className="pxl-num">{stats.count ?? 0}</span> sales
             </p>
           </div>
         </div>

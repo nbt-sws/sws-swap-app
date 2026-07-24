@@ -7,18 +7,34 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore, isAdmin } from '@/stores/auth';
 
+// R3 category wayfinding accents — shared active-state language with
+// BottomNav/TopBar: accent-tinted text + low-alpha background + a hard
+// square 2px indicator bar (left edge) in the category color.
+// Market family = cyan; brand is the default for neutral sections.
+const NAV_ACCENTS = {
+  brand: { bg: 'bg-brand/10', text: 'text-brand', bar: 'bg-brand' },
+  cyan: { bg: 'bg-cyan/10', text: 'text-cyan', bar: 'bg-cyan' },
+  peri: { bg: 'bg-periwinkle/10', text: 'text-periwinkle', bar: 'bg-periwinkle' },
+} as const;
+
+type NavAccent = keyof typeof NAV_ACCENTS;
+
 interface NavItem {
   to: string;
   label: string;
   icon: React.ElementType;
   requiresAuth?: boolean;
+  accent?: NavAccent;
 }
 
 // ── Public nav (guest + auth) ──
 const PUBLIC_NAV: NavItem[] = [
   { to: '/', label: 'nav.home', icon: Home },
-  { to: '/market', label: 'nav.market', icon: ShoppingBag },
-  { to: '/stores', label: 'nav.stores', icon: Store },
+  { to: '/market', label: 'nav.market', icon: ShoppingBag, accent: 'cyan' },
+  // Catalog = data surface → cyan wayfinding (spec R3). Auth-guarded route;
+  // guests are redirected to /login by requireAuth, same as other guards.
+  // { to: '/cards', label: 'nav.cards', icon: Layers, accent: 'cyan' },
+  { to: '/stores', label: 'nav.stores', icon: Store, accent: 'cyan' },
   { to: '/following', label: 'nav.following', icon: Users },
 ];
 
@@ -60,18 +76,23 @@ export function Sidebar() {
         {PUBLIC_NAV.map((item) => {
           const active = isActive(item.to);
           const Icon = item.icon;
+          const accent = NAV_ACCENTS[item.accent ?? 'brand'];
           return (
             <Link
               key={item.to}
               to={item.to}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-brand/10 text-brand'
+                  ? cn(accent.bg, accent.text)
                   : 'text-muted-foreground hover:text-foreground hover:bg-surface-light'
               )}
             >
-              <Icon className={cn('w-5 h-5', active ? 'text-brand' : 'text-muted-foreground')} />
+              {active && (
+                <span aria-hidden="true" className={cn('absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px]', accent.bar)} />
+              )}
+              <Icon className={cn('w-5 h-5', active ? accent.text : 'text-muted-foreground')} />
               {t(item.label)}
             </Link>
           );
@@ -85,28 +106,34 @@ export function Sidebar() {
           if (item.requiresAuth && !isAuthenticated) return null;
           const active = isActive(item.to);
           const Icon = item.icon;
+          const accent = NAV_ACCENTS[item.accent ?? 'brand'];
           return (
             <Link
               key={item.to}
               to={item.to}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-brand/10 text-brand'
+                  ? cn(accent.bg, accent.text)
                   : 'text-muted-foreground hover:text-foreground hover:bg-surface-light'
               )}
             >
-              <Icon className={cn('w-5 h-5', active ? 'text-brand' : 'text-muted-foreground')} />
+              {active && (
+                <span aria-hidden="true" className={cn('absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px]', accent.bar)} />
+              )}
+              <Icon className={cn('w-5 h-5', active ? accent.text : 'text-muted-foreground')} />
               {t(item.label)}
             </Link>
           );
         })}
 
-        {/* Scan CTA */}
+        {/* Scan CTA — pixel-notched corners; stays the one filled hero action */}
         <Link
           to="/scan"
+          aria-current={isActive('/scan') ? 'page' : undefined}
           className={cn(
-            'mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+            'pxl-corner mt-4 flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
             isActive('/scan')
               ? 'bg-brand text-white shadow-glow'
               : 'bg-brand/10 text-brand hover:bg-brand hover:text-white'
@@ -121,13 +148,17 @@ export function Sidebar() {
             <div className="my-2 border-t border-border/50" />
             <Link
               to="/admin"
+              aria-current={isActive('/admin') ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive('/admin')
                   ? 'bg-brand/10 text-brand'
                   : 'text-muted-foreground hover:text-foreground hover:bg-surface-light'
               )}
             >
+              {isActive('/admin') && (
+                <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] bg-brand" />
+              )}
               <Shield className={cn('w-5 h-5', isActive('/admin') ? 'text-brand' : 'text-muted-foreground')} />
               Admin
             </Link>

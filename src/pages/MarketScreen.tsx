@@ -447,9 +447,9 @@ export function MarketScreen() {
                 ))}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="divide-y divide-border/50">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 bg-surface-light rounded-xl p-3 border border-border">
+                  <div key={i} className="flex items-center gap-4 px-2 py-3">
                     <Skeleton className="w-16 aspect-[5/7] rounded-lg" />
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-3 w-24" />
@@ -503,7 +503,7 @@ export function MarketScreen() {
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="divide-y divide-border/50">
               {filteredListings.map((listing) => (
                 <MarketListRow
                   key={listing.id}
@@ -553,7 +553,7 @@ function MarketListRow({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-4 bg-surface-light rounded-xl p-3 border border-border hover:border-brand/30 transition cursor-pointer"
+    <div className="flex items-center gap-4 px-2 py-3 hover:bg-surface-light/60 transition-colors cursor-pointer"
       onClick={() => onQuickView?.(listing)}
     >
       <div className="w-16 aspect-[5/7] rounded-lg overflow-hidden bg-surface-lighter shrink-0 flex items-center justify-center text-sm font-bold text-muted-foreground">
@@ -567,7 +567,7 @@ function MarketListRow({
         <div className="flex items-center gap-2">
           <p className="text-xs font-mono text-muted-foreground">{listing.card.code}</p>
           {listing.vaultVerified && (
-            <span className="text-xs font-mono bg-brand/10 text-brand px-1.5 rounded">{t('market.verified').toUpperCase()}</span>
+            <Badge variant="pixel" className="pxl-chip--peri">{t('market.verified').toUpperCase()}</Badge>
           )}
         </div>
         <p className="text-sm font-semibold truncate">{listing.card.nameEn}</p>

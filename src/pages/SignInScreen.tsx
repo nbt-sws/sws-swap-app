@@ -132,36 +132,8 @@ export function SignInScreen() {
           </CardContent>
         </Card>
 
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-surface px-2 text-muted-foreground">or continue with</span>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {[
-            { icon: '\uF8FF', label: 'Continue with Apple', color: 'bg-surface-lighter border border-border text-white hover:bg-surface-light' },
-            { icon: 'G', label: 'Continue with Google', color: 'bg-surface-light border border-border text-white hover:bg-surface-lighter' },
-          ].map((btn, i) => (
-            <motion.button
-              key={btn.label}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              onClick={() => toast.info('Social login coming soon')}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all active:scale-[0.98] ${btn.color}`}
-            >
-              <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm font-bold font-mono">
-                {btn.icon}
-              </span>
-              <span className="font-medium text-sm">{btn.label}</span>
-            </motion.button>
-          ))}
-        </div>
-
+        {/* TODO(P1-12): Social login (Apple/Google) is not implemented yet.
+            Buttons are hidden on production until real OAuth flows exist. */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
           <Link to="/register" className="text-brand hover:underline">
@@ -177,20 +149,15 @@ export function SignInScreen() {
           </p>
         )}
 
+        {/* TODO(P1-12): Terms/privacy pages are not implemented yet.
+            Rendered as plain text until real /terms and /privacy routes exist. */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
           className="text-xs text-muted-foreground text-center mt-6"
         >
-          By continuing you accept our{' '}
-          <button type="button" onClick={() => window.alert('Terms of service coming soon')} className="text-brand hover:underline">
-            terms
-          </button>{' '}
-          and{' '}
-          <button type="button" onClick={() => window.alert('Privacy policy coming soon')} className="text-brand hover:underline">
-            privacy policy
-          </button>
+          By continuing you accept our terms and privacy policy
         </motion.p>
       </motion.div>
 

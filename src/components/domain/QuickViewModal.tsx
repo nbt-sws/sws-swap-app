@@ -71,7 +71,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
               className="absolute inset-0"
             />
             <div className="absolute top-3 left-3">
-              <Badge className={listing.listingType === 'SALE' ? 'bg-brand/20 text-brand' : 'bg-cyan/20 text-cyan'}>
+              <Badge variant="pixel" className={listing.listingType === 'TRADE' ? 'pxl-chip--cyan' : ''}>
                 {listing.listingType === 'TRADE' ? t('common.tradeOnly').toUpperCase() : t('market.listingTypes.sale').toUpperCase()}
               </Badge>
             </div>

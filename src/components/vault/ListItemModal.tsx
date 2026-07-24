@@ -52,7 +52,8 @@ export function ListItemModal({ open, onClose, item, listing }: ListItemModalPro
     if (!item) return;
 
     if (isEditMode && listing) {
-      const priceNum = Number(price) || 0;
+      // [P2-4] Clamp price to >= 0 — negative prices must not reach the API
+      const priceNum = Math.max(0, Number(price) || 0);
       updateListing.mutate(
         { listingId: listing.listingId, data: { price: priceNum } },
         {
@@ -67,7 +68,7 @@ export function ListItemModal({ open, onClose, item, listing }: ListItemModalPro
       return;
     }
 
-    const priceNum = listingType === 'SALE' ? Number(price) || 0 : 0;
+    const priceNum = listingType === 'SALE' ? Math.max(0, Number(price) || 0) : 0;
     createListing.mutate(
       {
         card: item.card,
@@ -143,11 +144,20 @@ export function ListItemModal({ open, onClose, item, listing }: ListItemModalPro
               <label className="text-sm font-medium">Price (฿)</label>
               <Input
                 type="number"
+                min={0}
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  // [P2-4] Clamp to >= 0 — never allow a negative price in state
+                  if (v !== '' && Number(v) < 0) return;
+                  setPrice(v);
+                }}
                 placeholder={`Suggested: ฿${item.currentPrice.toLocaleString()}`}
                 className="bg-surface border-border"
               />
+              {price !== '' && Number(price) <= 0 && (
+                <p className="text-xs text-pldown">Price must be greater than 0</p>
+              )}
               <p className="text-xs text-muted-foreground">
                 Current market value: ฿{item.currentPrice.toLocaleString()}
               </p>
@@ -173,7 +183,7 @@ export function ListItemModal({ open, onClose, item, listing }: ListItemModalPro
           <Button
             className="w-full bg-brand hover:bg-brand-light h-11"
             onClick={handleSubmit}
-            disabled={isBusy || (!isEditMode && listingType === 'SALE' && !price)}
+            disabled={isBusy || ((isEditMode || listingType === 'SALE') && (!price || Number(price) <= 0))}
           >
             {isBusy ? (
               <span className="flex items-center gap-2">

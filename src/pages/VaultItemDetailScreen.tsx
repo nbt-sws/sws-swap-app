@@ -10,6 +10,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import {
@@ -208,18 +209,20 @@ export function VaultItemDetailScreen() {
                 <span className="inline-flex items-center rounded-full bg-surface-lighter px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {item.card.language}
                 </span>
-                <span className={cn(
-                  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide',
-                  item.status === 'held' ? 'bg-plup/10 text-plup' :
-                  item.status === 'sold' ? 'bg-cyan/10 text-cyan' :
-                  'bg-brand/10 text-brand'
-                )}>
+                <Badge
+                  variant="pixel"
+                  className={cn(
+                    item.status === 'held' ? 'pxl-chip--peri' :
+                    item.status === 'sold' ? 'pxl-chip--cyan' :
+                    'pxl-chip--brand'
+                  )}
+                >
                   {item.status.toUpperCase()}
-                </span>
+                </Badge>
                 {isListing && (
-                  <span className="inline-flex items-center rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
-                    LISTED
-                  </span>
+                  <Badge variant="pixel" className="pxl-chip--cyan">
+                    Listed
+                  </Badge>
                 )}
               </div>
             </div>
@@ -479,9 +482,11 @@ export function VaultItemDetailScreen() {
                 <span className="ml-2 text-sm text-muted-foreground">{t('common.loadingHistory')}</span>
               </div>
             ) : itemAudit.data && itemAudit.data.length > 0 ? (
-              itemAudit.data.map((record: AuditRecord) => (
-                <AuditRecordCard key={record.id} record={record} />
-              ))
+              <div className="divide-y divide-border rounded-xl border border-border bg-surface-light overflow-hidden">
+                {itemAudit.data.map((record: AuditRecord) => (
+                  <AuditRecordCard key={record.id} record={record} />
+                ))}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <Clock className="w-8 h-8 mb-2 opacity-40" />
@@ -584,8 +589,8 @@ function AuditRecordCard({ record }: { record: AuditRecord }) {
   const { t } = useTranslation();
   const eventLabel = t(`vault.eventLabels.${record.eventType}` as const, { defaultValue: record.eventType });
   return (
-    <div className="flex items-start gap-4 rounded-xl border border-border bg-surface-light p-4">
-      <div className="mt-0.5 h-2 w-2 rounded-full bg-brand" />
+    <div className="flex items-start gap-4 p-4">
+      <div className="mt-0.5 h-2 w-2 rounded-full bg-periwinkle" aria-hidden="true" />
       <div className="flex-1">
         <div className="flex items-center justify-between">
           <span className="font-medium">{eventLabel}</span>

@@ -97,6 +97,8 @@ module.exports = {
       fontFamily: {
         mono: ['"JetBrains Mono"', '"Fira Code"', '"SF Mono"', 'monospace'],
         sans: ['Manrope', 'system-ui', 'sans-serif'],
+        // 8-bit accent font — micro-labels/badges/status numbers/steppers only (see DESIGN.md §7)
+        pixel: ['Silkscreen', '"JetBrains Mono"', 'monospace'],
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",

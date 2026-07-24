@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { servicesApi, servicePackagesApi, serviceOrdersApi, partnersApi } from '@/lib/api';
+import { servicesApi, servicePackagesApi, serviceOrdersApi, partnersApi, storesApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
-import type { ServiceCategory, ServiceProvider, ServicePackage, ServiceOrder, PartnerApplication, PartnerApplicationInput, ServiceOrderInput, ServiceOrderUpdate } from '@/types';
+import type { ServiceCategory, ServiceProvider, ServicePackage, ServiceOrder, PartnerApplication, PartnerApplicationInput, ServiceOrderInput, ServiceOrderUpdate, StoreReview } from '@/types';
 
 export function useServiceProviders(category?: ServiceCategory) {
   return useQuery({
@@ -124,6 +124,36 @@ export function useUpdateServiceOrder() {
       queryClient.invalidateQueries({ queryKey: ['receivedServiceOrders'] });
       queryClient.invalidateQueries({ queryKey: ['serviceOrder', variables.orderId] });
       queryClient.invalidateQueries({ queryKey: ['vault'] });
+    },
+  });
+}
+
+// ─── Store reviews (rating a service = reviewing the provider's store) ──
+
+export function useStoreReviews(storeId?: string) {
+  return useQuery({
+    queryKey: ['storeReviews', storeId],
+    queryFn: async () => {
+      if (!storeId) return { reviews: [] as StoreReview[], count: 0, average: null as number | null };
+      const res = await storesApi.getReviews(storeId);
+      return {
+        reviews: res.reviews as StoreReview[],
+        count: res.count,
+        average: res.average,
+      };
+    },
+    enabled: !!storeId,
+    staleTime: 1000 * 60,
+  });
+}
+
+export function useSubmitStoreReview() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ storeId, rating, comment }: { storeId: string; rating: number; comment?: string }) =>
+      storesApi.submitReview(storeId, { rating, comment }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['storeReviews', variables.storeId] });
     },
   });
 }

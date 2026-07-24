@@ -15,10 +15,9 @@
     "profile": "Profile",
     "notifications": "Notifications",
     "browse": "Browse",
+    "cards": "Cards",
     "stores": "Stores",
-    "following": "Following",
-    "campaigns": "Campaigns",
-    "achievements": "Achievements"
+    "following": "Following"
   },
   "common": {
     "search": "Search",
@@ -473,13 +472,7 @@
       "prefsSaved": "Preferences saved",
       "passwordChanged": "Password changed",
       "passwordWrong": "Current password is incorrect",
-      "deleteFailed": "Could not delete account. Check your password.",
-      "terms": "Terms of service coming soon",
-      "privacy": "Privacy policy coming soon",
-      "dataSources": "Data sources: eBay, Yahoo! JP, domestic Thai marketplaces",
-      "help": "Support contact coming soon",
-      "deleteConfirm": "This is a demo. Account deletion is not implemented.",
-      "deleteRequested": "Account deletion request received (demo)"
+      "deleteFailed": "Could not delete account. Check your password."
     },
     "kycStatus": {
       "verified": "Verified",

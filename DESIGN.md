@@ -253,3 +253,55 @@ Depth is conveyed through tonal layering and subtle ambient glow rather than hea
 - **Don't** rely on color alone for status. Pair badges/icons with text or labels.
 - **Don't** use rounded corners larger than 16px on cards, sections, or inputs. Full pills are for buttons, tags, and badges only.
 - **Don't** introduce a light-mode body background. The dark surface is core to the app's identity.
+
+## 7. 8-bit Accent System
+
+A restrained pixel-flavor layer that nods to retro collecting culture (TCG binders, arcade score counters) without turning the vault into a theme park. The goal is **a whiff of 8-bit, never a costume** — Playful must never erode Trustworthy.
+
+**Pixel Font:** Silkscreen (400/700), fallback `JetBrains Mono, monospace` — Tailwind token `font-pixel`.
+Chosen over Press Start 2P and Pixelify Sans because its tall x-height and open counters stay legible at 10–11px micro-label sizes; the alternatives blur or shout at that scale.
+
+### Where the pixel font is allowed
+- Micro-labels and badges (`.pxl-chip`)
+- Status numbers, counters, and stepper indicators (`.pxl-num` / `font-pixel`)
+- Small scan-flow accents (e.g. "STEP 2/4", rarity tags)
+
+### Utilities (src/index.css)
+- **`.pxl-chip`** (+ `--brand` / `--cyan` / `--peri` modifiers): notched-corner badge with pixel font. Meaning variants must always carry text — color is never the only signal.
+- **`.pxl-corner`**: clip-path notched corners (default 4px, override via `--pxl-notch`). Shape primitive for small accents.
+- **`.pxl-shadow`** (+ `--brand` / `--cyan` / `--peri`): hard 3px offset shadow with zero blur. Use sparingly, on one or two elements per screen max.
+- **`.pxl-num`**: pixel font with tabular numerals for status numbers and steppers.
+- **`.pxl-scanline`**: faint static cyan scanline texture (5% opacity, pointer-events: none). **Scan-related surfaces only** (viewfinder, scan progress) — never decorative wallpaper.
+
+### Named Rules
+**The Micro-Label Rule.** The pixel font is for micro-labels, badges, status numbers, and steppers only. Never use it for body text, headings, prices, buttons, or anything longer than ~4 words.
+
+**The One-Room Rule.** Pixel accents live in small rooms, not on the whole house. Never apply pixel styling to an entire screen, page background, or primary card layout — one accent cluster per screen is enough.
+
+**The Trust Rule.** Retro flavor must never undermine trust. No pixel styling on prices, payment, trade confirmations, or destructive flows; no flicker/CRT/glitch animations; all 8-bit utilities are static and inherit the global focus ring and reduced-motion protections.
+
+**The Existing Palette Rule.** Pixel accents use only the existing palette — brand magenta, periwinkle, cyan, and surface/border tokens. Do not introduce new "retro" colors (NES reds, arcade yellows, neon greens) outside the token system.
+
+### Site-wide rollout (chrome)
+
+Codified by the system-level chrome rollout. Future contributors should reuse these patterns instead of inventing new ones.
+
+**Scrollbar (R5).** The global scrollbar is thin (5px) with a brand-tinted thumb at low alpha (`rgba(240, 106, 168, 0.22)`, 0.35 on hover) over a transparent track; Firefox gets the equivalent via `scrollbar-width: thin` + `scrollbar-color`. Defined once in `src/index.css` — do not restyle scrollbars per page; `scrollbar-hide` remains the opt-out for internal scroll regions.
+
+**Nav active-state pattern.** One shared language across BottomNav, Sidebar, TopBar, and the mobile sheet:
+- Active icon/label take the category accent color over a low-alpha accent background (`accent/10`–`accent/15`); BottomNav's active icon pill is notched via `.pxl-corner`.
+- A hard, square 2px indicator bar in the accent color — never rounded — marks the active item: top edge in BottomNav, left edge in Sidebar and the mobile sheet, bottom edge in TopBar.
+- The active link carries `aria-current="page"`; touch targets stay ≥44px.
+- BottomNav labels stay Manrope (Thai legibility) — the pixel flavor comes from the notched pill, square bar, and category color, not from the label font.
+
+**Category wayfinding (R3).** The same color always means the same section, in nav chrome, chips, and dots alike:
+
+| Section | Accent | Tokens |
+| --- | --- | --- |
+| Scan / AI | Brand magenta | `brand` / `--color-brand-primary*` |
+| Market / prices / stores | Cyan | `cyan` / `--color-success*` |
+| Vault / storage / security | Periwinkle | `periwinkle` / `--color-brand-secondary*` |
+
+Neutral sections (home, profile, orders, wishlist, services, campaigns, admin) default to brand magenta.
+
+**Pixel badges.** Use `<Badge variant="pixel">` (composes `.pxl-chip`) for status micro-labels anywhere; add `pxl-chip--brand` / `pxl-chip--cyan` / `pxl-chip--peri` via `className` for the category variants. Always pair with text — never color alone (R8).

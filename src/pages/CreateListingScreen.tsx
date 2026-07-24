@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useCreateListing } from '@/hooks/useApi';
+import { toast } from 'sonner';
+import { useCreateListing, useUploadItemImage, useUpdateListing } from '@/hooks/useApi';
+import { downscaleImage } from '@/lib/image';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -31,11 +33,18 @@ const CONDITIONS: CardType['condition'][] = ['Raw', 'PSA 10', 'PSA 9', 'BGS 9.5'
 const SHELVES: MarketListing['shelf'][] = ['RAW', 'PRE-GRADED', 'GRADED', 'SEALED-BOX'];
 const LANGUAGES: CardType['language'][] = ['JP', 'EN'];
 
+// Photo validation mirrors RegisterItemModal (src/components/vault/RegisterItemModal.tsx)
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+
 export function CreateListingScreen() {
   const navigate = useNavigate();
   const createListing = useCreateListing();
+  const uploadImage = useUploadItemImage();
+  const updateListing = useUpdateListing();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photos, setPhotos] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [listingType, setListingType] = useState<'SALE' | 'TRADE'>('SALE');
   const [form, setForm] = useState({
     game: 'one-piece' as CardType['game'],
@@ -55,9 +64,35 @@ export function CreateListingScreen() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.code || !form.nameEn) return;
+
+    // P1-3: really upload the selected photos (same pattern as RegisterItemModal)
+    setUploading(true);
+    const imageUrls: string[] = [];
+    try {
+      for (const file of photos) {
+        if (!ACCEPTED_TYPES.includes(file.type)) {
+          toast.error(`${file.name}: use JPEG, PNG, WebP or AVIF`);
+          continue;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          toast.error(`${file.name}: max 5MB per image`);
+          continue;
+        }
+        try {
+          const prepared = await downscaleImage(file);
+          const url = await uploadImage.mutateAsync(prepared);
+          imageUrls.push(url);
+        } catch {
+          toast.error(`${file.name}: upload failed`);
+        }
+      }
+    } finally {
+      setUploading(false);
+    }
+    const coverImageUrl = imageUrls[0];
 
     createListing.mutate(
       {
@@ -71,7 +106,7 @@ export function CreateListingScreen() {
           language: form.language,
           game: form.game,
           condition: form.condition,
-          imageUrl: undefined,
+          imageUrl: coverImageUrl,
         },
         price: listingType === 'SALE' ? Number(form.price) || 0 : 0,
         listingType,
@@ -79,7 +114,20 @@ export function CreateListingScreen() {
         description: form.description,
       },
       {
-        onSuccess: () => navigate({ to: '/seller' }),
+        onSuccess: (listing) => {
+          // useCreateListing does not forward imageUrl to the backend create payload,
+          // so persist the cover photo via the update endpoint (image_url column).
+          if (coverImageUrl && listing?.id) {
+            updateListing.mutate(
+              { listingId: listing.id, data: { image_url: coverImageUrl } },
+              { onError: () => toast.error('Listing published, but the cover photo could not be saved.') }
+            );
+          }
+          navigate({ to: '/seller' });
+        },
+        onError: () => {
+          toast.error('Could not publish listing. Please try again.');
+        },
       }
     );
   };
@@ -282,7 +330,7 @@ export function CreateListingScreen() {
                 <Input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={ACCEPTED_TYPES.join(',')}
                   multiple
                   className="hidden"
                   onChange={(e) => {
@@ -301,9 +349,9 @@ export function CreateListingScreen() {
               <Button
                 type="submit"
                 className="w-full bg-brand hover:bg-brand-light h-12"
-                disabled={createListing.isPending || !form.code || !form.nameEn || (listingType === 'SALE' && !form.price)}
+                disabled={uploading || createListing.isPending || !form.code || !form.nameEn || (listingType === 'SALE' && !form.price)}
               >
-                {createListing.isPending ? 'Creating...' : 'Publish listing'}
+                {uploading ? 'Uploading photos...' : createListing.isPending ? 'Creating...' : 'Publish listing'}
               </Button>
             </CardContent>
           </Card>

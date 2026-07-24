@@ -5,14 +5,32 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
 
-const LEFT_TABS = [
-  { to: '/', label: 'nav.home', icon: Home },
-  { to: '/market', label: 'nav.market', icon: ShoppingBag },
+// R3 category wayfinding accents — same color = same section, app-wide.
+// Scan = brand magenta, Market = cyan, Vault = periwinkle; brand is the
+// default active accent for neutral sections (home, profile).
+const NAV_ACCENTS = {
+  brand: { pill: 'bg-brand/15', text: 'text-brand', bar: 'bg-brand' },
+  cyan: { pill: 'bg-cyan/15', text: 'text-cyan', bar: 'bg-cyan' },
+  peri: { pill: 'bg-periwinkle/15', text: 'text-periwinkle', bar: 'bg-periwinkle' },
+} as const;
+
+type NavAccent = keyof typeof NAV_ACCENTS;
+
+interface NavTab {
+  to: string;
+  label: string;
+  icon: React.ElementType;
+  accent: NavAccent;
+}
+
+const LEFT_TABS: NavTab[] = [
+  { to: '/', label: 'nav.home', icon: Home, accent: 'brand' },
+  { to: '/market', label: 'nav.market', icon: ShoppingBag, accent: 'cyan' },
 ];
 
-const RIGHT_TABS = [
-  { to: '/vault', label: 'nav.vault', icon: Package },
-  { to: '/profile', label: 'nav.profile', icon: User },
+const RIGHT_TABS: NavTab[] = [
+  { to: '/vault', label: 'nav.vault', icon: Package, accent: 'peri' },
+  { to: '/profile', label: 'nav.profile', icon: User, accent: 'brand' },
 ];
 
 export function BottomNav() {
@@ -26,33 +44,38 @@ export function BottomNav() {
     return currentPath.startsWith(to);
   };
 
+  const renderTab = (tab: NavTab) => {
+    const active = isActive(tab.to);
+    const Icon = tab.icon;
+    const accent = NAV_ACCENTS[tab.accent];
+    const to = !isAuthenticated && tab.to === '/vault' ? '/login' : tab.to;
+    return (
+      <Link
+        key={tab.to}
+        to={to}
+        aria-current={active ? 'page' : undefined}
+        className="flex flex-col items-center justify-center gap-0.5 w-16 h-full relative"
+      >
+        <div className={cn('p-1 rounded-lg transition-all', active && cn('pxl-corner', accent.pill))}>
+          <Icon className={cn('w-[18px] h-[18px] transition-colors', active ? accent.text : 'text-muted-foreground')} />
+        </div>
+        <span className={cn('text-xs transition-colors', active ? cn(accent.text, 'font-medium') : 'text-muted-foreground')}>
+          {t(tab.label)}
+        </span>
+        {active && (
+          <motion.div
+            layoutId="bottomNavIndicator"
+            className={cn('absolute -top-px left-1/2 -translate-x-1/2 w-6 h-[2px]', accent.bar)}
+          />
+        )}
+      </Link>
+    );
+  };
+
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/90 backdrop-blur-md border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
       <div className="h-full flex items-center justify-around px-2 relative">
-        {LEFT_TABS.map((tab) => {
-          const active = isActive(tab.to);
-          const Icon = tab.icon;
-          return (
-            <Link
-              key={tab.to}
-              to={tab.to}
-              className="flex flex-col items-center justify-center gap-0.5 w-16 h-full relative"
-            >
-              <div className={cn('p-1 rounded-lg transition-all', active && 'bg-brand/10')}>
-                <Icon className={cn('w-[18px] h-[18px] transition-colors', active ? 'text-brand' : 'text-muted-foreground')} />
-              </div>
-              <span className={cn('text-xs transition-colors', active ? 'text-brand font-medium' : 'text-muted-foreground')}>
-                {t(tab.label)}
-              </span>
-              {active && (
-                <motion.div
-                  layoutId="bottomNavIndicator"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 w-6 h-[2px] bg-brand rounded-full"
-                />
-              )}
-            </Link>
-          );
-        })}
+        {LEFT_TABS.map(renderTab)}
 
         {/* Scan FAB */}
         <Link to="/scan" className="relative -mt-5">
@@ -64,31 +87,7 @@ export function BottomNav() {
           </motion.div>
         </Link>
 
-        {RIGHT_TABS.map((tab) => {
-          const active = isActive(tab.to);
-          const Icon = tab.icon;
-          const to = !isAuthenticated && tab.to === '/vault' ? '/login' : tab.to;
-          return (
-            <Link
-              key={tab.to}
-              to={to}
-              className="flex flex-col items-center justify-center gap-0.5 w-16 h-full relative"
-            >
-              <div className={cn('p-1 rounded-lg transition-all', active && 'bg-brand/10')}>
-                <Icon className={cn('w-[18px] h-[18px] transition-colors', active ? 'text-brand' : 'text-muted-foreground')} />
-              </div>
-              <span className={cn('text-xs transition-colors', active ? 'text-brand font-medium' : 'text-muted-foreground')}>
-                {t(tab.label)}
-              </span>
-              {active && (
-                <motion.div
-                  layoutId="bottomNavIndicator"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 w-6 h-[2px] bg-brand rounded-full"
-                />
-              )}
-            </Link>
-          );
-        })}
+        {RIGHT_TABS.map(renderTab)}
       </div>
     </nav>
   );

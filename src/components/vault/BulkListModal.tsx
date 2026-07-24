@@ -31,7 +31,8 @@ export function BulkListModal({ open, onClose, items }: BulkListModalProps) {
   const [listingType, setListingType] = useState<'SALE' | 'TRADE'>('SALE');
 
   const handleSubmit = async () => {
-    const priceNum = listingType === 'SALE' ? Number(price) || 0 : 0;
+    // [P2-4] Clamp to >= 0 — negative prices must not reach the API
+    const priceNum = listingType === 'SALE' ? Math.max(0, Number(price) || 0) : 0;
     const results = await Promise.allSettled(
       items.map((item) =>
         createListing.mutateAsync({
@@ -115,11 +116,20 @@ export function BulkListModal({ open, onClose, items }: BulkListModalProps) {
               <label className="text-sm font-medium">Price per item (฿)</label>
               <Input
                 type="number"
+                min={0}
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  // [P2-4] Clamp to >= 0 — never allow a negative price in state
+                  if (v !== '' && Number(v) < 0) return;
+                  setPrice(v);
+                }}
                 placeholder="0"
                 className="bg-surface border-border"
               />
+              {price !== '' && Number(price) <= 0 && (
+                <p className="text-xs text-pldown">Price must be greater than 0</p>
+              )}
               <p className="text-xs text-muted-foreground">
                 All items will be listed at the same price. You can edit individual prices later.
               </p>
@@ -129,7 +139,7 @@ export function BulkListModal({ open, onClose, items }: BulkListModalProps) {
           <Button
             className="w-full bg-brand hover:bg-brand-light h-11"
             onClick={handleSubmit}
-            disabled={createListing.isPending || (listingType === 'SALE' && !price)}
+            disabled={createListing.isPending || (listingType === 'SALE' && (!price || Number(price) <= 0))}
           >
             {createListing.isPending ? 'Creating listings...' : `List ${items.length} items`}
           </Button>

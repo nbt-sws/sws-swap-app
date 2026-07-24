@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=Silkscreen:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -162,6 +162,33 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-strong);
+}
+
+/* ─── R5 chrome scrollbar override (pixel-rollout-spec) ──────────
+   Same specificity as the base dark-theme scrollbar above; later in
+   the cascade, so these win. Thin, brand-tinted thumb at low alpha,
+   transparent track. Firefox gets the equivalent via scrollbar-*. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(240, 106, 168, 0.22) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(240, 106, 168, 0.22);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(240, 106, 168, 0.35);
 }
 
 /* Selection color */
@@ -331,3 +358,120 @@ h1, h2, h3 {
     transform: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   8-bit Accent System (subtle pixel flavor — restraint first)
+   Rules: see DESIGN.md §7. Pixel font for micro-labels/badges/
+   status numbers/steppers only. Never body text, never full-screen.
+   Colors come from the existing palette only (brand / periwinkle /
+   cyan / surface tokens). All utilities are static — no animation.
+   ═══════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* ─── .pxl-corner: notched (cut) corners via clip-path ─────────
+     Pure shape primitive — compose with your own bg/border.
+     Notch size is overridable via --pxl-notch. */
+  .pxl-corner {
+    --pxl-notch: 4px;
+    clip-path: polygon(
+      var(--pxl-notch) 0,
+      100% 0,
+      100% calc(100% - var(--pxl-notch)),
+      calc(100% - var(--pxl-notch)) 100%,
+      0 100%,
+      0 var(--pxl-notch)
+    );
+  }
+
+  /* ─── .pxl-shadow: hard offset shadow, zero blur (8-bit feel) ── */
+  .pxl-shadow {
+    box-shadow: 3px 3px 0 0 var(--color-bg-default);
+  }
+  .pxl-shadow-brand {
+    box-shadow: 3px 3px 0 0 var(--color-brand-primary-dark);
+  }
+  .pxl-shadow-cyan {
+    box-shadow: 3px 3px 0 0 var(--color-success-dark);
+  }
+  .pxl-shadow-peri {
+    box-shadow: 3px 3px 0 0 var(--color-brand-secondary-dark);
+  }
+
+  /* ─── .pxl-chip: pixel badge for micro-labels / status ─────────
+     Base uses neutral surface + secondary text (no meaning via
+     color). Meaning variants below always pair with text content. */
+  .pxl-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    font-family: 'Silkscreen', 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+    --pxl-notch: 3px;
+    clip-path: polygon(
+      var(--pxl-notch) 0,
+      100% 0,
+      100% calc(100% - var(--pxl-notch)),
+      calc(100% - var(--pxl-notch)) 100%,
+      0 100%,
+      0 var(--pxl-notch)
+    );
+  }
+  .pxl-chip--brand {
+    color: var(--color-brand-primary);
+    border-color: var(--color-brand-primary-dark);
+    background: var(--color-brand-primary-light);
+  }
+  .pxl-chip--cyan {
+    color: var(--color-success);
+    border-color: var(--color-success-dark);
+    background: var(--color-success-light);
+  }
+  .pxl-chip--peri {
+    color: var(--color-brand-secondary);
+    border-color: var(--color-brand-secondary-dark);
+    background: var(--color-brand-secondary-light);
+  }
+
+  /* ─── .pxl-num: pixel font for status numbers / steppers ─────── */
+  .pxl-num {
+    font-family: 'Silkscreen', 'JetBrains Mono', monospace;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── .pxl-scanline: faint scanline texture overlay ────────────
+     Only for scan-related surfaces (camera viewfinder, scan
+     progress). Static by design — a moving scanline would break
+     the restraint rule and motion-safety budget. */
+  .pxl-scanline {
+    position: relative;
+  }
+  .pxl-scanline::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(79, 224, 208, 0.05) 0px,
+      rgba(79, 224, 208, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+}
+
+/* 8-bit utilities are static (no keyframes), so they need no
+   dedicated reduced-motion override; the global reduced-motion
+   block above already neutralizes any transition composed onto
+   them. Interactive elements using these classes still inherit
+   the global 2px brand focus ring defined earlier in this file. */

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { useOffers, useRespondOffer } from '@/hooks/useApi';
+import { useOffers, useRespondOffer, useCounterOffer, useWithdrawOffer } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,28 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
-import { ArrowRightLeft, ArrowUpRight, ArrowDownLeft, Check, X, Clock, ChevronRight, Handshake } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowRightLeft, ArrowUpRight, ArrowDownLeft, Check, X, Clock, ChevronRight, Handshake, Undo2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Offer } from '@/types';
 
@@ -27,6 +48,33 @@ export function OffersScreen() {
   const { data: offers, isLoading } = useOffers();
   const [tab, setTab] = useState<'all' | 'incoming' | 'outgoing'>('all');
   const respond = useRespondOffer();
+  const counter = useCounterOffer();
+  const withdraw = useWithdrawOffer();
+
+  // [P1-2] Counter dialog state (incoming PENDING offers)
+  const [counterTarget, setCounterTarget] = useState<Offer | null>(null);
+  const [counterPrice, setCounterPrice] = useState('');
+
+  const openCounter = (offer: Offer) => {
+    setCounterTarget(offer);
+    setCounterPrice(String(offer.offerPrice));
+  };
+
+  const counterPriceNum = Number(counterPrice);
+  const counterValid = counterPrice !== '' && Number.isFinite(counterPriceNum) && counterPriceNum > 0;
+
+  const submitCounter = () => {
+    if (!counterTarget || !counterValid) return;
+    counter.mutate(
+      { offerId: counterTarget.id, offerPrice: Math.max(0, Math.round(counterPriceNum)) },
+      {
+        onSettled: () => {
+          setCounterTarget(null);
+          setCounterPrice('');
+        },
+      }
+    );
+  };
 
   const filtered = offers?.filter((offer) => {
     if (tab === 'incoming') return offer.direction === 'INCOMING';
@@ -135,6 +183,16 @@ export function OffersScreen() {
                           size="sm"
                           variant="outline"
                           className="border-border"
+                          onClick={() => openCounter(offer)}
+                          disabled={respond.isPending || counter.isPending}
+                        >
+                          <ArrowRightLeft className="w-4 h-4 mr-1" />
+                          Counter
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-border"
                           onClick={() => respond.mutate({ offerId: offer.id, action: 'decline' })}
                           disabled={respond.isPending}
                         >
@@ -145,9 +203,36 @@ export function OffersScreen() {
                     )}
 
                     {!isIncoming && offer.status === 'PENDING' && (
-                      <Button size="sm" variant="outline" className="border-border" disabled>
-                        Awaiting response
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-border text-pldown hover:text-pldown"
+                            disabled={withdraw.isPending}
+                          >
+                            <Undo2 className="w-4 h-4 mr-1" />
+                            Withdraw
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-surface-light border-border">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Withdraw this offer?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Your offer of ฿{offer.offerPrice.toLocaleString()} on &quot;{offer.listing.card.nameEn}&quot; will be withdrawn. This can&apos;t be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="border-border">Keep offer</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-pldown hover:bg-pldown/90 text-white"
+                              onClick={() => withdraw.mutate(offer.id)}
+                            >
+                              Withdraw offer
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </CardContent>
@@ -156,6 +241,47 @@ export function OffersScreen() {
           })}
         </div>
       </div>
+
+      {/* Counter offer dialog */}
+      <Dialog open={!!counterTarget} onOpenChange={(v) => !v && setCounterTarget(null)}>
+        <DialogContent className="bg-surface-light border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle>Counter offer</DialogTitle>
+            <DialogDescription>
+              {counterTarget
+                ? `Send a counter offer to @${counterTarget.fromUser.name} for "${counterTarget.listing.card.nameEn}". Their offer: ฿${counterTarget.offerPrice.toLocaleString()} · Listed: ฿${counterTarget.listing.price.toLocaleString()}`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="counter-price">Counter price (฿)</Label>
+            <Input
+              id="counter-price"
+              type="number"
+              min={1}
+              value={counterPrice}
+              onChange={(e) => setCounterPrice(e.target.value)}
+              className="bg-surface border-border"
+              autoFocus
+            />
+            {!counterValid && counterPrice !== '' && (
+              <p className="text-xs text-pldown">Price must be greater than 0</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="border-border" onClick={() => setCounterTarget(null)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-brand hover:bg-brand-light"
+              onClick={submitCounter}
+              disabled={!counterValid || counter.isPending}
+            >
+              Send counter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

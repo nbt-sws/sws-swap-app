@@ -34,12 +34,14 @@ import { PriceChart } from '@/components/domain/PriceChart';
 import { MarketStatsCards } from '@/components/domain/MarketStatsCards';
 import { useAuthStore, isMember } from '@/stores/auth';
 
+// Pixel status chips (R1/R3) — active listings get the cyan market accent,
+// terminal/inactive states stay neutral; the text label always carries meaning.
 const statusConfig = {
-  active: { labelKey: 'listing.status.active', className: 'bg-success/10 text-success border-0' },
-  sold: { labelKey: 'listing.status.sold', className: 'bg-muted/30 text-muted-foreground border-0' },
-  paused: { labelKey: 'listing.status.inactive', className: 'bg-warning/10 text-warning border-0' },
-  draft: { labelKey: 'listing.status.draft', className: 'bg-surface-lighter text-muted-foreground border-0' },
-  delisted: { labelKey: 'listing.status.delisted', className: 'bg-pldown/10 text-pldown border-0' },
+  active: { labelKey: 'listing.status.active', className: 'pxl-chip--cyan' },
+  sold: { labelKey: 'listing.status.sold', className: '' },
+  paused: { labelKey: 'listing.status.inactive', className: '' },
+  draft: { labelKey: 'listing.status.draft', className: '' },
+  delisted: { labelKey: 'listing.status.delisted', className: '' },
 };
 
 const PERIODS = ['7d', '30d', '90d', '1y'] as const;
@@ -197,8 +199,8 @@ export function ListingDetailScreen() {
               />
             </button>
             <div className="absolute top-4 left-4 flex gap-2">
-              <Badge className={status.className}>{t(status.labelKey)}</Badge>
-              <Badge className="bg-surface-lighter text-foreground">{listing.shelf}</Badge>
+              <Badge variant="pixel" className={status.className}>{t(status.labelKey)}</Badge>
+              <Badge variant="pixel">{listing.shelf}</Badge>
             </div>
 
           </CardContent>
@@ -267,11 +269,11 @@ export function ListingDetailScreen() {
             {listing.listingType === 'TRADE' && (
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Type</span>
-                <Badge className="bg-cyan/10 text-cyan text-xs">Trade Only</Badge>
+                <Badge variant="pixel" className="pxl-chip--cyan">Trade Only</Badge>
               </div>
             )}
             {/* IDs demoted to a quiet footer — debug info, not purchase info */}
-            <p className="text-[10px] font-mono text-muted-foreground/50 pt-2 border-t border-border/60">
+            <p className="text-[11px] font-mono text-muted-foreground/50 pt-2 border-t border-border/60">
               Item {listing.itemId?.slice(0, 8)}… · Listing {listing.id.slice(0, 8)}…
             </p>
           </div>
@@ -501,7 +503,7 @@ export function ListingDetailScreen() {
         <div className="fixed bottom-20 inset-x-0 z-40 px-3 md:hidden">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-light/95 backdrop-blur px-3.5 py-3 shadow-xl">
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-mono uppercase text-muted-foreground">{isTrade ? 'Trade' : t('common.price')}</p>
+              <p className="text-[11px] font-mono uppercase text-muted-foreground">{isTrade ? 'Trade' : t('common.price')}</p>
               <p className={cn('text-base font-bold font-mono truncate', isTrade ? 'text-cyan' : 'text-brand')}>
                 {isTrade ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
               </p>

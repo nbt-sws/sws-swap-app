@@ -80,14 +80,14 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           <div className="absolute inset-0 bg-gradient-to-t from-surface-dark/40 via-transparent to-transparent pointer-events-none" />
 
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+          <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 z-10">
             {listing.listingType === 'TRADE' ? (
-              <Badge className="bg-cyan/20 text-cyan border border-cyan/30">{t('common.tradeOnly').toUpperCase()}</Badge>
+              <Badge variant="pixel" className="pxl-chip--cyan">{t('common.tradeOnly').toUpperCase()}</Badge>
             ) : (
-              <Badge className="bg-brand/20 text-brand border border-brand/30">{t('market.listingTypes.sale').toUpperCase()}</Badge>
+              <Badge variant="pixel">{t('market.listingTypes.sale').toUpperCase()}</Badge>
             )}
             {isNew && (
-              <Badge className="bg-success/20 text-success border border-success/30">{t('common.new')}</Badge>
+              <Badge variant="pixel" className="pxl-chip--cyan">{t('common.new')}</Badge>
             )}
           </div>
 
@@ -138,7 +138,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
             )}
           </div>
           {listing.status !== 'active' && (
-            <Badge variant="outline" className="shrink-0 text-xs h-5 px-1.5">
+            <Badge variant="pixel" className="shrink-0">
               {t(status.labelKey)}
             </Badge>
           )}
@@ -146,12 +146,12 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
 
         <div className="mt-2 flex flex-wrap gap-1">
           {listing.card.rarity && (
-            <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.rarity}</span>
+            <span className="text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.rarity}</span>
           )}
           {listing.card.condition && (
-            <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.condition}</span>
+            <span className="text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.condition}</span>
           )}
-          <span className="text-[10px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.shelf}</span>
+          <span className="text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.shelf}</span>
         </div>
 
         <div className="mt-auto pt-3 flex items-center justify-between">
@@ -163,7 +163,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           >
             {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}
           </span>
-          <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[120px] bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40" title={`@${listing.seller.name}`}>
+          <span className="text-[11px] font-bold text-muted-foreground truncate max-w-[120px] bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40" title={`@${listing.seller.name}`}>
             @{listing.seller.name}
           </span>
         </div>

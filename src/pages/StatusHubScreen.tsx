@@ -3,7 +3,9 @@ import { useSubmissions, useApproveSubmissionConsent } from '@/hooks/useApi';
 import { motion } from 'framer-motion';
 import { ScrollablePage } from '@/components/layout/ScrollablePage';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Check, Clock, Truck, Package, QrCode, ArrowRight } from 'lucide-react';
+import { Check, Clock, Truck, Package, ArrowRight, ExternalLink } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import {
   Dialog,
   DialogContent,
@@ -25,8 +27,24 @@ const STATUS_CONFIG: Record<string, { icon: typeof Check; color: string; label: 
   delivered: { icon: Check, color: 'text-plup', label: 'DELIVERED ✓' },
 };
 
+// Official cert/report lookup pages per grading service. PSA supports deep
+// links by cert number; the others land on their public verification pages.
+const REPORT_URLS: Record<string, string> = {
+  PSA: 'https://www.psacard.com/cert',
+  BGS: 'https://www.beckett.com/grading/card-lookup',
+  CGC: 'https://www.cgccards.com/cert-lookup/',
+  TAG: 'https://www.taggrading.com',
+};
+
+function reportUrlFor(sub: { service: string; labOrderNumber?: string }): string | null {
+  if (sub.service === 'PSA' && sub.labOrderNumber) {
+    return `https://www.psacard.com/cert/${encodeURIComponent(sub.labOrderNumber)}`;
+  }
+  return REPORT_URLS[sub.service] ?? null;
+}
+
 export function StatusHubScreen() {
-  const { data: submissions } = useSubmissions();
+  const { data: submissions, isLoading } = useSubmissions();
   const approveConsent = useApproveSubmissionConsent();
   const [activeFilter, setActiveFilter] = useState('All');
   const [consentId, setConsentId] = useState<string | null>(null);
@@ -81,6 +99,35 @@ export function StatusHubScreen() {
         </div>
 
         {/* Submissions */}
+        {isLoading ? (
+          <div className="space-y-4">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="bg-surface-light rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-6 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-16">
+            <EmptyMedia variant="icon">
+              <Package className="w-8 h-8 text-brand" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No submissions yet</EmptyTitle>
+              <EmptyDescription>
+                {activeFilter === 'All'
+                  ? 'When you send cards to a lab or grader, their live status will show up here.'
+                  : `No ${activeFilter.toLowerCase()} submissions right now.`}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
         <div className="space-y-4">
           {filtered.map((sub, i) => {
             const statusConfig = STATUS_CONFIG[sub.status] || STATUS_CONFIG['in-lab'];
@@ -160,11 +207,18 @@ export function StatusHubScreen() {
 
                 {sub.status === 'ready' && (
                   <button
-                    onClick={() => setQrSub(sub)}
+                    onClick={() => {
+                      const url = reportUrlFor(sub);
+                      if (url) {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                      } else {
+                        setQrSub(sub);
+                      }
+                    }}
                     className="w-full py-2.5 rounded-xl bg-cyan/10 text-cyan text-xs font-medium hover:bg-cyan/20 transition-colors flex items-center justify-center gap-2"
                   >
-                    <QrCode className="w-3 h-3" />
-                    View report (QR)
+                    <ExternalLink className="w-3 h-3" />
+                    View report
                   </button>
                 )}
 
@@ -186,6 +240,7 @@ export function StatusHubScreen() {
             );
           })}
         </div>
+        )}
 
         {/* Update channels */}
         <div>
@@ -236,19 +291,19 @@ export function StatusHubScreen() {
         </DialogContent>
       </Dialog>
 
-      {/* QR dialog */}
+      {/* Report fallback dialog — shown only for services without an online report page */}
       <Dialog open={!!qrSub} onOpenChange={(open) => !open && setQrSub(null)}>
         <DialogContent className="bg-surface-light border-border">
           <DialogHeader>
-            <DialogTitle>Report QR</DialogTitle>
+            <DialogTitle>Report</DialogTitle>
             <DialogDescription>
-              Scan to open the official {qrSub?.service} report for {qrSub?.cardName}.
+              {qrSub?.service} does not publish reports online. Reference {qrSub?.orderNumber} when contacting the lab.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center py-4">
-            <div className="w-48 h-48 bg-white rounded-xl p-3 flex items-center justify-center">
-              <QrCode className="w-32 h-32 text-surface-dark" />
-            </div>
+            <p className="text-sm text-muted-foreground text-center">
+              Your report for <span className="text-foreground font-medium">{qrSub?.cardName}</span> is delivered directly by the lab.
+            </p>
             <p className="text-xs text-muted-foreground mt-3 font-mono">{qrSub?.orderNumber}</p>
           </div>
           <DialogFooter>

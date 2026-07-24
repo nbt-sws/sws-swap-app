@@ -12,10 +12,7 @@ import {
   Package,
   Shield,
   Bell,
-  CreditCard,
   Settings,
-  Trophy,
-  Zap,
   HelpCircle,
   LogOut,
   Crown,
@@ -31,11 +28,11 @@ const menuItems = [
   { icon: Package, label: 'Vault', description: 'Manage your collection', to: '/vault' },
   { icon: Shield, label: 'KYC Verification', description: 'Verify your identity', to: '/profile/kyc' },
   { icon: Bell, label: 'Notifications', description: 'Offers, orders, and alerts', to: '/notifications' },
-  { icon: CreditCard, label: 'Payment Methods', description: 'Cards and wallets', to: '/settings' },
+  // TODO(deferred): Payment Methods hidden — payment is deferred by the owner and
+  // /settings has no payment section yet. Restore when payments ship.
+  // { icon: CreditCard, label: 'Payment Methods', description: 'Cards and wallets', to: '/settings' },
   { icon: Settings, label: 'Settings', description: 'Language, theme, security', to: '/settings' },
-  { icon: Trophy, label: 'Achievements', description: 'Badges and milestones', to: '/achievements' },
-  { icon: Zap, label: 'Campaigns', description: 'Promotions and events', to: '/campaigns' },
-  { icon: HelpCircle, label: 'Help & Support', description: 'FAQs and contact', to: '#' },
+  { icon: HelpCircle, label: 'Help & Support', description: 'FAQs and contact', to: 'mailto:support@swibswap.app' },
 ];
 
 export function ProfileScreen() {
@@ -52,8 +49,8 @@ export function ProfileScreen() {
   const totalSpent = orders?.reduce((sum, o) => sum + (o.total ?? 0), 0) ?? 0;
   const unreadNotifications = notifications?.filter((n: Notification) => !n.read).length ?? 0;
 
-  // Derive KYC status from user data
-  const kycStatus = (user as any)?.kycStatus ?? 'PENDING';
+  // Derive KYC status from user data — users who never submitted KYC are NONE, not PENDING
+  const kycStatus = (user as any)?.kycStatus ?? 'NONE';
   const tier = (user as any)?.tier ?? 'REGULAR';
 
   return (
@@ -79,19 +76,19 @@ export function ProfileScreen() {
                 <h1 className="mt-4 text-xl font-bold">{(displayUser as any)?.fullName ?? 'Guest'}</h1>
                 <p className="text-sm text-muted-foreground">{(displayUser as any)?.email ?? 'Sign in to access your account'}</p>
                 <div className="mt-3 flex items-center justify-center gap-2">
-                  <Badge className="bg-brand/10 text-brand">
-                    <Crown className="w-3 h-3 mr-1" />
+                  <Badge variant="pixel" className="pxl-chip--brand">
+                    <Crown className="w-3 h-3 mr-1" aria-hidden="true" />
                     {tier}
                   </Badge>
-                  {kycStatus !== 'APPROVED' && (
+                  {kycStatus !== 'APPROVED' && kycStatus !== 'NONE' && (
                     <Badge variant="outline" className="text-pldown border-pldown/30">
-                      <AlertCircle className="w-3 h-3 mr-1" />
+                      <AlertCircle className="w-3 h-3 mr-1" aria-hidden="true" />
                       KYC {kycStatus}
                     </Badge>
                   )}
                   {kycStatus === 'APPROVED' && (
-                    <Badge variant="outline" className="text-plup border-plup/30">
-                      <Shield className="w-3 h-3 mr-1" />
+                    <Badge variant="pixel" className="pxl-chip--peri">
+                      <Shield className="w-3 h-3 mr-1" aria-hidden="true" />
                       Verified
                     </Badge>
                   )}
@@ -131,7 +128,7 @@ export function ProfileScreen() {
         <div className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isExternal = item.to === '#';
+            const isMailto = item.to.startsWith('mailto:');
             const badge = item.label === 'Notifications' && unreadNotifications > 0
               ? String(unreadNotifications)
               : item.label === 'KYC Verification'
@@ -161,8 +158,12 @@ export function ProfileScreen() {
               </div>
             );
 
-            if (isExternal) {
-              return <div key={item.label}>{content}</div>;
+            if (isMailto) {
+              return (
+                <a key={item.label} href={item.to}>
+                  {content}
+                </a>
+              );
             }
 
             return (

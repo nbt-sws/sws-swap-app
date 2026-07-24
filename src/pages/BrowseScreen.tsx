@@ -133,7 +133,7 @@ export function BrowseScreen() {
                       {listing.card.condition}
                     </Badge>
                   </div>
-                  <p className="text-brand font-bold mt-2">
+                  <p className={listing.listingType === 'TRADE' ? 'text-cyan font-bold mt-2' : 'text-brand font-bold mt-2'}>
                     {listing.listingType === 'TRADE' ? 'Trade' : `฿${listing.price.toLocaleString()}`}
                   </p>
                 </div>

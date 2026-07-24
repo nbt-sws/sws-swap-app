@@ -1,9 +1,14 @@
 import { Link } from '@tanstack/react-router';
+import { useMemo } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { useStores, useFollowedSellers, useUnfollowSeller } from '@/hooks/useApi';
+import { listingsApi } from '@/lib/api';
+import { mapApiListingToMarketListing } from '@/lib/api-mappers';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ListingCard } from '@/components/domain/ListingCard';
 import { Users, Store, Package, Heart, Trash2, Loader2 } from 'lucide-react';
 
 interface StoreData {
@@ -40,6 +45,30 @@ export function FollowingScreen() {
   const followedSellers = allSellers.filter((s) => followedIds?.includes(s.id));
 
   const isLoading = storesLoading || followsLoading;
+
+  // Latest listings from followed sellers — real data via GET /market/listings?sellerId=
+  // (one query per followed seller, merged client-side newest-first).
+  const feedQueries = useQueries({
+    queries: followedSellers.map((seller) => ({
+      queryKey: ['sellerListings', seller.id],
+      queryFn: async () => {
+        const res = await listingsApi.getBySeller(seller.id);
+        return res.results.map(mapApiListingToMarketListing);
+      },
+      staleTime: 1000 * 30,
+    })),
+  });
+
+  const feedLoading = feedQueries.some((q) => q.isLoading);
+  const feedListings = useMemo(
+    () =>
+      feedQueries
+        .flatMap((q) => q.data ?? [])
+        .filter((l) => (l.status ?? 'active') === 'active')
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 12),
+    [feedQueries]
+  );
 
   return (
     <PageContainer className="py-6">
@@ -106,12 +135,24 @@ export function FollowingScreen() {
             <Heart className="w-4 h-4 text-brand" />
             New listings from followed sellers
           </h2>
-          <Card className="bg-surface-light border-border">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <Package className="w-10 h-10 mx-auto mb-3 opacity-50" />
-              <p>Feed from followed sellers will appear here.</p>
-            </CardContent>
-          </Card>
+          {feedLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-brand" />
+            </div>
+          ) : feedListings.length === 0 ? (
+            <Card className="bg-surface-light border-border">
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <Package className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                <p>No listings from followed sellers yet.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {feedListings.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </PageContainer>

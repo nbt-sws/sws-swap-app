@@ -142,7 +142,7 @@ function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
   }
 
   return (
-    <Card className="relative overflow-hidden border-border/60 bg-surface-light/80 backdrop-blur-sm transition-all duration-300 hover:border-brand/30 hover:shadow-glow">
+    <Card className="relative overflow-hidden border-border/60 bg-surface-light/80 backdrop-blur-sm transition-all duration-300 hover:border-brand/30 hover:shadow-glow pxl-shadow-brand">
       {/* Top accent line */}
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-gradient opacity-80" />
       <CardContent className="p-5 sm:p-6">
@@ -381,7 +381,7 @@ function MarketPulse({ listings, loading, t }: { listings?: MarketListing[]; loa
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-                <div className="absolute left-2 top-2 rounded-full bg-surface-dark/80 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm border border-white/10">
+                <div className={cn('absolute left-2 top-2 rounded-full bg-surface-dark/80 px-2 py-0.5 text-xs font-semibold backdrop-blur-sm border border-white/10', listing.listingType === 'TRADE' ? 'text-cyan' : 'text-white')}>
                   {listing.listingType === 'TRADE' ? t('home.marketPulse.trade') : formatPrice(listing.price)}
                 </div>
                 {/* Hover arrow */}
@@ -426,7 +426,7 @@ function ActivitySummary({ orders, offers, loading, t }: { orders?: Order[]; off
                 <ClipboardList className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-2xl sm:text-3xl font-bold mono-num leading-none">{pendingOrders}</p>
+                <p className="text-2xl sm:text-3xl font-bold pxl-num leading-none">{pendingOrders}</p>
                 <p className="text-xs text-muted-foreground mt-1 truncate">{t('home.activity.pendingOrders', { count: pendingOrders })}</p>
               </div>
             </Link>
@@ -435,7 +435,7 @@ function ActivitySummary({ orders, offers, loading, t }: { orders?: Order[]; off
                 <Handshake className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <p className="text-2xl sm:text-3xl font-bold mono-num leading-none">{pendingOffers}</p>
+                <p className="text-2xl sm:text-3xl font-bold pxl-num leading-none">{pendingOffers}</p>
                 <p className="text-xs text-muted-foreground mt-1 truncate">{t('home.activity.pendingOffers', { count: pendingOffers })}</p>
               </div>
             </Link>
@@ -609,9 +609,9 @@ export function HomeScreen() {
     <PageContainer size="xl" className="py-6 space-y-6">
       <HeroGreeting greeting={greeting} dateStr={dateStr} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         {/* Main column */}
-        <div className="space-y-6 stagger-fade-in">
+        <div className="space-y-6 stagger-fade-in min-w-0">
           {isAuthenticated ? (
             <>
               <PortfolioCard vault={vault} loading={userLoading || vaultLoading} t={t} />
@@ -630,7 +630,7 @@ export function HomeScreen() {
         </div>
 
         {/* Side column */}
-        <div className="space-y-6 stagger-fade-in">
+        <div className="space-y-6 stagger-fade-in min-w-0">
           {(user as any) && !isUserMember && !userLoading && <KycBanner t={t} />}
           {isAuthenticated && <WishlistSnapshot items={wishlist} loading={wishlistLoading} t={t} />}
           <DiscoveryCard t={t} />

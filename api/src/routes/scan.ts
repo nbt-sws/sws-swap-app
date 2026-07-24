@@ -328,6 +328,31 @@ scanRoutes.post('/scan', authMiddleware, async (c) => {
     }
   }
 
+  // 7b) Community samples — fill image gaps the official catalog can't (user-contributed)
+  const allCodes = [card.code, ...nearMatches.map((m) => m.code), ...candidates.map((cd) => cd.code)]
+    .map((cd) => String(cd ?? '').toUpperCase())
+    .filter(Boolean);
+  let mainSampleUrl: string | null = null;
+  if (allCodes.length) {
+    const sampleRows = await withTenant(c.env, tenantId, async (client) => {
+      const { rows } = await client.query(
+        `SELECT DISTINCT ON (UPPER(code)) code, image_url FROM public.community_samples
+         WHERE UPPER(code) = ANY($1) AND status = 'APPROVED'`,
+        [allCodes]
+      );
+      return rows;
+    });
+    const fillImage = (src: any) => {
+      if (!src || src.imageUrl) return;
+      const s = sampleRows.find((row: any) => String(row.code).toUpperCase() === String(src.code ?? '').toUpperCase());
+      if (s) src.imageUrl = s.image_url;
+    };
+    fillImage(catalog);
+    nearMatches.forEach(fillImage);
+    candidates.forEach(fillImage);
+    mainSampleUrl = sampleRows.find((row: any) => String(row.code).toUpperCase() === String(card.code ?? '').toUpperCase())?.image_url ?? null;
+  }
+
   // 7) Persist: image to R2 + cache row
   const origin = new URL(c.req.url).origin;
   const imageKey = `scans/${tenantId}/${hash}.jpg`;
@@ -356,9 +381,13 @@ scanRoutes.post('/scan', authMiddleware, async (c) => {
     })(),
   };
 
-  // 8) Image options — user's photo first, then official/catalog sample images to pick as cover
+  // 8) Image options — user's photo first, then official/catalog/community samples to pick as cover
   const imageOptions: { url: string; label: string }[] = [{ url: imageUrl, label: 'your-photo' }];
   const seenImages = new Set<string>([imageUrl]);
+  if (mainSampleUrl && !seenImages.has(mainSampleUrl)) {
+    seenImages.add(mainSampleUrl);
+    imageOptions.push({ url: mainSampleUrl, label: 'community' });
+  }
   for (const src of [catalog, ...nearMatches, ...candidates]) {
     const u = src?.imageUrl;
     if (u && !seenImages.has(u) && imageOptions.length < 6) {
@@ -377,4 +406,52 @@ scanRoutes.post('/scan', authMiddleware, async (c) => {
   });
 
   return c.json({ ok: true, cached: false, card: cardOut, hash, imageUrl, identifiedBy, crossCheck, catalog, nearMatches, candidates, imageOptions });
+});
+
+// ─── POST /api/v1/scan/contribute — share your photo as the community sample ───
+// Pre-launch: auto-approved. Only our own hosted scan images are accepted.
+const contributeSchema = z.object({
+  code: z.string().min(2).max(40),
+  game: z.string().default('one-piece'),
+  lang: z.string().default('JP'),
+  rarity: z.string().max(40).optional(),
+  nameEn: z.string().max(200).optional(),
+  imageUrl: z.string().url(),
+});
+
+scanRoutes.post('/scan/contribute', authMiddleware, async (c) => {
+  const tenantId = c.get('tenantId');
+  const userId = c.get('userId');
+  if (!userId) return c.json({ error: 'Unauthorized' }, 401);
+
+  const body = await c.req.json();
+  const parsed = contributeSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid input', details: parsed.error.flatten() }, 400);
+  }
+  const { code, game, lang, rarity, nameEn, imageUrl } = parsed.data;
+
+  // Trust gate: only images hosted by this API (uploaded scans) can become samples
+  const origin = new URL(c.req.url).origin;
+  if (!imageUrl.startsWith(`${origin}/api/v1/images/`)) {
+    return c.json({ error: 'Only scanned/uploaded images hosted by this app can be contributed' }, 400);
+  }
+
+  const normalized = code.replace(/\s+/g, '').toUpperCase();
+  const sample = await withTenant(c.env, tenantId, async (client) => {
+    const { rows } = await client.query(
+      `INSERT INTO public.community_samples (code, game, lang, rarity, name_en, image_url, contributed_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (code, lang, rarity) DO UPDATE SET
+         image_url = EXCLUDED.image_url,
+         name_en = EXCLUDED.name_en,
+         contributed_by = EXCLUDED.contributed_by,
+         created_at = NOW()
+       RETURNING id, code, lang, rarity, image_url`,
+      [normalized, game, lang.toUpperCase(), rarity || '', nameEn || null, imageUrl, userId]
+    );
+    return rows[0];
+  });
+
+  return c.json({ ok: true, sample });
 });

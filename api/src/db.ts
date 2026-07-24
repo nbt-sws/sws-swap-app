@@ -8,6 +8,8 @@ export interface Env {
   GOOGLE_VISION_API_KEY: string;
   EBAY_APP_ID: string;
   EBAY_CERT_ID: string;
+  /** Base URL of the sws-scanner-service (e.g. http://localhost:8088). Optional — scanner features degrade gracefully when unset. */
+  SCANNER_SERVICE_URL?: string;
 }
 
 type DbClient = InstanceType<typeof Pool.prototype.connect>;

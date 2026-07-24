@@ -146,7 +146,7 @@ function Stat({ value, label, icon }: { value: number; label: string; icon: Reac
         {icon}
       </div>
       <div>
-        <p className="text-sm font-bold font-mono leading-none">{value.toLocaleString()}</p>
+        <p className="text-sm font-bold pxl-num leading-none">{value.toLocaleString()}</p>
         <p className="text-[11px] text-muted-foreground mt-0.5 uppercase tracking-wider">{label}</p>
       </div>
     </div>

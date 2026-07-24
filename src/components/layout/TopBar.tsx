@@ -2,8 +2,8 @@ import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import {
   Search, Bell, Menu, Package, Sun, Moon, Globe,
-  Award, Megaphone, House, Store, Users, ClipboardList,
-  Heart, User,
+  Award, House, Store, Users, ClipboardList,
+  Heart, User, Layers,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -19,22 +19,33 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 
+// R3 category wayfinding accents — same active-state language as
+// BottomNav/Sidebar: accent tint + hard square indicator bar.
+const NAV_ACCENTS = {
+  brand: { bg: 'bg-brand/10', text: 'text-brand', bar: 'bg-brand' },
+  cyan: { bg: 'bg-cyan/10', text: 'text-cyan', bar: 'bg-cyan' },
+  peri: { bg: 'bg-periwinkle/10', text: 'text-periwinkle', bar: 'bg-periwinkle' },
+} as const;
+
+type NavAccent = keyof typeof NAV_ACCENTS;
+
 interface NavItem {
   to: string;
   label: string;
   icon: React.ElementType;
   requiresAuth?: boolean;
+  accent?: NavAccent;
 }
 
 // Mobile hamburger menu — mirrors the remaining Sidebar nav + top nav items
 const MOBILE_NAV: NavItem[] = [
   { to: '/', label: 'nav.home', icon: House },
-  { to: '/market', label: 'nav.market', icon: Search },
-  { to: '/stores', label: 'nav.stores', icon: Store },
+  { to: '/market', label: 'nav.market', icon: Search, accent: 'cyan' },
+  { to: '/cards', label: 'nav.cards', icon: Layers, accent: 'cyan' },
+  { to: '/stores', label: 'nav.stores', icon: Store, accent: 'cyan' },
   { to: '/following', label: 'nav.following', icon: Users },
-  { to: '/vault', label: 'nav.vault', icon: Package, requiresAuth: true },
+  { to: '/vault', label: 'nav.vault', icon: Package, requiresAuth: true, accent: 'peri' },
   { to: '/services', label: 'nav.services', icon: Award },
-  { to: '/campaigns', label: 'nav.campaigns', icon: Megaphone },
   { to: '/orders', label: 'nav.orders', icon: ClipboardList, requiresAuth: true },
   { to: '/wishlist', label: 'nav.wishlist', icon: Heart, requiresAuth: true },
   { to: '/profile', label: 'nav.profile', icon: User },
@@ -42,9 +53,9 @@ const MOBILE_NAV: NavItem[] = [
 
 // Desktop top nav — moved from Sidebar
 const TOP_NAV: NavItem[] = [
-  { to: '/vault', label: 'nav.vault', icon: Package, requiresAuth: true },
+  { to: '/vault', label: 'nav.vault', icon: Package, requiresAuth: true, accent: 'peri' },
+  { to: '/cards', label: 'nav.cards', icon: Layers, accent: 'cyan' },
   { to: '/services', label: 'nav.services', icon: Award },
-  { to: '/campaigns', label: 'nav.campaigns', icon: Megaphone },
 ];
 
 export function TopBar() {
@@ -95,17 +106,22 @@ export function TopBar() {
                     if (item.requiresAuth && !isAuthenticated) return null;
                     const active = isActive(item.to);
                     const Icon = item.icon;
+                    const accent = NAV_ACCENTS[item.accent ?? 'brand'];
                     return (
                       <Link
                         key={item.to}
                         to={item.to}
+                        aria-current={active ? 'page' : undefined}
                         className={cn(
-                          'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                          'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                           active
-                            ? 'bg-brand/10 text-brand'
+                            ? cn(accent.bg, accent.text)
                             : 'text-muted-foreground hover:text-foreground hover:bg-surface-light'
                         )}
                       >
+                        {active && (
+                          <span aria-hidden="true" className={cn('absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px]', accent.bar)} />
+                        )}
                         <Icon className="w-5 h-5" />
                         {t(item.label)}
                       </Link>
@@ -145,19 +161,24 @@ export function TopBar() {
               if (item.requiresAuth && !isAuthenticated) return null;
               const active = isActive(item.to);
               const Icon = item.icon;
+              const accent = NAV_ACCENTS[item.accent ?? 'brand'];
               return (
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                    'relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
                     active
-                      ? 'bg-brand/10 text-brand'
+                      ? cn(accent.bg, accent.text)
                       : 'text-muted-foreground hover:text-foreground hover:bg-surface-light'
                   )}
                 >
                   <Icon className="w-4 h-4" />
                   {t(item.label)}
+                  {active && (
+                    <span aria-hidden="true" className={cn('absolute bottom-1 left-1/2 -translate-x-1/2 h-[2px] w-5', accent.bar)} />
+                  )}
                 </Link>
               );
             })}

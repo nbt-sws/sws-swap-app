@@ -23,7 +23,6 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RedemptionsRouteImport } from './routes/redemptions'
 import { Route as RatingsRouteImport } from './routes/ratings'
 import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PregradeRouteImport } from './routes/pregrade'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OffersRouteImport } from './routes/offers'
@@ -31,13 +30,10 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FollowingRouteImport } from './routes/following'
-import { Route as ExtractRouteImport } from './routes/extract'
 import { Route as DevLoginRouteImport } from './routes/dev-login'
-import { Route as CampaignsRouteImport } from './routes/campaigns'
+import { Route as CardsRouteImport } from './routes/cards'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AddToVaultRouteImport } from './routes/add-to-vault'
-import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VaultIndexRouteImport } from './routes/vault.index'
 import { Route as ServiceOrdersIndexRouteImport } from './routes/service-orders.index'
@@ -45,8 +41,7 @@ import { Route as SellerIndexRouteImport } from './routes/seller.index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as MarketIndexRouteImport } from './routes/market.index'
-import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
-import { Route as AchievementsIndexRouteImport } from './routes/achievements.index'
+import { Route as CardsIndexRouteImport } from './routes/cards.index'
 import { Route as ServiceProviderProviderIdRouteImport } from './routes/service-provider.$providerId'
 import { Route as ServiceOrdersOrderIdRouteImport } from './routes/service-orders.$orderId'
 import { Route as SellerOrdersRouteImport } from './routes/seller.orders'
@@ -56,8 +51,7 @@ import { Route as ProfileKycRouteImport } from './routes/profile.kyc'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as MarketListingIdRouteImport } from './routes/market.$listingId'
 import { Route as CheckoutListingIdRouteImport } from './routes/checkout.$listingId'
-import { Route as CampaignsSlugRouteImport } from './routes/campaigns.$slug'
-import { Route as AchievementsSlugRouteImport } from './routes/achievements.$slug'
+import { Route as CardsBrowseRouteImport } from './routes/cards.browse'
 import { Route as VaultItemsItemIdRouteImport } from './routes/vault.items.$itemId'
 
 const WishlistRoute = WishlistRouteImport.update({
@@ -130,11 +124,6 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PregradeRoute = PregradeRouteImport.update({
   id: '/pregrade',
   path: '/pregrade',
@@ -170,19 +159,14 @@ const FollowingRoute = FollowingRouteImport.update({
   path: '/following',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ExtractRoute = ExtractRouteImport.update({
-  id: '/extract',
-  path: '/extract',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DevLoginRoute = DevLoginRouteImport.update({
   id: '/dev-login',
   path: '/dev-login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsRoute = CampaignsRouteImport.update({
-  id: '/campaigns',
-  path: '/campaigns',
+const CardsRoute = CardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrowseRoute = BrowseRouteImport.update({
@@ -193,16 +177,6 @@ const BrowseRoute = BrowseRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AddToVaultRoute = AddToVaultRouteImport.update({
-  id: '/add-to-vault',
-  path: '/add-to-vault',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AchievementsRoute = AchievementsRouteImport.update({
-  id: '/achievements',
-  path: '/achievements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -240,15 +214,10 @@ const MarketIndexRoute = MarketIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MarketRoute,
 } as any)
-const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
+const CardsIndexRoute = CardsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => CampaignsRoute,
-} as any)
-const AchievementsIndexRoute = AchievementsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AchievementsRoute,
+  getParentRoute: () => CardsRoute,
 } as any)
 const ServiceProviderProviderIdRoute =
   ServiceProviderProviderIdRouteImport.update({
@@ -296,15 +265,10 @@ const CheckoutListingIdRoute = CheckoutListingIdRouteImport.update({
   path: '/checkout/$listingId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CampaignsSlugRoute = CampaignsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CampaignsRoute,
-} as any)
-const AchievementsSlugRoute = AchievementsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => AchievementsRoute,
+const CardsBrowseRoute = CardsBrowseRouteImport.update({
+  id: '/browse',
+  path: '/browse',
+  getParentRoute: () => CardsRoute,
 } as any)
 const VaultItemsItemIdRoute = VaultItemsItemIdRouteImport.update({
   id: '/items/$itemId',
@@ -314,13 +278,10 @@ const VaultItemsItemIdRoute = VaultItemsItemIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/achievements': typeof AchievementsRouteWithChildren
-  '/add-to-vault': typeof AddToVaultRoute
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
-  '/campaigns': typeof CampaignsRouteWithChildren
+  '/cards': typeof CardsRouteWithChildren
   '/dev-login': typeof DevLoginRoute
-  '/extract': typeof ExtractRoute
   '/following': typeof FollowingRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRouteWithChildren
@@ -328,7 +289,6 @@ export interface FileRoutesByFullPath {
   '/offers': typeof OffersRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pregrade': typeof PregradeRoute
-  '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRouteWithChildren
   '/ratings': typeof RatingsRoute
   '/redemptions': typeof RedemptionsRoute
@@ -343,8 +303,7 @@ export interface FileRoutesByFullPath {
   '/vault': typeof VaultRouteWithChildren
   '/vault-deliveries': typeof VaultDeliveriesRoute
   '/wishlist': typeof WishlistRoute
-  '/achievements/$slug': typeof AchievementsSlugRoute
-  '/campaigns/$slug': typeof CampaignsSlugRoute
+  '/cards/browse': typeof CardsBrowseRoute
   '/checkout/$listingId': typeof CheckoutListingIdRoute
   '/market/$listingId': typeof MarketListingIdRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -354,8 +313,7 @@ export interface FileRoutesByFullPath {
   '/seller/orders': typeof SellerOrdersRoute
   '/service-orders/$orderId': typeof ServiceOrdersOrderIdRoute
   '/service-provider/$providerId': typeof ServiceProviderProviderIdRoute
-  '/achievements/': typeof AchievementsIndexRoute
-  '/campaigns/': typeof CampaignsIndexRoute
+  '/cards/': typeof CardsIndexRoute
   '/market/': typeof MarketIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
@@ -366,17 +324,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/add-to-vault': typeof AddToVaultRoute
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/dev-login': typeof DevLoginRoute
-  '/extract': typeof ExtractRoute
   '/following': typeof FollowingRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/offers': typeof OffersRoute
   '/pregrade': typeof PregradeRoute
-  '/pricing': typeof PricingRoute
   '/ratings': typeof RatingsRoute
   '/redemptions': typeof RedemptionsRoute
   '/register': typeof RegisterRoute
@@ -388,8 +343,7 @@ export interface FileRoutesByTo {
   '/stores': typeof StoresRoute
   '/vault-deliveries': typeof VaultDeliveriesRoute
   '/wishlist': typeof WishlistRoute
-  '/achievements/$slug': typeof AchievementsSlugRoute
-  '/campaigns/$slug': typeof CampaignsSlugRoute
+  '/cards/browse': typeof CardsBrowseRoute
   '/checkout/$listingId': typeof CheckoutListingIdRoute
   '/market/$listingId': typeof MarketListingIdRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -399,8 +353,7 @@ export interface FileRoutesByTo {
   '/seller/orders': typeof SellerOrdersRoute
   '/service-orders/$orderId': typeof ServiceOrdersOrderIdRoute
   '/service-provider/$providerId': typeof ServiceProviderProviderIdRoute
-  '/achievements': typeof AchievementsIndexRoute
-  '/campaigns': typeof CampaignsIndexRoute
+  '/cards': typeof CardsIndexRoute
   '/market': typeof MarketIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/profile': typeof ProfileIndexRoute
@@ -412,13 +365,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/achievements': typeof AchievementsRouteWithChildren
-  '/add-to-vault': typeof AddToVaultRoute
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
-  '/campaigns': typeof CampaignsRouteWithChildren
+  '/cards': typeof CardsRouteWithChildren
   '/dev-login': typeof DevLoginRoute
-  '/extract': typeof ExtractRoute
   '/following': typeof FollowingRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRouteWithChildren
@@ -426,7 +376,6 @@ export interface FileRoutesById {
   '/offers': typeof OffersRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pregrade': typeof PregradeRoute
-  '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRouteWithChildren
   '/ratings': typeof RatingsRoute
   '/redemptions': typeof RedemptionsRoute
@@ -441,8 +390,7 @@ export interface FileRoutesById {
   '/vault': typeof VaultRouteWithChildren
   '/vault-deliveries': typeof VaultDeliveriesRoute
   '/wishlist': typeof WishlistRoute
-  '/achievements/$slug': typeof AchievementsSlugRoute
-  '/campaigns/$slug': typeof CampaignsSlugRoute
+  '/cards/browse': typeof CardsBrowseRoute
   '/checkout/$listingId': typeof CheckoutListingIdRoute
   '/market/$listingId': typeof MarketListingIdRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -452,8 +400,7 @@ export interface FileRoutesById {
   '/seller/orders': typeof SellerOrdersRoute
   '/service-orders/$orderId': typeof ServiceOrdersOrderIdRoute
   '/service-provider/$providerId': typeof ServiceProviderProviderIdRoute
-  '/achievements/': typeof AchievementsIndexRoute
-  '/campaigns/': typeof CampaignsIndexRoute
+  '/cards/': typeof CardsIndexRoute
   '/market/': typeof MarketIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
@@ -466,13 +413,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/achievements'
-    | '/add-to-vault'
     | '/admin'
     | '/browse'
-    | '/campaigns'
+    | '/cards'
     | '/dev-login'
-    | '/extract'
     | '/following'
     | '/login'
     | '/market'
@@ -480,7 +424,6 @@ export interface FileRouteTypes {
     | '/offers'
     | '/orders'
     | '/pregrade'
-    | '/pricing'
     | '/profile'
     | '/ratings'
     | '/redemptions'
@@ -495,8 +438,7 @@ export interface FileRouteTypes {
     | '/vault'
     | '/vault-deliveries'
     | '/wishlist'
-    | '/achievements/$slug'
-    | '/campaigns/$slug'
+    | '/cards/browse'
     | '/checkout/$listingId'
     | '/market/$listingId'
     | '/orders/$orderId'
@@ -506,8 +448,7 @@ export interface FileRouteTypes {
     | '/seller/orders'
     | '/service-orders/$orderId'
     | '/service-provider/$providerId'
-    | '/achievements/'
-    | '/campaigns/'
+    | '/cards/'
     | '/market/'
     | '/orders/'
     | '/profile/'
@@ -518,17 +459,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/add-to-vault'
     | '/admin'
     | '/browse'
     | '/dev-login'
-    | '/extract'
     | '/following'
     | '/login'
     | '/notifications'
     | '/offers'
     | '/pregrade'
-    | '/pricing'
     | '/ratings'
     | '/redemptions'
     | '/register'
@@ -540,8 +478,7 @@ export interface FileRouteTypes {
     | '/stores'
     | '/vault-deliveries'
     | '/wishlist'
-    | '/achievements/$slug'
-    | '/campaigns/$slug'
+    | '/cards/browse'
     | '/checkout/$listingId'
     | '/market/$listingId'
     | '/orders/$orderId'
@@ -551,8 +488,7 @@ export interface FileRouteTypes {
     | '/seller/orders'
     | '/service-orders/$orderId'
     | '/service-provider/$providerId'
-    | '/achievements'
-    | '/campaigns'
+    | '/cards'
     | '/market'
     | '/orders'
     | '/profile'
@@ -563,13 +499,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/achievements'
-    | '/add-to-vault'
     | '/admin'
     | '/browse'
-    | '/campaigns'
+    | '/cards'
     | '/dev-login'
-    | '/extract'
     | '/following'
     | '/login'
     | '/market'
@@ -577,7 +510,6 @@ export interface FileRouteTypes {
     | '/offers'
     | '/orders'
     | '/pregrade'
-    | '/pricing'
     | '/profile'
     | '/ratings'
     | '/redemptions'
@@ -592,8 +524,7 @@ export interface FileRouteTypes {
     | '/vault'
     | '/vault-deliveries'
     | '/wishlist'
-    | '/achievements/$slug'
-    | '/campaigns/$slug'
+    | '/cards/browse'
     | '/checkout/$listingId'
     | '/market/$listingId'
     | '/orders/$orderId'
@@ -603,8 +534,7 @@ export interface FileRouteTypes {
     | '/seller/orders'
     | '/service-orders/$orderId'
     | '/service-provider/$providerId'
-    | '/achievements/'
-    | '/campaigns/'
+    | '/cards/'
     | '/market/'
     | '/orders/'
     | '/profile/'
@@ -616,13 +546,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AchievementsRoute: typeof AchievementsRouteWithChildren
-  AddToVaultRoute: typeof AddToVaultRoute
   AdminRoute: typeof AdminRoute
   BrowseRoute: typeof BrowseRoute
-  CampaignsRoute: typeof CampaignsRouteWithChildren
+  CardsRoute: typeof CardsRouteWithChildren
   DevLoginRoute: typeof DevLoginRoute
-  ExtractRoute: typeof ExtractRoute
   FollowingRoute: typeof FollowingRoute
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRouteWithChildren
@@ -630,7 +557,6 @@ export interface RootRouteChildren {
   OffersRoute: typeof OffersRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PregradeRoute: typeof PregradeRoute
-  PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRouteWithChildren
   RatingsRoute: typeof RatingsRoute
   RedemptionsRoute: typeof RedemptionsRoute
@@ -751,13 +677,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/pregrade': {
       id: '/pregrade'
       path: '/pregrade'
@@ -807,13 +726,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FollowingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/extract': {
-      id: '/extract'
-      path: '/extract'
-      fullPath: '/extract'
-      preLoaderRoute: typeof ExtractRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dev-login': {
       id: '/dev-login'
       path: '/dev-login'
@@ -821,11 +733,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns': {
-      id: '/campaigns'
-      path: '/campaigns'
-      fullPath: '/campaigns'
-      preLoaderRoute: typeof CampaignsRouteImport
+    '/cards': {
+      id: '/cards'
+      path: '/cards'
+      fullPath: '/cards'
+      preLoaderRoute: typeof CardsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/browse': {
@@ -840,20 +752,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/add-to-vault': {
-      id: '/add-to-vault'
-      path: '/add-to-vault'
-      fullPath: '/add-to-vault'
-      preLoaderRoute: typeof AddToVaultRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/achievements': {
-      id: '/achievements'
-      path: '/achievements'
-      fullPath: '/achievements'
-      preLoaderRoute: typeof AchievementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -905,19 +803,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketIndexRouteImport
       parentRoute: typeof MarketRoute
     }
-    '/campaigns/': {
-      id: '/campaigns/'
+    '/cards/': {
+      id: '/cards/'
       path: '/'
-      fullPath: '/campaigns/'
-      preLoaderRoute: typeof CampaignsIndexRouteImport
-      parentRoute: typeof CampaignsRoute
-    }
-    '/achievements/': {
-      id: '/achievements/'
-      path: '/'
-      fullPath: '/achievements/'
-      preLoaderRoute: typeof AchievementsIndexRouteImport
-      parentRoute: typeof AchievementsRoute
+      fullPath: '/cards/'
+      preLoaderRoute: typeof CardsIndexRouteImport
+      parentRoute: typeof CardsRoute
     }
     '/service-provider/$providerId': {
       id: '/service-provider/$providerId'
@@ -982,19 +873,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutListingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/campaigns/$slug': {
-      id: '/campaigns/$slug'
-      path: '/$slug'
-      fullPath: '/campaigns/$slug'
-      preLoaderRoute: typeof CampaignsSlugRouteImport
-      parentRoute: typeof CampaignsRoute
-    }
-    '/achievements/$slug': {
-      id: '/achievements/$slug'
-      path: '/$slug'
-      fullPath: '/achievements/$slug'
-      preLoaderRoute: typeof AchievementsSlugRouteImport
-      parentRoute: typeof AchievementsRoute
+    '/cards/browse': {
+      id: '/cards/browse'
+      path: '/browse'
+      fullPath: '/cards/browse'
+      preLoaderRoute: typeof CardsBrowseRouteImport
+      parentRoute: typeof CardsRoute
     }
     '/vault/items/$itemId': {
       id: '/vault/items/$itemId'
@@ -1006,33 +890,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AchievementsRouteChildren {
-  AchievementsSlugRoute: typeof AchievementsSlugRoute
-  AchievementsIndexRoute: typeof AchievementsIndexRoute
+interface CardsRouteChildren {
+  CardsBrowseRoute: typeof CardsBrowseRoute
+  CardsIndexRoute: typeof CardsIndexRoute
 }
 
-const AchievementsRouteChildren: AchievementsRouteChildren = {
-  AchievementsSlugRoute: AchievementsSlugRoute,
-  AchievementsIndexRoute: AchievementsIndexRoute,
+const CardsRouteChildren: CardsRouteChildren = {
+  CardsBrowseRoute: CardsBrowseRoute,
+  CardsIndexRoute: CardsIndexRoute,
 }
 
-const AchievementsRouteWithChildren = AchievementsRoute._addFileChildren(
-  AchievementsRouteChildren,
-)
-
-interface CampaignsRouteChildren {
-  CampaignsSlugRoute: typeof CampaignsSlugRoute
-  CampaignsIndexRoute: typeof CampaignsIndexRoute
-}
-
-const CampaignsRouteChildren: CampaignsRouteChildren = {
-  CampaignsSlugRoute: CampaignsSlugRoute,
-  CampaignsIndexRoute: CampaignsIndexRoute,
-}
-
-const CampaignsRouteWithChildren = CampaignsRoute._addFileChildren(
-  CampaignsRouteChildren,
-)
+const CardsRouteWithChildren = CardsRoute._addFileChildren(CardsRouteChildren)
 
 interface MarketRouteChildren {
   MarketListingIdRoute: typeof MarketListingIdRoute
@@ -1104,13 +972,10 @@ const VaultRouteWithChildren = VaultRoute._addFileChildren(VaultRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AchievementsRoute: AchievementsRouteWithChildren,
-  AddToVaultRoute: AddToVaultRoute,
   AdminRoute: AdminRoute,
   BrowseRoute: BrowseRoute,
-  CampaignsRoute: CampaignsRouteWithChildren,
+  CardsRoute: CardsRouteWithChildren,
   DevLoginRoute: DevLoginRoute,
-  ExtractRoute: ExtractRoute,
   FollowingRoute: FollowingRoute,
   LoginRoute: LoginRoute,
   MarketRoute: MarketRouteWithChildren,
@@ -1118,7 +983,6 @@ const rootRouteChildren: RootRouteChildren = {
   OffersRoute: OffersRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PregradeRoute: PregradeRoute,
-  PricingRoute: PricingRoute,
   ProfileRoute: ProfileRouteWithChildren,
   RatingsRoute: RatingsRoute,
   RedemptionsRoute: RedemptionsRoute,

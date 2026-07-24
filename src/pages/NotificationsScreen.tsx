@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
   useNotifications,
   useMarkNotificationRead,
@@ -19,6 +19,13 @@ import {
 } from '@/components/ui/empty';
 import { Bell, ShoppingBag, MessageSquare, Heart, ArrowRightLeft, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Real backend event types look like ORDER_CREATED / ORDER_STATUS /
+// ORDER_COMPLETED / OFFER_RECEIVED / OFFER_ACCEPTED / OFFER_DECLINED —
+// normalize to a lowercase category for icons and colors.
+function categoryOf(type: string): string {
+  return type.split('_')[0].toLowerCase();
+}
 
 const ICONS: Record<string, React.ElementType> = {
   order: ShoppingBag,
@@ -50,6 +57,7 @@ function relativeTime(iso: string): string {
 
 export function NotificationsScreen() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: notifications, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
@@ -63,6 +71,18 @@ export function NotificationsScreen() {
   const handleMarkAll = () => {
     const unreadIds = notifications?.filter((n) => !n.read).map((n) => n.id) ?? [];
     if (unreadIds.length) markAll.mutate(unreadIds);
+  };
+
+  // [P2-3] Click-through: route by notification event type. The notification
+  // payload carries no related entity id, so order notifications land on the
+  // orders list rather than a specific order detail (backend gap).
+  const handleOpen = (n: { id: string; type: string }) => {
+    handleMarkRead(n.id);
+    if (n.type.startsWith('ORDER')) {
+      navigate({ to: '/orders' });
+    } else if (n.type.startsWith('OFFER')) {
+      navigate({ to: '/offers' });
+    }
   };
 
   if (isLoading) {
@@ -95,15 +115,33 @@ export function NotificationsScreen() {
       <div className="space-y-6">
         <div className="space-y-3">
           {notifications?.map((n) => {
-            const Icon = ICONS[n.type] ?? Bell;
+            const category = categoryOf(n.type);
+            const Icon = ICONS[category] ?? Bell;
+            const navigates = n.type.startsWith('ORDER') || n.type.startsWith('OFFER');
             return (
               <Card
                 key={n.id}
-                className={cn('bg-surface-light border-border transition', !n.read && 'border-brand/30')}
-                onClick={() => handleMarkRead(n.id)}
+                role={navigates ? 'button' : undefined}
+                tabIndex={navigates ? 0 : undefined}
+                onKeyDown={
+                  navigates
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleOpen(n);
+                        }
+                      }
+                    : undefined
+                }
+                className={cn(
+                  'bg-surface-light border-border transition',
+                  navigates && 'cursor-pointer hover:border-brand/40',
+                  !n.read && 'border-brand/30'
+                )}
+                onClick={() => handleOpen(n)}
               >
                 <CardContent className="p-4 flex items-start gap-3">
-                  <div className={cn('w-10 h-10 rounded-full flex items-center justify-center shrink-0', COLORS[n.type] ?? 'bg-surface-lighter text-muted-foreground')}>
+                  <div className={cn('w-10 h-10 rounded-full flex items-center justify-center shrink-0', COLORS[category] ?? 'bg-surface-lighter text-muted-foreground')}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">

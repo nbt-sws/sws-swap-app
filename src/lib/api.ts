@@ -73,10 +73,11 @@ function createWrappers(instance: typeof api) {
       }
     },
 
-    async post<T>(path: string, options?: { json?: unknown; body?: FormData }): Promise<T> {
+    async post<T>(path: string, options?: { json?: unknown; body?: FormData; signal?: AbortSignal }): Promise<T> {
       try {
         const headers = getAuthHeaders();
-        const opts: { headers: Record<string, string>; json?: unknown; body?: FormData } = { headers };
+        const opts: { headers: Record<string, string>; json?: unknown; body?: FormData; signal?: AbortSignal } = { headers };
+        if (options?.signal) opts.signal = options.signal;
         if (options?.body) {
           opts.body = options.body;
         } else if (options?.json !== undefined) {
@@ -350,13 +351,32 @@ export const marketApi = {
   getStats: (sku: string) => apiGet<ApiMarketStats>(`market/${sku}/stats`),
 };
 
+/** Response shape of POST /offers/:id/accept|decline and PATCH /offers/:id.
+ *  `orderId` is optional — the current backend does NOT create an order on
+ *  accept, but the field is handled if the backend starts returning one. */
+export interface OfferActionResult {
+  id: string;
+  status: string;
+  offerPrice?: number;
+  updatedAt?: string;
+  orderId?: string;
+}
+
 export const offersApi = {
   getReceived: () => apiGet<{ offers: ApiOffer[] }>('offers/received'),
   getSent: () => apiGet<{ offers: ApiOffer[] }>('offers/sent'),
   create: (data: { listingId: string; sellerId: string; offerPrice: number }) =>
     apiPost<ApiOffer>('offers', { json: data }),
-  accept: (offerId: string) => apiPost<ApiOffer>(`offers/${offerId}/accept`),
-  decline: (offerId: string) => apiPost<ApiOffer>(`offers/${offerId}/decline`),
+  accept: (offerId: string) => apiPost<OfferActionResult>(`offers/${offerId}/accept`),
+  decline: (offerId: string) => apiPost<OfferActionResult>(`offers/${offerId}/decline`),
+  // PATCH /offers/:id { status: 'COUNTERED', offerPrice } — seller only (incoming offers)
+  counter: (offerId: string, offerPrice: number) =>
+    apiPatch<OfferActionResult>(`offers/${offerId}`, { json: { status: 'COUNTERED', offerPrice } }),
+  // GAP: backend has no buyer-side withdraw endpoint. Closest real mutation is
+  // PATCH /offers/:id { status: 'DECLINED' }, which the backend currently
+  // authorizes for the seller only — a buyer withdraw needs a dedicated route.
+  withdraw: (offerId: string) =>
+    apiPatch<OfferActionResult>(`offers/${offerId}`, { json: { status: 'DECLINED' } }),
 };
 
 export const kycApi = {
@@ -579,8 +599,10 @@ export function describeIdentifiedBy(id: string): { label: string; verified: boo
 }
 
 export const scanApi = {
-  scan: (data: { image: string; tcg: string; lang: string; force?: boolean }) =>
-    apiPost<ScanResult>('scan', { json: data }),
+  scan: (data: { image: string; tcg: string; lang: string; force?: boolean }, signal?: AbortSignal) =>
+    apiPost<ScanResult>('scan', { json: data, signal }),
+  contribute: (data: { code: string; game: string; lang: string; rarity?: string; nameEn?: string; imageUrl: string }) =>
+    apiPost<{ ok: boolean; sample: { id: string } }>('scan/contribute', { json: data }),
 };
 
 export interface PriceTier {
@@ -623,6 +645,155 @@ export interface CardVariant {
   imageUrl?: string;
   condition?: string;
 }
+
+// ─── Scanner service integration (spec: .impeccable/scanner-integration-spec.md §B) ─
+// All scanner endpoints degrade gracefully — `configured:false` means SCANNER_SERVICE_URL is unset.
+
+export interface ScannerHealth {
+  ok: boolean;
+  scanner: { configured: boolean; ready: boolean };
+}
+
+export interface ScannerOpDetailsData {
+  officialImageUrl?: string;
+  officialName?: string;
+  officialSetName?: string;
+  officialReleaseDate?: string;
+  sampleImageUrl?: string;
+  watermarkedSampleUrl?: string;
+}
+
+export interface ScannerOpDetails {
+  ok: boolean;
+  configured: boolean;
+  details: ScannerOpDetailsData | null;
+}
+
+export interface ScannerVariant {
+  code: string;
+  name: string;
+  rarity: string;
+  imageUrl: string | null;
+  source: 'scanner';
+}
+
+export interface ScannerVariants {
+  ok: boolean;
+  configured: boolean;
+  variants: ScannerVariant[];
+}
+
+export interface VisualMatchCandidate {
+  id: string;
+  imageUrl?: string;
+  matchScore: number;
+  matched: boolean;
+}
+
+export interface VisualMatchResult {
+  ok: boolean;
+  degraded?: boolean;
+  mode: string;
+  confident?: boolean;
+  bestMatchUrl?: string;
+  candidates?: VisualMatchCandidate[];
+  bestMatch?: VisualMatchCandidate;
+  haikuConfirmation?: { matchId: string; confidence: number };
+  labels?: { description: string; score: number }[];
+  webEntities?: { description: string; score: number }[];
+  counts?: { full: number; partial: number; similar: number };
+  reason?: string;
+}
+
+export interface VisualMatchResponse {
+  ok: boolean;
+  configured: boolean;
+  result: VisualMatchResult | null;
+}
+
+export interface ScannerSampleCatalogItem {
+  id: string;
+  imageUrl: string;
+  name?: string;
+  rarity?: string;
+  variant?: string;
+  setCode?: string | null;
+}
+
+export interface ScannerSampleCatalog {
+  id: 'don' | 'cn-anniv';
+  title: string;
+  count: number;
+  items: ScannerSampleCatalogItem[];
+}
+
+export interface ScannerSampleCatalogs {
+  ok: boolean;
+  configured: boolean;
+  catalogs: ScannerSampleCatalog[];
+}
+
+export const scannerApi = {
+  health: () => apiGet<ScannerHealth>('scanner/health'),
+  opDetails: (code: string) =>
+    apiGet<ScannerOpDetails>('scanner/op-details', { searchParams: { code } }),
+  opVariants: (code: string) =>
+    apiGet<ScannerVariants>('scanner/op-variants', { searchParams: { code } }),
+  sampleCatalogs: () => apiGet<ScannerSampleCatalogs>('scanner/sample-catalogs'),
+  visualMatch: (payload: { image: string; candidates: { id: string; imageUrl: string }[]; haikuConfirm?: boolean; haikuConfirmTopN?: number }) =>
+    apiPost<VisualMatchResponse>('scanner/visual-match', { json: payload }),
+};
+
+// ─── Card catalog (public.cards) ─────────────────────────────────────
+
+export interface CatalogGame {
+  game: string;
+  count: number;
+}
+
+export interface CatalogGames {
+  ok: boolean;
+  games: CatalogGame[];
+}
+
+export interface CatalogCardSummary {
+  code: string;
+  nameEn: string;
+  nameJp?: string;
+  rarity?: string;
+  type?: string;
+  game?: string;
+  imageUrl?: string | null;
+}
+
+export interface CatalogCards {
+  ok: boolean;
+  total: number;
+  page: number;
+  pageSize: number;
+  cards: CatalogCardSummary[];
+}
+
+export interface CatalogCardVariant {
+  code: string;
+  nameEn: string;
+  rarity?: string;
+  type?: string;
+  imageUrl?: string | null;
+}
+
+export interface CatalogCardDetail {
+  ok: boolean;
+  card: CatalogCardSummary | null;
+  variants: CatalogCardVariant[];
+}
+
+export const catalogApi = {
+  games: () => apiGet<CatalogGames>('catalog/games'),
+  cards: (params?: { game?: string; q?: string; rarity?: string; page?: number; pageSize?: number }) =>
+    apiGet<CatalogCards>('catalog/cards', { searchParams: params }),
+  card: (code: string) => apiGet<CatalogCardDetail>(`catalog/cards/${encodeURIComponent(code)}`),
+};
 
 
 

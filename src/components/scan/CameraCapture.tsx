@@ -65,19 +65,19 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
           aria-label="Close camera"
           className="w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center text-white"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
         <button
           onClick={() => setFacing((f) => (f === 'environment' ? 'user' : 'environment'))}
           aria-label="Switch camera"
           className="w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center text-white"
         >
-          <SwitchCamera className="w-5 h-5" />
+          <SwitchCamera className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
-      {/* Video + reticle */}
-      <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+      {/* Video + reticle — pxl-scanline: the one surface where scanlines belong (DESIGN.md §7) */}
+      <div className="relative flex-1 flex items-center justify-center overflow-hidden pxl-scanline">
         <video
           ref={videoRef}
           autoPlay
@@ -112,7 +112,7 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
           aria-label="Capture"
           className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg active:scale-95 transition-transform"
         >
-          <Camera className="w-7 h-7 text-surface-dark" />
+          <Camera className="w-7 h-7 text-surface-dark" aria-hidden="true" />
         </button>
       </div>
     </div>

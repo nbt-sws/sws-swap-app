@@ -18,7 +18,7 @@ export function SocialFooter() {
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-brand transition-colors"
+            className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-brand transition-colors"
             title={link.label}
           >
             <Icon className="w-3 h-3" />
@@ -26,7 +26,7 @@ export function SocialFooter() {
           </a>
         );
       })}
-      <span className="text-[10px] text-muted-foreground/50">© 2025 SwibSwap</span>
+      <span className="text-[11px] text-muted-foreground/50">© 2025 SwibSwap</span>
     </footer>
   );
 }

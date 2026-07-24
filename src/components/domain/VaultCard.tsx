@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   TrendingUp,
@@ -47,30 +48,31 @@ export function VaultCard({
   const platformHeld = isPlatformHeld(item);
   const isListing = item.itemStatus === 'LISTING';
 
-  // Status configuration
+  // Status configuration — pixel-chip look (R1), category colors (R3):
+  // listed → cyan (market), vault states → periwinkle, grading → brand
   const statusConfig = isListing
     ? {
         label: t('filters.listed'),
-        color: 'bg-brand text-white shadow-md',
+        chipClass: 'pxl-chip--cyan',
         icon: Sparkles,
       }
     : item.status === 'sold'
-    ? { label: t('common.sold'), color: 'bg-danger/15 text-danger border-danger/30', icon: null }
+    ? { label: t('common.sold'), chipClass: '', icon: null }
     : item.serviceOrderStatus
     ? {
         label: `${t('common.grade')} · ${item.serviceOrderStatus}`,
-        color: 'bg-warning/15 text-warning border-warning/30',
+        chipClass: 'pxl-chip--brand',
         icon: null,
       }
     : platformHeld
     ? {
         label: 'SWS Vault',
-        color: 'bg-success/15 text-success border-success/30',
+        chipClass: 'pxl-chip--peri',
         icon: Package,
       }
     : {
         label: t('common.inVault'),
-        color: 'bg-cyan/15 text-cyan border-cyan/30',
+        chipClass: 'pxl-chip--peri',
         icon: null,
       };
 
@@ -143,15 +145,10 @@ export function VaultCard({
         {/* Status badge */}
         {!selecting && (
           <div className="absolute top-2.5 left-2.5 z-10">
-            <span
-              className={cn(
-                'text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border inline-flex items-center gap-1 shadow-lg backdrop-blur-sm',
-                statusConfig.color
-              )}
-            >
-              {StatusIcon && <StatusIcon className="w-3 h-3" />}
+            <Badge variant="pixel" className={cn('shadow-lg', statusConfig.chipClass)}>
+              {StatusIcon && <StatusIcon className="w-3 h-3" aria-hidden="true" />}
               {statusConfig.label}
-            </span>
+            </Badge>
           </div>
         )}
 
@@ -187,17 +184,17 @@ export function VaultCard({
         {/* Tags */}
         <div className="mt-2 flex flex-wrap gap-1">
           {item.card.rarity && (
-            <span className="text-[10px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
+            <span className="text-[11px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
               {item.card.rarity}
             </span>
           )}
           {item.condition && (
-            <span className="text-[10px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
+            <span className="text-[11px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
               {item.condition}
             </span>
           )}
           {item.card.language && (
-            <span className="text-[10px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
+            <span className="text-[11px] font-bold bg-surface-lighter/80 text-muted-foreground px-2 py-0.5 rounded-full border border-border/40">
               {item.card.language}
             </span>
           )}

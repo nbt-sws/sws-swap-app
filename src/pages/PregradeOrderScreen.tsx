@@ -39,8 +39,10 @@ export function PregradeOrderScreen() {
   const { data: providers, isLoading: providersLoading } = useServiceProviders(category);
   const createOrder = useCreateServiceOrder();
 
+  // PHOTO_UPLOAD providers are hidden: the backend has no endpoint to attach
+  // photos to a service order, so that delivery mode is a dead end for buyers.
   const filteredProviders = useMemo(
-    () => providers?.filter((p) => p.category === category) ?? [],
+    () => providers?.filter((p) => p.category === category && p.deliveryMode !== 'PHOTO_UPLOAD') ?? [],
     [providers, category]
   );
 
@@ -60,7 +62,7 @@ export function PregradeOrderScreen() {
   const [selectedPackageId, setSelectedPackageId] = useState<string>(preferredPackageId ?? '');
 
   const packages = useMemo(
-    () => providerDetail?.packages.filter((p) => p.enabled) ?? [],
+    () => providerDetail?.packages.filter((p) => p.enabled && p.deliveryMode !== 'PHOTO_UPLOAD') ?? [],
     [providerDetail]
   );
 
@@ -372,22 +374,16 @@ export function PregradeOrderScreen() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <div className="bg-surface-light rounded-xl p-4">
               <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">
-                {activeDeliveryMode === 'PHOTO_UPLOAD' ? 'UPLOAD DESTINATION' : 'SHIP TO'} · {provider.storeName.toUpperCase()}
+                SHIP TO · {provider.storeName.toUpperCase()}
               </p>
-              {activeDeliveryMode === 'PHOTO_UPLOAD' ? (
-                <p className="text-sm text-cyan">Upload high-res scans after creating the order.</p>
-              ) : (
-                <>
-                  <p className="text-sm">88 Sukhumvit 24, Klongton</p>
-                  <p className="text-sm text-muted-foreground">Bangkok 10110</p>
-                </>
-              )}
+              <p className="text-sm">88 Sukhumvit 24, Klongton</p>
+              <p className="text-sm text-muted-foreground">Bangkok 10110</p>
             </div>
           </motion.div>
         )}
 
         {/* Courier selection */}
-        {cardCount > 0 && provider && activeDeliveryMode !== 'PHOTO_UPLOAD' && (
+        {cardCount > 0 && provider && (
           <div>
             <p className="text-xs font-mono tracking-wider text-muted-foreground mb-2">COURIER</p>
             <div className="flex gap-2">
