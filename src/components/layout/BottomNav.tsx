@@ -54,7 +54,7 @@ export function BottomNav() {
         key={tab.to}
         to={to}
         aria-current={active ? 'page' : undefined}
-        className="flex flex-col items-center justify-center gap-0.5 w-16 h-full relative"
+        className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5"
       >
         <div className={cn('p-1 rounded-lg transition-all', active && cn('pxl-corner', accent.pill))}>
           <Icon className={cn('w-[18px] h-[18px] transition-colors', active ? accent.text : 'text-muted-foreground')} />
@@ -74,11 +74,11 @@ export function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/90 backdrop-blur-md border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
-      <div className="h-full flex items-center justify-around px-2 relative">
+      <div className="relative grid h-full grid-cols-5 items-center px-2">
         {LEFT_TABS.map(renderTab)}
 
         {/* Scan FAB */}
-        <Link to="/scan" className="relative -mt-5">
+        <Link to="/scan" className="relative z-0 flex h-full items-center justify-center -mt-5">
           <motion.div
             whileTap={{ scale: 0.9 }}
             className="w-12 h-12 rounded-full bg-brand-gradient flex items-center justify-center shadow-glow"
