@@ -95,18 +95,15 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
   return (
     <div className="fixed inset-0 z-[70] flex flex-col bg-black" style={{ touchAction: 'none' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 shrink-0 bg-black/80">
+      <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 shrink-0 bg-black/80 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <button type="button" onClick={onCancel}
           className="p-2 rounded-full text-white hover:bg-white/10 transition-colors" aria-label="Cancel crop">
           <X className="w-5 h-5" />
         </button>
-        <p className="text-sm text-white/80 font-medium select-none">
+        <p className="min-w-0 text-center text-xs sm:text-sm text-white/80 font-medium select-none truncate">
           {cropPreview ? 'Review your crop' : hasCrop ? 'Tap Crop to continue' : 'Drag to select area'}
         </p>
-        <Button size="sm" className="bg-brand hover:bg-brand-light text-white h-8 px-3 gap-1.5" onClick={handleConfirm}>
-          <Crop className="w-3.5 h-3.5" />
-          {cropPreview ? 'Confirm' : hasCrop ? 'Crop' : 'Use full'}
-        </Button>
+        <span className="w-9 shrink-0" aria-hidden="true" />
       </div>
 
       {/* Image + selection overlay */}
@@ -119,8 +116,8 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
         <div className={cropPreview ? 'relative rounded-xl border border-white/15 bg-white/5 p-2' : 'relative inline-block'}>
           <img ref={imgRef} src={cropPreview ?? src} alt={cropPreview ? 'Cropped image preview' : 'Crop preview'}
             className={cropPreview
-              ? 'block max-w-[min(82vw,420px)] max-h-[58dvh] object-contain rounded-lg pointer-events-none select-none'
-              : 'block max-w-[88vw] max-h-[calc(100dvh-120px)] object-contain pointer-events-none select-none'}
+              ? 'block max-w-[calc(100vw-2rem)] max-h-[52dvh] sm:max-w-[min(82vw,420px)] sm:max-h-[58dvh] object-contain rounded-lg pointer-events-none select-none'
+              : 'block max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-180px)] sm:max-w-[88vw] sm:max-h-[calc(100dvh-120px)] object-contain pointer-events-none select-none'}
             draggable={false} />
 
           {!cropPreview && sel && sel.w > 0 && sel.h > 0 && (
@@ -156,22 +153,28 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 shrink-0 text-center pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="relative z-10 px-3 sm:px-4 py-3 shrink-0 text-center bg-black/80 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {cropPreview ? (
-          <div className="flex items-center justify-center gap-2">
-            <Button type="button" variant="outline" size="sm" className="h-9 border-white/20 text-white hover:bg-white/10" onClick={handleRedo}>
+          <div className="mx-auto flex w-full max-w-sm items-center justify-center gap-2">
+            <Button type="button" variant="outline" size="sm" className="h-10 flex-1 border-white/20 text-white hover:bg-white/10" onClick={handleRedo}>
               Adjust crop
             </Button>
-            <Button type="button" size="sm" className="h-9 bg-brand hover:bg-brand-light text-white" onClick={() => onConfirm(cropPreview)}>
+            <Button type="button" size="sm" className="h-10 flex-1 bg-brand hover:bg-brand-light text-white" onClick={() => onConfirm(cropPreview)}>
               Confirm crop
             </Button>
           </div>
         ) : (
-          <p className="text-xs text-white/40 select-none">
-            {hasCrop
-            ? `Selected ${Math.round(sel!.w * 100)}% × ${Math.round(sel!.h * 100)}% of image`
-            : 'Or tap "Use full" to skip cropping'}
-          </p>
+          <div className="space-y-2">
+            <p className="text-xs text-white/40 select-none">
+              {hasCrop
+              ? `Selected ${Math.round(sel!.w * 100)}% × ${Math.round(sel!.h * 100)}% of image`
+              : 'Or tap "Use full" to skip cropping'}
+            </p>
+            <Button type="button" size="sm" className="w-full max-w-sm h-10 bg-brand hover:bg-brand-light text-white gap-1.5" onClick={handleConfirm}>
+              <Crop className="w-3.5 h-3.5" />
+              {hasCrop ? 'Crop' : 'Use full'}
+            </Button>
+          </div>
         )}
       </div>
     </div>
