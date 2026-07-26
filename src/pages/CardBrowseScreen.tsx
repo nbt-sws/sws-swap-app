@@ -219,7 +219,7 @@ export function CardBrowseScreen() {
                 className="group block text-left bg-surface-light rounded-xl overflow-hidden border border-border hover:border-cyan/40 transition-colors"
               >
                 <div className="aspect-[5/7] overflow-hidden bg-surface-lighter">
-                  <ImageWithFallback src={card.imageUrl ?? ''} alt={card.nameEn ?? card.code} />
+                  <ImageWithFallback src={card.cardImage ?? ''} alt={card.nameEn ?? card.code} />
                 </div>
                 <div className="p-3">
                   <p className="text-xs font-mono text-muted-foreground">{card.code}</p>

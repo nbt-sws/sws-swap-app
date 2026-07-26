@@ -28,7 +28,7 @@ interface CardDetailModalProps {
 export function CardDetailModal({ code, onClose, onSelectCode }: CardDetailModalProps) {
   const { t } = useTranslation();
   const { data, isLoading } = useCatalogCard(code);
-  const card = data?.card ?? null;
+  const card = data ?? null;
   const variants = data?.variants ?? [];
 
   return (
@@ -67,7 +67,7 @@ export function CardDetailModal({ code, onClose, onSelectCode }: CardDetailModal
             {/* Image */}
             <div className="aspect-[4/5] md:aspect-auto md:h-full bg-surface-lighter relative">
               <ImageWithFallback
-                src={card.imageUrl ?? ''}
+                src={card.cardImage ?? ''}
                 alt={card.nameEn ?? card.code}
                 className="absolute inset-0"
               />

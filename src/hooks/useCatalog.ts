@@ -11,7 +11,7 @@ import type {
 //   scannerApi.sampleCatalogs() → { ok, configured, catalogs: [{ id, title, count, items }] }
 //   catalogApi.games()          → { ok, games: [{ game, count }] }
 //   catalogApi.cards(params)    → { ok, total, page, pageSize, cards: [...] }
-//   catalogApi.card(code)       → { ok, card | null, variants: [...] }
+//   catalogApi.card(code)       → { ok, code, nameEn, ..., variants: [...], marketplacePrices: [...] }
 // Every integration must degrade quietly when the scanner/catalog backend
 // is unconfigured or down — the UI hides optional sections, never blocks.
 

@@ -32,6 +32,7 @@ function normalizeBaseUrl(url: string | undefined): string {
 }
 
 const API_BASE_URL = `${normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api/v1')}/`;
+const CATALOG_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_CATALOG_API_BASE_URL);
 const SCANNER_API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_SCANNER_API_BASE_URL);
 const USE_DIRECT_SCANNER_API = SCANNER_API_BASE_URL.length > 0;
 const SCANNER_API_PREFIX = `${USE_DIRECT_SCANNER_API ? SCANNER_API_BASE_URL : normalizeBaseUrl(API_BASE_URL)}/`;
@@ -985,14 +986,19 @@ export interface CatalogGames {
   games: CatalogGame[];
 }
 
-export interface CatalogCardSummary {
+export interface CatalogCard {
   code: string;
   nameEn: string;
   nameJp?: string;
-  rarity?: string;
-  type?: string;
-  game?: string;
-  imageUrl?: string | null;
+  cardType: string;
+  cardColor: string;
+  rarity: string;
+  cardCost: number;
+  cardPower: number;
+  life: number;
+  setCode: string;
+  setName: string;
+  cardImage: string;
 }
 
 export interface CatalogCards {
@@ -1000,28 +1006,56 @@ export interface CatalogCards {
   total: number;
   page: number;
   pageSize: number;
-  cards: CatalogCardSummary[];
+  cards: CatalogCard[];
 }
 
 export interface CatalogCardVariant {
-  code: string;
-  nameEn: string;
-  rarity?: string;
-  type?: string;
-  imageUrl?: string | null;
+  id: number;
+  condition: string;
+  language: string;
+  code?: string;
+  nameEn?: string;
+  imageUrl?: string;
+}
+
+export interface MarketplacePrice {
+  platform: string;
+  price: number;
+  url?: string;
+  seller?: string;
+  ended?: string;
 }
 
 export interface CatalogCardDetail {
   ok: boolean;
-  card: CatalogCardSummary | null;
+  code: string;
+  nameEn: string;
+  nameJp?: string;
+  cardType: string;
+  cardColor: string;
+  rarity: string;
+  cardCost: number;
+  cardPower: number;
+  life: number;
+  setCode: string;
+  setName: string;
+  cardImage: string;
   variants: CatalogCardVariant[];
+  marketplacePrices: MarketplacePrice[];
 }
 
+// Create a separate ky instance for catalog API (no auth headers needed)
+const catalogApiInstance = ky.create({
+  prefix: CATALOG_BASE_URL ? `${CATALOG_BASE_URL}/` : '',
+  retry: 0,
+  timeout: 30000,
+});
+
 export const catalogApi = {
-  games: () => apiGet<CatalogGames>('catalog/games'),
+  games: () => catalogApiInstance.get<CatalogGames>('catalog/games'),
   cards: (params?: { game?: string; q?: string; rarity?: string; page?: number; pageSize?: number }) =>
-    apiGet<CatalogCards>('catalog/cards', { searchParams: params }),
-  card: (code: string) => apiGet<CatalogCardDetail>(`catalog/cards/${encodeURIComponent(code)}`),
+    catalogApiInstance.get<CatalogCards>('catalog/cards', { searchParams: params }).json(),
+  card: (code: string) => catalogApiInstance.get<CatalogCardDetail>(`catalog/card/${encodeURIComponent(code)}`).json(),
 };
 
 
