@@ -51,6 +51,8 @@ export function PostCard({ post, followed, onToggleFollow }: {
   const [saved, setSaved] = useState(post.savedByMe);
   const [likes, setLikes] = useState(post.likes);
 
+  const listings = post.listings ?? [];
+
   const toggle = (kind: 'like' | 'save') => {
     if (!isAuthenticated) {
       navigate({ to: '/login' });
@@ -131,13 +133,13 @@ export function PostCard({ post, followed, onToggleFollow }: {
         )}
 
         {/* Linked listings (drops / restocks) */}
-        {post.listings.length > 0 && (
+        {listings.length > 0 && (
           <div className="mt-4">
             <div className={cn(
               'grid gap-3',
-              post.listings.length > 3 ? 'grid-cols-4' : post.listings.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:max-w-[70%]'
+              listings.length > 3 ? 'grid-cols-4' : listings.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:max-w-[70%]'
             )}>
-              {post.listings.map((item) => (
+              {listings.map((item) => (
                 <div key={item.listingId}>
                   <div className="relative aspect-[5/7] w-full overflow-hidden rounded-xl border border-border bg-surface-lighter">
                     {item.imageUrl ? (

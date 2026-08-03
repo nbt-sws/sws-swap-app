@@ -55,7 +55,7 @@ export function ServiceProviderScreen() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const packages = useMemo(
-    () => provider?.packages.filter((p) => p.enabled) ?? [],
+    () => provider?.packages?.filter((p) => p.enabled) ?? [],
     [provider]
   );
   const groupedPackages = useMemo(() => {

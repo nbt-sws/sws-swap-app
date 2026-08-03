@@ -62,7 +62,7 @@ export function PregradeOrderScreen() {
   const [selectedPackageId, setSelectedPackageId] = useState<string>(preferredPackageId ?? '');
 
   const packages = useMemo(
-    () => providerDetail?.packages.filter((p) => p.enabled && p.deliveryMode !== 'PHOTO_UPLOAD') ?? [],
+    () => providerDetail?.packages?.filter((p) => p.enabled && p.deliveryMode !== 'PHOTO_UPLOAD') ?? [],
     [providerDetail]
   );
 

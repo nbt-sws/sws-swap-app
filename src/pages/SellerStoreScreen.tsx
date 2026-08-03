@@ -119,7 +119,7 @@ export function SellerStoreScreen() {
   }, [profile]);
 
   const { data: providers = [] } = useServiceProviders();
-  const storeProviders = (providers as ServiceProvider[]).filter((p) => p.storeId === sellerId && p.enabled) ?? [];
+  const storeProviders = (providers ?? []).filter((p) => p.storeId === sellerId && p.enabled);
 
   const featuredListings = activeListings.filter((l) => l.isFeatured).slice(0, 6);
 
@@ -627,7 +627,7 @@ function ProviderRow({ provider }: { provider: ServiceProvider }) {
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-bold">{provider.category === 'PREGRADE' ? 'Pre-grade' : 'Grading'}</h3>
               <span className="text-xs px-2 py-0.5 rounded-full bg-surface border border-border text-muted-foreground">
-                {provider.packages.length} packages
+                {provider.packages?.length ?? 0} packages
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{provider.description}</p>

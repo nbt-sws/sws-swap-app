@@ -167,7 +167,7 @@ export interface ServiceProvider {
   color: 'brand' | 'periwinkle' | 'cyan' | 'pregrade' | 'plup';
   logoUrl?: string;
   enabled: boolean;
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
   galleryUrls?: string[];
   contactPhone?: string;
   contactEmail?: string;
