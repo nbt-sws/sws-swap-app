@@ -28,7 +28,7 @@ interface CardDetailModalProps {
 export function CardDetailModal({ code, onClose, onSelectCode }: CardDetailModalProps) {
   const { t } = useTranslation();
   const { data, isLoading } = useCatalogCard(code);
-  const card = data ?? null;
+  const card = data?.card ?? null;
   const variants = data?.variants ?? [];
 
   return (
@@ -67,7 +67,7 @@ export function CardDetailModal({ code, onClose, onSelectCode }: CardDetailModal
             {/* Image */}
             <div className="aspect-[4/5] md:aspect-auto md:h-full bg-surface-lighter relative">
               <ImageWithFallback
-                src={card.cardImage ?? ''}
+                src={card.imageUrl ?? ''}
                 alt={card.nameEn ?? card.code}
                 className="absolute inset-0"
               />
@@ -103,13 +103,13 @@ export function CardDetailModal({ code, onClose, onSelectCode }: CardDetailModal
                   <div className="divide-y divide-border/60 border border-border rounded-xl overflow-hidden">
                     {variants.map((v, i) => (
                       <button
-                        key={`${v.code}-${i}`}
+                        key={v.code ?? `variant-${i}`}
                         type="button"
-                        onClick={() => onSelectCode(v.code)}
+                        onClick={() => v.code && onSelectCode(v.code)}
                         className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-surface-lighter transition-colors"
                       >
                         <div className="w-8 aspect-[5/7] shrink-0 rounded-sm overflow-hidden bg-surface-lighter">
-                          <ImageWithFallback src={v.imageUrl ?? ''} alt={v.nameEn ?? v.code} />
+                          <ImageWithFallback src={v.imageUrl ?? ''} alt={v.nameEn ?? v.code ?? ''} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-mono text-muted-foreground">{v.code}</p>

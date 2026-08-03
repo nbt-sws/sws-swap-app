@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { X, Crop } from 'lucide-react';
+import { X, Crop, RotateCcw, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Rect {
@@ -58,7 +58,9 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
     });
   }, [getNorm]);
 
-  const onPointerUp = useCallback(() => { isDrawing.current = false; }, []);
+  const onPointerUp = useCallback(() => {
+    isDrawing.current = false;
+  }, []);
 
   const handleCrop = useCallback(() => {
     const img = imgRef.current;
@@ -94,35 +96,44 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex flex-col bg-black sm:inset-6 sm:m-auto sm:h-[calc(100dvh-3rem)] sm:w-[calc(100vw-3rem)] sm:max-h-[900px] sm:max-w-5xl sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl"
+      className="fixed inset-0 z-[70] flex flex-col bg-black sm:inset-6 sm:mx-auto sm:h-[calc(100dvh-3rem)] sm:max-h-[900px] sm:w-[calc(100vw-3rem)] sm:max-w-5xl sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl"
       style={{ touchAction: 'none' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 shrink-0 bg-black/80 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <button type="button" onClick={onCancel}
-          className="absolute top-[max(0.75rem,env(safe-area-inset-top))] left-3 z-[90] flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/75 text-white shadow-lg hover:bg-white/15 transition-colors"
-          aria-label="Cancel crop">
+      <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 bg-black/80 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/75 text-white shadow-lg hover:bg-white/15 transition-colors"
+          aria-label="Cancel crop"
+        >
           <X className="w-5 h-5" />
         </button>
-        <p className="min-w-0 text-center text-xs sm:text-sm text-white/80 font-medium select-none truncate">
+        <p className="min-w-0 flex-1 text-center text-sm text-white/90 font-medium select-none truncate">
           {cropPreview ? 'Review your crop' : hasCrop ? 'Tap Crop to continue' : 'Drag to select area'}
         </p>
-        <span className="w-9 shrink-0" aria-hidden="true" />
+        <span className="w-10 shrink-0" aria-hidden="true" />
       </div>
 
       {/* Image + selection overlay */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden select-none px-4 pb-32 sm:pb-24"
+      <div
+        className="relative flex flex-1 items-center justify-center overflow-hidden select-none px-4"
         onPointerDown={cropPreview ? undefined : onPointerDown}
         onPointerMove={cropPreview ? undefined : onPointerMove}
         onPointerUp={cropPreview ? undefined : onPointerUp}
         onPointerCancel={cropPreview ? undefined : onPointerUp}
-        style={{ cursor: cropPreview ? 'default' : 'crosshair', touchAction: 'none' }}>
+        style={{ cursor: cropPreview ? 'default' : 'crosshair', touchAction: 'none' }}
+      >
         <div className={cropPreview ? 'relative rounded-xl border border-white/15 bg-white/5 p-2' : 'relative inline-block'}>
-          <img ref={imgRef} src={cropPreview ?? src} alt={cropPreview ? 'Cropped image preview' : 'Crop preview'}
+          <img
+            ref={imgRef}
+            src={cropPreview ?? src}
+            alt={cropPreview ? 'Cropped image preview' : 'Crop preview'}
             className={cropPreview
-              ? 'block max-w-[calc(100vw-4rem)] max-h-[40dvh] sm:max-w-[min(76vw,380px)] sm:max-h-[46dvh] object-contain rounded-lg pointer-events-none select-none'
-              : 'block max-w-[calc(100vw-4rem)] max-h-[40dvh] sm:max-w-[78vw] sm:max-h-[46dvh] object-contain pointer-events-none select-none'}
-            draggable={false} />
+              ? 'block max-h-[62dvh] w-auto max-w-[calc(100vw-3rem)] object-contain rounded-lg pointer-events-none select-none sm:max-h-[64dvh]'
+              : 'block max-h-[62dvh] w-auto max-w-[calc(100vw-3rem)] object-contain pointer-events-none select-none sm:max-h-[64dvh]'}
+            draggable={false}
+          />
 
           {!cropPreview && sel && sel.w > 0 && sel.h > 0 && (
             <div className="absolute inset-0 pointer-events-none">
@@ -130,25 +141,41 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
                 <defs>
                   <mask id="crop-mask">
                     <rect width="100%" height="100%" fill="white" />
-                    <rect x={`${sel.x * 100}%`} y={`${sel.y * 100}%`}
-                      width={`${sel.w * 100}%`} height={`${sel.h * 100}%`} fill="black" />
+                    <rect
+                      x={`${sel.x * 100}%`}
+                      y={`${sel.y * 100}%`}
+                      width={`${sel.w * 100}%`}
+                      height={`${sel.h * 100}%`}
+                      fill="black"
+                    />
                   </mask>
                 </defs>
                 <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" mask="url(#crop-mask)" />
               </svg>
 
-              <div className="absolute border-2 border-white"
-                style={{ left: `${sel.x * 100}%`, top: `${sel.y * 100}%`, width: `${sel.w * 100}%`, height: `${sel.h * 100}%` }}>
-                <span className="absolute inset-x-0 top-1/3 border-t border-white/30" />
-                <span className="absolute inset-x-0 top-2/3 border-t border-white/30" />
-                <span className="absolute inset-y-0 left-1/3 border-l border-white/30" />
-                <span className="absolute inset-y-0 left-2/3 border-l border-white/30" />
+              <div
+                className="absolute border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.5)]"
+                style={{ left: `${sel.x * 100}%`, top: `${sel.y * 100}%`, width: `${sel.w * 100}%`, height: `${sel.h * 100}%` }}
+              >
+                {/* Rule-of-thirds grid */}
+                <span className="absolute inset-x-0 top-1/3 border-t border-white/40" />
+                <span className="absolute inset-x-0 top-2/3 border-t border-white/40" />
+                <span className="absolute inset-y-0 left-1/3 border-l border-white/40" />
+                <span className="absolute inset-y-0 left-2/3 border-l border-white/40" />
+
+                {/* Corner handles */}
                 {(['tl', 'tr', 'bl', 'br'] as const).map((c) => (
-                  <span key={c} className="absolute w-4 h-4 border-white border-[3px]"
+                  <span
+                    key={c}
+                    className="absolute w-4 h-4 border-white border-[3px] shadow-sm"
                     style={{
-                      top: c.startsWith('t') ? -2 : undefined, bottom: c.startsWith('b') ? -2 : undefined,
-                      left: c.endsWith('l') ? -2 : undefined, right: c.endsWith('r') ? -2 : undefined,
-                    }} aria-hidden="true" />
+                      top: c.startsWith('t') ? -2 : undefined,
+                      bottom: c.startsWith('b') ? -2 : undefined,
+                      left: c.endsWith('l') ? -2 : undefined,
+                      right: c.endsWith('r') ? -2 : undefined,
+                    }}
+                    aria-hidden="true"
+                  />
                 ))}
               </div>
             </div>
@@ -157,26 +184,44 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Footer */}
-      <div className="absolute inset-x-0 bottom-20 sm:bottom-0 z-[80] px-3 sm:px-4 py-3 text-center bg-black/95 backdrop-blur-sm border border-white/15 shadow-[0_8px_24px_rgba(0,0,0,0.45)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="shrink-0 px-4 py-4 bg-black/95 backdrop-blur-sm border-t border-white/10 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {cropPreview ? (
-          <div className="mx-auto flex w-full max-w-sm items-center justify-center gap-2">
-            <Button type="button" variant="outline" size="sm" className="h-10 flex-1 border-white/20 text-white hover:bg-white/10" onClick={handleRedo}>
-              Adjust crop
+          <div className="mx-auto flex w-full max-w-sm items-center justify-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-11 flex-1 gap-1.5 border-white/20 text-white hover:bg-white/10"
+              onClick={handleRedo}
+            >
+              <RotateCcw className="w-4 h-4" />
+              Adjust
             </Button>
-            <Button type="button" size="sm" className="h-10 flex-1 bg-brand hover:bg-brand-light text-white" onClick={() => onConfirm(cropPreview)}>
-              Confirm crop
+            <Button
+              type="button"
+              size="sm"
+              className="h-11 flex-1 gap-1.5 bg-brand hover:bg-brand-light text-white"
+              onClick={() => onConfirm(cropPreview)}
+            >
+              <Check className="w-4 h-4" />
+              Confirm
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
-            <p className="text-xs text-white/40 select-none">
+          <div className="mx-auto max-w-sm space-y-2">
+            <p className="text-xs text-white/50 select-none text-center">
               {hasCrop
-              ? `Selected ${Math.round(sel!.w * 100)}% × ${Math.round(sel!.h * 100)}% of image`
-              : 'Or tap "Use full" to skip cropping'}
+                ? `Selected ${Math.round(sel!.w * 100)}% × ${Math.round(sel!.h * 100)}% of image`
+                : 'Drag on the image to crop, or use the full image'}
             </p>
-            <Button type="button" size="sm" className="w-full max-w-sm h-10 bg-brand hover:bg-brand-light text-white gap-1.5" onClick={handleConfirm}>
-              <Crop className="w-3.5 h-3.5" />
-              {hasCrop ? 'Crop' : 'Use full'}
+            <Button
+              type="button"
+              size="sm"
+              className="w-full h-11 bg-brand hover:bg-brand-light text-white gap-1.5"
+              onClick={handleConfirm}
+            >
+              <Crop className="w-4 h-4" />
+              {hasCrop ? 'Crop selection' : 'Use full image'}
             </Button>
           </div>
         )}

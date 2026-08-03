@@ -48,7 +48,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl bg-surface-light border-border p-0 overflow-hidden">
+      <DialogContent className="max-w-[calc(100%-1rem)] max-h-[92dvh] overflow-hidden p-0 gap-0 bg-surface-light border-border sm:max-w-5xl xl:max-w-6xl">
         <DialogHeader className="sr-only">
           <DialogTitle>{listing.card.nameEn}</DialogTitle>
         </DialogHeader>
@@ -62,9 +62,9 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
           <X className="w-4 h-4" />
         </Button>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr]">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(320px,42%)_1fr]">
           {/* Image */}
-          <div className="aspect-[4/5] md:aspect-auto md:h-full bg-surface-lighter relative">
+          <div className="relative h-[46dvh] md:h-full md:min-h-[520px] bg-surface-lighter">
             <ImageWithFallback
               src={getCardImageUrl(listing.card)}
               alt={listing.card.nameEn}
@@ -78,7 +78,7 @@ export function QuickViewModal({ listing, open, onClose }: QuickViewModalProps) 
           </div>
 
           {/* Info */}
-          <div className="p-6 flex flex-col">
+          <div className="p-6 flex flex-col overflow-y-auto">
             <p className="text-xs font-mono text-muted-foreground">{listing.card.code}</p>
             <h2 className="text-xl font-bold mt-1">{listing.card.nameEn}</h2>
             <p className="text-sm text-muted-foreground font-mono">{listing.card.nameJp}</p>

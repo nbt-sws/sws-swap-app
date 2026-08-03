@@ -30,6 +30,7 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FollowingRouteImport } from './routes/following'
+import { Route as FeedRouteImport } from './routes/feed'
 import { Route as DevLoginRouteImport } from './routes/dev-login'
 import { Route as CardsRouteImport } from './routes/cards'
 import { Route as BrowseRouteImport } from './routes/browse'
@@ -159,6 +160,11 @@ const FollowingRoute = FollowingRouteImport.update({
   path: '/following',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevLoginRoute = DevLoginRouteImport.update({
   id: '/dev-login',
   path: '/dev-login',
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRouteWithChildren
   '/dev-login': typeof DevLoginRoute
+  '/feed': typeof FeedRoute
   '/following': typeof FollowingRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRouteWithChildren
@@ -327,6 +334,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/dev-login': typeof DevLoginRoute
+  '/feed': typeof FeedRoute
   '/following': typeof FollowingRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/browse': typeof BrowseRoute
   '/cards': typeof CardsRouteWithChildren
   '/dev-login': typeof DevLoginRoute
+  '/feed': typeof FeedRoute
   '/following': typeof FollowingRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRouteWithChildren
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/dev-login'
+    | '/feed'
     | '/following'
     | '/login'
     | '/market'
@@ -462,6 +472,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/browse'
     | '/dev-login'
+    | '/feed'
     | '/following'
     | '/login'
     | '/notifications'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/cards'
     | '/dev-login'
+    | '/feed'
     | '/following'
     | '/login'
     | '/market'
@@ -550,6 +562,7 @@ export interface RootRouteChildren {
   BrowseRoute: typeof BrowseRoute
   CardsRoute: typeof CardsRouteWithChildren
   DevLoginRoute: typeof DevLoginRoute
+  FeedRoute: typeof FeedRoute
   FollowingRoute: typeof FollowingRoute
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRouteWithChildren
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       path: '/following'
       fullPath: '/following'
       preLoaderRoute: typeof FollowingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev-login': {
@@ -976,6 +996,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrowseRoute: BrowseRoute,
   CardsRoute: CardsRouteWithChildren,
   DevLoginRoute: DevLoginRoute,
+  FeedRoute: FeedRoute,
   FollowingRoute: FollowingRoute,
   LoginRoute: LoginRoute,
   MarketRoute: MarketRouteWithChildren,

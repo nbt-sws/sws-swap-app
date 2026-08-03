@@ -990,15 +990,28 @@ export interface CatalogCard {
   code: string;
   nameEn: string;
   nameJp?: string;
-  cardType: string;
-  cardColor: string;
-  rarity: string;
-  cardCost: number;
-  cardPower: number;
-  life: number;
-  setCode: string;
-  setName: string;
-  cardImage: string;
+  rarity?: string;
+  type?: string;
+  game?: string;
+  imageUrl?: string;
+  /** Lowest active SWS listing price for this card code (null = none listed). */
+  swsFloor?: number | null;
+  /** Number of active SWS listings for this card code. */
+  listingCount?: number;
+}
+
+export type CatalogSort = 'code' | 'name' | 'price_asc' | 'price_desc';
+
+export interface CatalogCardsParams {
+  game?: string;
+  q?: string;
+  rarity?: string;
+  type?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: CatalogSort;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface CatalogCards {
@@ -1009,12 +1022,22 @@ export interface CatalogCards {
   cards: CatalogCard[];
 }
 
+export interface CatalogFacet {
+  value: string;
+  count: number;
+}
+
+export interface CatalogFilters {
+  ok: boolean;
+  rarities: CatalogFacet[];
+  types: CatalogFacet[];
+}
+
 export interface CatalogCardVariant {
-  id: number;
-  condition: string;
-  language: string;
   code?: string;
   nameEn?: string;
+  rarity?: string;
+  type?: string;
   imageUrl?: string;
 }
 
@@ -1028,34 +1051,24 @@ export interface MarketplacePrice {
 
 export interface CatalogCardDetail {
   ok: boolean;
-  code: string;
-  nameEn: string;
-  nameJp?: string;
-  cardType: string;
-  cardColor: string;
-  rarity: string;
-  cardCost: number;
-  cardPower: number;
-  life: number;
-  setCode: string;
-  setName: string;
-  cardImage: string;
+  card: CatalogCard | null;
   variants: CatalogCardVariant[];
-  marketplacePrices: MarketplacePrice[];
 }
 
 // Create a separate ky instance for catalog API (no auth headers needed)
 const catalogApiInstance = ky.create({
-  prefix: CATALOG_BASE_URL ? `${CATALOG_BASE_URL}/` : '',
+  prefix: CATALOG_BASE_URL ? `${CATALOG_BASE_URL}/` : API_BASE_URL,
   retry: 0,
   timeout: 30000,
 });
 
 export const catalogApi = {
-  games: () => catalogApiInstance.get<CatalogGames>('catalog/games'),
-  cards: (params?: { game?: string; q?: string; rarity?: string; page?: number; pageSize?: number }) =>
-    catalogApiInstance.get<CatalogCards>('catalog/cards', { searchParams: params }).json(),
-  card: (code: string) => catalogApiInstance.get<CatalogCardDetail>(`catalog/card/${encodeURIComponent(code)}`).json(),
+  games: () => catalogApiInstance.get<CatalogGames>('catalog/games').json(),
+  cards: (params?: CatalogCardsParams) =>
+    catalogApiInstance.get<CatalogCards>('catalog/cards', { searchParams: params as Record<string, string | number | undefined> }).json(),
+  filters: (params?: { game?: string }) =>
+    catalogApiInstance.get<CatalogFilters>('catalog/filters', { searchParams: params as Record<string, string | undefined> }).json(),
+  card: (code: string) => catalogApiInstance.get<CatalogCardDetail>(`catalog/cards/${encodeURIComponent(code)}`).json(),
 };
 
 
