@@ -61,12 +61,21 @@ export function ServicesScreen() {
         icon={<Award className="w-6 h-6 text-brand" />}
         description="Pre-grade, grade, and vault-to-market services from partner stores"
         action={
-          <Link
-            to="/service-orders"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-light border border-border text-sm font-medium hover:border-brand/30 transition-colors"
-          >
-            My orders
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/status"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand/10 border border-brand/30 text-sm font-medium text-brand hover:bg-brand/20 transition-colors"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              Track status
+            </Link>
+            <Link
+              to="/service-orders"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-light border border-border text-sm font-medium hover:border-brand/30 transition-colors"
+            >
+              My orders
+            </Link>
+          </div>
         }
       />
 

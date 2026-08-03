@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { adminKycApi, type AdminKycSubmission } from '@/lib/api';
 import {
   usePlatformStats,
   useListings,
@@ -28,6 +30,9 @@ import {
   Package,
   Search,
   Clock,
+  FileCheck,
+  XCircle,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Order, MarketListing } from '@/types';
@@ -155,6 +160,98 @@ function OrderRow({ order }: { order: Order }) {
   );
 }
 
+// ─── KYC review queue ────────────────────────────────────────────
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const docUrl = (key: string) => `${API_BASE}/images/${key}`;
+
+function KycReviewRow({ sub }: { sub: AdminKycSubmission }) {
+  const queryClient = useQueryClient();
+  const review = useMutation({
+    mutationFn: ({ action }: { action: 'approve' | 'reject' }) =>
+      adminKycApi.review(sub.id, action),
+    onSuccess: (_data, { action }) => {
+      toast.success(action === 'approve' ? 'KYC approved' : 'KYC rejected');
+      queryClient.invalidateQueries({ queryKey: ['adminKyc'] });
+    },
+    onError: () => toast.error('Review failed — try again'),
+  });
+
+  return (
+    <div className="flex items-center gap-4 p-3 rounded-lg bg-surface border border-border">
+      <a
+        href={docUrl(sub.docKey)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="shrink-0 group relative"
+        title="Open document"
+      >
+        <img
+          src={docUrl(sub.docKey)}
+          alt={`ID document of ${sub.fullName}`}
+          className="w-16 h-16 rounded-lg object-cover border border-border group-hover:border-brand/50 transition-colors"
+        />
+        <ExternalLink className="absolute bottom-1 right-1 w-3.5 h-3.5 text-white drop-shadow" />
+      </a>
+      <div className="min-w-0 flex-1">
+        <p className="font-medium truncate">{sub.fullName}</p>
+        <p className="text-xs text-muted-foreground truncate">{sub.email} · {sub.accountName}</p>
+        <p className="text-xs font-mono text-muted-foreground">
+          ID {sub.idNumber} · {new Date(sub.createdAt).toLocaleString('th-TH')}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <Button
+          size="sm"
+          className="bg-plup/90 hover:bg-plup text-surface-dark"
+          onClick={() => review.mutate({ action: 'approve' })}
+          disabled={review.isPending}
+        >
+          <FileCheck className="w-4 h-4 mr-1" />
+          Approve
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="border-border text-pldown hover:text-pldown"
+          onClick={() => review.mutate({ action: 'reject' })}
+          disabled={review.isPending}
+        >
+          <XCircle className="w-4 h-4 mr-1" />
+          Reject
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function KycQueue() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['adminKyc', 'PENDING'],
+    queryFn: () => adminKycApi.list('PENDING'),
+  });
+  const submissions = data?.submissions ?? [];
+
+  if (isLoading) return <Skeleton className="h-40 w-full" />;
+  if (submissions.length === 0) {
+    return (
+      <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-10">
+        <EmptyMedia variant="icon">
+          <FileCheck className="w-8 h-8 text-brand" />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>No pending verifications</EmptyTitle>
+          <EmptyDescription>New KYC submissions will appear here for review.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      {submissions.map((s) => <KycReviewRow key={s.id} sub={s} />)}
+    </div>
+  );
+}
+
 export function AdminScreen() {
   const { data: stats, isLoading: statsLoading } = usePlatformStats();
   const { data: listingsData, isLoading: listingsLoading } = useListings({ limit: 100 });
@@ -173,10 +270,15 @@ export function AdminScreen() {
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="bg-surface-light border-border">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="kyc">KYC</TabsTrigger>
           <TabsTrigger value="listings">Listings</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="audit">Audit</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="kyc" className="space-y-4">
+          <KycQueue />
+        </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
           {statsLoading ? (

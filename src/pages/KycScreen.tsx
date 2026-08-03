@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useUser, useKycStatus, useSubmitKyc } from '@/hooks/useApi';
+import { uploadsApi } from '@/lib/api';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,23 +77,19 @@ export function KycScreen() {
       return;
     }
     try {
-      const imageBase64 = await readFileAsBase64(idImage);
-      // Backend expects s3Key references, but no upload/presigned-URL endpoint
-      // is exposed in the gateway yet. In real mode this will fail until the
-      // backend can accept or generate S3 keys.
+      // 1) Upload the document to R2 via the uploads endpoint → real key
+      const formData = new FormData();
+      formData.append('file', idImage);
+      const { key } = await uploadsApi.upload(formData);
+      // 2) Submit the KYC payload with the stored document key
       await submitKyc.mutateAsync({
-        documents: [{ type: 'ID_CARD', s3Key: imageBase64 }],
+        fullName: fullName.trim(),
+        idNumber: idNumber.trim(),
+        docKey: key,
       });
       toast.success('KYC verification submitted');
     } catch (err) {
-      const isRealMode = import.meta.env.VITE_USE_MOCK_API !== 'true';
-      const message =
-        isRealMode && !(err instanceof Error && err.message.toLowerCase().includes('mock'))
-          ? 'KYC document upload is not fully wired yet: the backend expects an S3 key but no upload endpoint is exposed.'
-          : err instanceof Error
-          ? err.message
-          : 'Failed to submit KYC';
-      toast.error(message);
+      toast.error(err instanceof Error ? err.message : 'Failed to submit KYC');
     }
   };
 

@@ -1,14 +1,13 @@
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import {
-  Search, Bell, Menu, Package, Sun, Moon, Globe,
+  Search, Bell, Menu, Package, Globe,
   Award, House, Store, ClipboardList,
   Heart, User, Layers, Megaphone, HandCoins,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
-import { useThemeStore } from '@/stores/theme';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -66,7 +65,6 @@ export function TopBar() {
   const [query, setQuery] = useState('');
   const currentPath = router.location.pathname;
   const { isAuthenticated, user } = useAuthStore();
-  const { resolvedTheme, toggleTheme } = useThemeStore();
 
   const isActive = (to: string) => {
     if (to === '/') return currentPath === '/';
@@ -190,10 +188,6 @@ export function TopBar() {
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand" />
             </Link>
-          </Button>
-
-          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={resolvedTheme === 'dark' ? t('common.lightMode') : t('common.darkMode')}>
-            {resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
 
           <Button variant="ghost" size="icon" onClick={toggleLanguage} aria-label={t('common.switchLanguage')}>

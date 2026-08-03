@@ -20,12 +20,14 @@ import {
   ChevronRight,
   Loader2,
   User,
+  Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
   { icon: ShoppingBag, label: 'Orders', description: 'Track your purchases', to: '/orders' },
   { icon: Package, label: 'Vault', description: 'Manage your collection', to: '/vault' },
+  { icon: Truck, label: 'Submissions', description: 'Track grading & pre-grade status', to: '/status' },
   { icon: Shield, label: 'KYC Verification', description: 'Verify your identity', to: '/profile/kyc' },
   { icon: Bell, label: 'Notifications', description: 'Offers, orders, and alerts', to: '/notifications' },
   // TODO(deferred): Payment Methods hidden — payment is deferred by the owner and

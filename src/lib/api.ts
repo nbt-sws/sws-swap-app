@@ -410,8 +410,29 @@ export const offersApi = {
 export const kycApi = {
   getStatus: (userId: string) =>
     apiGet<{ userId: string; status: ApiUser['kycStatus']; submittedAt?: string; reviewedAt?: string }>(`kyc/status/${userId}`),
-  submit: (data: { documents: { type: string; s3Key: string }[] }) =>
+  submit: (data: { fullName: string; idNumber: string; docKey: string }) =>
     apiPost<{ kycId: string; status: ApiUser['kycStatus']; message: string }>('kyc/submit', { json: data }),
+};
+
+export interface AdminKycSubmission {
+  id: string;
+  userId: string;
+  email: string;
+  accountName: string;
+  fullName: string;
+  idNumber: string;
+  docKey: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reviewNote: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+export const adminKycApi = {
+  list: (status = 'PENDING') =>
+    apiGet<{ submissions: AdminKycSubmission[] }>('admin/kyc', { searchParams: { status } }),
+  review: (id: string, action: 'approve' | 'reject', note?: string) =>
+    apiPost<{ ok: boolean; status: string }>(`admin/kyc/${id}/review`, { json: { action, note } }),
 };
 
 export const campaignsApi = {

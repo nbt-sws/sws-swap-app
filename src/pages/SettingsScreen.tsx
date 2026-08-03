@@ -5,7 +5,7 @@ import {
   useUser, useUpdatePreferences, useChangePassword, useDeleteAccount,
 } from '@/hooks/useApi';
 import {
-  ChevronRight, User, Bell, Palette, Settings, Globe, LifeBuoy,
+  ChevronRight, User, Bell, Settings, Globe, LifeBuoy,
   Wallet, KeyRound, Trash2, Award, Smartphone, Mail, MessageCircle, Loader2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -21,7 +21,6 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { useAuthStore } from '@/stores/auth';
-import { useThemeStore } from '@/stores/theme';
 import { toast } from 'sonner';
 import { version as APP_VERSION } from '../../package.json';
 import { cn } from '@/lib/utils';
@@ -85,7 +84,6 @@ export function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const logout = useAuthStore((s) => s.logout);
   const authUser = useAuthStore((s) => s.user);
-  const { theme, toggleTheme } = useThemeStore();
   const { data: userQuery } = useUser();
   const updatePreferences = useUpdatePreferences();
   const changePassword = useChangePassword();
@@ -207,13 +205,6 @@ export function SettingsScreen() {
         <div className="space-y-2">
           <SectionTitle>{t('settings.sections.preferences')}</SectionTitle>
           <SectionCard>
-            <Row
-              icon={Palette}
-              label={t('settings.items.appearance')}
-              value={t(`settings.theme.${theme === 'light' ? 'light' : theme === 'system' ? 'system' : 'dark'}`)}
-              hasArrow
-              onClick={toggleTheme}
-            />
             <Row
               icon={Globe}
               label={t('settings.items.language')}

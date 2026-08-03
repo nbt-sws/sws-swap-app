@@ -32,8 +32,11 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   },
 
   initTheme: () => {
-    const stored = (localStorage.getItem(STORAGE_KEY) as Theme) ?? 'dark';
-    get().setTheme(stored);
+    // App is dark-only by design (neon/arcade tokens have no light variants
+    // yet). Force dark and clear any stale stored preference so the removed
+    // toggle can never resurrect a broken light mode.
+    localStorage.setItem(STORAGE_KEY, 'dark');
+    get().setTheme('dark');
   },
 
   toggleTheme: () => {
