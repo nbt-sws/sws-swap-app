@@ -1073,6 +1073,94 @@ export const catalogApi = {
 
 
 
+// ─── Social layer: shop posts feed + WTB board (Phase 1–2) ─────────
+
+export type FeedTab = 'foryou' | 'following' | 'explore';
+export type ShopPostType = 'update' | 'drop' | 'restock' | 'live';
+
+export interface FeedPostListing {
+  listingId: string;
+  title: string;
+  price: number;
+  imageUrl?: string | null;
+}
+
+export interface ShopPost {
+  id: string;
+  shopId: string;
+  shopName: string;
+  shopAvatar?: string | null;
+  type: ShopPostType;
+  body: string;
+  mediaUrls: string[];
+  liveAt?: string | null;
+  createdAt: string;
+  likes: number;
+  saves: number;
+  likedByMe: boolean;
+  savedByMe: boolean;
+  listings: FeedPostListing[];
+}
+
+export interface FeedResponse {
+  ok: boolean;
+  tab: FeedTab;
+  page: number;
+  posts: ShopPost[];
+  hasMore: boolean;
+}
+
+export interface WtbRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string | null;
+  cardCode?: string | null;
+  cardName: string;
+  game?: string | null;
+  targetPrice?: number | null;
+  condition?: string | null;
+  note?: string | null;
+  status: 'OPEN' | 'FOUND' | 'CLOSED';
+  createdAt: string;
+}
+
+export const feedApi = {
+  feed: (params?: { tab?: FeedTab; page?: number }) =>
+    apiGet<FeedResponse>('feed', { searchParams: params as Record<string, string | number | undefined> }),
+  shopPosts: (shopId: string) => apiGet<{ ok: boolean; posts: ShopPost[] }>(`shops/${shopId}/posts`),
+  createPost: (shopId: string, data: {
+    type?: ShopPostType;
+    body: string;
+    mediaUrls?: string[];
+    linkedListingIds?: string[];
+    liveAt?: string;
+  }) => apiPost<{ ok: boolean; post: ShopPost }>(`shops/${shopId}/posts`, { json: data }),
+  deletePost: (postId: string) => apiDelete<{ ok: boolean }>(`posts/${postId}`),
+  toggleReaction: (postId: string, kind: 'like' | 'save') =>
+    apiPost<{ ok: boolean; kind: string; active: boolean; likes: number; saves: number }>(
+      `posts/${postId}/reactions`, { json: { kind } }
+    ),
+};
+
+export const wtbApi = {
+  list: (params?: { status?: string; q?: string }) =>
+    apiGet<{ ok: boolean; requests: WtbRequest[] }>('wtb', { searchParams: params as Record<string, string | undefined> }),
+  create: (data: {
+    cardName: string;
+    cardCode?: string;
+    game?: string;
+    targetPrice?: number;
+    condition?: string;
+    note?: string;
+  }) => apiPost<{ ok: boolean; request: WtbRequest }>('wtb', { json: data }),
+  setStatus: (id: string, status: 'OPEN' | 'FOUND' | 'CLOSED') =>
+    apiPatch<{ ok: boolean; status: string }>(`wtb/${id}`, { json: { status } }),
+  remove: (id: string) => apiDelete<{ ok: boolean }>(`wtb/${id}`),
+};
+
+
+
 export const uploadsApi = {
   upload: (formData: FormData) =>
     api.post('uploads', { body: formData, headers: getAuthHeaders() }).json<{ url: string; key: string }>(),
