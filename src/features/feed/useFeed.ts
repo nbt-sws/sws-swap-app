@@ -1,17 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { feedApi, wtbApi } from '@/lib/api';
-import type { FeedTab, ShopPost, ShopPostType, WtbRequest } from '@/lib/api';
+import type { FeedTab, ShopPostType, WtbRequest } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth';
+import { useUser } from '@/hooks/useApi';
 
-/* Social layer hooks (Phase 1–2). All queries degrade quietly (retry: 0) —
-   screens fall back to demo content when the backend tables are not migrated
-   yet, matching the repo's scanner/catalog integration contract. */
+/* Social layer hooks (Phase 1–2). All queries hit the live API
+   (tables: shop_posts, post_reactions, wtb_requests — migration 009). */
 
-export function useFeed(tab: FeedTab, page = 1) {
+/* ─── Feed access gate: the live feed requires a KYC-approved user ──
+   guest   → not signed in
+   needKyc → signed in, KYC not submitted / rejected
+   pending → signed in, KYC submitted, waiting for review
+   allowed → KYC APPROVED (admins count via their kyc status too) */
+export type FeedAccess = 'guest' | 'needKyc' | 'pending' | 'allowed';
+
+export function useFeedAccess(): { status: FeedAccess; isLoading: boolean } {
+  const { isAuthenticated, user } = useAuthStore();
+  const { data: freshUser, isLoading } = useUser();
+  if (!isAuthenticated) return { status: 'guest', isLoading: false };
+  const kyc =
+    (freshUser as { kycStatus?: string } | undefined)?.kycStatus ??
+    (user as { kycStatus?: string } | null)?.kycStatus ??
+    'NONE';
+  if (kyc === 'APPROVED') return { status: 'allowed', isLoading: false };
+  return { status: kyc === 'PENDING' ? 'pending' : 'needKyc', isLoading };
+}
+
+export function useFeed(tab: FeedTab, page = 1, enabled = true) {
   return useQuery({
     queryKey: ['feed', tab, page],
     queryFn: () => feedApi.feed({ tab, page }),
     staleTime: 1000 * 30,
     retry: 0,
+    enabled,
   });
 }
 
@@ -93,41 +114,3 @@ export function timeAgo(iso: string): string {
   if (days < 7) return `${days} วันที่แล้ว`;
   return new Date(iso).toLocaleDateString('th-TH', { month: 'short', day: 'numeric' });
 }
-
-/** Demo posts shown when the feed backend is unavailable or empty. */
-export const DEMO_POSTS: ShopPost[] = [
-  {
-    id: 'demo-1', shopId: 'demo-pk', shopName: 'PK Cards', shopAvatar: null,
-    type: 'drop', body: '🔥 ล็อตใหม่ลงตู้แล้ว! งานสภาพสวย ๆ ทั้งนั้น เกรด 9–10 เช็กได้เลย จองทางแอปได้ก่อนใคร',
-    mediaUrls: [], createdAt: new Date(Date.now() - 25 * 60000).toISOString(),
-    likes: 128, saves: 12, likedByMe: false, savedByMe: false,
-    listings: [
-      { listingId: 'demo-l1', title: 'Terapagos ex SAR', price: 4850, imageUrl: null },
-      { listingId: 'demo-l2', title: 'Luffy SEC', price: 6200, imageUrl: null },
-      { listingId: 'demo-l3', title: 'Ajani, Nacatl Pariah', price: 1350, imageUrl: null },
-    ],
-  },
-  {
-    id: 'demo-2', shopId: 'demo-dragon', shopName: 'Dragon Vault BKK', shopAvatar: null,
-    type: 'live', body: 'คืนนี้ 2 ทุ่มเจอกัน! ไลฟ์เปิดกล่อง + แจกการ์ดท้ายไลฟ์ ฝากกดติดตามร้านไว้จะได้ไม่พลาด',
-    mediaUrls: [], liveAt: new Date(Date.now() + 9 * 3600000).toISOString(),
-    createdAt: new Date(Date.now() - 60 * 60000).toISOString(),
-    likes: 86, saves: 30, likedByMe: false, savedByMe: false, listings: [],
-  },
-  {
-    id: 'demo-3', shopId: 'demo-nightowl', shopName: 'Night Owl TCG', shopAvatar: null,
-    type: 'update', body: 'เสาร์นี้ร้านไปออกบูธงาน TCG Meet @ สามย่านมิตรทาวน์ ใครมีการ์ดอยากส่งเช็กสภาพ เอามาฝากได้ที่บูธเลยครับ',
-    mediaUrls: [], createdAt: new Date(Date.now() - 3 * 3600000).toISOString(),
-    likes: 45, saves: 4, likedByMe: false, savedByMe: false, listings: [],
-  },
-  {
-    id: 'demo-4', shopId: 'demo-mintlab', shopName: 'Mint Lab', shopAvatar: null,
-    type: 'restock', body: 'รีสต็อกแล้ว! ตัวที่หมดไปนาน รอบนี้มาแบบจำนวนจำกัด ใครตั้ง wishlist ไว้เช็กเลย',
-    mediaUrls: [], createdAt: new Date(Date.now() - 5 * 3600000).toISOString(),
-    likes: 67, saves: 18, likedByMe: false, savedByMe: false,
-    listings: [
-      { listingId: 'demo-l4', title: 'Greninja ex', price: 2290, imageUrl: null },
-      { listingId: 'demo-l5', title: 'Command and Conquer', price: 3100, imageUrl: null },
-    ],
-  },
-];

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Scan, Package, Plus, Store, ShoppingBag, ClipboardList, Handshake,
   Heart, ChevronRight, ShieldCheck, Zap, Sparkles, TrendingUp, ArrowUpRight,
+  Megaphone, HandCoins,
 } from 'lucide-react';
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip,
@@ -21,6 +22,8 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { useAuthStore, isMember, type AuthUser } from '@/stores/auth';
 import type { VaultItem, MarketListing, WishlistItem, Order, Offer } from '@/types';
+import { PostCard } from '@/features/feed/PostCard';
+import { useFeed, useFeedAccess } from '@/features/feed/useFeed';
 
 function formatPrice(n: number) {
   return `฿${n.toLocaleString()}`;
@@ -39,6 +42,8 @@ function HeroGreeting({ greeting, dateStr }: { greeting: string; dateStr: string
       {/* Ambient gradient orbs */}
       <div className="absolute top-0 left-1/4 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -top-8 right-1/4 w-48 h-48 bg-periwinkle/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Soft surrealism mesh — super-app hero layer */}
+      <div className="surreal-mesh absolute inset-0 opacity-50 pointer-events-none" />
 
       <div className="relative">
         <p className="text-xs font-medium text-brand tracking-wide uppercase">{dateStr}</p>
@@ -222,9 +227,11 @@ function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
 function QuickActions({ t }: { t: (k: string, o?: Record<string, unknown>) => string }) {
   const actions = [
     { key: 'scan', icon: Scan, to: '/scan', className: 'bg-brand-gradient text-white shadow-glow hover:shadow-glow hover:scale-105' },
+    { key: 'feed', icon: Megaphone, to: '/feed' },
     { key: 'addVault', icon: Plus, to: '/vault', search: { action: 'register' as const } },
     { key: 'sell', icon: Store, to: '/seller' },
     { key: 'market', icon: ShoppingBag, to: '/market' },
+    { key: 'wtb', icon: HandCoins, to: '/wtb' },
     { key: 'orders', icon: ClipboardList, to: '/orders' },
     { key: 'offers', icon: Handshake, to: '/offers' },
   ];
@@ -232,7 +239,7 @@ function QuickActions({ t }: { t: (k: string, o?: Record<string, unknown>) => st
   return (
     <section>
       <h2 className="text-sm font-semibold text-muted-foreground">{t('home.quickActions.title')}</h2>
-      <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-6">
+      <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-8">
         {actions.map((a, i) => {
           const Icon = a.icon;
           return (
@@ -584,6 +591,88 @@ function DiscoveryCard({ t }: { t: (k: string, o?: Record<string, unknown>) => s
   );
 }
 
+/* ─── Feed Preview (super-app social layer on Home) ────────────── */
+function FeedPreview({ t }: { t: (k: string, o?: Record<string, unknown>) => string }) {
+  const { status: feedAccess } = useFeedAccess();
+  const feedQuery = useFeed('foryou', 1, feedAccess === 'allowed');
+  const posts = feedQuery.data?.posts?.slice(0, 2) ?? [];
+
+  // Feed is KYC-gated → guests / non-KYC users see the WTB teaser instead.
+  if (feedAccess !== 'allowed') {
+    return (
+      <section>
+        <Card className="relative overflow-hidden border-border/60 bg-surface-light/80">
+          <div className="surreal-mesh absolute inset-0 opacity-50 pointer-events-none" />
+          <CardContent className="relative flex items-center gap-4 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">{t('home.feedPreview.gateTitle')}</p>
+              <p className="text-xs text-muted-foreground">{t('home.feedPreview.gateDesc')}</p>
+            </div>
+            <Link
+              to="/feed"
+              className="shrink-0 rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-light transition-colors"
+            >
+              {t('home.feedPreview.gateCta')}
+            </Link>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
+
+  if (feedQuery.isLoading) {
+    return (
+      <section>
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="mt-3 h-32 rounded-xl" />
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-bold tracking-tight flex items-center gap-2">
+          <Megaphone className="h-4 w-4 text-brand" />
+          {t('home.feedPreview.title')}
+        </h2>
+        <Link to="/feed" className="group/link flex items-center gap-0.5 text-xs font-medium text-brand hover:text-brand-light transition-colors">
+          {t('common.viewAll')} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
+        </Link>
+      </div>
+
+      {posts.length === 0 ? (
+        <Card className="mt-3 border-dashed border-border bg-surface-light/50">
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              <HandCoins className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">{t('home.feedPreview.emptyTitle')}</p>
+              <p className="text-xs text-muted-foreground">{t('home.feedPreview.emptyDesc')}</p>
+            </div>
+            <Link
+              to="/wtb"
+              className="shrink-0 rounded-full bg-warning px-3 py-1.5 text-xs font-bold text-surface-dark hover:bg-warning/90 transition-colors"
+            >
+              {t('home.feedPreview.wtbCta')}
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="mt-3 space-y-4">
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 /* ─── Main Export ──────────────────────────────────────────────── */
 export function HomeScreen() {
   const { t, i18n } = useTranslation();
@@ -616,6 +705,7 @@ export function HomeScreen() {
             <>
               <PortfolioCard vault={vault} loading={userLoading || vaultLoading} t={t} />
               <QuickActions t={t} />
+              <FeedPreview t={t} />
               <VaultSnapshot vault={vault} loading={vaultLoading} t={t} />
               <MarketPulse listings={trending} loading={trendingLoading} t={t} />
               <ActivitySummary orders={orders} offers={offers} loading={ordersLoading || offersLoading} t={t} />
@@ -624,6 +714,7 @@ export function HomeScreen() {
             <>
               <GuestWelcome t={t} />
               <QuickActions t={t} />
+              <FeedPreview t={t} />
               <MarketPulse listings={trending} loading={trendingLoading} t={t} />
             </>
           )}

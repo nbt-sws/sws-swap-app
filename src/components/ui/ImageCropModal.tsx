@@ -96,7 +96,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex flex-col bg-black sm:inset-6 sm:mx-auto sm:h-[calc(100dvh-3rem)] sm:max-h-[900px] sm:w-[calc(100vw-3rem)] sm:max-w-5xl sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl"
+      className="fixed inset-0 z-[70] flex flex-col bg-black overflow-hidden h-dvh max-h-dvh sm:inset-6 sm:mx-auto sm:h-[calc(100dvh-3rem)] sm:max-h-[900px] sm:w-[calc(100vw-3rem)] sm:max-w-5xl sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl"
       style={{ touchAction: 'none' }}
     >
       {/* Header */}
@@ -117,7 +117,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
 
       {/* Image + selection overlay */}
       <div
-        className="relative flex flex-1 items-center justify-center overflow-hidden select-none px-4"
+        className="relative flex flex-1 min-h-0 items-center justify-center overflow-hidden select-none px-4 pb-4"
         onPointerDown={cropPreview ? undefined : onPointerDown}
         onPointerMove={cropPreview ? undefined : onPointerMove}
         onPointerUp={cropPreview ? undefined : onPointerUp}
@@ -184,14 +184,14 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 px-4 py-4 bg-black/95 backdrop-blur-sm border-t border-white/10 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="shrink-0 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] bg-black/95 backdrop-blur-xl border-t border-white/10 shadow-[0_-8px_24px_rgba(0,0,0,0.5)]">
         {cropPreview ? (
           <div className="mx-auto flex w-full max-w-sm items-center justify-center gap-3">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="h-11 flex-1 gap-1.5 border-white/20 text-white hover:bg-white/10"
+              className="h-12 flex-1 gap-1.5 border-white/20 text-white hover:bg-white/10"
               onClick={handleRedo}
             >
               <RotateCcw className="w-4 h-4" />
@@ -200,7 +200,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
             <Button
               type="button"
               size="sm"
-              className="h-11 flex-1 gap-1.5 bg-brand hover:bg-brand-light text-white"
+              className="h-12 flex-1 gap-1.5 bg-brand hover:bg-brand-light text-white"
               onClick={() => onConfirm(cropPreview)}
             >
               <Check className="w-4 h-4" />
@@ -217,7 +217,7 @@ export function ImageCropModal({ src, onConfirm, onCancel }: ImageCropModalProps
             <Button
               type="button"
               size="sm"
-              className="w-full h-11 bg-brand hover:bg-brand-light text-white gap-1.5"
+              className="w-full h-12 bg-brand hover:bg-brand-light text-white gap-1.5"
               onClick={handleConfirm}
             >
               <Crop className="w-4 h-4" />

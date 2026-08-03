@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import {
-  Home, ShoppingBag, Store, Users,
-  ClipboardList, Heart, Scan, Shield,
+  Home, ShoppingBag, Store,
+  ClipboardList, Heart, Scan, Shield, Megaphone, HandCoins,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ const NAV_ACCENTS = {
   brand: { bg: 'bg-brand/10', text: 'text-brand', bar: 'bg-brand' },
   cyan: { bg: 'bg-cyan/10', text: 'text-cyan', bar: 'bg-cyan' },
   peri: { bg: 'bg-periwinkle/10', text: 'text-periwinkle', bar: 'bg-periwinkle' },
+  warn: { bg: 'bg-warning/10', text: 'text-warning', bar: 'bg-warning' },
 } as const;
 
 type NavAccent = keyof typeof NAV_ACCENTS;
@@ -30,12 +31,15 @@ interface NavItem {
 // ── Public nav (guest + auth) ──
 const PUBLIC_NAV: NavItem[] = [
   { to: '/', label: 'nav.home', icon: Home },
+  // Feed = social home of the super app (posts/following/explore in one place);
+  // it supersedes the standalone /following entry in the chrome.
+  { to: '/feed', label: 'nav.feed', icon: Megaphone },
   { to: '/market', label: 'nav.market', icon: ShoppingBag, accent: 'cyan' },
   // Catalog = data surface → cyan wayfinding (spec R3). Auth-guarded route;
   // guests are redirected to /login by requireAuth, same as other guards.
   // { to: '/cards', label: 'nav.cards', icon: Layers, accent: 'cyan' },
   { to: '/stores', label: 'nav.stores', icon: Store, accent: 'cyan' },
-  { to: '/following', label: 'nav.following', icon: Users },
+  { to: '/wtb', label: 'nav.wtb', icon: HandCoins, accent: 'warn' },
 ];
 
 // ── Auth-only nav (Vault/Services/Campaigns moved to TopBar) ──
@@ -57,7 +61,9 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex w-64 flex-col h-screen sticky top-0 z-[60] border-r border-border bg-surface-dark">
+    <aside className="hidden md:flex w-64 flex-col h-screen sticky top-0 z-[60] border-r border-border bg-surface-dark relative">
+      {/* Neon hairline — super-app chrome accent */}
+      <div aria-hidden="true" className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-transparent via-brand/35 to-transparent pointer-events-none" />
       {/* Brand */}
       <div className="p-6 shrink-0">
         <Link to="/" className="flex items-center gap-2">

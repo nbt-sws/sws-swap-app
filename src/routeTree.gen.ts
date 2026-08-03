@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WtbRouteImport } from './routes/wtb'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as VaultDeliveriesRouteImport } from './routes/vault-deliveries'
 import { Route as VaultRouteImport } from './routes/vault'
@@ -55,6 +56,11 @@ import { Route as CheckoutListingIdRouteImport } from './routes/checkout.$listin
 import { Route as CardsBrowseRouteImport } from './routes/cards.browse'
 import { Route as VaultItemsItemIdRouteImport } from './routes/vault.items.$itemId'
 
+const WtbRoute = WtbRouteImport.update({
+  id: '/wtb',
+  path: '/wtb',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
@@ -310,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/vault': typeof VaultRouteWithChildren
   '/vault-deliveries': typeof VaultDeliveriesRoute
   '/wishlist': typeof WishlistRoute
+  '/wtb': typeof WtbRoute
   '/cards/browse': typeof CardsBrowseRoute
   '/checkout/$listingId': typeof CheckoutListingIdRoute
   '/market/$listingId': typeof MarketListingIdRoute
@@ -351,6 +358,7 @@ export interface FileRoutesByTo {
   '/stores': typeof StoresRoute
   '/vault-deliveries': typeof VaultDeliveriesRoute
   '/wishlist': typeof WishlistRoute
+  '/wtb': typeof WtbRoute
   '/cards/browse': typeof CardsBrowseRoute
   '/checkout/$listingId': typeof CheckoutListingIdRoute
   '/market/$listingId': typeof MarketListingIdRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/vault': typeof VaultRouteWithChildren
   '/vault-deliveries': typeof VaultDeliveriesRoute
   '/wishlist': typeof WishlistRoute
+  '/wtb': typeof WtbRoute
   '/cards/browse': typeof CardsBrowseRoute
   '/checkout/$listingId': typeof CheckoutListingIdRoute
   '/market/$listingId': typeof MarketListingIdRoute
@@ -448,6 +457,7 @@ export interface FileRouteTypes {
     | '/vault'
     | '/vault-deliveries'
     | '/wishlist'
+    | '/wtb'
     | '/cards/browse'
     | '/checkout/$listingId'
     | '/market/$listingId'
@@ -489,6 +499,7 @@ export interface FileRouteTypes {
     | '/stores'
     | '/vault-deliveries'
     | '/wishlist'
+    | '/wtb'
     | '/cards/browse'
     | '/checkout/$listingId'
     | '/market/$listingId'
@@ -536,6 +547,7 @@ export interface FileRouteTypes {
     | '/vault'
     | '/vault-deliveries'
     | '/wishlist'
+    | '/wtb'
     | '/cards/browse'
     | '/checkout/$listingId'
     | '/market/$listingId'
@@ -584,6 +596,7 @@ export interface RootRouteChildren {
   VaultRoute: typeof VaultRouteWithChildren
   VaultDeliveriesRoute: typeof VaultDeliveriesRoute
   WishlistRoute: typeof WishlistRoute
+  WtbRoute: typeof WtbRoute
   CheckoutListingIdRoute: typeof CheckoutListingIdRoute
   ServiceOrdersOrderIdRoute: typeof ServiceOrdersOrderIdRoute
   ServiceProviderProviderIdRoute: typeof ServiceProviderProviderIdRoute
@@ -592,6 +605,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wtb': {
+      id: '/wtb'
+      path: '/wtb'
+      fullPath: '/wtb'
+      preLoaderRoute: typeof WtbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wishlist': {
       id: '/wishlist'
       path: '/wishlist'
@@ -1018,6 +1038,7 @@ const rootRouteChildren: RootRouteChildren = {
   VaultRoute: VaultRouteWithChildren,
   VaultDeliveriesRoute: VaultDeliveriesRoute,
   WishlistRoute: WishlistRoute,
+  WtbRoute: WtbRoute,
   CheckoutListingIdRoute: CheckoutListingIdRoute,
   ServiceOrdersOrderIdRoute: ServiceOrdersOrderIdRoute,
   ServiceProviderProviderIdRoute: ServiceProviderProviderIdRoute,

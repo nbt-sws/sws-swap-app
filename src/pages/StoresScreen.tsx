@@ -53,17 +53,24 @@ export function StoresScreen() {
 
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<'all' | 'following'>('all');
+  const [sort, setSort] = useState<'followers' | 'listings' | 'rating'>('followers');
 
   const sellers = useMemo(() => (rawSellers ? deriveStoreData(rawSellers) : []), [rawSellers]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return sellers.filter((s) => {
-      const matchesQuery = !q || s.name.toLowerCase().includes(q) || (s.location ?? '').toLowerCase().includes(q);
-      const matchesTab = tab === 'all' || (isAuthenticated && followedIds?.includes(s.id));
-      return matchesQuery && matchesTab;
-    });
-  }, [sellers, query, tab, followedIds, isAuthenticated]);
+    return sellers
+      .filter((s) => {
+        const matchesQuery = !q || s.name.toLowerCase().includes(q) || (s.location ?? '').toLowerCase().includes(q);
+        const matchesTab = tab === 'all' || (isAuthenticated && followedIds?.includes(s.id));
+        return matchesQuery && matchesTab;
+      })
+      .sort((a, b) => {
+        if (sort === 'listings') return b.listings - a.listings;
+        if (sort === 'rating') return b.rating - a.rating;
+        return b.followers - a.followers;
+      });
+  }, [sellers, query, tab, sort, followedIds, isAuthenticated]);
 
   const handleFollow = (e: React.MouseEvent, seller: StoreData) => {
     e.preventDefault();
@@ -131,6 +138,30 @@ export function StoresScreen() {
           </div>
         </div>
 
+        {/* Sort chips + result count */}
+        {!isLoading && filtered.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground mono-num">{filtered.length} stores</span>
+            <div className="ml-auto flex gap-1.5">
+              {(['followers', 'listings', 'rating'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSort(s)}
+                  aria-pressed={sort === s}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border',
+                    sort === s
+                      ? 'bg-brand/15 text-brand border-brand/40'
+                      : 'bg-surface-light text-muted-foreground border-border hover:text-foreground'
+                  )}
+                >
+                  {s === 'followers' ? 'Followers' : s === 'listings' ? 'Listings' : 'Rating'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -194,7 +225,7 @@ export function StoresScreen() {
                   params={{ sellerId: seller.id }}
                   className="group block"
                 >
-                  <Card className="bg-surface-light border-border overflow-hidden hover:border-brand/40 hover-lift transition h-full relative">
+                  <Card className="neon-card bg-surface-light border-border overflow-hidden hover:border-brand/40 hover-lift transition h-full relative">
                     <div
                       className={cn(
                         'h-24 bg-cover bg-center relative',

@@ -2,8 +2,8 @@ import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import {
   Search, Bell, Menu, Package, Sun, Moon, Globe,
-  Award, House, Store, Users, ClipboardList,
-  Heart, User, Layers,
+  Award, House, Store, ClipboardList,
+  Heart, User, Layers, Megaphone, HandCoins,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -40,15 +40,16 @@ interface NavItem {
 // Mobile hamburger menu — mirrors the remaining Sidebar nav + top nav items
 const MOBILE_NAV: NavItem[] = [
   { to: '/', label: 'nav.home', icon: House },
+  { to: '/feed', label: 'nav.feed', icon: Megaphone },
   { to: '/market', label: 'nav.market', icon: Search, accent: 'cyan' },
   { to: '/cards', label: 'nav.cards', icon: Layers, accent: 'cyan' },
   { to: '/stores', label: 'nav.stores', icon: Store, accent: 'cyan' },
-  { to: '/following', label: 'nav.following', icon: Users },
+  { to: '/wtb', label: 'nav.wtb', icon: HandCoins },
   { to: '/vault', label: 'nav.vault', icon: Package, requiresAuth: true, accent: 'peri' },
   { to: '/services', label: 'nav.services', icon: Award },
   { to: '/orders', label: 'nav.orders', icon: ClipboardList, requiresAuth: true },
   { to: '/wishlist', label: 'nav.wishlist', icon: Heart, requiresAuth: true },
-  { to: '/profile', label: 'nav.profile', icon: User },
+  { to: '/profile', label: 'nav.profile', icon: User, requiresAuth: true },
 ];
 
 // Desktop top nav — moved from Sidebar

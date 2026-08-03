@@ -17,7 +17,9 @@
     "browse": "Browse",
     "cards": "Cards",
     "stores": "Stores",
-    "following": "Following"
+    "following": "Following",
+    "feed": "Feed",
+    "wtb": "WTB"
   },
   "common": {
     "search": "Search",
@@ -156,11 +158,22 @@
     "quickActions": {
       "title": "Quick Actions",
       "scan": "Scan",
+      "feed": "Feed",
       "addVault": "Add to Vault",
       "sell": "Sell",
       "market": "Market",
+      "wtb": "WTB",
       "orders": "Orders",
       "offers": "Offers"
+    },
+    "feedPreview": {
+      "title": "Latest from shops",
+      "emptyTitle": "Hunting a card?",
+      "emptyDesc": "Post on the WTB board so every shop can see it",
+      "wtbCta": "Post a request",
+      "gateTitle": "The shop feed is for KYC members",
+      "gateDesc": "Verify your identity to see updates and new drops from shops you follow",
+      "gateCta": "Learn more"
     },
     "vaultSnapshot": {
       "title": "Vault",
@@ -500,7 +513,8 @@
     "tabs": {
       "foryou": "For you",
       "following": "Following",
-      "new": "New drops"
+      "new": "New drops",
+      "explore": "Explore"
     },
     "badges": {
       "update": "Update",
@@ -512,7 +526,32 @@
     "justNow": "Just now",
     "composer": {
       "placeholder": "Post an update for your shop...",
-      "post": "Post"
+      "guestPlaceholder": "Sign in to post an update for your shop...",
+      "post": "Post",
+      "posted": "Posted!",
+      "postFailed": "Could not post — please try again"
+    },
+    "stories": {
+      "you": "Your shop"
+    },
+    "linkCopied": "Link copied",
+    "emptyAuth": "Sign in to see posts from shops you follow",
+    "gate": {
+      "guest": {
+        "title": "Sign in to use the feed",
+        "desc": "The feed connects to the real shop and collector network — sign in to see and post updates.",
+        "cta": "Sign in"
+      },
+      "needKyc": {
+        "title": "Verify your identity (KYC) to unlock the feed",
+        "desc": "To keep the market safe, the feed and posting are available to verified members only. It takes just a few minutes.",
+        "cta": "Start verification"
+      },
+      "pending": {
+        "title": "Your KYC is under review",
+        "desc": "We've received your documents. The feed unlocks as soon as you're approved.",
+        "cta": "Waiting for approval"
+      }
     },
     "viewMarket": "View in Market",
     "liveHint": "follow the shop to get notified",
@@ -522,7 +561,9 @@
     "follow": "Follow",
     "followingBtn": "Following",
     "empty": "No posts in this tab yet — try following more shops",
-    "emptyCta": "Browse stores"
+    "emptyCta": "Browse stores",
+    "errorTitle": "Could not load the feed",
+    "errorDesc": "The server is unreachable right now — please try again"
   },
   "cardsBrowse": {
     "title": "Card Catalog",
@@ -560,5 +601,33 @@
     "prev": "Prev",
     "next": "Next",
     "pageOf": "Page {{page}} of {{totalPages}}"
+  },
+  "wtb": {
+    "title": "Want-to-Buy Board",
+    "subtitle": "Collectors post the cards they're hunting — shops see real market demand",
+    "badge": "WTB",
+    "createCta": "Post a request",
+    "searchPlaceholder": "Search cards people are hunting...",
+    "budget": "max budget",
+    "budgetOpen": "Budget negotiable",
+    "markFound": "Mark as found",
+    "delete": "Delete request",
+    "formTitle": "Post a want-to-buy request",
+    "formName": "Card name *",
+    "formCode": "Card code (optional)",
+    "formGame": "Game, e.g. pokemon",
+    "formBudget": "Max budget (฿)",
+    "formCondition": "Accepted condition, e.g. NM+",
+    "formNote": "Extra details...",
+    "formSubmit": "Post request",
+    "posted": "Request posted!",
+    "postFailed": "Could not post the request — try again",
+    "emptyTitle": "No requests yet",
+    "emptyDesc": "Be the first to post the card you're hunting",
+    "errorTitle": "Could not load the board",
+    "errorDesc": "The server is unreachable right now — please try again",
+    "teaserTitle": "Hunting a card?",
+    "teaserDesc": "Post on the WTB board so every shop on the app can see it — let the card come to you",
+    "teaserCta": "Go to the WTB board"
   }
 }

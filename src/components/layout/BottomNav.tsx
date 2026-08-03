@@ -1,13 +1,13 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Home, ShoppingBag, Package, User, Scan, Layers } from 'lucide-react';
+import { Home, ShoppingBag, Package, User, Scan, Megaphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
 
 // R3 category wayfinding accents — same color = same section, app-wide.
 // Scan = brand magenta, Market = cyan, Vault = periwinkle; brand is the
-// default active accent for neutral sections (home, profile).
+// default active accent for neutral sections (home, feed, profile).
 const NAV_ACCENTS = {
   brand: { pill: 'bg-brand/15', text: 'text-brand', bar: 'bg-brand' },
   cyan: { pill: 'bg-cyan/15', text: 'text-cyan', bar: 'bg-cyan' },
@@ -25,11 +25,11 @@ interface NavTab {
 
 const LEFT_TABS: NavTab[] = [
   { to: '/', label: 'nav.home', icon: Home, accent: 'brand' },
-  { to: '/market', label: 'nav.market', icon: ShoppingBag, accent: 'cyan' },
+  { to: '/feed', label: 'nav.feed', icon: Megaphone, accent: 'brand' },
 ];
 
 const RIGHT_TABS: NavTab[] = [
-  { to: '/cards', label: 'nav.cards', icon: Layers, accent: 'cyan' },
+  { to: '/market', label: 'nav.market', icon: ShoppingBag, accent: 'cyan' },
   { to: '/vault', label: 'nav.vault', icon: Package, accent: 'peri' },
   { to: '/profile', label: 'nav.profile', icon: User, accent: 'brand' },
 ];
@@ -44,6 +44,12 @@ export function BottomNav() {
     if (to === '/') return currentPath === '/';
     return currentPath.startsWith(to);
   };
+
+  // Always show the guest-style menu on mobile: Home, Feed, Scan, Market, Vault.
+  // Profile is reachable from the top bar / vault instead.
+  const leftTabs = LEFT_TABS;
+  const rightTabs = RIGHT_TABS.filter((tab) => tab.to !== '/profile');
+  const colCount = leftTabs.length + 1 + rightTabs.length; // tabs + scan FAB
 
   const renderTab = (tab: NavTab) => {
     const active = isActive(tab.to);
@@ -75,8 +81,13 @@ export function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/90 backdrop-blur-md border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
-      <div className="relative grid h-full min-w-0 grid-cols-6 items-center px-2">
-        {LEFT_TABS.map(renderTab)}
+      {/* Neon hairline — super-app chrome accent */}
+      <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent" />
+      <div
+        className="relative grid h-full min-w-0 items-center px-2"
+        style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
+      >
+        {leftTabs.map(renderTab)}
 
         {/* Scan FAB */}
         <Link to="/scan" className="relative z-0 flex h-full w-full items-center justify-center -mt-5">
@@ -88,7 +99,7 @@ export function BottomNav() {
           </motion.div>
         </Link>
 
-        {RIGHT_TABS.map(renderTab)}
+        {rightTabs.map(renderTab)}
       </div>
     </nav>
   );

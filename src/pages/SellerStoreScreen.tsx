@@ -30,11 +30,14 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Star, Package, Heart, MapPin, Store, FolderOpen, Search, ShieldCheck, SlidersHorizontal,
-  Award, ArrowLeft, Calendar, Link as LinkIcon, ExternalLink, Clock, Sparkles, Share2,
+  Award, ArrowLeft, Calendar, Link as LinkIcon, ExternalLink, Clock, Sparkles, Share2, Megaphone,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
 import type { MarketListing, ServiceProvider } from '@/types';
+import { useShopPosts } from '@/features/feed/useFeed';
+import { PostCard } from '@/features/feed/PostCard';
+import { PostComposer } from '@/features/feed/PostComposer';
 
 const SOCIAL_ICONS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   instagram: InstagramIcon,
@@ -61,6 +64,10 @@ export function SellerStoreScreen() {
   const follow = useFollowSeller();
   const unfollow = useUnfollowSeller();
   const [justFollowed, setJustFollowed] = useState(false);
+
+  // Shop posts (Phase 1) — live API; empty state when the shop has no posts.
+  const { data: shopPostsData, isLoading: shopPostsLoading } = useShopPosts(sellerId);
+  const shopPosts = shopPostsData?.posts ?? [];
 
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'sale' | 'trade'>('all');
@@ -125,7 +132,7 @@ export function SellerStoreScreen() {
     }
   };
 
-  const [userTab, setUserTab] = useState<'listings' | 'services' | 'reviews' | 'about' | null>(null);
+  const [userTab, setUserTab] = useState<'listings' | 'posts' | 'services' | 'reviews' | 'about' | null>(null);
   const tabValue = userTab ?? (storeProviders.length > 0 ? 'services' : 'listings');
 
   if (listingsLoading || profileLoading) {
@@ -325,8 +332,12 @@ export function SellerStoreScreen() {
 
       {/* Tabs */}
       <Tabs value={tabValue} onValueChange={(v) => setUserTab(v as NonNullable<typeof userTab>)} className="w-full">
-        <TabsList className="w-full grid grid-cols-4 mb-6 bg-surface-light">
+        <TabsList className="w-full grid grid-cols-5 mb-6 bg-surface-light">
           <TabsTrigger value="listings">Listings</TabsTrigger>
+          <TabsTrigger value="posts">
+            <Megaphone className="w-3.5 h-3.5 mr-1.5" />
+            Posts
+          </TabsTrigger>
           <TabsTrigger value="services" disabled={storeProviders.length === 0}>
             Services
           </TabsTrigger>
@@ -418,6 +429,38 @@ export function SellerStoreScreen() {
               <ListingGrid listings={filteredListings} />
             )}
           </section>
+        </TabsContent>
+
+        <TabsContent value="posts" className="mt-0 space-y-4">
+          {isOwner && <PostComposer />}
+
+          {shopPostsLoading ? (
+            <Card className="bg-surface-light border-border">
+              <CardContent className="p-5 space-y-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+            </Card>
+          ) : shopPosts.length === 0 ? (
+            <Card className="bg-surface-light border-border">
+              <CardContent className="py-14 text-center space-y-2">
+                <Megaphone className="w-8 h-8 mx-auto text-muted-foreground" />
+                <p className="font-semibold">No posts yet</p>
+                <p className="text-sm text-muted-foreground">
+                  {isOwner
+                    ? 'Share your first update — new drops, restocks, or a live session.'
+                    : 'Follow this store to see their updates in your feed.'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {shopPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="services" className="mt-0 space-y-4">
