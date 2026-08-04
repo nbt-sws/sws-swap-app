@@ -1153,6 +1153,7 @@ export interface WtbRequest {
   targetPrice?: number | null;
   condition?: string | null;
   note?: string | null;
+  imageUrl?: string | null;
   status: 'OPEN' | 'FOUND' | 'CLOSED';
   createdAt: string;
 }
@@ -1187,6 +1188,7 @@ export const wtbApi = {
     targetPrice?: number;
     condition?: string;
     note?: string;
+    imageUrl?: string;
   }) => apiPost<{ ok: boolean; request: WtbRequest }>('wtb', { json: data }),
   setStatus: (id: string, status: 'OPEN' | 'FOUND' | 'CLOSED') =>
     apiPatch<{ ok: boolean; status: string }>(`wtb/${id}`, { json: { status } }),
