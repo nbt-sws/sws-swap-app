@@ -27,6 +27,7 @@
     "save": "Save",
     "submit": "Submit",
     "loading": "Loading",
+    "done": "Done",
     "error": "Error",
     "retry": "Retry",
     "close": "Close",
@@ -553,21 +554,59 @@
       "update": "Update",
       "drop": "New drop",
       "restock": "Restock",
-      "live": "Live"
+      "live": "Live",
+      "activity": "New items"
+    },
+    "rooms": {
+      "label": "Topic rooms",
+      "all": "All",
+      "chat": "Chat",
+      "news": "News",
+      "product": "New items",
+      "pokemon": "Pokémon",
+      "onepiece": "One Piece",
+      "lorcana": "Lorcana"
     },
     "hasNew": "NEW",
     "justNow": "Just now",
     "composer": {
       "placeholder": "Post an update for your shop...",
+      "placeholders": {
+        "chat": "Chat with your followers...",
+        "news": "Share news or updates from your shop...",
+        "product": "Showcase your shop's new items...",
+        "pokemon": "Talk Pokémon — new cards, decks, or news...",
+        "onepiece": "Talk One Piece — new cards, decks, or news...",
+        "lorcana": "Talk Lorcana — new cards, decks, or news..."
+      },
       "guestPlaceholder": "Sign in to post an update for your shop...",
       "post": "Post",
       "posted": "Posted!",
-      "postFailed": "Could not post — please try again"
+      "postFailed": "Could not post — please try again",
+      "addPhoto": "Photo",
+      "removePhoto": "Remove this photo",
+      "photoLimit": "Up to {{max}} photos per post",
+      "photoTooLarge": "Photo exceeds 5MB",
+      "uploading": "Uploading...",
+      "uploadFailed": "Photo upload failed — please try again",
+      "photoOnlyBody": "📷 Photo update from the shop",
+      "attachCard": "Cards",
+      "attachTitle": "Attach cards to post ({{count}}/{{max}})",
+      "attachFromVault": "From Vault",
+      "attachFromMarket": "From Market",
+      "searchCards": "Search cards in the market...",
+      "attachLimit": "You can attach up to {{max}} cards",
+      "removeAttach": "Remove this card",
+      "noVaultCards": "No cards in your vault yet",
+      "noMarketCards": "No cards found"
     },
     "stories": {
       "you": "Your shop"
     },
     "linkCopied": "Link copied",
+    "viewPhoto": "View full photo",
+    "prevPhoto": "Previous photo",
+    "nextPhoto": "Next photo",
     "emptyAuth": "Sign in to see posts from shops you follow",
     "gate": {
       "guest": {

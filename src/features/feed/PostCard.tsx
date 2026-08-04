@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Heart, MessageCircle, Bookmark, Share2, BadgeCheck, Radio, ChevronRight } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, Share2, BadgeCheck, Radio, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ const TYPE_BADGE: Record<Exclude<ShopPostType, 'update'>, { chip: string; key: s
   drop: { chip: 'pxl-chip--brand', key: 'feed.badges.drop' },
   restock: { chip: 'pxl-chip--cyan', key: 'feed.badges.restock' },
   live: { chip: 'pxl-chip--brand', key: 'feed.badges.live' },
+  activity: { chip: 'pxl-chip--cyan', key: 'feed.badges.activity' },
 };
 
 export function ShopAvatar({ name, avatar, size = 'md' }: {
@@ -50,8 +51,10 @@ export function PostCard({ post, followed, onToggleFollow }: {
   const [liked, setLiked] = useState(post.likedByMe);
   const [saved, setSaved] = useState(post.savedByMe);
   const [likes, setLikes] = useState(post.likes);
+  const [photoIndex, setPhotoIndex] = useState<number | null>(null);
 
   const listings = post.listings ?? [];
+  const vaultItems = post.vaultItems ?? [];
 
   const toggle = (kind: 'like' | 'save') => {
     if (!isAuthenticated) {
@@ -122,6 +125,74 @@ export function PostCard({ post, followed, onToggleFollow }: {
         {/* Body */}
         <p className="mt-3 text-sm leading-relaxed whitespace-pre-line">{post.body}</p>
 
+        {/* Photo attachments — compact thumbnail strip, never a hero */}
+        {post.mediaUrls.length > 0 && (
+          <div
+            className={cn(
+              'mt-3 grid gap-2',
+              post.mediaUrls.length === 1
+                ? 'grid-cols-2 max-w-[220px]'
+                : post.mediaUrls.length === 2
+                  ? 'grid-cols-3 max-w-[330px]'
+                  : 'grid-cols-4 max-w-[440px]'
+            )}
+          >
+            {post.mediaUrls.slice(0, 6).map((url, i) => (
+              <button
+                key={`${url}-${i}`}
+                onClick={() => setPhotoIndex(i)}
+                aria-label={t('feed.viewPhoto')}
+                className="group/ph relative aspect-square overflow-hidden rounded-lg border border-border/60 bg-surface-lighter transition-all hover:border-brand/50"
+              >
+                <ImageWithFallback src={url} alt="" className="h-full w-full object-cover transition-transform group-hover/ph:scale-105" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Photo lightbox — full-size viewer with prev/next */}
+        {photoIndex !== null && post.mediaUrls[photoIndex] && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+            onClick={() => setPhotoIndex(null)}
+          >
+            <button
+              onClick={() => setPhotoIndex(null)}
+              aria-label={t('common.close')}
+              className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            {post.mediaUrls.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setPhotoIndex((photoIndex + post.mediaUrls.length - 1) % post.mediaUrls.length); }}
+                  aria-label={t('feed.prevPhoto')}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setPhotoIndex((photoIndex + 1) % post.mediaUrls.length); }}
+                  aria-label={t('feed.nextPhoto')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs mono-num text-white">
+                  {photoIndex + 1}/{post.mediaUrls.length}
+                </span>
+              </>
+            )}
+            <img
+              src={post.mediaUrls[photoIndex]}
+              alt=""
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[85vh] max-w-[92vw] rounded-xl object-contain"
+            />
+          </div>
+        )}
+
         {post.liveAt && (
           <div className="mt-3 flex items-center gap-2 rounded-xl border border-brand/25 bg-brand/5 px-3 py-2">
             <Radio className="h-4 w-4 text-brand" />
@@ -140,8 +211,13 @@ export function PostCard({ post, followed, onToggleFollow }: {
               listings.length > 3 ? 'grid-cols-4' : listings.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:max-w-[70%]'
             )}>
               {listings.map((item) => (
-                <div key={item.listingId}>
-                  <div className="relative aspect-[5/7] w-full overflow-hidden rounded-xl border border-border bg-surface-lighter">
+                <Link
+                  key={item.listingId}
+                  to="/market/$listingId"
+                  params={{ listingId: item.listingId }}
+                  className="group/item block"
+                >
+                  <div className="relative aspect-[5/7] w-full overflow-hidden rounded-xl border border-border bg-surface-lighter transition-all group-hover/item:border-brand/40 group-hover/item:shadow-glow">
                     {item.imageUrl ? (
                       <ImageWithFallback src={item.imageUrl} alt={item.title} />
                     ) : (
@@ -150,9 +226,9 @@ export function PostCard({ post, followed, onToggleFollow }: {
                       </div>
                     )}
                   </div>
-                  <p className="mt-1 truncate text-[11px] text-muted-foreground">{item.title}</p>
+                  <p className="mt-1 truncate text-[11px] text-muted-foreground transition-colors group-hover/item:text-foreground">{item.title}</p>
                   <p className="text-xs font-semibold mono-num text-cyan">฿{item.price.toLocaleString()}</p>
-                </div>
+                </Link>
               ))}
             </div>
             <Link
@@ -162,6 +238,43 @@ export function PostCard({ post, followed, onToggleFollow }: {
               {t('feed.viewMarket')}
               <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
             </Link>
+          </div>
+        )}
+
+        {/* Shared vault items (cards shared straight from the vault) */}
+        {vaultItems.length > 0 && (
+          <div className="mt-4">
+            <div className={cn(
+              'grid gap-3',
+              vaultItems.length > 3 ? 'grid-cols-4' : vaultItems.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:max-w-[70%]'
+            )}>
+              {vaultItems.map((item) => (
+                <Link
+                  key={item.itemId}
+                  to="/vault/items/$itemId"
+                  params={{ itemId: item.itemId }}
+                  className="group/item block"
+                >
+                  <div className="relative aspect-[5/7] w-full overflow-hidden rounded-xl border border-border bg-surface-lighter transition-all group-hover/item:border-periwinkle/50 group-hover/item:shadow-glow">
+                    {item.imageUrl ? (
+                      <ImageWithFallback src={item.imageUrl} alt={item.title} />
+                    ) : (
+                      <div className="surreal-mesh-static absolute inset-0 flex items-center justify-center">
+                        <span className="font-pixel text-[9px] tracking-wider text-periwinkle/90">{item.title.slice(0, 10)}</span>
+                      </div>
+                    )}
+                    <span className="pxl-chip pxl-chip--peri absolute left-1.5 top-1.5 text-[8px]">VAULT</span>
+                    {item.condition && (
+                      <span className="absolute right-1.5 top-1.5 rounded bg-black/55 px-1.5 py-0.5 text-[8px] font-bold text-white backdrop-blur-sm">
+                        {item.condition}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 truncate text-[11px] text-muted-foreground transition-colors group-hover/item:text-foreground">{item.title}</p>
+                  <p className="text-xs font-semibold mono-num text-cyan">฿{item.price.toLocaleString()}</p>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 

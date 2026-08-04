@@ -1097,11 +1097,20 @@ export const catalogApi = {
 // ─── Social layer: shop posts feed + WTB board (Phase 1–2) ─────────
 
 export type FeedTab = 'foryou' | 'following' | 'explore';
-export type ShopPostType = 'update' | 'drop' | 'restock' | 'live';
+export type FeedRoom = 'all' | 'chat' | 'news' | 'product' | 'pokemon' | 'onepiece' | 'lorcana';
+export type ShopPostType = 'update' | 'drop' | 'restock' | 'live' | 'activity';
 
 export interface FeedPostListing {
   listingId: string;
   title: string;
+  price: number;
+  imageUrl?: string | null;
+}
+
+export interface FeedPostVaultItem {
+  itemId: string;
+  title: string;
+  condition?: string | null;
   price: number;
   imageUrl?: string | null;
 }
@@ -1112,6 +1121,7 @@ export interface ShopPost {
   shopName: string;
   shopAvatar?: string | null;
   type: ShopPostType;
+  room: Exclude<FeedRoom, 'all'>;
   body: string;
   mediaUrls: string[];
   liveAt?: string | null;
@@ -1121,6 +1131,7 @@ export interface ShopPost {
   likedByMe: boolean;
   savedByMe: boolean;
   listings: FeedPostListing[];
+  vaultItems: FeedPostVaultItem[];
 }
 
 export interface FeedResponse {
@@ -1147,14 +1158,16 @@ export interface WtbRequest {
 }
 
 export const feedApi = {
-  feed: (params?: { tab?: FeedTab; page?: number }) =>
+  feed: (params?: { tab?: FeedTab; room?: Exclude<FeedRoom, 'all'>; page?: number }) =>
     apiGet<FeedResponse>('feed', { searchParams: params as Record<string, string | number | undefined> }),
   shopPosts: (shopId: string) => apiGet<{ ok: boolean; posts: ShopPost[] }>(`shops/${shopId}/posts`),
   createPost: (shopId: string, data: {
     type?: ShopPostType;
+    room?: Exclude<FeedRoom, 'all'>;
     body: string;
     mediaUrls?: string[];
     linkedListingIds?: string[];
+    linkedVaultItemIds?: string[];
     liveAt?: string;
   }) => apiPost<{ ok: boolean; post: ShopPost }>(`shops/${shopId}/posts`, { json: data }),
   deletePost: (postId: string) => apiDelete<{ ok: boolean }>(`posts/${postId}`),

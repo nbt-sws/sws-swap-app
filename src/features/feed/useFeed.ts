@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { feedApi, wtbApi } from '@/lib/api';
-import type { FeedTab, ShopPostType, WtbRequest } from '@/lib/api';
+import type { FeedRoom, FeedTab, ShopPostType, WtbRequest } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { useUser } from '@/hooks/useApi';
 
@@ -26,10 +26,10 @@ export function useFeedAccess(): { status: FeedAccess; isLoading: boolean } {
   return { status: kyc === 'PENDING' ? 'pending' : 'needKyc', isLoading };
 }
 
-export function useFeed(tab: FeedTab, page = 1, enabled = true) {
+export function useFeed(tab: FeedTab, room: FeedRoom = 'all', page = 1, enabled = true) {
   return useQuery({
-    queryKey: ['feed', tab, page],
-    queryFn: () => feedApi.feed({ tab, page }),
+    queryKey: ['feed', tab, room, page],
+    queryFn: () => feedApi.feed({ tab, room: room === 'all' ? undefined : room, page }),
     staleTime: 1000 * 30,
     retry: 0,
     enabled,
@@ -49,8 +49,15 @@ export function useShopPosts(shopId: string | undefined) {
 export function useCreatePost(shopId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { type?: ShopPostType; body: string; liveAt?: string }) =>
-      feedApi.createPost(shopId as string, data),
+    mutationFn: (data: {
+      type?: ShopPostType;
+      room?: Exclude<FeedRoom, 'all'>;
+      body: string;
+      mediaUrls?: string[];
+      linkedListingIds?: string[];
+      linkedVaultItemIds?: string[];
+      liveAt?: string;
+    }) => feedApi.createPost(shopId as string, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['shopPosts', shopId] });

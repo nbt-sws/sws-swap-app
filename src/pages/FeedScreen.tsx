@@ -18,7 +18,8 @@ import { PostCard } from '@/features/feed/PostCard';
 import { PostComposer } from '@/features/feed/PostComposer';
 import { FeedGate } from '@/features/feed/FeedGate';
 import { useFeed, useFeedAccess } from '@/features/feed/useFeed';
-import type { FeedTab, ShopPost } from '@/lib/api';
+import { FEED_ROOMS } from '@/features/feed/PostComposer';
+import type { FeedRoom, FeedTab, ShopPost } from '@/lib/api';
 
 /* ══════════════════════════════════════════════════════════════════
    Unified feed — Phase 1 (Feed + Stories + Follow) & Phase 2 (Explore).
@@ -114,7 +115,8 @@ export function FeedScreen() {
   const { isAuthenticated } = useAuthStore();
   const { status: feedAccess } = useFeedAccess();
   const [tab, setTab] = useState<FeedTab>('foryou');
-  const feedQuery = useFeed(tab, 1, feedAccess === 'allowed');
+  const [room, setRoom] = useState<FeedRoom>('all');
+  const feedQuery = useFeed(tab, room, 1, feedAccess === 'allowed');
 
   const { data: followedIds = [] } = useFollowedSellers();
   const follow = useFollowSeller();
@@ -175,6 +177,26 @@ export function FeedScreen() {
           <FeedGate>
             <StoriesBar activeShopIds={activeShopIds} />
             {tab !== 'explore' && <PostComposer />}
+
+            {/* Room bar — topic channels (รวม = every room) */}
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5" role="tablist" aria-label={t('feed.rooms.label')}>
+              {(['all', ...FEED_ROOMS] as FeedRoom[]).map((r) => (
+                <button
+                  key={r}
+                  role="tab"
+                  aria-selected={room === r}
+                  onClick={() => setRoom(r)}
+                  className={cn(
+                    'shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all border',
+                    room === r
+                      ? 'bg-brand text-white border-brand shadow-glow'
+                      : 'bg-surface-light/70 text-muted-foreground border-border/60 hover:text-foreground hover:border-brand/30'
+                  )}
+                >
+                  {t(`feed.rooms.${r}`)}
+                </button>
+              ))}
+            </div>
 
             {feedQuery.isLoading ? (
             <FeedSkeleton />

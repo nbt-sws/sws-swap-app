@@ -594,7 +594,7 @@ function DiscoveryCard({ t }: { t: (k: string, o?: Record<string, unknown>) => s
 /* ─── Feed Preview (super-app social layer on Home) ────────────── */
 function FeedPreview({ t }: { t: (k: string, o?: Record<string, unknown>) => string }) {
   const { status: feedAccess } = useFeedAccess();
-  const feedQuery = useFeed('foryou', 1, feedAccess === 'allowed');
+  const feedQuery = useFeed('foryou', 'all', 1, feedAccess === 'allowed');
   const posts = feedQuery.data?.posts?.slice(0, 2) ?? [];
 
   // Feed is KYC-gated → guests / non-KYC users see the WTB teaser instead.

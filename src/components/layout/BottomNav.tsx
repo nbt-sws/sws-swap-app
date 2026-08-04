@@ -80,7 +80,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface/90 backdrop-blur-md border-t border-border/80 pb-[env(safe-area-inset-bottom)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 bg-surface-dark/85 backdrop-blur-xl border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
       {/* Neon hairline — super-app chrome accent */}
       <div aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent" />
       <div
