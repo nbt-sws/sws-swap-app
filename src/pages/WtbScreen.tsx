@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -215,23 +216,14 @@ export function WtbScreen() {
 
   return (
     <PageContainer size="xl" className="py-6 space-y-6">
-      {/* Hero — surreal mesh + neon title + pixel accent */}
-      <header className="relative overflow-hidden rounded-2xl border border-border/60 bg-surface-light/60 px-5 py-6 sm:px-7">
-        <div className="surreal-mesh absolute inset-0 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 h-3 w-3 bg-brand/60 pxl-corner" aria-hidden="true" />
-        <div className="relative flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-warning/10 text-warning">
-                <HandCoins className="h-5 w-5" />
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                {t('wtb.title')}
-              </h1>
-              <span className="pxl-chip pxl-chip--brand">{t('wtb.badge')}</span>
-            </div>
-            <p className="mt-2 max-w-md text-sm text-muted-foreground">{t('wtb.subtitle')}</p>
-          </div>
+      {/* Hero — unified neon hero via PageHeader */}
+      <PageHeader
+        title={t('wtb.title')}
+        icon={<HandCoins className="text-warning" />}
+        badge={<span className="pxl-chip pxl-chip--brand">{t('wtb.badge')}</span>}
+        description={t('wtb.subtitle')}
+        glow={false}
+        action={
           <Button
             onClick={openForm}
             className="bg-warning font-bold text-surface-dark hover:bg-warning/90 hover:shadow-[0_0_20px_rgba(255,216,77,0.35)]"
@@ -239,8 +231,8 @@ export function WtbScreen() {
             <Plus className="mr-1.5 h-4 w-4" />
             {t('wtb.createCta')}
           </Button>
-        </div>
-      </header>
+        }
+      />
 
       {showForm && <WtbForm onClose={() => setShowForm(false)} />}
 

@@ -192,11 +192,15 @@ export function SellerStoreScreen() {
       <div className="relative mb-8">
         <div
           className={cn(
-            'h-48 sm:h-64 rounded-xl bg-cover bg-center relative overflow-hidden',
+            'h-48 sm:h-64 rounded-xl bg-cover bg-center relative overflow-hidden border border-border/60',
             !profile?.bannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-surface-dark'
           )}
           style={profile?.bannerUrl ? { backgroundImage: `url(${profile.bannerUrl})` } : undefined}
         >
+          {!profile?.bannerUrl && (
+            <div className="surreal-mesh absolute inset-0 pointer-events-none" aria-hidden="true" />
+          )}
+          <div className="absolute bottom-0 right-0 h-3 w-3 bg-brand/60 pxl-corner" aria-hidden="true" />
           <div className={cn(
             'absolute inset-0 bg-gradient-to-t',
             profile?.bannerUrl ? 'from-black/60 via-black/20 to-transparent' : 'from-surface-dark/60 via-surface-dark/20 to-transparent'
@@ -211,7 +215,7 @@ export function SellerStoreScreen() {
         </div>
 
         <div className="flex flex-col items-center -mt-16 px-4 text-center">
-          <Avatar className="w-32 h-32 rounded-xl border-4 border-surface-light shadow-xl bg-surface-lighter">
+          <Avatar className="w-32 h-32 rounded-xl border-4 border-surface-light shadow-xl bg-surface-lighter ring-2 ring-brand/40 shadow-glow">
             <AvatarImage src={profile?.avatarUrl} alt={displayName} className="object-cover" />
             <AvatarFallback className="rounded-xl text-3xl font-bold bg-surface-lighter text-foreground">
               {displayName.charAt(0)}
@@ -219,7 +223,7 @@ export function SellerStoreScreen() {
           </Avatar>
 
           <div className="mt-3">
-            <h1 className="text-2xl sm:text-3xl font-bold">{displayName}</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight neon-text-brand">{displayName}</h1>
             <p className="text-sm text-muted-foreground">{handle}</p>
           </div>
 
@@ -261,7 +265,7 @@ export function SellerStoreScreen() {
                 variant={isFollowing ? 'outline' : 'default'}
                 className={cn(
                   'min-w-[120px]',
-                  isFollowing ? 'border-border' : 'bg-brand hover:bg-brand-light'
+                  isFollowing ? 'border-border' : 'bg-brand hover:bg-brand-light font-bold shadow-glow'
                 )}
                 onClick={toggleFollow}
                 disabled={follow.isPending || unfollow.isPending}
@@ -465,7 +469,7 @@ export function SellerStoreScreen() {
 
         <TabsContent value="services" className="mt-0 space-y-4">
           {storeProviders.length === 0 ? (
-            <EmptyState icon={<Award className="w-8 h-8" />} title="No services" description="This store is not offering grading or pre-grade services yet." />
+            <EmptyState icon={<Award className="w-8 h-8" />} title="No services" description="This store hasn’t listed any services yet." />
           ) : (
             storeProviders.map((provider) => (
               <ProviderRow key={provider.id} provider={provider} />
@@ -604,11 +608,11 @@ export function SellerStoreScreen() {
 
 function StatCard({ value, label, icon }: { value: number | string; label: string; icon: React.ReactNode }) {
   return (
-    <div className="bg-surface-light border border-border rounded-xl p-4 flex items-center gap-3">
+    <div className="neon-card bg-surface-light border border-border rounded-xl p-4 flex items-center gap-3">
       <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center shrink-0">{icon}</div>
       <div>
-        <p className="text-lg font-bold leading-none">{value}</p>
-        <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{label}</p>
+        <p className="text-lg font-bold leading-none mono-num">{value}</p>
+        <p className="ticket-label mt-1">{label}</p>
       </div>
     </div>
   );

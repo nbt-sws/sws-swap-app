@@ -51,7 +51,7 @@ export function DevLoginScreen() {
 
   return (
     <PageContainer size="sm" className="py-6">
-      <PageHeader title="Quick Login" description="Choose a test account to continue" />
+      <PageHeader title="Quick Login" description="Pick a test account to jump in" />
 
       <div className="space-y-4">
         {CONFIG.map((c) => {

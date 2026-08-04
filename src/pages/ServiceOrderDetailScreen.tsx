@@ -16,6 +16,7 @@ import {
   Star,
 } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -78,27 +79,19 @@ export function ServiceOrderDetailScreen() {
 
   return (
     <PageContainer className="py-6">
-      <div className="mb-4">
-        <Button asChild variant="ghost" size="sm" className="gap-1 -ml-2 text-muted-foreground">
-          <Link to="/service-orders">
-            <ArrowLeft className="w-4 h-4" /> Back to orders
-          </Link>
-        </Button>
-      </div>
+      <PageHeader
+        title={order.packageName ?? (order.category === 'PREGRADE' ? 'Pre-grade' : 'Grade')}
+        icon={<Award className="text-brand" />}
+        description={order.orderNo ?? order.id}
+        badge={<Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>}
+        back={{ to: '/service-orders' }}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-surface-light border border-border rounded-xl p-5 mb-4"
       >
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-mono text-muted-foreground mb-1">{order.orderNo ?? order.id}</p>
-            <h1 className="text-xl font-bold">{order.packageName ?? (order.category === 'PREGRADE' ? 'Pre-grade' : 'Grade')} order</h1>
-          </div>
-          <Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>
-        </div>
-
         {order.gradeResult && (
           <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-cyan/10 border border-cyan/30 px-3 py-2">
             <Award className="w-4 h-4 text-cyan" />

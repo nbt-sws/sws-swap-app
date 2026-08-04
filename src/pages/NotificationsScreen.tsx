@@ -135,7 +135,7 @@ export function NotificationsScreen() {
                 }
                 className={cn(
                   'bg-surface-light border-border transition',
-                  navigates && 'cursor-pointer hover:border-brand/40',
+                  navigates && 'cursor-pointer neon-card',
                   !n.read && 'border-brand/30'
                 )}
                 onClick={() => handleOpen(n)}
@@ -151,7 +151,7 @@ export function NotificationsScreen() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>
                   </div>
-                  {!n.read && <div className="w-2 h-2 rounded-full bg-brand mt-2" />}
+                  {!n.read && <div className="w-2 h-2 rounded-full bg-brand mt-2 shadow-[0_0_8px_rgba(240,106,168,0.9)]" />}
                 </CardContent>
               </Card>
             );

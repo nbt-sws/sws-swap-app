@@ -317,35 +317,35 @@ export function VaultScreen() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="surface-card rounded-xl p-3">
+          <div className="neon-card surface-card rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-6 h-6 rounded-md bg-brand/10 flex items-center justify-center">
                 <Wallet className="w-3.5 h-3.5 text-brand" />
               </div>
-              <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Value</p>
+              <p className="ticket-label">Value</p>
             </div>
-            <p className="text-sm font-bold font-mono text-foreground">฿{totalValue.toLocaleString()}</p>
+            <p className="text-sm font-bold mono-num text-foreground">฿{totalValue.toLocaleString()}</p>
           </div>
-          <div className="surface-card rounded-xl p-3">
+          <div className="neon-card surface-card rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-6 h-6 rounded-md bg-periwinkle/10 flex items-center justify-center">
                 <Package className="w-3.5 h-3.5 text-periwinkle" />
               </div>
-              <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Cards</p>
+              <p className="ticket-label">Cards</p>
             </div>
             <p className="text-sm font-bold pxl-num">{cardCount}</p>
             <p className="text-xs text-muted-foreground">{heldCards.length} held</p>
           </div>
-          <div className="surface-card rounded-xl p-3">
+          <div className="neon-card surface-card rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1.5">
               <div className={cn('w-6 h-6 rounded-md flex items-center justify-center', totalPL >= 0 ? 'bg-cyan/10' : 'bg-pldown/10')}>
                 {totalPL >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-cyan" /> : <TrendingDown className="w-3.5 h-3.5 text-pldown" />}
               </div>
-              <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">P/L</p>
+              <p className="ticket-label">P/L</p>
             </div>
             <p className={cn(
-              'text-sm font-bold font-mono flex items-center gap-1',
-              totalPL >= 0 ? 'text-plup' : 'text-pldown'
+              'text-sm font-bold mono-num flex items-center gap-1',
+              totalPL >= 0 ? 'text-plup neon-text-cyan' : 'text-pldown'
             )}>
               ฿{Math.abs(totalPL).toLocaleString()}
             </p>
@@ -685,7 +685,7 @@ export function VaultScreen() {
                     <Link
                       key={offer.id}
                       to="/offers"
-                      className="flex items-center gap-3 rounded-xl border border-border bg-surface-light p-3 hover:border-brand/40 transition"
+                      className="neon-card flex items-center gap-3 rounded-xl border border-border bg-surface-light p-3 transition"
                     >
                       <div className="w-10 h-10 rounded-lg bg-cyan/10 text-cyan flex items-center justify-center shrink-0">
                         <ArrowUpRight className="w-4 h-4" />
@@ -937,7 +937,7 @@ function VaultListRow({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-xs font-mono text-muted-foreground">{item.card.code}</p>
+          <p className="text-xs mono-num text-muted-foreground">{item.card.code}</p>
           {isListed && (
             <Badge variant="pixel" className="pxl-chip--cyan">Listed</Badge>
           )}
@@ -949,7 +949,7 @@ function VaultListRow({
         </div>
       </div>
       <div className="text-right">
-        <p className="text-sm font-bold font-mono">฿{item.currentPrice.toLocaleString()}</p>
+        <p className="text-sm font-bold mono-num">฿{item.currentPrice.toLocaleString()}</p>
         <p className={cn('text-xs font-bold', item.plPercent >= 0 ? 'text-plup' : 'text-pldown')}>
           {formatPriceChange(item.plPercent)}
         </p>

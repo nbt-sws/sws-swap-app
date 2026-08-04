@@ -52,10 +52,10 @@ export function RedemptionsScreen() {
             const config = statusConfig[r.status];
             const Icon = config.icon;
             return (
-              <Card key={r.id} className="bg-surface-light border-border">
+              <Card key={r.id} className="neon-card bg-surface-light border-border">
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-muted-foreground">{r.id}</span>
+                    <span className="ticket-label">#{r.id.slice(0, 10)}</span>
                     <Badge className={cn('text-xs', config.color)}>
                       <Icon className="w-3 h-3 mr-1" />
                       {config.label}

@@ -164,6 +164,7 @@ export function MarketScreen() {
       <PageHeader
         title={t('market.title')}
         icon={<ShoppingBag className="w-6 h-6 text-brand" />}
+        description={marketStats ? t('market.description', { count: marketStats.count }) : undefined}
       />
 
       {/* Market pulse — only when there's enough activity to be worth stating;
@@ -171,17 +172,17 @@ export function MarketScreen() {
       {marketStats && marketStats.count >= 2 && (
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-y border-border py-2.5 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-2 font-medium text-foreground">
-            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_6px_rgba(79,224,160,0.9)]" />
             {t('market.stats.live', { count: marketStats.count })}
           </span>
           {marketStats.floor !== null && (
-            <span className="font-mono">{t('market.stats.floor', { price: marketStats.floor.toLocaleString() })}</span>
+            <span className="mono-num">{t('market.stats.floor', { price: marketStats.floor.toLocaleString() })}</span>
           )}
           {marketStats.sellers > 1 && (
-            <span className="font-mono">{t('market.stats.sellers', { count: marketStats.sellers })}</span>
+            <span className="mono-num">{t('market.stats.sellers', { count: marketStats.sellers })}</span>
           )}
           {marketStats.trades > 0 && (
-            <span className="font-mono text-cyan">{t('market.stats.forTrade', { count: marketStats.trades })}</span>
+            <span className="mono-num text-cyan">{t('market.stats.forTrade', { count: marketStats.trades })}</span>
           )}
         </div>
       )}
@@ -630,7 +631,7 @@ function MobileFilterSheet({
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.game')}</h3>
+            <h3 className="ticket-label mb-2">{t('common.game')}</h3>
             <div className="space-y-1">
               {GAMES.map((game) => (
                 <button
@@ -650,7 +651,7 @@ function MobileFilterSheet({
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.type')}</h3>
+            <h3 className="ticket-label mb-2">{t('common.type')}</h3>
             <div className="space-y-1">
               {LISTING_TYPES.map((type) => (
                 <button
@@ -670,7 +671,7 @@ function MobileFilterSheet({
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.sort')}</h3>
+            <h3 className="ticket-label mb-2">{t('common.sort')}</h3>
             <div className="space-y-1">
               {SORT_OPTIONS.map((opt) => (
                 <button
@@ -690,7 +691,7 @@ function MobileFilterSheet({
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{t('common.priceRange')}</h3>
+            <h3 className="ticket-label mb-2">{t('common.priceRange')}</h3>
             <div className="space-y-1">
               {PRICE_RANGES.map((range) => (
                 <button

@@ -47,7 +47,7 @@ export function BrowseScreen() {
       <PageHeader
         title="Browse"
         icon={<Search className="w-6 h-6 text-brand" />}
-        description="Search cards, sets, and sellers"
+        description="Find cards, sets, and sellers"
       />
 
       <div className="space-y-6">
@@ -110,7 +110,7 @@ export function BrowseScreen() {
                 key={listing.id}
                 to="/market/$listingId"
                 params={{ listingId: listing.id }}
-                className="group block bg-surface-light rounded-xl overflow-hidden border border-border hover:border-brand/30 transition"
+                className="neon-card group block bg-surface-light rounded-xl overflow-hidden border border-border hover:border-brand/30 transition"
               >
                 <div className="aspect-[5/7] overflow-hidden">
                   <img

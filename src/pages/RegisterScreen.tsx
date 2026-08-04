@@ -1,4 +1,5 @@
 import { useNavigate, Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/auth';
 import { useAuthRegister } from '@/hooks/useApi';
 import { mapApiUserToAuthUser } from '@/lib/api-mappers';
@@ -20,25 +21,25 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
 
-const registerSchema = z
-  .object({
-    fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-    email: z.string().email('Please enter a valid email'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type RegisterForm = z.infer<typeof registerSchema>;
-
 export function RegisterScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const register = useAuthRegister();
   const setTokens = useAuthStore((s) => s.setTokens);
   const setUser = useAuthStore((s) => s.setUser);
+
+  const registerSchema = z
+    .object({
+      fullName: z.string().min(2, t('auth.register.nameTooShort')),
+      email: z.string().email(t('auth.invalidEmail')),
+      password: z.string().min(8, t('auth.register.passwordTooShort')),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('auth.register.passwordMismatch'),
+      path: ['confirmPassword'],
+    });
+  type RegisterForm = z.infer<typeof registerSchema>;
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -61,11 +62,12 @@ export function RegisterScreen() {
         onSuccess: (res) => {
           setTokens(res.token);
           setUser(mapApiUserToAuthUser(res.user));
-          toast.success('Account created');
-          navigate({ to: '/' });
+          toast.success(t('auth.register.success'));
+          // New collectors land on onboarding (pick games → follow shops → KYC).
+          navigate({ to: '/onboarding' });
         },
         onError: () => {
-          toast.error('Registration failed. Please try again.');
+          toast.error(t('auth.register.failed'));
         },
       }
     );
@@ -89,9 +91,9 @@ export function RegisterScreen() {
           <span className="text-xl font-bold">SwibSwap</span>
         </div>
 
-        <h1 className="text-3xl font-bold mb-2">Create your account</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('auth.register.title')}</h1>
         <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-          Join the vault-backed TCG marketplace.
+          {t('auth.register.subtitle')}
         </p>
 
         <Card className="bg-surface-light border-border">
@@ -103,10 +105,10 @@ export function RegisterScreen() {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full name</FormLabel>
+                      <FormLabel>{t('auth.register.fullName')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Collector name"
+                          placeholder={t('auth.register.fullNamePlaceholder')}
                           className="bg-surface border-border"
                           {...field}
                         />
@@ -121,7 +123,7 @@ export function RegisterScreen() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('auth.email')}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -140,7 +142,7 @@ export function RegisterScreen() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t('auth.password')}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -159,7 +161,7 @@ export function RegisterScreen() {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm password</FormLabel>
+                      <FormLabel>{t('auth.register.confirmPassword')}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -178,7 +180,7 @@ export function RegisterScreen() {
                   className="w-full bg-brand hover:bg-brand-light h-12"
                   disabled={register.isPending}
                 >
-                  {register.isPending ? 'Creating account...' : 'Create account'}
+                  {register.isPending ? t('auth.register.submitting') : t('auth.register.submit')}
                 </Button>
               </form>
             </Form>
@@ -188,9 +190,9 @@ export function RegisterScreen() {
         {/* TODO(P1-12): Social login (Apple/Google) is not implemented yet.
             Buttons are hidden on production until real OAuth flows exist. */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
+          {t('auth.register.haveAccount')}{' '}
           <Link to="/login" className="text-brand hover:underline">
-            Sign in
+            {t('auth.register.signIn')}
           </Link>
         </p>
 
@@ -202,7 +204,7 @@ export function RegisterScreen() {
           transition={{ delay: 0.7 }}
           className="text-xs text-muted-foreground text-center mt-6"
         >
-          By continuing you accept our terms and privacy policy
+          {t('auth.terms')}
         </motion.p>
       </motion.div>
     </div>

@@ -134,11 +134,15 @@ export function ServiceProviderScreen() {
       {/* Banner */}
       <div
         className={cn(
-          'h-48 sm:h-56 rounded-xl bg-cover bg-center relative overflow-hidden mb-6',
+          'h-48 sm:h-56 rounded-xl bg-cover bg-center relative overflow-hidden mb-6 border border-border/60',
           !provider.storeBannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-surface-dark'
         )}
         style={provider.storeBannerUrl ? { backgroundImage: `url(${provider.storeBannerUrl})` } : undefined}
       >
+        {!provider.storeBannerUrl && (
+          <div className="surreal-mesh absolute inset-0 pointer-events-none" aria-hidden="true" />
+        )}
+        <div className="absolute bottom-0 right-0 h-3 w-3 bg-brand/60 pxl-corner" aria-hidden="true" />
         <div className={cn(
           'absolute inset-0 bg-gradient-to-t',
           provider.storeBannerUrl ? 'from-black/70 via-black/25 to-transparent' : 'from-surface-dark/60 via-surface-dark/20 to-transparent'
@@ -147,7 +151,7 @@ export function ServiceProviderScreen() {
 
       {/* Header */}
       <div className="flex items-start gap-4 -mt-16 mb-6 relative">
-        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-4 border-surface-light bg-surface-lighter overflow-hidden shadow-lg flex items-center justify-center">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-4 border-surface-light bg-surface-lighter overflow-hidden shadow-lg flex items-center justify-center ring-2 ring-brand/40 shadow-glow">
           {provider.storeAvatarUrl ? (
             <img src={provider.storeAvatarUrl} alt={provider.storeName} className="w-full h-full object-cover" />
           ) : (
@@ -156,7 +160,7 @@ export function ServiceProviderScreen() {
         </div>
         <div className="pt-16 flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">{provider.storeName}</h1>
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight truncate neon-text-brand">{provider.storeName}</h1>
             <Badge className={cn(styles.badge, 'text-xs')}>
               {provider.category === 'PREGRADE' ? 'Pre-grade' : 'Grade'}
             </Badge>
@@ -176,7 +180,7 @@ export function ServiceProviderScreen() {
               <DeliveryIcon className="w-3.5 h-3.5" />
               {provider.deliveryMode.replace(/_/g, ' ').toLowerCase()}
             </span>
-            <span className="font-mono">
+            <span className="mono-num">
               {provider.currency} {provider.pricePerCard.toLocaleString()} / card from
             </span>
           </p>

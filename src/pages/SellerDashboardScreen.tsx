@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useMyListings, useUpdateListingStatus, useDeleteListing } from '@/hooks/useApi';
+import { useAuthStore } from '@/stores/auth';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -22,6 +24,8 @@ import {
   TrendingUp,
   Package,
   Award,
+  Megaphone,
+  Store,
 } from 'lucide-react';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import type { MarketListing } from '@/types';
@@ -33,6 +37,8 @@ const statusConfig: Record<NonNullable<MarketListing['status']>, { label: string
 };
 
 export function SellerDashboardScreen() {
+  const { t } = useTranslation();
+  const { user } = useAuthStore();
   const { data: listings, isLoading } = useMyListings();
   const updateStatus = useUpdateListingStatus();
   const deleteListing = useDeleteListing();
@@ -56,9 +62,10 @@ export function SellerDashboardScreen() {
     <PageContainer className="py-6">
       <PageHeader
         title="Seller Dashboard"
-        description="Manage your listings and track performance"
+        icon={<Store className="text-brand" />}
+        description="Your listings and stats"
         action={
-          <Button asChild className="bg-brand hover:bg-brand-light">
+          <Button asChild className="bg-brand hover:bg-brand-light font-bold shadow-glow">
             <Link to="/seller/new">
               <Plus className="w-4 h-4 mr-2" />
               New listing
@@ -70,47 +77,47 @@ export function SellerDashboardScreen() {
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-surface-light border-border">
+          <Card className="neon-card bg-surface-light border-border">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 rounded-lg bg-plup/10 text-plup">
                 <Tag className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{activeCount}</p>
-                <p className="text-xs text-muted-foreground">Active listings</p>
+                <p className="text-2xl font-bold mono-num">{activeCount}</p>
+                <p className="ticket-label mt-0.5">Active listings</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-surface-light border-border">
+          <Card className="neon-card bg-surface-light border-border">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 rounded-lg bg-brand/10 text-brand">
                 <Eye className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalViews.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Total views</p>
+                <p className="text-2xl font-bold mono-num">{totalViews.toLocaleString()}</p>
+                <p className="ticket-label mt-0.5">Total views</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-surface-light border-border">
+          <Card className="neon-card bg-surface-light border-border">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 rounded-lg bg-periwinkle/10 text-periwinkle">
                 <Heart className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalWatchers}</p>
-                <p className="text-xs text-muted-foreground">Watchers</p>
+                <p className="text-2xl font-bold mono-num">{totalWatchers}</p>
+                <p className="ticket-label mt-0.5">Watchers</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-surface-light border-border">
+          <Card className="neon-card bg-surface-light border-border">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 rounded-lg bg-cyan/10 text-cyan">
                 <ArrowRightLeft className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{tradeCount}</p>
-                <p className="text-xs text-muted-foreground">Trade listings</p>
+                <p className="text-2xl font-bold mono-num">{tradeCount}</p>
+                <p className="ticket-label mt-0.5">Trade listings</p>
               </div>
             </CardContent>
           </Card>
@@ -154,7 +161,48 @@ export function SellerDashboardScreen() {
           </div>
         )}
 
-        {!isLoading && filtered.length === 0 && (
+        {/* First-run seller onboarding — shown only when the shop has zero listings */}
+        {!isLoading && (listings?.length ?? 0) === 0 && (
+          <Card className="relative overflow-hidden border-border/60 bg-surface-light/60">
+            <div className="surreal-mesh absolute inset-0 pointer-events-none" />
+            <CardContent className="relative p-5 sm:p-7 space-y-5">
+              <div>
+                <h2 className="text-xl font-extrabold tracking-tight neon-text-brand">
+                  {t('sellerOnboarding.title')}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">{t('sellerOnboarding.subtitle')}</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  { icon: Tag, title: t('sellerOnboarding.step1Title'), desc: t('sellerOnboarding.step1Desc'), cta: t('sellerOnboarding.step1Cta'), to: '/seller/new' },
+                  { icon: Megaphone, title: t('sellerOnboarding.step2Title'), desc: t('sellerOnboarding.step2Desc'), cta: t('sellerOnboarding.step2Cta'), to: '/feed' },
+                  { icon: Store, title: t('sellerOnboarding.step3Title'), desc: t('sellerOnboarding.step3Desc'), cta: t('sellerOnboarding.step3Cta'), to: `/seller/${user?.id ?? ''}` },
+                ].map((step, i) => {
+                  const Icon = step.icon;
+                  return (
+                    <div key={i} className="flex flex-col rounded-2xl border border-border/60 bg-surface/70 p-4">
+                      <div className="flex items-center gap-2">
+                        <span className="pxl-num text-xs text-brand">{`0${i + 1}`}</span>
+                        <Icon className="w-4 h-4 text-brand" />
+                      </div>
+                      <p className="mt-2.5 text-sm font-bold">{step.title}</p>
+                      <p className="mt-1 flex-1 text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
+                      <Button asChild size="sm" className="mt-3 bg-brand hover:bg-brand-light h-8 text-xs">
+                        {step.to.startsWith('/seller/') && i === 2 ? (
+                          <Link to="/seller/$sellerId" params={{ sellerId: user?.id ?? '' }}>{step.cta}</Link>
+                        ) : (
+                          <Link to={step.to}>{step.cta}</Link>
+                        )}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {!isLoading && (listings?.length ?? 0) > 0 && filtered.length === 0 && (
           <Empty className="rounded-xl border-dashed border-border bg-surface-light/50 py-12">
             <EmptyMedia variant="icon">
               <Package className="w-8 h-8 text-brand" />
@@ -174,7 +222,7 @@ export function SellerDashboardScreen() {
             const status = listing.status ?? 'active';
             const config = statusConfig[status];
             return (
-              <Card key={listing.id} className="bg-surface-light border-border hover:border-brand/30 hover:bg-surface-lighter transition">
+              <Card key={listing.id} className="neon-card bg-surface-light border-border hover:bg-surface-lighter transition">
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Link
@@ -196,7 +244,7 @@ export function SellerDashboardScreen() {
                     </Link>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <p className="text-xs font-mono text-muted-foreground">{listing.card.code}</p>
+                        <p className="text-xs mono-num text-muted-foreground">{listing.card.code}</p>
                         <Badge className={cn('text-xs', config.color)}>{config.label}</Badge>
                         <Badge variant="outline" className="text-xs">
                           {listing.listingType === 'TRADE' ? 'TRADE' : 'SALE'}
@@ -233,9 +281,9 @@ export function SellerDashboardScreen() {
                     </div>
 
                     <div className="flex sm:flex-col items-end justify-between sm:justify-start gap-3 min-w-[140px]">
-                      <p className="text-xl font-bold font-mono">
+                      <p className="text-xl font-bold mono-num">
                         {listing.listingType === 'TRADE' ? (
-                          <span className="text-cyan">Trade</span>
+                          <span className="text-cyan neon-text-cyan">Trade</span>
                         ) : (
                           `฿${listing.price.toLocaleString()}`
                         )}

@@ -59,7 +59,7 @@ export function ServicesScreen() {
       <PageHeader
         title="Services"
         icon={<Award className="w-6 h-6 text-brand" />}
-        description="Pre-grade, grade, and vault-to-market services from partner stores"
+        description="Pre-grade and grading services from partner stores"
         action={
           <div className="flex items-center gap-2">
             <Link

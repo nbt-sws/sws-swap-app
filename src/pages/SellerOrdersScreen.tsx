@@ -46,7 +46,7 @@ export function SellerOrdersScreen() {
     <PageContainer className="py-6">
       <PageHeader
         title="Service orders"
-        description="Update statuses, lot numbers and progress for customer submissions"
+        description="Update progress for your customers"
         icon={<Award className="w-6 h-6 text-brand" />}
       />
 
@@ -137,7 +137,7 @@ function OrderManager({
   const currentStage = [...stages].reverse().find((s) => s.completed);
 
   return (
-    <Card className="bg-surface-light border-border overflow-hidden">
+    <Card className="neon-card bg-surface-light border-border overflow-hidden">
       <CardContent className="p-0">
         <button
           onClick={onToggle}
@@ -145,7 +145,7 @@ function OrderManager({
         >
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-xs font-mono text-muted-foreground">{order.id}</span>
+              <span className="ticket-label">#{order.id.slice(0, 10)}</span>
               <Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>
               {order.grader && (
                 <span className={cn('text-xs px-1.5 py-0.5 rounded border', GRADER_STYLES[order.grader])}>
@@ -155,7 +155,7 @@ function OrderManager({
             </div>
             <p className="font-medium truncate">{order.packageName ?? order.category}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {order.providerName} · {order.cardIds.length} card(s) · {order.currency} {order.totalAmount.toLocaleString()}
+              {order.providerName} · {order.cardIds.length} card(s) · <span className="mono-num">{order.currency} {order.totalAmount.toLocaleString()}</span>
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Latest: <span className="text-foreground font-medium">{currentStage?.label ?? 'Ordered'}</span>
@@ -214,7 +214,7 @@ function OrderManager({
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Progress</p>
+                  <p className="ticket-label mb-3">Progress</p>
                   <div className="space-y-2">
                     {stages.map((stage, idx) => (
                       <label
@@ -244,7 +244,7 @@ function OrderManager({
                 <Button
                   onClick={handleSave}
                   disabled={update.isPending}
-                  className="w-full bg-brand hover:bg-brand-light"
+                  className="w-full bg-brand hover:bg-brand-light font-bold shadow-glow"
                 >
                   {update.isPending ? (
                     'Saving…'

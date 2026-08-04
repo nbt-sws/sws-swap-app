@@ -201,7 +201,7 @@
     },
     "guestWelcome": {
       "title": "Unlock your collector vault",
-      "desc": "Sign in to track your portfolio, manage cards, and see personalized offers.",
+      "desc": "Sign in to track your collection and get personal offers.",
       "signIn": "Sign In",
       "register": "Create account"
     },
@@ -212,7 +212,7 @@
     },
     "discovery": {
       "title": "Discover cards",
-      "desc": "Browse vault-backed listings and trending cards",
+      "desc": "Trending cards and listings",
       "cta": "Explore market"
     }
   },
@@ -240,26 +240,26 @@
   },
   "offers": {
     "title": "Offers",
-    "description": "Manage your incoming and outgoing offers",
+    "description": "Offers you’ve sent and received",
     "empty": "No offers yet",
     "emptyDesc": "Make an offer on a listing or wait for buyers to reach out."
   },
   "wishlist": {
     "title": "Wishlist",
-    "description": "Cards you're watching",
+    "description": "Cards you’re watching",
     "empty": "Your wishlist is empty",
     "emptyDesc": "Save cards you’re watching and we’ll alert you when prices move."
   },
   "notifications": {
     "title": "Notifications",
-    "description": "Stay on top of offers, orders, and updates",
+    "description": "Offers, orders, and updates",
     "unread": "{{count}} unread",
     "empty": "No notifications yet",
     "emptyDesc": "We’ll let you know when there are offers, orders, or updates."
   },
   "market": {
     "title": "Market",
-    "description": "{{count}} LIVE · raw · pre-graded · graded · sealed — all vault-backed",
+    "description": "{{count}} live listings — cards, sealed & merch",
     "empty": "No listings found",
     "emptyDesc": "Try adjusting your filters or search for a different card.",
     "clearFilters": "Clear all filters",
@@ -355,7 +355,7 @@
   },
   "orders": {
     "title": "My Orders",
-    "description": "Track your purchases and trades",
+    "description": "Your purchases and trades",
     "empty": "No orders yet",
     "emptyDesc": "Browse the market to find your next card.",
     "tabs": {
@@ -371,7 +371,40 @@
       "DELIVERED": "Delivered",
       "COMPLETED": "Completed",
       "CANCELLED": "Cancelled"
-    }
+    },
+    "browseCta": "Browse market",
+    "updateSuccess": "Order updated",
+    "updateFailed": "Failed to update order",
+    "ship": "Ship",
+    "vault": "Vault",
+    "steps": {
+      "CREATED": "Order placed",
+      "PAYMENT_PENDING": "Payment sent",
+      "PAYMENT_CONFIRMED": "Payment confirmed",
+      "SHIPPING_ARRANGED": "Shipped",
+      "COMPLETED": "Completed"
+    },
+    "actions": {
+      "markPaid": "Mark as paid",
+      "confirmPayment": "Confirm payment received",
+      "markShipped": "Mark as shipped",
+      "confirmReceived": "Confirm received"
+    },
+    "hints": {
+      "waitBuyerPay": "Waiting for the buyer to pay",
+      "waitSellerConfirm": "Waiting for the seller to confirm your payment",
+      "waitSellerShip": "Waiting for the seller to ship",
+      "waitBuyerConfirm": "Waiting for the buyer to confirm delivery"
+    },
+    "updating": "Updating...",
+    "cancelOrder": "Cancel order",
+    "buyer": "Buyer",
+    "seller": "Seller",
+    "notFound": "Order not found",
+    "notFoundDesc": "We couldn't find this order.",
+    "backToOrders": "Back to orders",
+    "itemDetails": "Item details",
+    "noAddress": "No address provided"
   },
   "vault": {
     "title": "🗄️ SwibsVault",
@@ -509,7 +542,7 @@
   },
   "feed": {
     "title": "Feed",
-    "subtitle": "Updates from shops you follow, new drops, and live sessions — all in one place",
+    "subtitle": "Updates from shops you follow",
     "tabs": {
       "foryou": "For you",
       "following": "Following",
@@ -544,7 +577,7 @@
       },
       "needKyc": {
         "title": "Verify your identity (KYC) to unlock the feed",
-        "desc": "To keep the market safe, the feed and posting are available to verified members only. It takes just a few minutes.",
+        "desc": "Verify your identity to unlock posting and the feed.",
         "cta": "Start verification"
       },
       "pending": {
@@ -567,7 +600,7 @@
   },
   "cardsBrowse": {
     "title": "Card Catalog",
-    "subtitle": "Search the full card catalog",
+    "subtitle": "Browse the full card catalog",
     "subtitleCount": "{{count}} cards in the catalog",
     "searchPlaceholder": "Search code or name (EN/JP)…",
     "games": "Games",
@@ -604,7 +637,7 @@
   },
   "wtb": {
     "title": "Want-to-Buy Board",
-    "subtitle": "Collectors post the cards they're hunting — shops see real market demand",
+    "subtitle": "What collectors are looking for right now",
     "badge": "WTB",
     "createCta": "Post a request",
     "searchPlaceholder": "Search cards people are hunting...",
@@ -629,5 +662,195 @@
     "teaserTitle": "Hunting a card?",
     "teaserDesc": "Post on the WTB board so every shop on the app can see it — let the card come to you",
     "teaserCta": "Go to the WTB board"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "invalidEmail": "Please enter a valid email",
+    "passwordRequired": "Password is required",
+    "terms": "By continuing you accept our terms and privacy policy",
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to manage your cards and trades.",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one",
+      "success": "Welcome back",
+      "failed": "Sign in failed. Please check your email and password.",
+      "quickLogin": "Quick login (dev)",
+      "tagline": "your collection is waiting"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Create an account to start collecting and trading.",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Collector name",
+      "confirmPassword": "Confirm password",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "success": "Account created",
+      "failed": "Registration failed. Please try again.",
+      "nameTooShort": "Full name must be at least 2 characters",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords don't match"
+    }
+  },
+  "kyc": {
+    "back": "Back to profile",
+    "title": "KYC Verification",
+    "subtitle": "Verify your identity to unlock all features.",
+    "status": {
+      "NONE": "Not verified",
+      "PENDING": "Under review",
+      "APPROVED": "Verified",
+      "REJECTED": "Rejected"
+    },
+    "step1": "Upload ID card / Passport",
+    "step2": "Fill in details exactly as on the card",
+    "step3": "Wait for our team to review",
+    "approvedMsg": "Your identity is verified.",
+    "submittedMsg": "Verification submitted. We will review your documents shortly.",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "As shown on your ID",
+    "idNumber": "ID / Passport number",
+    "idNumberPlaceholder": "ID or passport number",
+    "idImage": "ID image",
+    "uploadHint": "Click to upload ID image",
+    "submit": "Submit verification",
+    "submitting": "Submitting...",
+    "successToast": "KYC verification submitted",
+    "fillAll": "Please fill in all required fields",
+    "needImage": "Please upload an ID image",
+    "imageTooLarge": "Image must be smaller than 5 MB",
+    "readFailed": "Failed to read image",
+    "failed": "Failed to submit KYC"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "item": "Item",
+    "delivery": "Delivery preference",
+    "shippingAddress": "Shipping address",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "postalCode": "Postal code",
+    "address": "Address",
+    "addressPlaceholder": "Street address",
+    "district": "District (optional)",
+    "districtPlaceholder": "District / Sub-district",
+    "province": "Province",
+    "errName": "Full name is required",
+    "errPhone": "Phone number is required",
+    "errAddress": "Address is required",
+    "errProvince": "Province is required",
+    "errPostal": "Postal code is required",
+    "payment": "Payment",
+    "card": "Credit / Debit card",
+    "mockNote": "Mock payment",
+    "summary": "Order summary",
+    "subtotal": "Subtotal",
+    "serviceFee": "Service fee (5%)",
+    "platformFee": "SWS fulfillment fee (2.5%)",
+    "deliveryLabel": "Delivery",
+    "free": "Free",
+    "total": "Total",
+    "confirm": "Confirm & Pay",
+    "processing": "Processing...",
+    "secured": "Secured by SWS Swap Vault",
+    "notFound": "Listing not found",
+    "notFoundDesc": "This listing may have been removed or sold.",
+    "backToMarket": "Back to market"
+  },
+  "profileMenu": {
+    "title": "Profile",
+    "guest": "Guest",
+    "guestHint": "Sign in to access your account",
+    "verified": "Verified",
+    "kycRequired": "Required",
+    "stats": {
+      "orders": "Orders",
+      "wishlist": "Wishlist",
+      "spent": "Spent"
+    },
+    "menu": {
+      "orders": { "label": "Orders", "desc": "Track your purchases" },
+      "vault": { "label": "Vault", "desc": "Manage your collection" },
+      "submissions": { "label": "Submissions", "desc": "Track grading & pre-grade status" },
+      "kyc": { "label": "KYC Verification", "desc": "Verify your identity" },
+      "notifications": { "label": "Notifications", "desc": "Offers, orders, and alerts" },
+      "myShop": { "label": "My Shop", "desc": "Seller dashboard and your listings" },
+      "settings": { "label": "Settings", "desc": "Language, theme, security" },
+      "help": { "label": "Help & Support", "desc": "FAQs and contact" }
+    },
+    "logout": "Log out"
+  },
+  "statusHub": {
+    "title": "Submissions",
+    "description": "Track your grading submissions",
+    "filters": { "all": "All", "pregrade": "Pre-grade", "grading": "Grading" },
+    "status": {
+      "ready": "READY",
+      "in-lab": "IN LAB",
+      "grading": "GRADING",
+      "qa": "QA",
+      "shipped": "SHIPPED",
+      "delivered": "DELIVERED ✓"
+    },
+    "emptyTitle": "No submissions yet",
+    "emptyDesc": "When you send cards to a lab or grader, their live status will show up here.",
+    "emptyFiltered": "No {{filter}} submissions right now.",
+    "forwardCta": "Forward to PSA (consent)",
+    "viewReport": "View report",
+    "eta": "est. {{days}} days · updated via {{service}}",
+    "deliveredLabel": "{{service}} #{{num}} · slab delivered",
+    "updatesVia": "UPDATES VIA",
+    "consentTitle": "Forward to PSA?",
+    "consentDesc": "This confirms you want to send this card from RAWLITY pre-grade to PSA for official grading. Shipping and grading fees will apply.",
+    "cancel": "Cancel",
+    "confirm": "Yes, forward",
+    "confirming": "Confirming…",
+    "reportTitle": "Report",
+    "reportDesc": "{{service}} does not publish reports online. Reference {{num}} when contacting the lab.",
+    "reportBody": "Your report for {{card}} is delivered directly by the lab.",
+    "close": "Close"
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip for now",
+    "finish": "Start exploring",
+    "games": {
+      "title": "Which games do you collect?",
+      "subtitle": "We’ll tailor your feed and market to your games."
+    },
+    "shops": {
+      "title": "Follow shops you like",
+      "subtitle": "Their posts will appear in your feed.",
+      "empty": "No suggested shops right now",
+      "follow": "Follow",
+      "following": "Following"
+    },
+    "kyc": {
+      "title": "Verify your identity to unlock everything",
+      "subtitle": "Verify your identity to unlock posting, vault storage, and more.",
+      "cta": "Start verification",
+      "later": "Maybe later"
+    }
+  },
+  "sellerOnboarding": {
+    "title": "Open your shop in 3 steps",
+    "subtitle": "Complete these steps to open your shop.",
+    "step1Title": "Create your first listing",
+    "step1Desc": "Pick a card from your vault or add a new one, then set a price",
+    "step1Cta": "Create a listing",
+    "step2Title": "Post your first update",
+    "step2Desc": "Tell everyone your shop is open — posts land in your followers' feed",
+    "step2Cta": "Go to the feed",
+    "step3Title": "Share your shop page",
+    "step3Desc": "Your public shop page is ready — share the link with customers",
+    "step3Cta": "View shop page"
   }
 }

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/auth';
 import { useUser, useOrders, useWishlist, useNotifications } from '@/hooks/useApi';
 import type { Notification } from '@/types';
@@ -21,23 +22,26 @@ import {
   Loader2,
   User,
   Truck,
+  Store,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { icon: ShoppingBag, label: 'Orders', description: 'Track your purchases', to: '/orders' },
-  { icon: Package, label: 'Vault', description: 'Manage your collection', to: '/vault' },
-  { icon: Truck, label: 'Submissions', description: 'Track grading & pre-grade status', to: '/status' },
-  { icon: Shield, label: 'KYC Verification', description: 'Verify your identity', to: '/profile/kyc' },
-  { icon: Bell, label: 'Notifications', description: 'Offers, orders, and alerts', to: '/notifications' },
+  { icon: ShoppingBag, key: 'orders', to: '/orders' },
+  { icon: Package, key: 'vault', to: '/vault' },
+  { icon: Truck, key: 'submissions', to: '/status' },
+  { icon: Shield, key: 'kyc', to: '/profile/kyc' },
+  { icon: Bell, key: 'notifications', to: '/notifications' },
+  { icon: Store, key: 'myShop', to: '/seller' },
   // TODO(deferred): Payment Methods hidden — payment is deferred by the owner and
   // /settings has no payment section yet. Restore when payments ship.
-  // { icon: CreditCard, label: 'Payment Methods', description: 'Cards and wallets', to: '/settings' },
-  { icon: Settings, label: 'Settings', description: 'Language, theme, security', to: '/settings' },
-  { icon: HelpCircle, label: 'Help & Support', description: 'FAQs and contact', to: 'mailto:support@swibswap.app' },
+  // { icon: CreditCard, key: 'payments', to: '/settings' },
+  { icon: Settings, key: 'settings', to: '/settings' },
+  { icon: HelpCircle, key: 'help', to: 'mailto:support@swibswap.app' },
 ];
 
 export function ProfileScreen() {
+  const { t } = useTranslation();
   const { user: authUser, logout, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const { data: user, isLoading: userLoading } = useUser();
@@ -58,7 +62,7 @@ export function ProfileScreen() {
   return (
     <PageContainer size="md" className="py-6">
       <PageHeader
-        title="Profile"
+        title={t('profileMenu.title')}
         icon={<User className="w-6 h-6 text-brand" />}
       />
 
@@ -75,8 +79,8 @@ export function ProfileScreen() {
                 <div className="w-20 h-20 rounded-full bg-brand-gradient mx-auto flex items-center justify-center text-2xl font-bold text-white border-4 border-surface-lighter">
                   {(displayUser as any)?.fullName?.charAt(0) ?? (displayUser as any)?.email?.charAt(0) ?? 'G'}
                 </div>
-                <h1 className="mt-4 text-xl font-bold">{(displayUser as any)?.fullName ?? 'Guest'}</h1>
-                <p className="text-sm text-muted-foreground">{(displayUser as any)?.email ?? 'Sign in to access your account'}</p>
+                <h1 className="mt-4 text-xl font-bold">{(displayUser as any)?.fullName ?? t('profileMenu.guest')}</h1>
+                <p className="text-sm text-muted-foreground">{(displayUser as any)?.email ?? t('profileMenu.guestHint')}</p>
                 <div className="mt-3 flex items-center justify-center gap-2">
                   <Badge variant="pixel" className="pxl-chip--brand">
                     <Crown className="w-3 h-3 mr-1" aria-hidden="true" />
@@ -91,7 +95,7 @@ export function ProfileScreen() {
                   {kycStatus === 'APPROVED' && (
                     <Badge variant="pixel" className="pxl-chip--peri">
                       <Shield className="w-3 h-3 mr-1" aria-hidden="true" />
-                      Verified
+                      {t('profileMenu.verified')}
                     </Badge>
                   )}
                 </div>
@@ -106,7 +110,7 @@ export function ProfileScreen() {
             <Card className="surface-card surface-card-hover">
               <CardContent className="p-3 text-center">
                 <p className="text-lg font-bold">{ordersLoading ? '-' : orderCount}</p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Orders</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('profileMenu.stats.orders')}</p>
               </CardContent>
             </Card>
           </Link>
@@ -114,14 +118,14 @@ export function ProfileScreen() {
             <Card className="surface-card surface-card-hover">
               <CardContent className="p-3 text-center">
                 <p className="text-lg font-bold">{wishlistLoading ? '-' : wishlistCount}</p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Wishlist</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('profileMenu.stats.wishlist')}</p>
               </CardContent>
             </Card>
           </Link>
           <Card className="surface-card surface-card-hover">
             <CardContent className="p-3 text-center">
               <p className="text-lg font-bold">{ordersLoading ? '-' : `฿${totalSpent.toLocaleString()}`}</p>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Spent</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('profileMenu.stats.spent')}</p>
             </CardContent>
           </Card>
         </div>
@@ -131,10 +135,10 @@ export function ProfileScreen() {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isMailto = item.to.startsWith('mailto:');
-            const badge = item.label === 'Notifications' && unreadNotifications > 0
+            const badge = item.key === 'notifications' && unreadNotifications > 0
               ? String(unreadNotifications)
-              : item.label === 'KYC Verification'
-                ? (kycStatus === 'APPROVED' ? 'Verified' : 'Required')
+              : item.key === 'kyc'
+                ? (kycStatus === 'APPROVED' ? t('profileMenu.verified') : t('profileMenu.kycRequired'))
                 : undefined;
 
             const content = (
@@ -143,14 +147,14 @@ export function ProfileScreen() {
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{item.label}</p>
-                  <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                  <p className="font-medium text-sm">{t(`profileMenu.menu.${item.key}.label`)}</p>
+                  <p className="text-xs text-muted-foreground truncate">{t(`profileMenu.menu.${item.key}.desc`)}</p>
                 </div>
                 {badge && (
                   <Badge className={cn(
                     'text-xs',
-                    badge === 'Required' ? 'bg-pldown/10 text-pldown' :
-                    badge === 'Verified' ? 'bg-plup/10 text-plup' :
+                    badge === t('profileMenu.kycRequired') ? 'bg-pldown/10 text-pldown' :
+                    badge === t('profileMenu.verified') ? 'bg-plup/10 text-plup' :
                     'bg-brand/10 text-brand'
                   )}>
                     {badge}
@@ -162,14 +166,14 @@ export function ProfileScreen() {
 
             if (isMailto) {
               return (
-                <a key={item.label} href={item.to}>
+                <a key={item.key} href={item.to}>
                   {content}
                 </a>
               );
             }
 
             return (
-              <Link key={item.label} to={item.to}>
+              <Link key={item.key} to={item.to}>
                 {content}
               </Link>
             );
@@ -179,7 +183,7 @@ export function ProfileScreen() {
         {isAuthenticated && (
           <Button variant="ghost" className="w-full text-pldown hover:text-pldown hover:bg-pldown/10" onClick={() => { logout(); navigate({ to: '/login' }); }}>
             <LogOut className="w-4 h-4 mr-2" />
-            Log out
+            {t('profileMenu.logout')}
           </Button>
         )}
       </div>

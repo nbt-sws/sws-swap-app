@@ -1,11 +1,11 @@
 import { useParams, Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useOrder, useCancelOrder, useUpdateOrderStatus } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Package, Truck, CheckCircle2, XCircle, Clock, MapPin } from 'lucide-react';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
@@ -15,18 +15,19 @@ import { GameMark } from '@/components/domain/GameMark';
 import { useAuthStore } from '@/stores/auth';
 import type { Order } from '@/types';
 
-const statusConfig: Record<Order['status'], { label: string; icon: typeof Clock; color: string; step: number }> = {
-  PENDING_PAYMENT: { label: 'Pending payment', icon: Clock, color: 'text-warning bg-warning/10', step: 1 },
-  PAID: { label: 'Paid', icon: CheckCircle2, color: 'text-cyan bg-cyan/10', step: 2 },
-  SHIPPED: { label: 'Shipped', icon: Truck, color: 'text-brand bg-brand/10', step: 3 },
-  DELIVERED: { label: 'Delivered', icon: Package, color: 'text-plup bg-plup/10', step: 4 },
-  COMPLETED: { label: 'Completed', icon: CheckCircle2, color: 'text-plup bg-plup/10', step: 5 },
-  CANCELLED: { label: 'Cancelled', icon: XCircle, color: 'text-pldown bg-pldown/10', step: 0 },
+const statusConfig: Record<Order['status'], { icon: typeof Clock; color: string; step: number }> = {
+  PENDING_PAYMENT: { icon: Clock, color: 'text-warning bg-warning/10', step: 1 },
+  PAID: { icon: CheckCircle2, color: 'text-cyan bg-cyan/10', step: 2 },
+  SHIPPED: { icon: Truck, color: 'text-brand bg-brand/10', step: 3 },
+  DELIVERED: { icon: Package, color: 'text-plup bg-plup/10', step: 4 },
+  COMPLETED: { icon: CheckCircle2, color: 'text-plup bg-plup/10', step: 5 },
+  CANCELLED: { icon: XCircle, color: 'text-pldown bg-pldown/10', step: 0 },
 };
 
-import { ORDER_STEPS, orderStepIndex, getOrderAction, canCancelOrder, waitingHint } from '@/lib/orderFlow';
+import { ORDER_STEPS, orderStepIndex, getOrderAction, canCancelOrder, waitingHintKey } from '@/lib/orderFlow';
 
 export function OrderDetailScreen() {
+  const { t } = useTranslation();
   const { orderId } = useParams({ from: '/orders/$orderId' });
   const { data: order, isLoading } = useOrder(orderId);
   const cancelOrder = useCancelOrder();
@@ -50,11 +51,11 @@ export function OrderDetailScreen() {
             <Package className="w-8 h-8 text-brand" />
           </EmptyMedia>
           <EmptyHeader>
-            <EmptyTitle>Order not found</EmptyTitle>
-            <EmptyDescription>We couldn't find this order.</EmptyDescription>
+            <EmptyTitle>{t('orders.notFound')}</EmptyTitle>
+            <EmptyDescription>{t('orders.notFoundDesc')}</EmptyDescription>
           </EmptyHeader>
           <Button asChild className="bg-brand hover:bg-brand-light">
-            <Link to="/orders">Back to orders</Link>
+            <Link to="/orders">{t('orders.backToOrders')}</Link>
           </Button>
         </Empty>
       </PageContainer>
@@ -70,7 +71,7 @@ export function OrderDetailScreen() {
   // Flow is driven by the raw backend status (display status is lossy)
   const primaryAction = getOrderAction(order.rawStatus, isBuyer, isSeller);
   const canCancel = canCancelOrder(order.rawStatus, isBuyer);
-  const hint = waitingHint(order.rawStatus, isBuyer);
+  const hintKey = waitingHintKey(order.rawStatus, isBuyer);
 
   const handlePrimary = () => {
     if (!primaryAction) return;
@@ -91,12 +92,12 @@ export function OrderDetailScreen() {
           <div className="flex items-center gap-2">
             {(isBuyer || isSeller) && (
               <Badge variant="outline" className="text-xs">
-                {isBuyer ? 'Buyer' : 'Seller'}
+                {isBuyer ? t('orders.buyer') : t('orders.seller')}
               </Badge>
             )}
             <Badge className={cn('text-sm', config.color)}>
               <Icon className="w-4 h-4 mr-1" />
-              {config.label}
+              {t(`orders.status.${order.status}`)}
             </Badge>
           </div>
         }
@@ -115,21 +116,23 @@ export function OrderDetailScreen() {
                     <div key={step.key} className="flex flex-col items-center gap-2 flex-1">
                       <div
                         className={cn(
-                          'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition',
-                          done || current
-                            ? 'bg-brand text-white'
-                            : 'bg-surface-lighter text-muted-foreground'
+                          'w-8 h-8 rounded-full flex items-center justify-center text-xs transition pxl-num',
+                          done
+                            ? 'bg-success/20 text-success'
+                            : current
+                              ? 'bg-brand text-white shadow-glow'
+                              : 'bg-surface-lighter text-muted-foreground'
                         )}
                       >
-                        {done ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
+                        {done ? <CheckCircle2 className="w-4 h-4" /> : `0${index + 1}`}
                       </div>
                       <span
                         className={cn(
                           'text-xs hidden sm:block text-center',
-                          done || current ? 'text-foreground' : 'text-muted-foreground'
+                          current ? 'text-foreground font-semibold' : done ? 'text-foreground' : 'text-muted-foreground'
                         )}
                       >
-                        {step.label}
+                        {t(step.labelKey)}
                       </span>
                     </div>
                   );
@@ -143,7 +146,7 @@ export function OrderDetailScreen() {
           <div className="lg:col-span-2 space-y-6">
             <Card className="bg-surface-light border-border">
               <CardHeader>
-                <CardTitle className="text-base">Item details</CardTitle>
+                <CardTitle className="text-base">{t('orders.itemDetails')}</CardTitle>
               </CardHeader>
               <CardContent className="flex gap-4">
                 <div
@@ -171,60 +174,66 @@ export function OrderDetailScreen() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
-                    Shipping address
+                    {t('checkout.shippingAddress')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">{order.shippingAddress || 'No address provided'}</p>
+                  <p className="text-sm text-muted-foreground">{order.shippingAddress || t('orders.noAddress')}</p>
                 </CardContent>
               </Card>
             )}
           </div>
 
           <div>
-            <Card className="bg-surface-light border-border sticky top-24">
-              <CardHeader>
-                <CardTitle className="text-base">Order summary</CardTitle>
+            <Card className="bg-surface-light border-border sticky top-24 overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">{t('checkout.summary')}</CardTitle>
+                  <span className="pxl-chip pxl-chip--peri">{order.id.slice(0, 8)}</span>
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>฿{order.subtotal.toLocaleString()}</span>
+                  <span className="ticket-label pt-0.5">{t('checkout.subtotal')}</span>
+                  <span className="mono-num">฿{order.subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Service fee</span>
-                  <span>฿{order.fee.toLocaleString()}</span>
+                  <span className="ticket-label pt-0.5">{t('checkout.serviceFee')}</span>
+                  <span className="mono-num">฿{order.fee.toLocaleString()}</span>
                 </div>
                 {order.platformFee ? (
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">SWS fulfillment fee</span>
-                    <span>฿{order.platformFee.toLocaleString()}</span>
+                    <span className="ticket-label pt-0.5">{t('checkout.platformFee')}</span>
+                    <span className="mono-num">฿{order.platformFee.toLocaleString()}</span>
                   </div>
                 ) : null}
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Delivery</span>
-                  <span>{order.shipping > 0 ? `฿${order.shipping.toLocaleString()}` : 'Free'}</span>
+                  <span className="ticket-label pt-0.5">{t('checkout.deliveryLabel')}</span>
+                  <span className="mono-num">{order.shipping > 0 ? `฿${order.shipping.toLocaleString()}` : t('checkout.free')}</span>
                 </div>
-                <Separator />
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span className="font-mono">฿{order.total.toLocaleString()}</span>
+
+                {/* Perforated tear-off line */}
+                <div className="ticket-dash mt-4" aria-hidden="true" />
+
+                <div className="flex justify-between items-end pt-1">
+                  <span className="ticket-label">{t('checkout.total')}</span>
+                  <span className="mono-num text-xl font-bold neon-text-brand">฿{order.total.toLocaleString()}</span>
                 </div>
 
                 <div className="pt-2 space-y-2">
                   {primaryAction && order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && (
                     <Button
-                      className="w-full bg-brand hover:bg-brand-light"
+                      className="w-full bg-brand hover:bg-brand-light font-bold shadow-glow"
                       onClick={handlePrimary}
                       disabled={updateStatus.isPending}
                     >
-                      {updateStatus.isPending ? 'Updating...' : primaryAction.label}
+                      {updateStatus.isPending ? t('orders.updating') : t(primaryAction.labelKey)}
                     </Button>
                   )}
-                  {hint && order.status !== 'CANCELLED' && !primaryAction && (
+                  {hintKey && order.status !== 'CANCELLED' && !primaryAction && (
                     <p className="text-xs text-muted-foreground text-center py-1 flex items-center justify-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
-                      {hint}
+                      {t(hintKey)}
                     </p>
                   )}
                   {canCancel && (
@@ -234,7 +243,7 @@ export function OrderDetailScreen() {
                       onClick={handleCancel}
                       disabled={cancelOrder.isPending}
                     >
-                      Cancel order
+                      {t('orders.cancelOrder')}
                     </Button>
                   )}
                 </div>

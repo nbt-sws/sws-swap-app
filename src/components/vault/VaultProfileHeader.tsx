@@ -50,13 +50,15 @@ export function VaultProfileHeader({
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-brand/15 via-periwinkle/15 to-surface" />
         )}
+        <div className="surreal-mesh absolute inset-0 pointer-events-none opacity-70" aria-hidden="true" />
+        <div className="absolute bottom-0 right-0 h-3 w-3 bg-brand/60 pxl-corner" aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-t from-surface-light/70 to-transparent" />
       </div>
 
       <CardContent className="relative pt-0 pb-5">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-9">
           {/* Avatar */}
-          <Avatar className="w-[72px] h-[72px] border-[3px] border-surface-light bg-surface-lighter">
+          <Avatar className="w-[72px] h-[72px] border-[3px] border-surface-light bg-surface-lighter ring-2 ring-brand/40 shadow-glow">
             <AvatarImage src={profile.avatarUrl} alt={displayName} />
             <AvatarFallback className="text-lg font-bold bg-surface-lighter text-foreground">
               {displayName.charAt(0).toUpperCase()}
@@ -65,7 +67,7 @@ export function VaultProfileHeader({
 
           {/* Name + Bio */}
           <div className="flex-1 min-w-0 pt-1 sm:pb-1">
-            <h2 className="text-lg font-bold truncate">{displayName}</h2>
+            <h2 className="text-lg font-extrabold tracking-tight truncate neon-text-brand">{displayName}</h2>
             {profile.location && (
               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                 <MapPin className="w-3 h-3" />
@@ -147,7 +149,7 @@ function Stat({ value, label, icon }: { value: number; label: string; icon: Reac
       </div>
       <div>
         <p className="text-sm font-bold pxl-num leading-none">{value.toLocaleString()}</p>
-        <p className="text-[11px] text-muted-foreground mt-0.5 uppercase tracking-wider">{label}</p>
+        <p className="ticket-label mt-0.5">{label}</p>
       </div>
     </div>
   );

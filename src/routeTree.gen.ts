@@ -26,6 +26,7 @@ import { Route as RatingsRouteImport } from './routes/ratings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PregradeRouteImport } from './routes/pregrade'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MarketRouteImport } from './routes/market'
@@ -139,6 +140,11 @@ const PregradeRoute = PregradeRouteImport.update({
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OffersRoute = OffersRouteImport.update({
@@ -300,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/market': typeof MarketRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/offers': typeof OffersRoute
+  '/onboarding': typeof OnboardingRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pregrade': typeof PregradeRoute
   '/profile': typeof ProfileRouteWithChildren
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/offers': typeof OffersRoute
+  '/onboarding': typeof OnboardingRoute
   '/pregrade': typeof PregradeRoute
   '/ratings': typeof RatingsRoute
   '/redemptions': typeof RedemptionsRoute
@@ -391,6 +399,7 @@ export interface FileRoutesById {
   '/market': typeof MarketRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/offers': typeof OffersRoute
+  '/onboarding': typeof OnboardingRoute
   '/orders': typeof OrdersRouteWithChildren
   '/pregrade': typeof PregradeRoute
   '/profile': typeof ProfileRouteWithChildren
@@ -441,6 +450,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/notifications'
     | '/offers'
+    | '/onboarding'
     | '/orders'
     | '/pregrade'
     | '/profile'
@@ -487,6 +497,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/notifications'
     | '/offers'
+    | '/onboarding'
     | '/pregrade'
     | '/ratings'
     | '/redemptions'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/market'
     | '/notifications'
     | '/offers'
+    | '/onboarding'
     | '/orders'
     | '/pregrade'
     | '/profile'
@@ -580,6 +592,7 @@ export interface RootRouteChildren {
   MarketRoute: typeof MarketRouteWithChildren
   NotificationsRoute: typeof NotificationsRoute
   OffersRoute: typeof OffersRoute
+  OnboardingRoute: typeof OnboardingRoute
   OrdersRoute: typeof OrdersRouteWithChildren
   PregradeRoute: typeof PregradeRoute
   ProfileRoute: typeof ProfileRouteWithChildren
@@ -722,6 +735,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/offers': {
@@ -1022,6 +1042,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketRoute: MarketRouteWithChildren,
   NotificationsRoute: NotificationsRoute,
   OffersRoute: OffersRoute,
+  OnboardingRoute: OnboardingRoute,
   OrdersRoute: OrdersRouteWithChildren,
   PregradeRoute: PregradeRoute,
   ProfileRoute: ProfileRouteWithChildren,

@@ -61,7 +61,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-border/60',
+        'neon-card group relative overflow-hidden rounded-2xl border border-border/60',
         'bg-gradient-to-br from-surface-light via-surface to-surface-lighter/30',
         'transition-all duration-300 hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20',
         'hover:-translate-y-1',
@@ -134,7 +134,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
               {listing.card.nameEn}
             </h3>
             {listing.card.code && (
-              <p className="text-xs text-muted-foreground font-mono mt-0.5">{listing.card.code}</p>
+              <p className="text-xs text-muted-foreground mono-num mt-0.5">{listing.card.code}</p>
             )}
           </div>
           {listing.status !== 'active' && (
@@ -157,8 +157,8 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
         <div className="mt-auto pt-3 flex items-center justify-between">
           <span
             className={cn(
-              'text-base font-bold font-mono whitespace-nowrap',
-              listing.listingType === 'TRADE' ? 'text-cyan text-sm' : 'text-brand'
+              'text-base font-bold mono-num whitespace-nowrap',
+              listing.listingType === 'TRADE' ? 'text-cyan text-sm neon-text-cyan' : 'text-brand'
             )}
           >
             {listing.listingType === 'TRADE' ? t('common.tradeOnly') : `฿${listing.price.toLocaleString()}`}

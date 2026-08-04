@@ -229,16 +229,16 @@ export function VaultItemDetailScreen() {
 
             {/* Price Stats */}
             <div className="grid grid-cols-2 gap-3">
-              <Card className="bg-surface-light border-border">
+              <Card className="neon-card bg-surface-light border-border">
                 <CardContent className="p-3">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('vault.item.paid')}</p>
-                  <p className="font-mono font-bold">฿{item.paidPrice.toLocaleString()}</p>
+                  <p className="ticket-label">{t('vault.item.paid')}</p>
+                  <p className="mono-num font-bold">฿{item.paidPrice.toLocaleString()}</p>
                 </CardContent>
               </Card>
-              <Card className="bg-surface-light border-border">
+              <Card className="neon-card bg-surface-light border-border">
                 <CardContent className="p-3">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('vault.item.current')}</p>
-                  <p className="font-mono font-bold">฿{item.currentPrice.toLocaleString()}</p>
+                  <p className="ticket-label">{t('vault.item.current')}</p>
+                  <p className="mono-num font-bold">฿{item.currentPrice.toLocaleString()}</p>
                 </CardContent>
               </Card>
             </div>
@@ -255,10 +255,10 @@ export function VaultItemDetailScreen() {
                   <TrendingDown className="w-6 h-6 text-pldown" />
                 )}
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('vault.item.allTimePL')}</p>
+                  <p className="ticket-label mb-1">{t('vault.item.allTimePL')}</p>
                   <p className={cn(
-                    'text-xl font-bold font-mono',
-                    isPositive ? 'text-plup' : 'text-pldown'
+                    'text-xl font-bold mono-num',
+                    isPositive ? 'text-plup neon-text-cyan' : 'text-pldown'
                   )}>
                     {isPositive ? '+' : ''}฿{item.plAmount.toLocaleString()} ({item.plPercent}%)
                   </p>
@@ -269,7 +269,7 @@ export function VaultItemDetailScreen() {
             {/* Ownership Card */}
             <Card className="bg-surface-light border-border">
               <CardContent className="p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                <h3 className="ticket-label mb-3">
                   {t('vault.item.ownership')}
                 </h3>
                 <div className="space-y-3 text-sm">

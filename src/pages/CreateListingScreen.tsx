@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Camera, Package } from 'lucide-react';
+import { Camera, Package, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Card as CardType, MarketListing } from '@/types';
 
@@ -136,6 +136,7 @@ export function CreateListingScreen() {
     <PageContainer className="py-6">
       <PageHeader
         title="Create new listing"
+        icon={<Tag className="text-brand" />}
         back={{ to: '/seller' }}
       />
 
@@ -290,9 +291,9 @@ export function CreateListingScreen() {
                       type="button"
                       onClick={() => setListingType(type)}
                       className={cn(
-                        'px-3 py-2 rounded-lg text-sm font-medium border transition',
+                        'px-3 py-2 rounded-lg text-sm font-bold border transition pxl-num',
                         listingType === type
-                          ? 'border-brand bg-brand/10 text-brand'
+                          ? 'border-brand bg-brand/10 text-brand shadow-glow'
                           : 'border-border bg-surface text-muted-foreground hover:text-foreground'
                       )}
                     >
@@ -348,7 +349,7 @@ export function CreateListingScreen() {
 
               <Button
                 type="submit"
-                className="w-full bg-brand hover:bg-brand-light h-12"
+                className="w-full bg-brand hover:bg-brand-light h-12 font-bold shadow-glow"
                 disabled={uploading || createListing.isPending || !form.code || !form.nameEn || (listingType === 'SALE' && !form.price)}
               >
                 {uploading ? 'Uploading photos...' : createListing.isPending ? 'Creating...' : 'Publish listing'}

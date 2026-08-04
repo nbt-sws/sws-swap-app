@@ -127,7 +127,7 @@ export function OffersScreen() {
             const config = statusConfig[offer.status];
             const isIncoming = offer.direction === 'INCOMING';
             return (
-              <Card key={offer.id} className="bg-surface-light border-border">
+              <Card key={offer.id} className="neon-card bg-surface-light border-border">
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className={cn(
@@ -138,7 +138,7 @@ export function OffersScreen() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="text-xs font-mono text-muted-foreground">{offer.id.slice(0, 8)}</p>
+                        <p className="ticket-label">#{offer.id.slice(0, 8)}</p>
                         <Badge className={cn('text-xs', config.color)}>
                           {offer.status === 'PENDING' && <Clock className="w-3 h-3 mr-1" />}
                           {config.label}
@@ -158,9 +158,9 @@ export function OffersScreen() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                          <span>Listed: ฿{offer.listing.price.toLocaleString()}</span>
+                          <span className="mono-num">Listed: ฿{offer.listing.price.toLocaleString()}</span>
                           <ChevronRight className="w-3 h-3" />
-                          <span className="font-medium text-foreground">Offer: ฿{offer.offerPrice.toLocaleString()}</span>
+                          <span className="font-medium text-foreground mono-num neon-text-brand">Offer: ฿{offer.offerPrice.toLocaleString()}</span>
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">

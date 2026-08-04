@@ -173,7 +173,7 @@ export function ScanScreen() {
       <PageHeader
         title="Scan"
         icon={<ScanLine className="w-6 h-6 text-brand" />}
-        description="Point your camera at a card — we'll identify it and file it into your vault"
+        description="Scan a card to add it to your vault"
       />
 
       <div className="max-w-xl mx-auto space-y-5">

@@ -1,4 +1,5 @@
 import { useNavigate, Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/auth';
 import { useAuthLogin } from '@/hooks/useApi';
 import { mapApiUserToAuthUser } from '@/lib/api-mappers';
@@ -20,18 +21,18 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
 
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
 export function SignInScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthLogin();
   const setTokens = useAuthStore((s) => s.setTokens);
   const setUser = useAuthStore((s) => s.setUser);
+
+  const loginSchema = z.object({
+    email: z.string().email(t('auth.invalidEmail')),
+    password: z.string().min(1, t('auth.passwordRequired')),
+  });
+  type LoginForm = z.infer<typeof loginSchema>;
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -46,11 +47,11 @@ export function SignInScreen() {
       onSuccess: (res) => {
         setTokens(res.token);
         setUser(mapApiUserToAuthUser(res.user));
-        toast.success('Welcome back');
+        toast.success(t('auth.signIn.success'));
         navigate({ to: '/' });
       },
       onError: () => {
-        toast.error('Sign in failed. Please check your email and password.');
+        toast.error(t('auth.signIn.failed'));
       },
     });
   };
@@ -73,9 +74,9 @@ export function SignInScreen() {
           <span className="text-xl font-bold">SwibSwap</span>
         </div>
 
-        <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('auth.signIn.title')}</h1>
         <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-          Sign in to track your portfolio, manage cards, and trade with the community.
+          {t('auth.signIn.subtitle')}
         </p>
 
         <Card className="bg-surface-light border-border">
@@ -87,7 +88,7 @@ export function SignInScreen() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('auth.email')}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -106,7 +107,7 @@ export function SignInScreen() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t('auth.password')}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
@@ -125,7 +126,7 @@ export function SignInScreen() {
                   className="w-full bg-brand hover:bg-brand-light h-12"
                   disabled={login.isPending}
                 >
-                  {login.isPending ? 'Signing in...' : 'Sign in'}
+                  {login.isPending ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
                 </Button>
               </form>
             </Form>
@@ -135,16 +136,16 @@ export function SignInScreen() {
         {/* TODO(P1-12): Social login (Apple/Google) is not implemented yet.
             Buttons are hidden on production until real OAuth flows exist. */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
+          {t('auth.signIn.noAccount')}{' '}
           <Link to="/register" className="text-brand hover:underline">
-            Create one
+            {t('auth.signIn.createOne')}
           </Link>
         </p>
 
         {(import.meta.env.DEV || import.meta.env.VITE_USE_MOCK_API === 'true') && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             <Link to="/dev-login" className="text-brand hover:underline">
-              Quick login
+              {t('auth.signIn.quickLogin')}
             </Link>
           </p>
         )}
@@ -157,7 +158,7 @@ export function SignInScreen() {
           transition={{ delay: 0.7 }}
           className="text-xs text-muted-foreground text-center mt-6"
         >
-          By continuing you accept our terms and privacy policy
+          {t('auth.terms')}
         </motion.p>
       </motion.div>
 
@@ -167,7 +168,7 @@ export function SignInScreen() {
         transition={{ delay: 0.9 }}
         className="text-center text-xs text-muted-foreground font-mono tracking-wider"
       >
-        your collection is waiting
+        {t('auth.signIn.tagline')}
       </motion.p>
     </div>
   );

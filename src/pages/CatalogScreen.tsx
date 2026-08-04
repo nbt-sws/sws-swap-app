@@ -42,7 +42,7 @@ export function CatalogScreen() {
       <PageHeader
         title="Cards"
         icon={<Layers className="w-6 h-6 text-cyan" />}
-        description="Official samples and the full card catalog"
+        description="Full card catalog"
       />
 
       <div className="space-y-8">
@@ -61,7 +61,7 @@ export function CatalogScreen() {
           catalogs.map((catalog) => (
             <section key={catalog.id} aria-label={catalog.title}>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs uppercase tracking-wider text-muted-foreground">
+                <h2 className="ticket-label">
                   Official Samples · {catalog.title}
                 </h2>
                 <Badge variant="pixel" className="pxl-chip--cyan">
@@ -91,7 +91,7 @@ export function CatalogScreen() {
 
         {/* ── Card Catalog (games) ── */}
         <section aria-label="Card catalog">
-          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
+          <h2 className="ticket-label mb-3">
             Card Catalog
           </h2>
 

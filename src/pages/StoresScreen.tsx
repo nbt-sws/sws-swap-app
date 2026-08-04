@@ -89,7 +89,7 @@ export function StoresScreen() {
       <PageHeader
         title="Stores"
         icon={<Store className="w-6 h-6 text-brand" />}
-        description="Browse trusted sellers and their collections"
+        description="Find sellers and their cards"
       />
 
       <div className="space-y-5">

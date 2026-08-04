@@ -209,8 +209,8 @@ export function ListingDetailScreen() {
         {/* Info */}
         <div className="space-y-5">
           <div>
-            <p className="text-xs font-mono text-muted-foreground mb-1">{listing.card.code}</p>
-            <h1 className="text-2xl font-bold mb-2">{listing.card.nameEn}</h1>
+            <p className="text-xs mono-num text-muted-foreground mb-1">{listing.card.code}</p>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-2">{listing.card.nameEn}</h1>
             {/* Condition already has its own row in the details panel — don't repeat it */}
             {[listing.card.rarity, listing.card.language].filter(Boolean).length > 0 && (
               <p className="text-sm text-muted-foreground">
@@ -280,11 +280,11 @@ export function ListingDetailScreen() {
 
           {/* Price + trust */}
           <div>
-            <p className="text-xs font-mono text-muted-foreground mb-1">{t('common.price').toUpperCase()}</p>
+            <p className="ticket-label mb-1">{t('common.price')}</p>
             {isTrade ? (
-              <p className="text-3xl font-bold font-mono text-cyan">{t('common.tradeOnly')}</p>
+              <p className="text-3xl font-bold mono-num text-cyan neon-text-cyan">{t('common.tradeOnly')}</p>
             ) : (
-              <p className="text-3xl font-bold font-mono text-brand">฿{listing.price.toLocaleString()}</p>
+              <p className="text-3xl font-bold mono-num text-brand neon-text-brand">฿{listing.price.toLocaleString()}</p>
             )}
           </div>
 

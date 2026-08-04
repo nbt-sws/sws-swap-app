@@ -80,7 +80,7 @@ export function OrdersScreen() {
               <EmptyDescription>{t('orders.emptyDesc', { defaultValue: 'Browse the market to find your next card.' })}</EmptyDescription>
             </EmptyHeader>
             <Button asChild className="bg-brand hover:bg-brand-light">
-              <Link to="/market">Browse market</Link>
+              <Link to="/market">{t('orders.browseCta')}</Link>
             </Button>
           </Empty>
         )}
@@ -143,6 +143,7 @@ function OrderCard({
   order: Order;
   config: { label: string; icon: typeof Clock; badge: string; bg: string };
 }) {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const updateStatus = useUpdateOrderStatus();
   const Icon = config.icon;
@@ -157,7 +158,7 @@ function OrderCard({
       params={{ orderId: order.id }}
       className="block group"
     >
-      <Card className="bg-surface-light border-border hover:border-brand/40 hover:bg-surface-lighter transition cursor-pointer overflow-hidden">
+      <Card className="neon-card bg-surface-light border-border hover:bg-surface-lighter transition cursor-pointer overflow-hidden">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             <div className={cn('w-14 h-[72px] rounded-lg flex items-center justify-center text-2xl shrink-0', config.bg)}>
@@ -165,7 +166,7 @@ function OrderCard({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <p className="text-xs font-mono text-muted-foreground">{order.id.slice(0, 8)}</p>
+                <p className="ticket-label">#{order.id.slice(0, 8)}</p>
                 <Badge className={cn('text-xs border-0', config.badge)}>
                   <Icon className="w-3 h-3 mr-1" />
                   {config.label}
@@ -177,7 +178,7 @@ function OrderCard({
               <OrderProgress status={order.status} />
             </div>
             <div className="text-right shrink-0 space-y-2">
-              <p className="font-mono font-semibold">฿{order.total.toLocaleString()}</p>
+              <p className="mono-num font-semibold">฿{order.total.toLocaleString()}</p>
               {action && (
                 <Button
                   size="sm"
@@ -189,13 +190,13 @@ function OrderCard({
                     updateStatus.mutate(
                       { orderId: order.id, status: action.next },
                       {
-                        onSuccess: () => toast.success('Order updated'),
-                        onError: () => toast.error('Failed to update order'),
+                        onSuccess: () => toast.success(t('orders.updateSuccess')),
+                        onError: () => toast.error(t('orders.updateFailed')),
                       }
                     );
                   }}
                 >
-                  {action.label}
+                  {t(action.labelKey)}
                 </Button>
               )}
               {!action && <ChevronRight className="w-4 h-4 text-muted-foreground inline-block group-hover:text-brand transition-colors" />}
@@ -208,16 +209,17 @@ function OrderCard({
 }
 
 function DeliveryBadge({ delivery }: { delivery?: 'SHIP' | 'VAULT_STORE' }) {
+  const { t } = useTranslation();
   if (delivery === 'SHIP') {
     return (
       <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-        <Truck className="w-3 h-3" /> Ship
+        <Truck className="w-3 h-3" /> {t('orders.ship')}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-      <Warehouse className="w-3 h-3" /> Vault
+      <Warehouse className="w-3 h-3" /> {t('orders.vault')}
     </span>
   );
 }
@@ -233,7 +235,12 @@ function OrderProgress({ status }: { status: Order['status'] }) {
         const completed = i <= index;
         return (
           <div key={step} className="flex-1 flex items-center gap-1">
-            <div className={cn('h-1.5 flex-1 rounded-full', completed ? 'bg-brand' : 'bg-border')} />
+            <div
+              className={cn(
+                'h-1.5 flex-1 rounded-full transition-all',
+                completed ? 'bg-brand shadow-[0_0_6px_rgba(240,106,168,0.55)]' : 'bg-border'
+              )}
+            />
           </div>
         );
       })}

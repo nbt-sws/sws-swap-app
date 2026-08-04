@@ -30,15 +30,11 @@ const PRE_GRADERS = ['RAWLITY', 'BLACKLENS'];
 const CURRENCIES = ['THB', 'USD', 'JPY'];
 
 function SectionCard({ children }: { children: React.ReactNode }) {
-  return <div className="bg-surface-light rounded-xl overflow-hidden">{children}</div>;
+  return <div className="bg-surface-light rounded-xl overflow-hidden border border-border/60">{children}</div>;
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-xs font-mono uppercase tracking-wider text-muted-foreground px-1">
-      {children}
-    </h2>
-  );
+  return <h2 className="ticket-label px-1">{children}</h2>;
 }
 
 function Row({
@@ -313,7 +309,7 @@ export function SettingsScreen() {
           {t('settings.items.signOut')}
         </button>
 
-        <p className="text-center text-xs font-mono text-muted-foreground/60">v{APP_VERSION}</p>
+        <p className="text-center ticket-label">v{APP_VERSION}</p>
       </div>
 
       {/* Change password dialog */}

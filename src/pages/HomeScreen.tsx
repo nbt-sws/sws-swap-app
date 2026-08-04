@@ -46,12 +46,12 @@ function HeroGreeting({ greeting, dateStr }: { greeting: string; dateStr: string
       <div className="surreal-mesh absolute inset-0 opacity-50 pointer-events-none" />
 
       <div className="relative">
-        <p className="text-xs font-medium text-brand tracking-wide uppercase">{dateStr}</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+        <p className="ticket-label text-brand">{dateStr}</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight neon-text-brand">
           {greeting}
         </h1>
         <div className="mt-3 flex items-center gap-2">
-          <div className="h-1 w-12 rounded-full bg-brand-gradient" />
+          <div className="h-1 w-12 rounded-full bg-brand-gradient shadow-glow" />
           <div className="h-1 w-3 rounded-full bg-periwinkle/60" />
         </div>
       </div>

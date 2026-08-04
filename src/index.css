@@ -468,6 +468,63 @@ h1, h2, h3 {
       transparent 3px
     );
   }
+
+  /* ─── Ticket / receipt system (money + document screens) ───────
+     Checkout, orders, KYC read as "printed tickets" inside the
+     arcade console. Static shapes only; palette tokens only. */
+
+  /* .ticket-edge: perforated top edge (stamp-like half circles). */
+  .ticket-edge {
+    --ticket-hole: 6px;
+    -webkit-mask-image: radial-gradient(
+      circle var(--ticket-hole) at var(--ticket-hole) 0,
+      transparent 98%,
+      #000 100%
+    );
+    -webkit-mask-size: calc(var(--ticket-hole) * 2 + 6px) 100%;
+    -webkit-mask-repeat: repeat-x;
+    -webkit-mask-position: top;
+    mask-image: radial-gradient(
+      circle var(--ticket-hole) at var(--ticket-hole) 0,
+      transparent 98%,
+      #000 100%
+    );
+    mask-size: calc(var(--ticket-hole) * 2 + 6px) 100%;
+    mask-repeat: repeat-x;
+    mask-position: top;
+  }
+
+  /* .ticket-dash: dashed tear-off divider with side notches. */
+  .ticket-dash {
+    position: relative;
+    border-top: 2px dashed var(--color-border-default);
+  }
+  .ticket-dash::before,
+  .ticket-dash::after {
+    content: '';
+    position: absolute;
+    top: -7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: var(--color-bg-default);
+    border: 1px solid var(--color-border-default);
+  }
+  .ticket-dash::before {
+    left: -22px;
+  }
+  .ticket-dash::after {
+    right: -22px;
+  }
+
+  /* .ticket-label: micro caps label for receipt line items. */
+  .ticket-label {
+    font-family: 'Silkscreen', 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+  }
 }
 
 /* 8-bit utilities are static (no keyframes), so they need no

@@ -28,7 +28,7 @@ export function ServiceOrdersScreen() {
       <PageHeader
         title="Service orders"
         icon={<Award className="w-6 h-6 text-brand" />}
-        description="Track your Pre-grade and Grade submissions"
+        description="Track your grading orders"
         back={{ to: '/services' }}
       />
 
@@ -64,12 +64,12 @@ export function ServiceOrdersScreen() {
                 <Link
                   to="/service-orders/$orderId"
                   params={{ orderId: order.id }}
-                  className="block bg-surface-light border border-border rounded-xl p-4 hover:border-brand/30 hover:bg-surface-lighter transition-colors group"
+                  className="neon-card block bg-surface-light border border-border rounded-xl p-4 hover:bg-surface-lighter transition-colors group"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-xs font-mono text-muted-foreground">{order.orderNo ?? order.id}</span>
+                        <span className="ticket-label">#{order.orderNo ?? order.id.slice(0, 10)}</span>
                         <Badge className={cn('text-xs', STATUS_COLORS[order.status])}>{order.status}</Badge>
                         {order.grader && (
                           <span className={cn('text-xs px-1.5 py-0.5 rounded border', GRADER_STYLES[order.grader])}>
@@ -87,7 +87,7 @@ export function ServiceOrdersScreen() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-bold font-mono">
+                      <p className="text-sm font-bold mono-num">
                         {order.currency} {order.totalAmount.toLocaleString()}
                       </p>
                       <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto mt-1 group-hover:text-brand transition-colors" />

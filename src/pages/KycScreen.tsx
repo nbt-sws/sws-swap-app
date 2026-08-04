@@ -1,31 +1,18 @@
 import { useState, useRef } from 'react';
-import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useUser, useKycStatus, useSubmitKyc } from '@/hooks/useApi';
 import { uploadsApi } from '@/lib/api';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, ArrowLeft, CheckCircle, Upload, FileCheck, AlertCircle } from 'lucide-react';
+import { Shield, CheckCircle, Upload, FileCheck, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { KycStatus } from '@/types';
-
-const statusLabel: Record<KycStatus, string> = {
-  NONE: 'Not verified',
-  PENDING: 'Under review',
-  APPROVED: 'Verified',
-  REJECTED: 'Rejected',
-};
-
-const statusColor: Record<KycStatus, string> = {
-  NONE: 'text-muted-foreground bg-surface',
-  PENDING: 'text-warning bg-warning/10',
-  APPROVED: 'text-plup bg-plup/10',
-  REJECTED: 'text-pldown bg-pldown/10',
-};
 
 function readFileAsBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -37,6 +24,7 @@ function readFileAsBase64(file: File): Promise<string> {
 }
 
 export function KycScreen() {
+  const { t } = useTranslation();
   const { data: user, isLoading: userLoading } = useUser();
   const { data: kycStatus, isLoading: statusLoading } = useKycStatus((user as any)?.id);
   const submitKyc = useSubmitKyc();
@@ -54,7 +42,7 @@ export function KycScreen() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be smaller than 5 MB');
+      toast.error(t('kyc.imageTooLarge'));
       return;
     }
     setIdImage(file);
@@ -62,18 +50,18 @@ export function KycScreen() {
       const dataUrl = await readFileAsBase64(file);
       setPreview(dataUrl);
     } catch {
-      toast.error('Failed to read image');
+      toast.error(t('kyc.readFailed'));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !idNumber.trim()) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('kyc.fillAll'));
       return;
     }
     if (!idImage) {
-      toast.error('Please upload an ID image');
+      toast.error(t('kyc.needImage'));
       return;
     }
     try {
@@ -87,9 +75,9 @@ export function KycScreen() {
         idNumber: idNumber.trim(),
         docKey: key,
       });
-      toast.success('KYC verification submitted');
+      toast.success(t('kyc.successToast'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to submit KYC');
+      toast.error(err instanceof Error ? err.message : t('kyc.failed'));
     }
   };
 
@@ -102,49 +90,56 @@ export function KycScreen() {
     );
   }
 
+  const steps = [t('kyc.step1'), t('kyc.step2'), t('kyc.step3')];
+
   return (
     <PageContainer className="py-6">
-      <Link
-        to="/profile"
-        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to profile
-      </Link>
-      <div className="max-w-xl mx-auto">
-        <Card className="bg-surface-light border-border">
-          <CardContent className="p-6">
-            <div className="w-16 h-16 rounded-full bg-brand/10 mx-auto flex items-center justify-center mb-4">
-              <Shield className="w-8 h-8 text-brand" />
-            </div>
-            <h1 className="text-2xl font-bold text-center mb-2">KYC Verification</h1>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Verify your identity to unlock full trading and withdrawal features.
-            </p>
+      <PageHeader
+        title={t('kyc.title')}
+        icon={<Shield className="text-brand" />}
+        description={t('kyc.subtitle')}
+        back={{ to: '/profile' }}
+        badge={
+          <span
+            className={cn(
+              'pxl-chip',
+              effectiveStatus === 'APPROVED' && 'pxl-chip--cyan',
+              effectiveStatus === 'PENDING' && 'pxl-chip--brand',
+              effectiveStatus === 'REJECTED' && 'border-pldown/50 text-pldown bg-pldown/10'
+            )}
+          >
+            {t(`kyc.status.${effectiveStatus}`)}
+          </span>
+        }
+      />
 
-            <div className="flex items-center justify-center mb-6">
-              <span
-                className={cn(
-                  'inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium',
-                  statusColor[effectiveStatus]
-                )}
-              >
-                {effectiveStatus === 'APPROVED' && <FileCheck className="w-4 h-4" />}
-                {effectiveStatus === 'REJECTED' && <AlertCircle className="w-4 h-4" />}
-                {effectiveStatus === 'PENDING' && <CheckCircle className="w-4 h-4" />}
-                {effectiveStatus === 'NONE' && <Shield className="w-4 h-4" />}
-                {statusLabel[effectiveStatus as keyof typeof statusLabel]}
+      <div className="max-w-xl mx-auto">
+        {/* Identity permit — ticket-edge perforation turns the form into a document */}
+        <Card className="ticket-edge bg-surface-light border-border overflow-hidden">
+          <CardContent className="p-6 pt-7">
+            <div className="flex items-center gap-3 mb-6 pb-4 ticket-dash">
+              <div className="w-11 h-11 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
+                <Shield className="w-6 h-6 text-brand" />
+              </div>
+              <div className="min-w-0">
+                <p className="ticket-label">SwibSwap ID Permit</p>
+                <p className="font-semibold truncate">{(user as any)?.displayName ?? (user as any)?.email ?? ''}</p>
+              </div>
+              <span className="ml-auto shrink-0">
+                {effectiveStatus === 'APPROVED' && <FileCheck className="w-5 h-5 text-plup" />}
+                {effectiveStatus === 'REJECTED' && <AlertCircle className="w-5 h-5 text-pldown" />}
+                {effectiveStatus === 'PENDING' && <CheckCircle className="w-5 h-5 text-warning" />}
               </span>
             </div>
 
             <div className="space-y-3 mb-6">
-              {['Upload ID card / Passport', 'Take a selfie (optional)', 'Wait for review'].map((step, i) => (
+              {steps.map((step, i) => (
                 <div
                   key={step}
                   className="flex items-center gap-3 p-3 rounded-lg bg-surface border border-border"
                 >
-                  <div className="w-6 h-6 rounded-full bg-brand/10 flex items-center justify-center text-xs font-bold text-brand">
-                    {i + 1}
+                  <div className="w-6 h-6 rounded-md bg-brand/10 flex items-center justify-center text-[10px] pxl-num text-brand">
+                    0{i + 1}
                   </div>
                   <span className="text-sm">{step}</span>
                 </div>
@@ -155,35 +150,33 @@ export function KycScreen() {
               <div className="text-center p-4 rounded-lg bg-plup/10 border border-plup/20">
                 <CheckCircle className="w-6 h-6 text-plup mx-auto mb-2" />
                 <p className="text-sm text-plup">
-                  {effectiveStatus === 'APPROVED'
-                    ? 'Your identity is verified.'
-                    : 'Verification submitted. We will review your documents shortly.'}
+                  {effectiveStatus === 'APPROVED' ? t('kyc.approvedMsg') : t('kyc.submittedMsg')}
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1">
-                  <Label htmlFor="kyc-fullName">Full name</Label>
+                  <Label htmlFor="kyc-fullName">{t('kyc.fullName')}</Label>
                   <Input
                     id="kyc-fullName"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="As shown on your ID"
+                    placeholder={t('kyc.fullNamePlaceholder')}
                     className="bg-surface border-border"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="kyc-idNumber">ID / Passport number</Label>
+                  <Label htmlFor="kyc-idNumber">{t('kyc.idNumber')}</Label>
                   <Input
                     id="kyc-idNumber"
                     value={idNumber}
                     onChange={(e) => setIdNumber(e.target.value)}
-                    placeholder="ID or passport number"
-                    className="bg-surface border-border"
+                    placeholder={t('kyc.idNumberPlaceholder')}
+                    className="bg-surface border-border mono-num"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label>ID image</Label>
+                  <Label>{t('kyc.idImage')}</Label>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -191,7 +184,7 @@ export function KycScreen() {
                       'w-full flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-dashed transition',
                       preview
                         ? 'border-brand bg-brand/5'
-                        : 'border-border bg-surface hover:bg-surface-lighter'
+                        : 'border-border bg-surface hover:bg-surface-lighter hover:border-brand/40'
                     )}
                   >
                     {preview ? (
@@ -203,7 +196,7 @@ export function KycScreen() {
                     ) : (
                       <>
                         <Upload className="w-6 h-6 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Click to upload ID image</span>
+                        <span className="text-sm text-muted-foreground">{t('kyc.uploadHint')}</span>
                       </>
                     )}
                     <Input
@@ -214,15 +207,15 @@ export function KycScreen() {
                       onChange={handleFileChange}
                     />
                   </button>
-                  {idImage && <p className="text-xs text-muted-foreground">{idImage.name}</p>}
+                  {idImage && <p className="text-xs text-muted-foreground mono-num">{idImage.name}</p>}
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-brand hover:bg-brand-light"
+                  className="w-full bg-brand hover:bg-brand-light font-bold shadow-glow h-11"
                   disabled={submitKyc.isPending}
                 >
-                  {submitKyc.isPending ? 'Submitting...' : 'Submit verification'}
+                  {submitKyc.isPending ? t('kyc.submitting') : t('kyc.submit')}
                 </Button>
               </form>
             )}

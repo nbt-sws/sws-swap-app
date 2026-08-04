@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSubmissions, useApproveSubmissionConsent } from '@/hooks/useApi';
 import { motion } from 'framer-motion';
 import { ScrollablePage } from '@/components/layout/ScrollablePage';
@@ -16,15 +17,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
-const FILTERS = ['All', 'Pre-grade', 'Grading'];
-
-const STATUS_CONFIG: Record<string, { icon: typeof Check; color: string; label: string }> = {
-  ready: { icon: Check, color: 'text-plup', label: 'READY' },
-  'in-lab': { icon: Clock, color: 'text-cyan', label: 'IN LAB' },
-  grading: { icon: Clock, color: 'text-pregrade', label: 'GRADING' },
-  qa: { icon: Package, color: 'text-periwinkle', label: 'QA' },
-  shipped: { icon: Truck, color: 'text-brand', label: 'SHIPPED' },
-  delivered: { icon: Check, color: 'text-plup', label: 'DELIVERED ✓' },
+const STATUS_CONFIG: Record<string, { icon: typeof Check; color: string }> = {
+  ready: { icon: Check, color: 'text-plup' },
+  'in-lab': { icon: Clock, color: 'text-cyan' },
+  grading: { icon: Clock, color: 'text-pregrade' },
+  qa: { icon: Package, color: 'text-periwinkle' },
+  shipped: { icon: Truck, color: 'text-brand' },
+  delivered: { icon: Check, color: 'text-plup' },
 };
 
 // Official cert/report lookup pages per grading service. PSA supports deep
@@ -43,19 +42,30 @@ function reportUrlFor(sub: { service: string; labOrderNumber?: string }): string
   return REPORT_URLS[sub.service] ?? null;
 }
 
+const FILTER_KEYS = ['all', 'pregrade', 'grading'] as const;
+
 export function StatusHubScreen() {
+  const { t } = useTranslation();
   const { data: submissions, isLoading } = useSubmissions();
   const approveConsent = useApproveSubmissionConsent();
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState<(typeof FILTER_KEYS)[number]>('all');
   const [consentId, setConsentId] = useState<string | null>(null);
   const [qrSub, setQrSub] = useState<typeof filtered[0] | null>(null);
 
   const filtered = (submissions || []).filter((s) => {
-    if (activeFilter === 'All') return true;
-    if (activeFilter === 'Pre-grade') return s.service === 'RAWLITY' || s.service === 'BLACKLENS';
-    if (activeFilter === 'Grading') return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC' || s.service === 'TAG';
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'pregrade') return s.service === 'RAWLITY' || s.service === 'BLACKLENS';
+    if (activeFilter === 'grading') return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC' || s.service === 'TAG';
     return true;
   });
+
+  const countFor = (f: (typeof FILTER_KEYS)[number]) => {
+    if (f === 'all') return submissions?.length || 0;
+    return submissions?.filter((s) => {
+      if (f === 'pregrade') return s.service === 'RAWLITY' || s.service === 'BLACKLENS';
+      return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC' || s.service === 'TAG';
+    }).length || 0;
+  };
 
   const handleApproveConsent = () => {
     if (!consentId) return;
@@ -68,8 +78,8 @@ export function StatusHubScreen() {
     <ScrollablePage
       header={
         <PageHeader
-          title="Submissions"
-          description="grading & pre-grading status · live from lab + grader APIs"
+          title={t('statusHub.title')}
+          description={t('statusHub.description')}
           back={{ to: '/services' }}
         />
       }
@@ -78,21 +88,17 @@ export function StatusHubScreen() {
         {/* Filters */}
         <div>
           <div className="flex gap-2">
-            {FILTERS.map((f) => (
+            {FILTER_KEYS.map((f) => (
               <button
                 key={f}
                 onClick={() => setActiveFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   activeFilter === f
-                    ? 'bg-brand text-white'
-                    : 'bg-surface-light text-muted-foreground hover:text-white'
+                    ? 'bg-brand text-white shadow-glow'
+                    : 'bg-surface-light text-muted-foreground hover:text-white border border-border/60'
                 }`}
               >
-                {f} · {f === 'All' ? (submissions?.length || 0) : submissions?.filter(s => {
-                  if (f === 'Pre-grade') return s.service === 'RAWLITY' || s.service === 'BLACKLENS';
-                  if (f === 'Grading') return s.service === 'PSA' || s.service === 'BGS' || s.service === 'CGC' || s.service === 'TAG';
-                  return true;
-                }).length || 0}
+                {t(`statusHub.filters.${f}`)} · {countFor(f)}
               </button>
             ))}
           </div>
@@ -119,11 +125,11 @@ export function StatusHubScreen() {
               <Package className="w-8 h-8 text-brand" />
             </EmptyMedia>
             <EmptyHeader>
-              <EmptyTitle>No submissions yet</EmptyTitle>
+              <EmptyTitle>{t('statusHub.emptyTitle')}</EmptyTitle>
               <EmptyDescription>
-                {activeFilter === 'All'
-                  ? 'When you send cards to a lab or grader, their live status will show up here.'
-                  : `No ${activeFilter.toLowerCase()} submissions right now.`}
+                {activeFilter === 'all'
+                  ? t('statusHub.emptyDesc')
+                  : t('statusHub.emptyFiltered', { filter: t(`statusHub.filters.${activeFilter}`).toLowerCase() })}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -138,25 +144,25 @@ export function StatusHubScreen() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-surface-light rounded-xl p-4"
+                className="neon-card bg-surface-light rounded-xl p-4 border border-border/60"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                        sub.service === 'RAWLITY' ? 'bg-brand/10 text-brand' :
-                        sub.service === 'BLACKLENS' ? 'bg-periwinkle/10 text-periwinkle' :
-                        sub.service === 'PSA' ? 'bg-cyan/10 text-cyan' :
-                        sub.service === 'BGS' ? 'bg-warning/10 text-warning' :
-                        sub.service === 'TAG' ? 'bg-success/10 text-success' :
-                        sub.service === 'OTHER' ? 'bg-muted/10 text-muted-foreground' :
-                        'bg-pregrade/10 text-pregrade'
+                      <span className={`pxl-chip ${
+                        sub.service === 'RAWLITY' ? 'pxl-chip--brand' :
+                        sub.service === 'BLACKLENS' ? 'pxl-chip--peri' :
+                        sub.service === 'PSA' ? 'pxl-chip--cyan' :
+                        sub.service === 'BGS' ? 'border-warning/50 text-warning bg-warning/10' :
+                        sub.service === 'TAG' ? 'pxl-chip--cyan' :
+                        sub.service === 'OTHER' ? '' :
+                        'pxl-chip--peri'
                       }`}>
                         {sub.service}
                       </span>
                       <span className={`text-xs font-mono ${statusConfig.color}`}>
-                        {statusConfig.label}
+                        {t(`statusHub.status.${sub.status}`, { defaultValue: t('statusHub.status.in-lab') })}
                       </span>
                     </div>
                     <h3 className="font-semibold">{sub.cardName}</h3>
@@ -201,7 +207,7 @@ export function StatusHubScreen() {
                     onClick={() => setConsentId(sub.id)}
                     className="w-full py-2.5 rounded-xl bg-brand/10 text-brand text-xs font-medium mb-2 hover:bg-brand/20 transition-colors flex items-center justify-center gap-2"
                   >
-                    Forward to PSA <ArrowRight className="w-3 h-3" /> (consent)
+                    {t('statusHub.forwardCta')} <ArrowRight className="w-3 h-3" />
                   </button>
                 )}
 
@@ -218,14 +224,14 @@ export function StatusHubScreen() {
                     className="w-full py-2.5 rounded-xl bg-cyan/10 text-cyan text-xs font-medium hover:bg-cyan/20 transition-colors flex items-center justify-center gap-2"
                   >
                     <ExternalLink className="w-3 h-3" />
-                    View report
+                    {t('statusHub.viewReport')}
                   </button>
                 )}
 
                 {/* ETA */}
                 {sub.estimatedDays && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    est. {sub.estimatedDays} days · updated 2h ago via {sub.service} API
+                    {t('statusHub.eta', { days: sub.estimatedDays, service: sub.service })}
                   </p>
                 )}
 
@@ -233,7 +239,7 @@ export function StatusHubScreen() {
                 {sub.status === 'delivered' && (
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-plup text-xs">✓</span>
-                    <span className="text-xs text-plup">{sub.service} #{sub.labOrderNumber} · slab delivered</span>
+                    <span className="text-xs text-plup">{t('statusHub.deliveredLabel', { service: sub.service, num: sub.labOrderNumber })}</span>
                   </div>
                 )}
               </motion.div>
@@ -244,9 +250,9 @@ export function StatusHubScreen() {
 
         {/* Update channels */}
         <div>
-          <div className="bg-surface-light rounded-xl p-4">
-            <p className="text-xs font-mono tracking-wider text-muted-foreground mb-3">
-              UPDATES VIA
+          <div className="bg-surface-light rounded-xl p-4 border border-border/60">
+            <p className="ticket-label mb-3">
+              {t('statusHub.updatesVia')}
             </p>
             <div className="flex gap-4">
               {[
@@ -273,19 +279,19 @@ export function StatusHubScreen() {
       <Dialog open={!!consentId} onOpenChange={(open) => !open && setConsentId(null)}>
         <DialogContent className="bg-surface-light border-border">
           <DialogHeader>
-            <DialogTitle>Forward to PSA?</DialogTitle>
+            <DialogTitle>{t('statusHub.consentTitle')}</DialogTitle>
             <DialogDescription>
-              This confirms you want to send this card from RAWLITY pre-grade to PSA for official grading. Shipping and grading fees will apply.
+              {t('statusHub.consentDesc')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" className="border-border" onClick={() => setConsentId(null)}>Cancel</Button>
+            <Button variant="outline" className="border-border" onClick={() => setConsentId(null)}>{t('statusHub.cancel')}</Button>
             <Button
               className="bg-brand hover:bg-brand-light"
               onClick={handleApproveConsent}
               disabled={approveConsent.isPending}
             >
-              {approveConsent.isPending ? 'Confirming…' : 'Yes, forward'}
+              {approveConsent.isPending ? t('statusHub.confirming') : t('statusHub.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -295,19 +301,19 @@ export function StatusHubScreen() {
       <Dialog open={!!qrSub} onOpenChange={(open) => !open && setQrSub(null)}>
         <DialogContent className="bg-surface-light border-border">
           <DialogHeader>
-            <DialogTitle>Report</DialogTitle>
+            <DialogTitle>{t('statusHub.reportTitle')}</DialogTitle>
             <DialogDescription>
-              {qrSub?.service} does not publish reports online. Reference {qrSub?.orderNumber} when contacting the lab.
+              {t('statusHub.reportDesc', { service: qrSub?.service, num: qrSub?.orderNumber })}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center py-4">
             <p className="text-sm text-muted-foreground text-center">
-              Your report for <span className="text-foreground font-medium">{qrSub?.cardName}</span> is delivered directly by the lab.
+              {t('statusHub.reportBody', { card: qrSub?.cardName })}
             </p>
             <p className="text-xs text-muted-foreground mt-3 font-mono">{qrSub?.orderNumber}</p>
           </div>
           <DialogFooter>
-            <Button className="w-full bg-brand hover:bg-brand-light" onClick={() => setQrSub(null)}>Close</Button>
+            <Button className="w-full bg-brand hover:bg-brand-light" onClick={() => setQrSub(null)}>{t('statusHub.close')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -57,7 +57,7 @@ export function WishlistScreen() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {items?.map((item) => (
-            <Card key={item.id} className="bg-surface-light border-border overflow-hidden group">
+            <Card key={item.id} className="neon-card bg-surface-light border-border overflow-hidden group">
               <CardContent className="p-0 relative">
                 <button
                   onClick={() => remove.mutate(item.listingId)}
@@ -77,12 +77,12 @@ export function WishlistScreen() {
                 </Link>
                 <div className="p-3">
                   {item.cardCode && (
-                    <p className="text-xs font-mono text-muted-foreground truncate">{item.cardCode}</p>
+                    <p className="text-xs mono-num text-muted-foreground truncate">{item.cardCode}</p>
                   )}
                   <p className="font-medium text-sm truncate">{item.cardName}</p>
                   <div className="flex items-center justify-between mt-1">
                     {item.currentPrice > 0 ? (
-                      <p className="text-sm font-bold font-mono text-brand">฿{item.currentPrice.toLocaleString()}</p>
+                      <p className="text-sm font-bold mono-num text-brand">฿{item.currentPrice.toLocaleString()}</p>
                     ) : <span />}
                     <p className="text-xs text-muted-foreground">
                       {item.addedAt ? new Date(item.addedAt).toLocaleDateString() : ''}
