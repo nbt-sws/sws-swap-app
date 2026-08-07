@@ -12,6 +12,10 @@ interface PageHeaderProps {
   className?: string;
   /** Pixel chip rendered next to the title (e.g. "BETA", counts). */
   badge?: ReactNode;
+  /** Shipaton-style eyebrow kicker above the title. */
+  eyebrow?: string;
+  /** Category accent for the eyebrow (default: brand). */
+  eyebrowAccent?: 'brand' | 'cyan' | 'peri';
   /** Neon title glow — default on; turn off for dense doc-style pages. */
   glow?: boolean;
   back?:
@@ -35,6 +39,8 @@ export function PageHeader({
   action,
   className,
   badge,
+  eyebrow,
+  eyebrowAccent = 'brand',
   glow = true,
   back,
 }: PageHeaderProps) {
@@ -79,6 +85,17 @@ export function PageHeader({
 
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
+            {eyebrow && (
+              <p
+                className={cn(
+                  'eyebrow mb-1.5',
+                  eyebrowAccent === 'cyan' && 'eyebrow--cyan',
+                  eyebrowAccent === 'peri' && 'eyebrow--peri'
+                )}
+              >
+                {eyebrow}
+              </p>
+            )}
             <div className="flex items-center gap-2.5">
               {icon && (
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-surface/80 [&>svg]:h-5 [&>svg]:w-5">

@@ -39,12 +39,12 @@ function WtbCard({ req, isOwner }: { req: WtbRequest; isOwner: boolean }) {
   const [viewing, setViewing] = useState(false);
 
   return (
-    <Card className="neon-card group relative overflow-hidden border-border/60 bg-surface-light/80">
+    <Card className="neon-card group relative flex h-full flex-col overflow-hidden border-border/60 bg-surface-light/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-warning/40 hover:shadow-[0_8px_24px_-8px_rgba(255,216,77,0.25)]">
       {/* Pixel corner accent */}
       <div className="absolute top-0 right-0 h-3 w-3 bg-warning/60 pxl-corner" aria-hidden="true" />
-      <CardContent className="p-4 sm:p-5">
+      <CardContent className="flex flex-1 flex-col p-4 sm:p-5">
         <div className="flex gap-3">
-          {req.imageUrl && (
+          {req.imageUrl ? (
             <button
               onClick={() => setViewing(true)}
               aria-label={t('wtb.viewImage')}
@@ -56,8 +56,8 @@ function WtbCard({ req, isOwner }: { req: WtbRequest; isOwner: boolean }) {
                 className="h-24 w-[68px] object-cover"
               />
             </button>
-          )}
-          <div className="min-w-0 flex-1">
+          ) : null}
+          <div className="min-w-0 min-h-24 flex-1">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -96,8 +96,11 @@ function WtbCard({ req, isOwner }: { req: WtbRequest; isOwner: boolean }) {
         </div>
 
         {req.note && (
-          <p className="mt-3 text-xs leading-relaxed text-muted-foreground line-clamp-2">{req.note}</p>
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground line-clamp-2 min-h-8">{req.note}</p>
         )}
+
+        {/* Spacer keeps the footer pinned to the bottom so every card shares one height */}
+        <div className="flex-1" aria-hidden="true" />
 
         <div className="mt-4 flex items-center gap-2 border-t border-border/40 pt-3">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-periwinkle/15 text-[10px] font-bold text-periwinkle">

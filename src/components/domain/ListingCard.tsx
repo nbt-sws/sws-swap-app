@@ -61,7 +61,7 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
   return (
     <div
       className={cn(
-        'neon-card group relative overflow-hidden rounded-2xl border border-border/60',
+        'neon-card group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60',
         'bg-gradient-to-br from-surface-light via-surface to-surface-lighter/30',
         'transition-all duration-300 hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20',
         'hover:-translate-y-1',
@@ -133,9 +133,10 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
             <h3 className="line-clamp-1 font-semibold text-sm text-foreground transition-colors group-hover:text-brand">
               {listing.card.nameEn}
             </h3>
-            {listing.card.code && (
-              <p className="text-xs text-muted-foreground mono-num mt-0.5">{listing.card.code}</p>
-            )}
+            {/* Fixed-height row so every card reserves the same space, with or without a code */}
+            <p className="text-xs text-muted-foreground mono-num mt-0.5 h-4 truncate">
+              {listing.card.code || '\u00A0'}
+            </p>
           </div>
           {listing.status !== 'active' && (
             <Badge variant="pixel" className="shrink-0">
@@ -144,14 +145,15 @@ export function ListingCard({ listing, onQuickView, className }: ListingCardProp
           )}
         </div>
 
-        <div className="mt-2 flex flex-wrap gap-1">
+        {/* Single fixed-height chip row — nowrap + overflow clip keeps every card identical */}
+        <div className="mt-2 flex h-[22px] flex-nowrap items-start gap-1 overflow-hidden">
           {listing.card.rarity && (
-            <span className="text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.rarity}</span>
+            <span className="shrink-0 text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.rarity}</span>
           )}
           {listing.card.condition && (
-            <span className="text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.condition}</span>
+            <span className="shrink-0 text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.card.condition}</span>
           )}
-          <span className="text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.shelf}</span>
+          <span className="shrink-0 text-[11px] font-bold bg-surface-lighter/80 px-2 py-0.5 rounded-full border border-border/40">{listing.shelf}</span>
         </div>
 
         <div className="mt-auto pt-3 flex items-center justify-between">

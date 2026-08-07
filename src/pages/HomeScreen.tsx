@@ -2,9 +2,8 @@ import { useMemo } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
-  Scan, Package, Plus, Store, ShoppingBag, ClipboardList, Handshake,
-  Heart, ChevronRight, ShieldCheck, Zap, Sparkles, TrendingUp, ArrowUpRight,
-  Megaphone, HandCoins,
+  Package, Plus, ShoppingBag, ClipboardList, Handshake,
+  Heart, ChevronRight, TrendingUp, ArrowUpRight,
 } from 'lucide-react';
 import {
   AreaChart, Area, ResponsiveContainer, Tooltip,
@@ -15,6 +14,7 @@ import {
 } from '@/hooks/useApi';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { PixelIcon, type PixelIconName } from '@/components/ui/PixelIcon';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,6 +35,31 @@ function greetingKey(hour: number) {
   return 'evening';
 }
 
+/* ─── Section Header (eyebrow kicker + title + view-all) ────────── */
+function SectionHeader({ eyebrow, title, accent, viewAllTo, viewAllLabel }: {
+  eyebrow: string;
+  title: string;
+  accent?: 'cyan' | 'peri';
+  viewAllTo?: string;
+  viewAllLabel?: string;
+}) {
+  return (
+    <div className="flex items-end justify-between">
+      <div>
+        <p className={cn('eyebrow', accent === 'cyan' && 'eyebrow--cyan', accent === 'peri' && 'eyebrow--peri')}>
+          {eyebrow}
+        </p>
+        <h2 className="mt-1 text-base font-bold tracking-tight">{title}</h2>
+      </div>
+      {viewAllTo && viewAllLabel && (
+        <Link to={viewAllTo} className="group/link flex items-center gap-0.5 text-xs font-medium text-brand hover:text-brand-light transition-colors">
+          {viewAllLabel} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
 /* ─── Hero Greeting ─────────────────────────────────────────────── */
 function HeroGreeting({ greeting, dateStr }: { greeting: string; dateStr: string }) {
   return (
@@ -46,7 +71,7 @@ function HeroGreeting({ greeting, dateStr }: { greeting: string; dateStr: string
       <div className="surreal-mesh absolute inset-0 opacity-50 pointer-events-none" />
 
       <div className="relative">
-        <p className="ticket-label text-brand">{dateStr}</p>
+        <p className="eyebrow">{dateStr}</p>
         <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight neon-text-brand">
           {greeting}
         </h1>
@@ -223,48 +248,52 @@ function PortfolioCard({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
   );
 }
 
-/* ─── Quick Actions ──────────────────────────────────────────────── */
+/* ─── Quick Actions (pixel-icon tiles, Shipaton-style) ─────────── */
+const ACCENT_TILE: Record<'brand' | 'cyan' | 'peri', string> = {
+  brand: 'bg-brand/10 text-brand border-brand/25 hover:border-brand/50 hover:bg-brand/15',
+  cyan: 'bg-cyan/10 text-cyan border-cyan/25 hover:border-cyan/50 hover:bg-cyan/15',
+  peri: 'bg-periwinkle/10 text-periwinkle border-periwinkle/25 hover:border-periwinkle/50 hover:bg-periwinkle/15',
+};
+
 function QuickActions({ t }: { t: (k: string, o?: Record<string, unknown>) => string }) {
-  const actions = [
-    { key: 'scan', icon: Scan, to: '/scan', className: 'bg-brand-gradient text-white shadow-glow hover:shadow-glow hover:scale-105' },
-    { key: 'feed', icon: Megaphone, to: '/feed' },
-    { key: 'addVault', icon: Plus, to: '/vault', search: { action: 'register' as const } },
-    { key: 'sell', icon: Store, to: '/seller' },
-    { key: 'market', icon: ShoppingBag, to: '/market' },
-    { key: 'wtb', icon: HandCoins, to: '/wtb' },
-    { key: 'orders', icon: ClipboardList, to: '/orders' },
-    { key: 'offers', icon: Handshake, to: '/offers' },
+  const actions: { key: string; icon: PixelIconName; to: string; search?: { action: 'register' }; accent: 'brand' | 'cyan' | 'peri' }[] = [
+    { key: 'scan', icon: 'scan', to: '/scan', accent: 'brand' },
+    { key: 'feed', icon: 'feed', to: '/feed', accent: 'brand' },
+    { key: 'addVault', icon: 'plus', to: '/vault', search: { action: 'register' }, accent: 'peri' },
+    { key: 'sell', icon: 'store', to: '/seller', accent: 'cyan' },
+    { key: 'market', icon: 'bag', to: '/market', accent: 'cyan' },
+    { key: 'wtb', icon: 'coins', to: '/wtb', accent: 'cyan' },
+    { key: 'orders', icon: 'clipboard', to: '/orders', accent: 'brand' },
+    { key: 'offers', icon: 'swap', to: '/offers', accent: 'brand' },
   ];
 
   return (
     <section>
-      <h2 className="text-sm font-semibold text-muted-foreground">{t('home.quickActions.title')}</h2>
+      <SectionHeader eyebrow={t('home.quickActions.eyebrow')} title={t('home.quickActions.title')} />
       <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-8">
-        {actions.map((a, i) => {
-          const Icon = a.icon;
-          return (
-            <Link
-              key={a.key}
-              to={a.to}
-              search={a.search as { action: 'register' } | undefined}
-              className="group flex flex-col items-center gap-2.5"
-              style={{ animationDelay: `${i * 40}ms` }}
+        {actions.map((a, i) => (
+          <Link
+            key={a.key}
+            to={a.to}
+            search={a.search as { action: 'register' } | undefined}
+            className="group flex flex-col items-center gap-2.5"
+            style={{ animationDelay: `${i * 40}ms` }}
+          >
+            <div
+              className={cn(
+                'flex h-14 w-14 items-center justify-center pxl-corner border transition-all duration-200 active:scale-90 hover:-translate-y-1',
+                a.key === 'scan'
+                  ? 'bg-brand-gradient text-white border-brand/40 shadow-glow'
+                  : ACCENT_TILE[a.accent]
+              )}
             >
-              <div
-                className={cn(
-                  'flex h-14 w-14 items-center justify-center rounded-2xl text-foreground transition-all duration-200 active:scale-90',
-                  'bg-surface-light border border-border/60 hover:border-brand/40 hover:bg-surface-lighter hover:-translate-y-1 hover:shadow-md',
-                  a.className
-                )}
-              >
-                <Icon className="h-6 w-6" />
-              </div>
-              <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center">
-                {t(`home.quickActions.${a.key}`)}
-              </span>
-            </Link>
-          );
-        })}
+              <PixelIcon name={a.icon} className="h-7 w-7" />
+            </div>
+            <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center">
+              {t(`home.quickActions.${a.key}`)}
+            </span>
+          </Link>
+        ))}
       </div>
     </section>
   );
@@ -276,12 +305,13 @@ function VaultSnapshot({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
 
   return (
     <section>
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold tracking-tight">{t('home.vaultSnapshot.title')}</h2>
-        <Link to="/vault" className="group/link flex items-center gap-0.5 text-xs font-medium text-brand hover:text-brand-light transition-colors">
-          {t('home.vaultSnapshot.viewAll')} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
-        </Link>
-      </div>
+      <SectionHeader
+        eyebrow={t('home.vaultSnapshot.eyebrow')}
+        title={t('home.vaultSnapshot.title')}
+        accent="peri"
+        viewAllTo="/vault"
+        viewAllLabel={t('home.vaultSnapshot.viewAll')}
+      />
 
       {loading ? (
         <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -297,7 +327,7 @@ function VaultSnapshot({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
             <Link
               to="/vault"
               search={{ action: 'register' as const }}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-light transition-colors"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-light pxl-cta pxl-cta--brand"
             >
               <Plus className="h-3.5 w-3.5" />
               {t('home.quickActions.addVault')}
@@ -345,12 +375,13 @@ function VaultSnapshot({ vault, loading, t }: { vault?: VaultItem[]; loading: bo
 function MarketPulse({ listings, loading, t }: { listings?: MarketListing[]; loading: boolean; t: (k: string, o?: Record<string, unknown>) => string }) {
   return (
     <section>
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold tracking-tight">{t('home.marketPulse.title')}</h2>
-        <Link to="/market" className="group/link flex items-center gap-0.5 text-xs font-medium text-brand hover:text-brand-light transition-colors">
-          {t('home.marketPulse.viewAll')} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
-        </Link>
-      </div>
+      <SectionHeader
+        eyebrow={t('home.marketPulse.eyebrow')}
+        title={t('home.marketPulse.title')}
+        accent="cyan"
+        viewAllTo="/market"
+        viewAllLabel={t('home.marketPulse.viewAll')}
+      />
 
       {loading ? (
         <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -367,7 +398,7 @@ function MarketPulse({ listings, loading, t }: { listings?: MarketListing[]; loa
             <EmptyTitle>{t('home.marketPulse.empty')}</EmptyTitle>
             <EmptyDescription>{t('home.marketPulse.emptyDescription')}</EmptyDescription>
           </EmptyHeader>
-          <Button asChild size="sm" className="bg-brand hover:bg-brand-light">
+          <Button asChild size="sm" className="bg-brand hover:bg-brand-light pxl-cta pxl-cta--brand">
             <Link to="/market">{t('home.marketPulse.viewAll')}</Link>
           </Button>
         </Empty>
@@ -424,7 +455,7 @@ function ActivitySummary({ orders, offers, loading, t }: { orders?: Order[]; off
 
   return (
     <section>
-      <h2 className="text-base font-bold tracking-tight">{t('home.activity.title')}</h2>
+      <SectionHeader eyebrow={t('home.activity.eyebrow')} title={t('home.activity.title')} />
       <Card className="mt-3 overflow-hidden border-border/60 bg-surface-light/80 backdrop-blur-sm transition-all duration-300 hover:border-brand/30 hover:shadow-glow">
         <CardContent className="p-4 sm:p-5">
           <div className="grid grid-cols-2 divide-x divide-border/40">
@@ -457,12 +488,12 @@ function ActivitySummary({ orders, offers, loading, t }: { orders?: Order[]; off
 function WishlistSnapshot({ items, loading, t }: { items?: WishlistItem[]; loading: boolean; t: (k: string, o?: Record<string, unknown>) => string }) {
   return (
     <section>
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold tracking-tight">{t('home.wishlist.title')}</h2>
-        <Link to="/wishlist" className="group/link flex items-center gap-0.5 text-xs font-medium text-brand hover:text-brand-light transition-colors">
-          {t('common.viewAll')} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
-        </Link>
-      </div>
+      <SectionHeader
+        eyebrow={t('home.wishlist.eyebrow')}
+        title={t('home.wishlist.title')}
+        viewAllTo="/wishlist"
+        viewAllLabel={t('common.viewAll')}
+      />
 
       {loading ? (
         <div className="mt-3 space-y-2">
@@ -518,8 +549,8 @@ function GuestWelcome({ t }: { t: (k: string, o?: Record<string, unknown>) => st
       <div className="absolute -left-10 -bottom-10 h-24 w-24 rounded-full bg-periwinkle/10 blur-3xl" />
       <CardContent className="relative p-5 sm:p-6">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand shadow-inner">
-            <Sparkles className="h-6 w-6" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center pxl-corner bg-brand/10 text-brand shadow-inner">
+            <PixelIcon name="bag" className="h-7 w-7" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-base">{t('home.guestWelcome.title')}</p>
@@ -527,7 +558,7 @@ function GuestWelcome({ t }: { t: (k: string, o?: Record<string, unknown>) => st
               {t('home.guestWelcome.desc')}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button size="sm" className="bg-brand hover:bg-brand-light transition-all hover:shadow-glow" asChild>
+              <Button size="sm" className="bg-brand hover:bg-brand-light pxl-cta pxl-cta--brand" asChild>
                 <Link to="/login">{t('home.guestWelcome.signIn')}</Link>
               </Button>
               <Button size="sm" variant="outline" className="border-border/60 hover:border-brand/40 transition-colors" asChild>
@@ -547,8 +578,8 @@ function KycBanner({ t }: { t: (k: string, o?: Record<string, unknown>) => strin
     <Card className="relative overflow-hidden border-brand/20 bg-surface-light/80 backdrop-blur-sm">
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-brand/10 blur-2xl" />
       <CardContent className="relative flex items-center gap-4 p-4 sm:p-5">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
-          <ShieldCheck className="h-5 w-5" />
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center pxl-corner bg-brand/10 text-brand">
+          <PixelIcon name="shield" className="h-6 w-6" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">{t('home.kycBanner.title')}</p>
@@ -556,7 +587,7 @@ function KycBanner({ t }: { t: (k: string, o?: Record<string, unknown>) => strin
         </div>
         <Link
           to="/profile/kyc"
-          className="shrink-0 rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-light transition-colors hover:shadow-glow"
+          className="shrink-0 rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-light pxl-cta pxl-cta--brand"
         >
           {t('home.kycBanner.cta')}
         </Link>
@@ -572,8 +603,8 @@ function DiscoveryCard({ t }: { t: (k: string, o?: Record<string, unknown>) => s
       <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-periwinkle/10 blur-2xl" />
       <CardContent className="relative p-5 sm:p-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-periwinkle/10 text-periwinkle transition-transform duration-200 hover:scale-105">
-            <Zap className="h-5 w-5" />
+          <div className="flex h-11 w-11 items-center justify-center pxl-corner bg-periwinkle/10 text-periwinkle transition-transform duration-200 hover:scale-105">
+            <PixelIcon name="bag" className="h-6 w-6" />
           </div>
           <div>
             <p className="text-sm font-semibold">{t('home.discovery.title')}</p>
@@ -582,7 +613,7 @@ function DiscoveryCard({ t }: { t: (k: string, o?: Record<string, unknown>) => s
         </div>
         <Link
           to="/market"
-          className="mt-4 block w-full rounded-xl bg-surface-lighter py-2.5 text-center text-sm font-semibold text-foreground transition-all duration-200 hover:bg-periwinkle hover:text-white hover:shadow-md"
+          className="mt-4 block w-full rounded-xl bg-surface-lighter py-2.5 text-center text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-periwinkle hover:text-white pxl-cta pxl-cta--peri"
         >
           {t('home.discovery.cta')}
         </Link>
@@ -604,8 +635,8 @@ function FeedPreview({ t }: { t: (k: string, o?: Record<string, unknown>) => str
         <Card className="relative overflow-hidden border-border/60 bg-surface-light/80">
           <div className="surreal-mesh absolute inset-0 opacity-50 pointer-events-none" />
           <CardContent className="relative flex items-center gap-4 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
-              <ShieldCheck className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center pxl-corner bg-brand/10 text-brand">
+              <PixelIcon name="feed" className="h-6 w-6" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold">{t('home.feedPreview.gateTitle')}</p>
@@ -613,7 +644,7 @@ function FeedPreview({ t }: { t: (k: string, o?: Record<string, unknown>) => str
             </div>
             <Link
               to="/feed"
-              className="shrink-0 rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-light transition-colors"
+              className="shrink-0 rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-light pxl-cta pxl-cta--brand"
             >
               {t('home.feedPreview.gateCta')}
             </Link>
@@ -634,21 +665,18 @@ function FeedPreview({ t }: { t: (k: string, o?: Record<string, unknown>) => str
 
   return (
     <section>
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold tracking-tight flex items-center gap-2">
-          <Megaphone className="h-4 w-4 text-brand" />
-          {t('home.feedPreview.title')}
-        </h2>
-        <Link to="/feed" className="group/link flex items-center gap-0.5 text-xs font-medium text-brand hover:text-brand-light transition-colors">
-          {t('common.viewAll')} <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
-        </Link>
-      </div>
+      <SectionHeader
+        eyebrow={t('home.feedPreview.eyebrow')}
+        title={t('home.feedPreview.title')}
+        viewAllTo="/feed"
+        viewAllLabel={t('common.viewAll')}
+      />
 
       {posts.length === 0 ? (
         <Card className="mt-3 border-dashed border-border bg-surface-light/50">
           <CardContent className="flex items-center gap-4 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
-              <HandCoins className="h-5 w-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center pxl-corner bg-brand/10 text-brand">
+              <PixelIcon name="coins" className="h-6 w-6" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold">{t('home.feedPreview.emptyTitle')}</p>
@@ -656,7 +684,7 @@ function FeedPreview({ t }: { t: (k: string, o?: Record<string, unknown>) => str
             </div>
             <Link
               to="/wtb"
-              className="shrink-0 rounded-full bg-warning px-3 py-1.5 text-xs font-bold text-surface-dark hover:bg-warning/90 transition-colors"
+              className="shrink-0 rounded-full bg-warning px-3 py-1.5 text-xs font-bold text-surface-dark hover:bg-warning/90 pxl-cta"
             >
               {t('home.feedPreview.wtbCta')}
             </Link>

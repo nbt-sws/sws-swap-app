@@ -1,10 +1,28 @@
+import { Suspense } from 'react';
+import { Outlet, useRouterState } from '@tanstack/react-router';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { BottomNav } from './BottomNav';
 import { SocialFooter } from './SocialFooter';
 import { ScrollableOutlet } from '@/routes/__root';
+import { PageLoader } from '@/components/ui/page-loader';
 
 export function AppShell() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Public landing renders bare — no sidebar, topbar, bottomnav, or footer chrome.
+  if (pathname.startsWith('/welcome')) {
+    return (
+      <div className="min-h-screen text-text-primary">
+        <main className="min-h-screen">
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen text-text-primary flex">
       <Sidebar />

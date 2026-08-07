@@ -163,6 +163,8 @@ export function MarketScreen() {
     <PageContainer className="py-6">
       <PageHeader
         title={t('market.title')}
+        eyebrow={t('market.eyebrow')}
+        eyebrowAccent="cyan"
         icon={<ShoppingBag className="w-6 h-6 text-brand" />}
         description={marketStats ? t('market.description', { count: marketStats.count }) : undefined}
       />
@@ -292,7 +294,7 @@ export function MarketScreen() {
                 onClick={() => setActiveShelf(shelf.id)}
                 className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
                   activeShelf === shelf.id
-                    ? 'bg-brand text-white'
+                    ? 'bg-brand text-white pxl-corner pxl-shadow-brand'
                     : 'bg-surface-light text-muted-foreground hover:text-white'
                 }`}
               >
@@ -730,7 +732,7 @@ function MobileFilterSheet({
           </button>
           <button
             onClick={onClose}
-            className="flex-1 rounded-xl bg-brand py-3 text-sm font-medium text-white hover:bg-brand-light transition-colors"
+            className="flex-1 rounded-xl bg-brand py-3 text-sm font-medium text-white hover:bg-brand-light pxl-cta pxl-cta--brand"
           >
             {t('common.showResults', { count: resultCount })}
           </button>

@@ -16,13 +16,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn, getCardImageUrl } from '@/lib/utils';
 import { downscaleImage } from '@/lib/image';
 import type { VaultItem, StoreGroup } from '@/types';
 import {
   Edit3, ImagePlus, Package, Plus, Trash2, MapPin, Loader2, GripVertical, FolderOpen, Eye, Star,
+  Link as LinkIcon, Store, Heart,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+/* Platforms offered in the social-links editor; the public store page
+   renders any platform with a generic icon as fallback. */
+const LINK_PLATFORMS = ['instagram', 'facebook', 'twitter', 'tiktok', 'line', 'website'] as const;
 
 interface StorefrontManagerProps {
   userId: string;
@@ -48,6 +60,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
   const [draftLocation, setDraftLocation] = useState('');
   const [draftAvatar, setDraftAvatar] = useState<string | undefined>();
   const [draftBanner, setDraftBanner] = useState<string | undefined>();
+  const [draftLinks, setDraftLinks] = useState<{ platform: string; url: string }[]>([]);
 
   const [newGroupName, setNewGroupName] = useState('');
   const [dragOverGroup, setDragOverGroup] = useState<string | null>(null);
@@ -58,6 +71,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
     setDraftLocation(profile?.location || '');
     setDraftAvatar(profile?.avatarUrl);
     setDraftBanner(profile?.bannerUrl);
+    setDraftLinks(profile?.socialLinks ?? []);
     setIsEditing(true);
   };
 
@@ -102,6 +116,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
         location: draftLocation,
         avatarUrl: draftAvatar,
         bannerUrl: draftBanner,
+        socialLinks: draftLinks.filter((l) => l.url.trim()),
       },
     });
     setIsEditing(false);
@@ -111,6 +126,11 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
     setIsEditing(false);
     setDraftAvatar(profile?.avatarUrl);
     setDraftBanner(profile?.bannerUrl);
+    setDraftLinks(profile?.socialLinks ?? []);
+  };
+
+  const setLink = (index: number, patch: Partial<{ platform: string; url: string }>) => {
+    setDraftLinks((prev) => prev.map((l, i) => (i === index ? { ...l, ...patch } : l)));
   };
 
   const setGroupsAndPersist = (next: StoreGroup[]) => {
@@ -153,80 +173,61 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card className="bg-surface-light border-border overflow-hidden">
-        <div
-          className={cn(
-            'h-40 sm:h-48 bg-cover bg-center relative',
-            !bannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-brand/20'
-          )}
-          style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-          {!isEditing && (
-            <div className="absolute top-3 right-3 flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                className="gap-1.5 bg-black/40 border-white/10 text-white hover:bg-black/60"
-                asChild
-              >
-                <Link to="/seller/$sellerId" params={{ sellerId: userId }}>
-                  <Eye className="w-3.5 h-3.5" />
-                  Preview
-                </Link>
+    <div className="space-y-8">
+      {/* Control room — the storefront itself is the hero.
+          One surface, hairline divisions, zero nested cards. */}
+      <Card className="overflow-hidden border-border bg-surface-light">
+        {/* Status strip — friendly mode indicator + actions */}
+        <div className="flex items-center justify-between gap-2 border-b border-border bg-surface/50 px-4 py-3 sm:px-5">
+          <p className="flex items-center gap-2 text-xs font-semibold">
+            <span className={cn('h-2 w-2 rounded-full', isEditing ? 'animate-pulse bg-warning' : 'bg-cyan')} />
+            {isEditing ? '✏️ Customizing your store…' : '✨ Your store is live'}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <Button size="sm" variant="ghost" className="h-8 gap-1.5 rounded-full px-3 text-xs text-muted-foreground hover:text-foreground" asChild>
+              <Link to="/seller/$sellerId" params={{ sellerId: userId }}>
+                <Eye className="w-3.5 h-3.5" />
+                View public page
+              </Link>
+            </Button>
+            {isEditing ? (
+              <>
+                <Button size="sm" variant="ghost" className="h-8 rounded-full px-3 text-xs" onClick={handleCancelEdit}>
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-8 rounded-full bg-brand px-4 text-xs font-bold hover:bg-brand-light"
+                  onClick={handleSaveProfile}
+                  disabled={updateProfile.isPending}
+                >
+                  {updateProfile.isPending && <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />}
+                  Save changes
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" className="h-8 gap-1.5 rounded-full bg-brand px-4 text-xs font-bold shadow-glow hover:bg-brand-light" onClick={startEditing}>
+                <Edit3 className="w-3 h-3" />
+                Customize store
               </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="gap-1.5 bg-black/40 border-white/10 text-white hover:bg-black/60"
-                onClick={startEditing}
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                Customize
-              </Button>
-            </div>
-          )}
-        </div>
-        <CardContent className="p-4 sm:p-5 relative">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12 sm:-mt-14">
-            <Avatar className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-4 border-surface-light shadow-lg bg-surface-lighter">
-              <AvatarImage src={avatarUrl} alt={displayName} className="object-cover" />
-              <AvatarFallback className="rounded-xl text-2xl font-bold bg-surface-lighter text-foreground">
-                {displayName.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0 pb-1">
-              <h2 className="text-xl sm:text-2xl font-bold truncate">@{displayName}</h2>
-              {profile?.bio && !isEditing && (
-                <p className="text-sm text-text-secondary mt-1 line-clamp-2">{profile.bio}</p>
-              )}
-              {profile?.location && !isEditing && (
-                <div className="flex items-center gap-1 text-xs text-text-secondary mt-1">
-                  <MapPin className="w-3 h-3" />
-                  {profile.location}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-4 text-sm shrink-0">
-              <div className="text-center">
-                <p className="font-bold">{items.length}</p>
-                <p className="text-xs text-muted-foreground">Listings</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold">{profile?.sales ?? 0}</p>
-                <p className="text-xs text-muted-foreground">Sales</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold">{profile?.followers ?? 0}</p>
-                <p className="text-xs text-muted-foreground">Followers</p>
-              </div>
-            </div>
+            )}
           </div>
+        </div>
 
-          {isEditing && (
-            <div className="mt-5 space-y-4 border-t border-border pt-4">
+        {isEditing ? (
+          /* Edit mode — control room: controls left, live buyer view right */
+          <div className="grid lg:grid-cols-[440px_1fr]">
+            <div className="divide-y divide-border border-b border-border lg:border-b-0 lg:border-r">
+              <section className="space-y-4 p-5 sm:p-6">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                    <Store className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold">Store identity</p>
+                    <p className="text-[11px] text-muted-foreground">The basics buyers see first</p>
+                  </div>
+                </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Store name</Label>
@@ -253,12 +254,81 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
                   value={draftBio}
                   onChange={(e) => setDraftBio(e.target.value)}
                   placeholder="Tell buyers about your store..."
-                  className="bg-surface border-border min-h-[80px]"
+                  className="bg-surface border-border min-h-[100px]"
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              </section>
+              <section className="space-y-4 p-5 sm:p-6">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pldown/10 text-pldown">
+                    <Heart className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold">Social &amp; links</p>
+                    <p className="text-[11px] text-muted-foreground">Ways buyers can reach you</p>
+                  </div>
+                </div>
+                {draftLinks.length === 0 && (
+                  <p className="rounded-lg bg-surface px-3 py-2 text-xs text-muted-foreground">
+                    No links yet — add your shop's Facebook, LINE, or website so buyers can say hi 👋
+                  </p>
+                )}
+                <div className="space-y-2.5">
+                  {draftLinks.map((link, i) => (
+                    <div key={i} className="flex items-center gap-2.5">
+                      <Select value={link.platform} onValueChange={(v) => setLink(i, { platform: v })}>
+                        <SelectTrigger className="h-10 w-36 shrink-0 bg-surface border-border text-xs capitalize">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-surface-light border-border">
+                          {LINK_PLATFORMS.map((p) => (
+                            <SelectItem key={p} value={p} className="text-xs capitalize">
+                              {p}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        value={link.url}
+                        onChange={(e) => setLink(i, { url: e.target.value })}
+                        placeholder="https://..."
+                        className="h-10 bg-surface border-border text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setDraftLinks((prev) => prev.filter((_, j) => j !== i))}
+                        aria-label="Remove link"
+                        className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-pldown/10 hover:text-pldown"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 gap-1 rounded-full border-dashed border-border text-xs hover:border-brand/40 hover:text-brand"
+                  onClick={() => setDraftLinks((prev) => [...prev, { platform: 'instagram', url: '' }])}
+                >
+                  <Plus className="w-3 h-3" />
+                  Add a link
+                </Button>
+              </section>
+              <section className="space-y-4 p-5 sm:p-6">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan/10 text-cyan">
+                    <ImagePlus className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold">Photos</p>
+                    <p className="text-[11px] text-muted-foreground">Make it feel like your shop</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label>Store avatar</Label>
+                  <Label className="text-xs">Store avatar</Label>
                   <Input
                     ref={avatarInputRef}
                     type="file"
@@ -269,22 +339,23 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
                   <button
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
-                    className="flex items-center justify-center gap-2 w-full h-20 rounded-xl border border-dashed border-border bg-surface hover:border-brand/40 transition"
+                    className="flex flex-col items-center justify-center gap-1.5 w-full h-24 rounded-xl border border-dashed border-border bg-surface hover:border-brand/40 hover:bg-brand/5 transition"
                   >
                     {uploadAvatar.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin text-brand" />
                     ) : (
                       <>
                         <ImagePlus className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {draftAvatar ? 'Change avatar' : 'Upload avatar'}
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {draftAvatar ? 'Tap to change avatar' : 'Tap to upload avatar'}
                         </span>
+                        <span className="text-[10px] text-muted-foreground/60">Square photo works best</span>
                       </>
                     )}
                   </button>
                 </div>
                 <div className="space-y-2">
-                  <Label>Store banner</Label>
+                  <Label className="text-xs">Store banner</Label>
                   <Input
                     ref={bannerInputRef}
                     type="file"
@@ -295,53 +366,109 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
                   <button
                     type="button"
                     onClick={() => bannerInputRef.current?.click()}
-                    className="flex items-center justify-center gap-2 w-full h-20 rounded-xl border border-dashed border-border bg-surface hover:border-brand/40 transition"
+                    className="flex flex-col items-center justify-center gap-1.5 w-full h-24 rounded-xl border border-dashed border-border bg-surface hover:border-brand/40 hover:bg-brand/5 transition"
                   >
                     {uploadBanner.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin text-brand" />
                     ) : (
                       <>
                         <ImagePlus className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {draftBanner ? 'Change banner' : 'Upload banner'}
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {draftBanner ? 'Tap to change banner' : 'Tap to upload banner'}
                         </span>
+                        <span className="text-[10px] text-muted-foreground/60">Wide photo looks great here</span>
                       </>
                     )}
                   </button>
                 </div>
               </div>
-              <div className="flex items-center justify-end gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  className="bg-brand hover:bg-brand-light"
-                  onClick={handleSaveProfile}
-                  disabled={updateProfile.isPending}
-                >
-                  {updateProfile.isPending && <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />}
-                  Save store profile
-                </Button>
+              </section>
+            </div>
+
+            {/* Buyer view — the public store hero, updating live as you type */}
+            <div className="bg-surface/40 p-5 sm:p-6">
+              <p className="mb-4 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Eye className="w-3.5 h-3.5" />
+                👀 This is what buyers see — updates as you type
+              </p>
+              <StorefrontHero
+                name={draftName.trim() || displayName}
+                bio={draftBio}
+                location={draftLocation}
+                avatarUrl={draftAvatar}
+                bannerUrl={draftBanner}
+                links={draftLinks.filter((l) => l.url.trim())}
+                listings={items.length}
+                sales={profile?.sales ?? 0}
+                followers={profile?.followers ?? 0}
+              />
+            </div>
+          </div>
+        ) : (
+          /* View mode — banner hero + hairline stats row */
+          <>
+            <div
+              className={cn(
+                'h-40 sm:h-48 bg-cover bg-center relative',
+                !bannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-brand/20'
+              )}
+              style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            </div>
+            <div className="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:items-end">
+              <Avatar className="-mt-12 w-24 h-24 rounded-xl border-4 border-surface-light shadow-lg bg-surface-lighter sm:-mt-14 sm:w-28 sm:h-28">
+                <AvatarImage src={avatarUrl} alt={displayName} className="object-cover" />
+                <AvatarFallback className="rounded-xl text-2xl font-bold bg-surface-lighter text-foreground">
+                  {displayName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1 pb-1">
+                <h2 className="truncate text-xl font-bold sm:text-2xl">@{displayName}</h2>
+                {profile?.bio && (
+                  <p className="mt-1 line-clamp-2 text-sm text-text-secondary">{profile.bio}</p>
+                )}
+                {profile?.location && (
+                  <div className="mt-1 flex items-center gap-1 text-xs text-text-secondary">
+                    <MapPin className="w-3 h-3" />
+                    {profile.location}
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </CardContent>
+            {/* Stats — friendly cells with icons */}
+            <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
+              {[
+                { value: items.length, label: 'Listings', icon: <Package className="w-3.5 h-3.5 text-brand" /> },
+                { value: profile?.sales ?? 0, label: 'Sales', icon: <Star className="w-3.5 h-3.5 text-pregrade" /> },
+                { value: profile?.followers ?? 0, label: 'Followers', icon: <Heart className="w-3.5 h-3.5 text-periwinkle" /> },
+              ].map((s) => (
+                <div key={s.label} className="flex flex-col items-center gap-1.5 px-2 py-4 text-center">
+                  {s.icon}
+                  <p className="text-lg font-extrabold leading-none mono-num">{s.value}</p>
+                  <p className="text-[11px] text-muted-foreground">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </Card>
 
       {/* Public preview / Group manager */}
       {!isEditing ? (
         <StorefrontPreview items={items} listingsMap={listingsMap} />
       ) : (
-      <section className="space-y-4">
+      <section className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <FolderOpen className="w-4 h-4 text-brand" />
-              Storefront groups
+            <h3 className="flex items-center gap-2 text-sm font-bold">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">
+                <FolderOpen className="w-3.5 h-3.5" />
+              </span>
+              Shelves on your storefront
             </h3>
-            <p className="text-xs text-text-tertiary mt-0.5">
-              Drag cards between groups to organize how buyers browse your store.
+            <p className="mt-1 text-xs text-text-tertiary">
+              Create shelves like “Pokémon” or “New arrivals”, then drag cards onto them — buyers browse by shelf.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -362,7 +489,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
         {items.length === 0 && (
           <Card className="bg-surface-light border-border">
             <CardContent className="py-12 text-center text-muted-foreground">
-              Your store is empty. List items from your vault to start organizing.
+              Your store is empty for now — list cards from your vault and they'll appear here 🌱
             </CardContent>
           </Card>
         )}
@@ -372,7 +499,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
             <Loader2 className="w-6 h-6 animate-spin text-brand" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {groups.map((group) => {
               const groupItems = items.filter((i) => group.cardCodes.includes(i.card.code));
               return (
@@ -393,7 +520,7 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
             {/* Ungrouped */}
             <div
               className={cn(
-                'rounded-xl border border-dashed border-border bg-surface-light/50 p-4 transition',
+                'rounded-xl border border-dashed border-border bg-surface-light/50 p-5 transition',
                 dragOverGroup === 'ungrouped' && 'border-brand bg-brand/5'
               )}
               onDragOver={(e) => { e.preventDefault(); setDragOverGroup('ungrouped'); }}
@@ -408,18 +535,18 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold flex items-center gap-1.5">
                   <Package className="w-3.5 h-3.5 text-muted-foreground" />
-                  Ungrouped
+                  Not on a shelf yet
                 </h4>
                 <span className="text-xs text-muted-foreground">{ungroupedItems.length}</span>
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
                 {ungroupedItems.map((item) => (
                   <DraggableItem key={item.id} item={item} listingsMap={listingsMap} />
                 ))}
               </div>
               {ungroupedItems.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center py-4">
-                  Drag items here to ungroup
+                  Everything's on a shelf — nice! 🎉
                 </p>
               )}
             </div>
@@ -427,6 +554,85 @@ export function StorefrontManager({ userId, items, listingsMap }: StorefrontMana
         )}
       </section>
       )}
+    </div>
+  );
+}
+
+/** Buyer-view replica of the public store hero — rendered with draft values
+    so the owner sees exactly what buyers will see, before saving. */
+function StorefrontHero({
+  name,
+  bio,
+  location,
+  avatarUrl,
+  bannerUrl,
+  links,
+  listings,
+  sales,
+  followers,
+}: {
+  name: string;
+  bio?: string;
+  location?: string;
+  avatarUrl?: string;
+  bannerUrl?: string;
+  links: { platform: string; url: string }[];
+  listings: number;
+  sales: number;
+  followers: number;
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface-light shadow-lg">
+      <div
+        className={cn(
+          'relative h-32 bg-cover bg-center',
+          !bannerUrl && 'bg-gradient-to-br from-surface-lighter via-surface-light to-brand/20'
+        )}
+        style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      </div>
+      <div className="px-4 pb-4">
+        <Avatar className="-mt-8 h-16 w-16 rounded-xl border-2 border-surface-light bg-surface-lighter shadow">
+          <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
+          <AvatarFallback className="rounded-xl text-lg font-bold bg-surface-lighter text-foreground">
+            {name.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
+        <p className="mt-2 truncate text-sm font-bold">@{name}</p>
+        {bio && <p className="mt-1 line-clamp-2 text-xs text-text-secondary">{bio}</p>}
+        {location && (
+          <p className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+            <MapPin className="w-3 h-3" />
+            {location}
+          </p>
+        )}
+        {links.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {links.map((l, i) => (
+              <span
+                key={`${l.platform}-${i}`}
+                className="inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2 py-1 text-[10px] capitalize text-muted-foreground"
+              >
+                <LinkIcon className="w-2.5 h-2.5" />
+                {l.platform}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="mt-4 grid grid-cols-3 divide-x divide-border border-t border-border pt-3.5 text-center">
+          {[
+            { value: listings, label: 'Listings' },
+            { value: sales, label: 'Sales' },
+            { value: followers, label: 'Followers' },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-sm font-extrabold leading-none mono-num">{s.value}</p>
+              <p className="mt-1.5 text-[10px] text-muted-foreground">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -445,25 +651,27 @@ function StorefrontPreview({
   );
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-5">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold flex items-center gap-2">
-          <Package className="w-4 h-4 text-brand" />
-          All listings
+        <h3 className="flex items-center gap-2 text-sm font-bold">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10 text-brand">
+            <Package className="w-3.5 h-3.5" />
+          </span>
+          On your shelf right now
         </h3>
-        <span className="text-xs text-muted-foreground">{listedItems.length}</span>
+        <span className="rounded-full bg-surface px-2.5 py-0.5 mono-num text-xs text-muted-foreground">{listedItems.length}</span>
       </div>
 
       {listedItems.length === 0 ? (
         <Card className="bg-surface-light border-border">
           <CardContent className="py-14 text-center space-y-2">
             <Package className="w-8 h-8 mx-auto text-muted-foreground" />
-            <p className="font-semibold">No active listings</p>
-            <p className="text-sm text-muted-foreground">List cards from your vault to start selling.</p>
+            <p className="font-semibold">Nothing on sale yet</p>
+            <p className="text-sm text-muted-foreground">List cards from your vault — they'll show up here ready to sell ✨</p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {listedItems.map((item) => {
             const listing = listingsMap.get(item.id);
             return (
@@ -549,7 +757,7 @@ function DropGroup({
   return (
     <div
       className={cn(
-        'rounded-xl border bg-surface-light p-4 transition hover:border-brand/20',
+        'rounded-xl border bg-surface-light p-5 transition hover:border-brand/20',
         isOver ? 'border-brand bg-brand/5' : 'border-border'
       )}
       onDragOver={(e) => { e.preventDefault(); onDragOver(); }}
@@ -576,14 +784,14 @@ function DropGroup({
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
         {items.map((item) => (
           <DraggableItem key={item.id} item={item} listingsMap={listingsMap} />
         ))}
       </div>
       {items.length === 0 && (
         <p className="text-xs text-muted-foreground text-center py-4">
-          Drag items into {group.name}
+          Empty shelf — drag cards here to fill it ✨
         </p>
       )}
     </div>
@@ -620,7 +828,7 @@ function DraggableItem({
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />
       </div>
-      <div className="p-1.5">
+      <div className="p-2">
         <p className="text-xs font-mono text-text-tertiary truncate">{item.card.code}</p>
         <h5 className="text-xs font-semibold leading-tight line-clamp-2 group-hover:text-brand transition min-h-[1.75rem]">{item.card.nameEn}</h5>
         <p className="text-xs text-brand font-bold mt-0.5">

@@ -132,11 +132,39 @@
     "locked": "Locked"
   },
   "auth": {
-    "signIn": "Sign in",
-    "signUp": "Sign up",
     "email": "Email",
     "password": "Password",
-    "continue": "Continue"
+    "invalidEmail": "Please enter a valid email",
+    "passwordRequired": "Password is required",
+    "terms": "By continuing you accept our terms and privacy policy",
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to manage your cards and trades.",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one",
+      "success": "Welcome back",
+      "failed": "Sign in failed. Please check your email and password.",
+      "quickLogin": "Quick login (dev)",
+      "tagline": "your collection is waiting"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Create an account to start collecting and trading.",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Collector name",
+      "confirmPassword": "Confirm password",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "success": "Account created",
+      "failed": "Registration failed. Please try again.",
+      "nameTooShort": "Full name must be at least 2 characters",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords don't match"
+    }
   },
   "home": {
     "greeting": {
@@ -157,6 +185,7 @@
       "topCards": "Top {{count}} cards"
     },
     "quickActions": {
+      "eyebrow": "Start here",
       "title": "Quick Actions",
       "scan": "Scan",
       "feed": "Feed",
@@ -168,6 +197,7 @@
       "offers": "Offers"
     },
     "feedPreview": {
+      "eyebrow": "Community",
       "title": "Latest from shops",
       "emptyTitle": "Hunting a card?",
       "emptyDesc": "Post on the WTB board so every shop can see it",
@@ -177,11 +207,13 @@
       "gateCta": "Learn more"
     },
     "vaultSnapshot": {
+      "eyebrow": "Collection",
       "title": "Vault",
       "viewAll": "View all",
       "empty": "Your vault is empty"
     },
     "marketPulse": {
+      "eyebrow": "Market",
       "title": "Market Pulse",
       "viewAll": "Browse market",
       "empty": "No trending listings",
@@ -189,6 +221,7 @@
       "trade": "Trade"
     },
     "activity": {
+      "eyebrow": "In progress",
       "title": "Active",
       "pendingOrders": "{{count}} pending order",
       "pendingOrders_plural": "{{count}} pending orders",
@@ -196,6 +229,7 @@
       "pendingOffers_plural": "{{count}} pending offers"
     },
     "wishlist": {
+      "eyebrow": "Watching",
       "title": "Wishlist",
       "empty": "No wishlist items",
       "target": "Target"
@@ -259,6 +293,7 @@
     "emptyDesc": "We’ll let you know when there are offers, orders, or updates."
   },
   "market": {
+    "eyebrow": "Card market",
     "title": "Market",
     "description": "{{count}} live listings — cards, sealed & merch",
     "empty": "No listings found",
@@ -711,41 +746,6 @@
     "teaserDesc": "Post on the WTB board so every shop on the app can see it — let the card come to you",
     "teaserCta": "Go to the WTB board"
   },
-  "auth": {
-    "email": "Email",
-    "password": "Password",
-    "invalidEmail": "Please enter a valid email",
-    "passwordRequired": "Password is required",
-    "terms": "By continuing you accept our terms and privacy policy",
-    "signIn": {
-      "title": "Welcome back",
-      "subtitle": "Sign in to manage your cards and trades.",
-      "submit": "Sign in",
-      "submitting": "Signing in...",
-      "noAccount": "Don't have an account?",
-      "createOne": "Create one",
-      "success": "Welcome back",
-      "failed": "Sign in failed. Please check your email and password.",
-      "quickLogin": "Quick login (dev)",
-      "tagline": "your collection is waiting"
-    },
-    "register": {
-      "title": "Create your account",
-      "subtitle": "Create an account to start collecting and trading.",
-      "fullName": "Full name",
-      "fullNamePlaceholder": "Collector name",
-      "confirmPassword": "Confirm password",
-      "submit": "Create account",
-      "submitting": "Creating account...",
-      "haveAccount": "Already have an account?",
-      "signIn": "Sign in",
-      "success": "Account created",
-      "failed": "Registration failed. Please try again.",
-      "nameTooShort": "Full name must be at least 2 characters",
-      "passwordTooShort": "Password must be at least 8 characters",
-      "passwordMismatch": "Passwords don't match"
-    }
-  },
   "kyc": {
     "back": "Back to profile",
     "title": "KYC Verification",
@@ -823,21 +823,49 @@
       "spent": "Spent"
     },
     "menu": {
-      "orders": { "label": "Orders", "desc": "Track your purchases" },
-      "vault": { "label": "Vault", "desc": "Manage your collection" },
-      "submissions": { "label": "Submissions", "desc": "Track grading & pre-grade status" },
-      "kyc": { "label": "KYC Verification", "desc": "Verify your identity" },
-      "notifications": { "label": "Notifications", "desc": "Offers, orders, and alerts" },
-      "myShop": { "label": "My Shop", "desc": "Seller dashboard and your listings" },
-      "settings": { "label": "Settings", "desc": "Language, theme, security" },
-      "help": { "label": "Help & Support", "desc": "FAQs and contact" }
+      "orders": {
+        "label": "Orders",
+        "desc": "Track your purchases"
+      },
+      "vault": {
+        "label": "Vault",
+        "desc": "Manage your collection"
+      },
+      "submissions": {
+        "label": "Submissions",
+        "desc": "Track grading & pre-grade status"
+      },
+      "kyc": {
+        "label": "KYC Verification",
+        "desc": "Verify your identity"
+      },
+      "notifications": {
+        "label": "Notifications",
+        "desc": "Offers, orders, and alerts"
+      },
+      "myShop": {
+        "label": "My Shop",
+        "desc": "Seller dashboard and your listings"
+      },
+      "settings": {
+        "label": "Settings",
+        "desc": "Language, theme, security"
+      },
+      "help": {
+        "label": "Help & Support",
+        "desc": "FAQs and contact"
+      }
     },
     "logout": "Log out"
   },
   "statusHub": {
     "title": "Submissions",
     "description": "Track your grading submissions",
-    "filters": { "all": "All", "pregrade": "Pre-grade", "grading": "Grading" },
+    "filters": {
+      "all": "All",
+      "pregrade": "Pre-grade",
+      "grading": "Grading"
+    },
     "status": {
       "ready": "READY",
       "in-lab": "IN LAB",
@@ -900,5 +928,107 @@
     "step3Title": "Share your shop page",
     "step3Desc": "Your public shop page is ready — share the link with customers",
     "step3Cta": "View shop page"
+  },
+  "welcome": {
+    "nav": {
+      "login": "Log in",
+      "register": "Open a shop free",
+      "launchApp": "Launch App"
+    },
+    "hero": {
+      "chip": "TCG SUPER APP FOR COLLECTORS",
+      "title": "Your favorite cards",
+      "titleHighlight": "have a market, a shop, a home",
+      "desc": "SwibSwap is the super app for card collectors — store cards in your Vault and see your profit/loss, buy and sell in a market where every seller is verified, and chat with your favorite shops in a single feed.",
+      "launchApp": "Launch App",
+      "startFree": "Start free",
+      "browseMarket": "Browse market first"
+    },
+    "stats": {
+      "listings": "Listings for sale now",
+      "shops": "Shops on the platform",
+      "kyc": "Sellers must pass KYC"
+    },
+    "features": {
+      "vault": {
+        "eyebrow": "VAULT — YOUR CARD COLLECTION",
+        "title": "Know instantly how much profit each card makes",
+        "desc": "Scan cards into your vault. The system tracks market prices for every card, so you see profit/loss in clear percentages. Decide when to sell without guessing.",
+        "points": [
+          "Scan cards into your vault in seconds",
+          "Market prices updated from real data",
+          "Send for grading / request withdrawal — all in one place"
+        ]
+      },
+      "market": {
+        "eyebrow": "MARKET — A MARKET YOU CAN TRUST",
+        "title": "Real buyers, real prices, real sellers",
+        "desc": "Every shop that lists must pass KYC. No ghost shops, no fake prices. Find the card you're hunting and buy instantly, or open a trade room.",
+        "points": [
+          "Every seller is identity-verified (KYC)",
+          "Buy direct or propose a trade",
+          "Filter by game, card condition, price — everything"
+        ]
+      },
+      "shopsFeed": {
+        "eyebrow": "SHOPS & FEED — YOUR FAVORITE SHOPS IN ONE PLACE",
+        "title": "Follow shops that update daily, just like social media",
+        "desc": "Each shop has its own page. They post new arrivals, live announcements, and share cards from their vault — you just hit follow, and every update appears in a single feed.",
+        "points": [
+          "Feed rooms by game: Pokémon, One Piece, Lorcana",
+          "Stories from shops you follow — never miss a drop",
+          "Shops can post cards directly from Vault / Market"
+        ]
+      }
+    },
+    "wtb": {
+      "eyebrow": "WTB — WANT-TO-BUY BOARD",
+      "title": "Hunt the card you want",
+      "titleHighlight": "and let it come to you",
+      "desc": "Post your budget on the board. Every shop on the app sees real demand — if someone has what you want, they'll reach out.",
+      "cta": "View WTB board"
+    },
+    "steps": {
+      "title": "Start in ",
+      "titleHighlight": "3 steps",
+      "step1": {
+        "n": "01",
+        "title": "Sign up",
+        "desc": "One email, under a minute"
+      },
+      "step2": {
+        "n": "02",
+        "title": "Verify identity (KYC)",
+        "desc": "One time — unlocks feed + open a shop"
+      },
+      "step3": {
+        "n": "03",
+        "title": "Collect or open a shop",
+        "desc": "Scan cards into your Vault and start listing"
+      }
+    },
+    "realShops": {
+      "eyebrow": "REAL SHOPS WITH US",
+      "title": "Browse shops like walking a card market",
+      "cta": "View all shops"
+    },
+    "finalCta": {
+      "title": "Ready to give your cards",
+      "titleHighlight": "a home of their own?",
+      "launchApp": "Launch App",
+      "startFree": "Sign up free today",
+      "browseMarket": "Browse market first"
+    },
+    "footer": {
+      "copyright": "SwibSwap — TCG Super App",
+      "market": "Market",
+      "stores": "Stores",
+      "feed": "Feed",
+      "wtb": "WTB",
+      "services": "Services"
+    },
+    "transition": {
+      "loading": "Entering the app…"
+    }
   }
 }
