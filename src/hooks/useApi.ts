@@ -29,14 +29,19 @@ import { useAuthStore } from '@/stores/auth';
 
 // ─── Vault hooks ────────────────────────────────────────────────────
 
+// Shared fetcher — also used by route prefetch (src/lib/prefetch.ts)
+export async function fetchVaultItems(userId: string) {
+  const res = await vaultApi.getItems({ ownerId: userId });
+  return res.items.map(mapApiItemToVaultItem);
+}
+
 export function useVault() {
   const { isAuthenticated, user } = useAuthStore();
   return useQuery({
     queryKey: ['vault', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const res = await vaultApi.getItems({ ownerId: user.id });
-      return res.items.map(mapApiItemToVaultItem);
+      return fetchVaultItems(user.id);
     },
     staleTime: 1000 * 30,
     refetchOnWindowFocus: false,
@@ -123,13 +128,16 @@ export function useUpdateListing() {
 
 // ─── Market hooks ───────────────────────────────────────────────────
 
+// Shared fetcher — also used by route prefetch (src/lib/prefetch.ts)
+export async function fetchMarketListings(shelf?: string) {
+  const res = await listingsApi.getAll(shelf && shelf !== 'All' ? { category: shelf } : undefined);
+  return res.results.map(mapApiListingToMarketListing);
+}
+
 export function useMarketListings(shelf?: string) {
   return useQuery({
     queryKey: ['market', shelf],
-    queryFn: async () => {
-      const res = await listingsApi.getAll(shelf && shelf !== 'All' ? { category: shelf } : undefined);
-      return res.results.map(mapApiListingToMarketListing);
-    },
+    queryFn: () => fetchMarketListings(shelf),
     staleTime: 1000 * 30,
     // Keep showing previous results while a new shelf loads — no skeleton flash
     placeholderData: keepPreviousData,
@@ -287,9 +295,17 @@ export function useDeleteAccount() {
 // ─── Wishlist hooks ─────────────────────────────────────────────────
 
 // Raw wishlist items (light) — shared by useWishlist and useWishlistIds
-async function fetchRawWishlistItems() {
+// (exported for route prefetch)
+export async function fetchRawWishlistItems() {
   const res = await wishlistApi.getAll();
   return res.items;
+}
+
+// Shared fetcher — also used by route prefetch (src/lib/prefetch.ts)
+export async function fetchWishlistItems() {
+  // Backend enriches each item with listing title/price/image + item sku
+  const items = await fetchRawWishlistItems();
+  return items.map(mapApiWishlistItemToWishlistItem);
 }
 
 // Lightweight hook: only the set of wishlisted listingIds.
@@ -310,11 +326,7 @@ export function useWishlist() {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: ['wishlist'],
-    queryFn: async () => {
-      // Backend enriches each item with listing title/price/image + item sku
-      const items = await fetchRawWishlistItems();
-      return items.map(mapApiWishlistItemToWishlistItem);
-    },
+    queryFn: fetchWishlistItems,
     staleTime: 1000 * 60 * 5,
     enabled: isAuthenticated,
   });
@@ -515,14 +527,17 @@ export function useUpdateListingStatus() {
 
 // ─── Orders hooks ───────────────────────────────────────────────────
 
+// Shared fetcher — also used by route prefetch (src/lib/prefetch.ts)
+export async function fetchOrders() {
+  const res = await ordersApi.getAll();
+  return res.orders.map(mapApiOrderToOrder);
+}
+
 export function useOrders() {
   const { isAuthenticated } = useAuthStore();
   return useQuery({
     queryKey: ['orders'],
-    queryFn: async () => {
-      const res = await ordersApi.getAll();
-      return res.orders.map(mapApiOrderToOrder);
-    },
+    queryFn: fetchOrders,
     staleTime: 1000 * 60 * 2,
     enabled: isAuthenticated,
   });
@@ -854,13 +869,16 @@ export function useDefaultShippingAddress() {
 
 // ─── Stores / Collectors hooks ──────────────────────────────────────
 
+// Shared fetcher — also used by route prefetch (src/lib/prefetch.ts)
+export async function fetchStores() {
+  const res = await storesApi.getAll();
+  return res.sellers.map(mapApiCollectorProfileToStore);
+}
+
 export function useStores() {
   return useQuery<StoreProfile[]>({
     queryKey: ['stores'],
-    queryFn: async () => {
-      const res = await storesApi.getAll();
-      return res.sellers.map(mapApiCollectorProfileToStore);
-    },
+    queryFn: fetchStores,
     staleTime: 1000 * 60 * 2,
   });
 }
@@ -1180,13 +1198,21 @@ export function useRecentActivity() {
   });
 }
 
+// Shared fetchers — also used by route prefetch (src/lib/prefetch.ts)
+export async function fetchPlatformStats() {
+  return platformApi.getStats();
+}
+
+export async function fetchTrendingListings() {
+  const res = await listingsApi.getAll({ sort: 'price_desc', limit: 8 });
+  const listings = res.results.map(mapApiListingToMarketListing);
+  return listings.slice(0, 8);
+}
+
 export function usePlatformStats() {
   return useQuery({
     queryKey: ['platformStats'],
-    queryFn: async () => {
-      const res = await platformApi.getStats();
-      return res;
-    },
+    queryFn: fetchPlatformStats,
     staleTime: 1000 * 60,
   });
 }
@@ -1194,11 +1220,7 @@ export function usePlatformStats() {
 export function useTrendingListings() {
   return useQuery({
     queryKey: ['trendingListings'],
-    queryFn: async () => {
-      const res = await listingsApi.getAll({ sort: 'price_desc', limit: 8 });
-      const listings = res.results.map(mapApiListingToMarketListing);
-      return listings.slice(0, 8);
-    },
+    queryFn: fetchTrendingListings,
     staleTime: 1000 * 60,
   });
 }

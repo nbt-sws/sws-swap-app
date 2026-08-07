@@ -1,5 +1,5 @@
 import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { Suspense, useEffect, useRef } from 'react';
 import i18n from '@/i18n';
@@ -8,16 +8,7 @@ import { PageLoader } from '@/components/ui/page-loader';
 import { Toaster } from '@/components/ui/sonner';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5,
-    },
-  },
-});
+import { queryClient } from '@/lib/queryClient';
 
 function RootProviders() {
   const initAuth = useAuthStore((s) => s.initAuth);

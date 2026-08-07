@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet, useRouterState } from '@tanstack/react-router';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
@@ -6,9 +6,25 @@ import { BottomNav } from './BottomNav';
 import { SocialFooter } from './SocialFooter';
 import { ScrollableOutlet } from '@/routes/__root';
 import { PageLoader } from '@/components/ui/page-loader';
+import { prefetchRouteData } from '@/lib/prefetch';
 
 export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Idle warm-up: cache the most common destinations' data right after load,
+  // so the first navigation renders from cache instead of skeletons.
+  useEffect(() => {
+    const warm = () => {
+      prefetchRouteData('/');
+      prefetchRouteData('/market');
+    };
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(warm, 1500);
+    return () => window.clearTimeout(id);
+  }, []);
 
   // Public landing renders bare — no sidebar, topbar, bottomnav, or footer chrome.
   if (pathname.startsWith('/welcome')) {

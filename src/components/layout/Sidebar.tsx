@@ -6,6 +6,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore, isAdmin } from '@/stores/auth';
+import { prefetchRouteData } from '@/lib/prefetch';
+
+// Warm the target page's data on hover/focus so the API round-trip
+// overlaps with the user's hand moving to click — first visit feels instant.
+const intentPrefetch = (to: string) => ({
+  onPointerEnter: () => prefetchRouteData(to),
+  onFocus: () => prefetchRouteData(to),
+});
 
 // R3 category wayfinding accents — shared active-state language with
 // BottomNav/TopBar: accent-tinted text + low-alpha background + a hard
@@ -88,6 +96,7 @@ export function Sidebar() {
               key={item.to}
               to={item.to}
               aria-current={active ? 'page' : undefined}
+              {...intentPrefetch(item.to)}
               className={cn(
                 'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
@@ -118,6 +127,7 @@ export function Sidebar() {
               key={item.to}
               to={item.to}
               aria-current={active ? 'page' : undefined}
+              {...intentPrefetch(item.to)}
               className={cn(
                 'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active

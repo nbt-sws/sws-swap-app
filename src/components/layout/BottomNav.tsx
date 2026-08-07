@@ -4,6 +4,7 @@ import { Home, ShoppingBag, Package, User, Scan, Megaphone } from 'lucide-react'
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
+import { prefetchRouteData } from '@/lib/prefetch';
 
 // R3 category wayfinding accents — same color = same section, app-wide.
 // Scan = brand magenta, Market = cyan, Vault = periwinkle; brand is the
@@ -61,6 +62,8 @@ export function BottomNav() {
         key={tab.to}
         to={to}
         aria-current={active ? 'page' : undefined}
+        onPointerEnter={() => prefetchRouteData(to)}
+        onFocus={() => prefetchRouteData(to)}
         className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5"
       >
         <div className={cn('p-1 rounded-lg transition-all', active && cn('pxl-corner', accent.pill))}>
